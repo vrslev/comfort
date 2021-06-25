@@ -172,3 +172,5 @@ user_data_fields = [
 # auth_hooks = [
 # 	"comfort.auth.validate"
 # ]
+
+treeviews = ['Account']
