@@ -1,6 +1,6 @@
-## Accounting
+## Comfort
 
-An Accounting App
+Lite-weight ERPNext alternative for specific business
 
 #### License
 

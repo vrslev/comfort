@@ -1,27 +1,27 @@
 from . import __version__ as app_version
 
-app_name = "accounting"
-app_title = "Accounting"
-app_publisher = "Shariq"
-app_description = "An Accounting App for Onboarding Test"
+app_name = "comfort"
+app_title = "Comfort"
+app_publisher = "vrslev"
+app_description = "Lite-weight ERPNext alternative for specific business"
 app_icon = "octicon octicon-file-directory"
 app_color = "grey"
-app_email = "shariq@erpnext.com"
+app_email = "levwint@gmail.com"
 app_license = "MIT"
 
 # Includes in <head>
 # ------------------
 
 # include js, css files in header of desk.html
-# app_include_css = "/assets/accounting/css/accounting.css"
-# app_include_js = "/assets/accounting/js/accounting.js"
+# app_include_css = "/assets/comfort/css/comfort.css"
+# app_include_js = "/assets/comfort/js/comfort.js"
 
 # include js, css files in header of web template
-# web_include_css = "/assets/accounting/css/accounting.css"
-# web_include_js = "/assets/accounting/js/accounting.js"
+# web_include_css = "/assets/comfort/css/comfort.css"
+# web_include_js = "/assets/comfort/js/comfort.js"
 
 # include custom scss in every website theme (without file extension ".scss")
-# website_theme_scss = "accounting/public/scss/website"
+# website_theme_scss = "comfort/public/scss/website"
 
 # include js, css files in header of web form
 # webform_include_js = {"doctype": "public/js/doctype.js"}
@@ -56,14 +56,14 @@ app_license = "MIT"
 # Installation
 # ------------
 
-# before_install = "accounting.install.before_install"
-# after_install = "accounting.install.after_install"
+# before_install = "comfort.install.before_install"
+# after_install = "comfort.install.after_install"
 
 # Desk Notifications
 # ------------------
 # See frappe.core.notifications.get_notification_config
 
-# notification_config = "accounting.notifications.get_notification_config"
+# notification_config = "comfort.notifications.get_notification_config"
 
 # Permissions
 # -----------
@@ -102,42 +102,74 @@ app_license = "MIT"
 
 # scheduler_events = {
 # 	"all": [
-# 		"accounting.tasks.all"
+# 		"comfort.tasks.all"
 # 	],
 # 	"daily": [
-# 		"accounting.tasks.daily"
+# 		"comfort.tasks.daily"
 # 	],
 # 	"hourly": [
-# 		"accounting.tasks.hourly"
+# 		"comfort.tasks.hourly"
 # 	],
 # 	"weekly": [
-# 		"accounting.tasks.weekly"
+# 		"comfort.tasks.weekly"
 # 	]
 # 	"monthly": [
-# 		"accounting.tasks.monthly"
+# 		"comfort.tasks.monthly"
 # 	]
 # }
 
 # Testing
 # -------
 
-# before_tests = "accounting.install.before_tests"
+# before_tests = "comfort.install.before_tests"
 
 # Overriding Methods
 # ------------------------------
 #
 # override_whitelisted_methods = {
-# 	"frappe.desk.doctype.event.event.get_events": "accounting.event.get_events"
+# 	"frappe.desk.doctype.event.event.get_events": "comfort.event.get_events"
 # }
 #
 # each overriding function accepts a `data` argument;
 # generated from the base implementation of the doctype dashboard,
 # along with any modifications made in other Frappe apps
 # override_doctype_dashboards = {
-# 	"Task": "accounting.task.get_dashboard_data"
+# 	"Task": "comfort.task.get_dashboard_data"
 # }
 
 # exempt linked doctypes from being automatically cancelled
 #
 # auto_cancel_exempted_doctypes = ["Auto Repeat"]
+
+
+# User Data Protection
+# --------------------
+
+user_data_fields = [
+	{
+		"doctype": "{doctype_1}",
+		"filter_by": "{filter_by}",
+		"redact_fields": ["{field_1}", "{field_2}"],
+		"partial": 1,
+	},
+	{
+		"doctype": "{doctype_2}",
+		"filter_by": "{filter_by}",
+		"partial": 1,
+	},
+	{
+		"doctype": "{doctype_3}",
+		"strict": False,
+	},
+	{
+		"doctype": "{doctype_4}"
+	}
+]
+
+# Authentication and authorization
+# --------------------------------
+
+# auth_hooks = [
+# 	"comfort.auth.validate"
+# ]
 

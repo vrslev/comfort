@@ -4,15 +4,15 @@ include *.json
 include *.md
 include *.py
 include *.txt
-recursive-include accounting *.css
-recursive-include accounting *.csv
-recursive-include accounting *.html
-recursive-include accounting *.ico
-recursive-include accounting *.js
-recursive-include accounting *.json
-recursive-include accounting *.md
-recursive-include accounting *.png
-recursive-include accounting *.py
-recursive-include accounting *.svg
-recursive-include accounting *.txt
-recursive-exclude accounting *.pyc
+recursive-include comfort *.css
+recursive-include comfort *.csv
+recursive-include comfort *.html
+recursive-include comfort *.ico
+recursive-include comfort *.js
+recursive-include comfort *.json
+recursive-include comfort *.md
+recursive-include comfort *.png
+recursive-include comfort *.py
+recursive-include comfort *.svg
+recursive-include comfort *.txt
+recursive-exclude comfort *.pyc
