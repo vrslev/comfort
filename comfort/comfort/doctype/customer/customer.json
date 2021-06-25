@@ -1,51 +1,31 @@
 {
  "actions": [],
  "allow_events_in_timeline": 1,
- "allow_import": 1,
  "allow_rename": 1,
- "autoname": "field:party_name",
+ "autoname": "Prompt",
  "creation": "2020-12-29 15:27:53.782555",
  "doctype": "DocType",
  "document_type": "Setup",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "basic_info",
-  "party_name",
-  "vk_id",
+  "image",
+  "basic_info_section",
+  "gender",
+  "column_break_4",
+  "customer_group",
   "contact_details_section",
+  "vk_id",
   "vk_url",
   "column_break_1",
-  "party_number",
-  "image"
+  "phone"
  ],
  "fields": [
-  {
-   "bold": 1,
-   "fieldname": "party_name",
-   "fieldtype": "Data",
-   "in_global_search": 1,
-   "in_list_view": 1,
-   "label": "Party Name",
-   "reqd": 1,
-   "unique": 1
-  },
-  {
-   "fieldname": "party_number",
-   "fieldtype": "Data",
-   "label": "Phone No"
-  },
   {
    "fieldname": "image",
    "fieldtype": "Attach Image",
    "hidden": 1,
    "label": "Image"
-  },
-  {
-   "fieldname": "basic_info",
-   "fieldtype": "Section Break",
-   "label": "Name and Type",
-   "options": "fa fa-user"
   },
   {
    "fieldname": "contact_details_section",
@@ -59,20 +39,58 @@
   {
    "fieldname": "vk_id",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "VK ID",
+   "read_only": 1,
    "unique": 1
   },
   {
    "fieldname": "vk_url",
    "fieldtype": "Data",
    "label": "VK URL"
+  },
+  {
+   "fieldname": "basic_info_section",
+   "fieldtype": "Section Break",
+   "label": "Basic Info"
+  },
+  {
+   "fieldname": "gender",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Gender",
+   "options": "\nMale\nFemale"
+  },
+  {
+   "fieldname": "customer_group",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Customer Group",
+   "options": "Customer Group",
+   "search_index": 1
+  },
+  {
+   "fieldname": "phone",
+   "fieldtype": "Data",
+   "in_global_search": 1,
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Phone",
+   "options": "Phone",
+   "search_index": 1
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-user",
  "image_field": "image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-06-24 03:41:20.284467",
+ "modified": "2021-06-25 04:19:46.003328",
  "modified_by": "Administrator",
  "module": "Comfort",
  "name": "Customer",
@@ -92,10 +110,10 @@
    "write": 1
   }
  ],
- "search_fields": "party_name",
+ "search_fields": "phone",
  "show_name_in_global_search": 1,
+ "show_preview_popup": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
- "title_field": "party_name",
  "track_changes": 1
 }
