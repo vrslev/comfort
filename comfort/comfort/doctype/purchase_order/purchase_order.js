@@ -14,7 +14,7 @@ cih.IkeaCartController = frappe.ui.form.Controller.extend({
 				}
 			});
 			return {
-				query: 'accounting.accounting.doctype.purchase_order.purchase_order.get_sales_order_query',
+				query: 'comfort.comfort.doctype.purchase_order.purchase_order.get_sales_order_query',
 				filters: {
 					'not in': cur_sales_orders
 				}
@@ -134,7 +134,7 @@ cih.IkeaCartController = frappe.ui.form.Controller.extend({
 		function before_submit_events(purchase_id, use_lite_id = false) {
 			return new Promise(resolve => {
 				frappe.call({
-					method: 'accounting.accounting.doctype.purchase_order.purchase_order.get_purchase_info',
+					method: 'comfort.comfort.doctype.purchase_order.purchase_order.get_purchase_info',
 					freeze: true,
 					args: {
 						purchase_id: purchase_id,
@@ -185,7 +185,7 @@ cih.IkeaCartController = frappe.ui.form.Controller.extend({
 		frappe.validated = false;
 
 		frappe.call({
-			method: 'accounting.accounting.doctype.purchase_order.purchase_order.get_purchase_history',
+			method: 'comfort.comfort.doctype.purchase_order.purchase_order.get_purchase_history',
 			freeze: true,
 			callback: (r) => {
 				if (r.message) {
@@ -354,7 +354,7 @@ function create_unavailable_items_table(response) {
 
 function show_unavailable_items_dialog(grid_row) {
 	frappe.call({
-		method: 'accounting.accounting.doctype.purchase_order.purchase_order.get_unavailable_items_in_cart_by_orders',
+		method: 'comfort.comfort.doctype.purchase_order.purchase_order.get_unavailable_items_in_cart_by_orders',
 		args: {
 			unavailable_items: grid_row.doc.unavailable_items_json,
 			sales_orders: cur_frm.doc.sales_orders.map(v => {

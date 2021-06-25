@@ -3,12 +3,10 @@
 import re
 
 import frappe
-from accounting.accounting.general_ledger import (make_gl_entry,
-                                                  make_reverse_gl_entry)
+from comfort.comfort.general_ledger import make_gl_entry, make_reverse_gl_entry
 from frappe import as_json
 from frappe.model.document import Document
-from frappe.model.mapper import get_mapped_doc
-from frappe.utils import flt, parse_json
+from frappe.utils import parse_json
 from frappe.utils.data import (add_to_date, get_datetime, getdate,
                                now_datetime, today)
 from frappe.utils.password import get_decrypted_password

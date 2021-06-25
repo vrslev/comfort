@@ -1,14 +1,14 @@
-frappe.ready(function(){
+frappe.ready(function () {
 	$('.buy_now').on('click', (e) => {
 		frappe.msgprint({
 			title: __('Confirm'),
 			message: __('Are you sure you want to proceed?'),
-			primary_action:{
+			primary_action: {
 				'label': 'Proceed',
-				action(){
+				action() {
 					var si = $(e.currentTarget).data('buy-item')
 					frappe.call({
-						method: "accounting.accounting.doctype.sales_invoice.sales_invoice.update_sales_invoice",
+						method: "comfort.comfort.doctype.sales_invoice.sales_invoice.update_sales_invoice",
 						args: {
 							item_name: null,
 							qty: 0,
@@ -21,7 +21,7 @@ frappe.ready(function(){
 							frappe.msgprint({
 								title: 'Success',
 								indicator: 'green',
-								message: `<h6>Invoice: ${ si }</h6><p>Thank You for shopping :)</p>`
+								message: `<h6>Invoice: ${si}</h6><p>Thank You for shopping :)</p>`
 							});
 						}
 					})

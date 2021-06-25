@@ -1,7 +1,7 @@
 
 frappe.treeview_settings["Account"] = {
-	get_tree_nodes: 'accounting.accounting.doctype.account.account.get_children',
-	add_tree_node: 'accounting.accounting.doctype.account.account.add_node',
+	get_tree_nodes: 'comfort.comfort.doctype.account.account.get_children',
+	add_tree_node: 'comfort.comfort.doctype.account.account.add_node',
 	get_tree_root: false,
 	root_label: "Accounts",
 	title: __("Chart of Accounts"),

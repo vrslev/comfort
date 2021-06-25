@@ -1,10 +1,8 @@
 
 import frappe
 from frappe import _
-from frappe.utils import cstr
 from frappe.utils.nestedset import rebuild_tree
 from six import iteritems
-from unidecode import unidecode
 
 
 def create_charts(company, abbr):

@@ -3,8 +3,8 @@
 import frappe
 import unittest
 from frappe.utils import flt, nowdate
-from accounting.accounting.doctype.company.test_company import create_company
-from accounting.accounting.doctype.journal_entry.test_journal_entry import get_gl_entries
+from comfort.comfort.doctype.company.test_company import create_company
+from comfort.comfort.doctype.journal_entry.test_journal_entry import get_gl_entries
 
 class TestPaymentEntry(unittest.TestCase):
 

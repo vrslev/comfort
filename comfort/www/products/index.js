@@ -7,7 +7,7 @@ frappe.ready(function(){
 		}
 		else{
 			frappe.call({
-				method: 'accounting.accounting.doctype.sales_invoice.sales_invoice.add_to_cart',
+				method: 'comfort.comfort.doctype.sales_invoice.sales_invoice.add_to_cart',
 				args: {
 					item_name: item_name,
 					qty: 1,

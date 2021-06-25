@@ -34,7 +34,8 @@ def make_reverse_gl_entry(voucher_type=None, voucher_no=None, transaction_type=N
     }, fields=["*"])
 
     if gl_entries:
-        cancel_gl_entry(transaction_type, gl_entries[0].voucher_type, gl_entries[0].voucher_no)
+        cancel_gl_entry(transaction_type,
+                        gl_entries[0].voucher_type, gl_entries[0].voucher_no)
 
         for entry in gl_entries:
             debit = entry.debit_amount

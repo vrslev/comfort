@@ -1,6 +1,5 @@
 import frappe
-from accounting.accounting.general_ledger import (make_gl_entry,
-                                                  make_reverse_gl_entry)
+from comfort.comfort.general_ledger import make_gl_entry, make_reverse_gl_entry
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt
@@ -95,10 +94,12 @@ class SalesOrder(Document):
             return
         status = None
 
-        po_name = frappe.get_all('Purchase Order Sales Order', 'parent', {'docstatus': 1, 'sales_order_name': self.name})
+        po_name = frappe.get_all('Purchase Order Sales Order', 'parent', {
+                                 'docstatus': 1, 'sales_order_name': self.name})
         if len(po_name) > 0:
             po_name = po_name[0].parent
-            po_status = frappe.get_cached_value('Purchase Order', po_name, 'status')
+            po_status = frappe.get_cached_value(
+                'Purchase Order', po_name, 'status')
             if po_status == 'To Receive':
                 status = 'Purchased'
             elif po_status == 'Completed':

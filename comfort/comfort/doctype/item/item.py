@@ -4,7 +4,7 @@ from frappe.model.document import Document
 
 
 class Item(Document):
-# TODO: Calculate total weight
+    # TODO: Calculate total weight
     def validate(self):
         if not self.item_name:
             self.item_name = self.item_code

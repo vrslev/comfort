@@ -1,11 +1,7 @@
-// Copyright (c) 2016, Shariq and contributors
-// For license information, please see license.txt
-/* eslint-disable */
-
 frappe.query_reports["Profit and Loss Statement"] = {
 	"filters": [
 		{
-			"fieldname":"company",
+			"fieldname": "company",
 			"label": __("Company"),
 			"fieldtype": "Link",
 			"options": "Company",
@@ -13,13 +9,13 @@ frappe.query_reports["Profit and Loss Statement"] = {
 			"reqd": 1
 		},
 		{
-			"fieldname":"filter_based_on",
+			"fieldname": "filter_based_on",
 			"label": __("Filter Based On"),
 			"fieldtype": "Select",
 			"options": ["Fiscal Year", "Date Range"],
 			"default": ["Fiscal Year"],
 			"reqd": 1,
-			on_change: function() {
+			on_change: function () {
 				let filter_based_on = frappe.query_report.get_filter_value('filter_based_on');
 				frappe.query_report.toggle_filter_display('fiscal_year', filter_based_on === 'Date Range');
 				frappe.query_report.toggle_filter_display('from_date', filter_based_on === 'Fiscal Year');
@@ -38,7 +34,7 @@ frappe.query_reports["Profit and Loss Statement"] = {
 			"width": "60px"
 		},
 		{
-			"fieldname":"from_date",
+			"fieldname": "from_date",
 			"label": __("From Date"),
 			"fieldtype": "Date",
 			"default": frappe.datetime.add_months(frappe.datetime.get_today(), -1),
@@ -47,7 +43,7 @@ frappe.query_reports["Profit and Loss Statement"] = {
 			"width": "60px"
 		},
 		{
-			"fieldname":"to_date",
+			"fieldname": "to_date",
 			"label": __("To Date"),
 			"fieldtype": "Date",
 			"default": frappe.datetime.get_today(),
@@ -56,8 +52,8 @@ frappe.query_reports["Profit and Loss Statement"] = {
 			"width": "60px"
 		},
 	],
-	"formatter": function(value, row, column, data, default_formatter) {
-		if (data && column.fieldname=="account") {
+	"formatter": function (value, row, column, data, default_formatter) {
+		if (data && column.fieldname == "account") {
 			value = data.account || value;
 			column.is_tree = true;
 		}
