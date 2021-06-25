@@ -1,2 +1,8 @@
-frappe
 Unidecode==1.1.1
+aiohttp
+erpnext_telegram_integration @ git+git://github.com/yrestom/erpnext_telegram.git@master
+ikea_api @ git+git://github.com/vrslev/ikea-api-client.git@master
+ikea_api_extender @ git+ssh://github.com/vrslev/ikea-api-extender.git
+ikea_api_parser @ git+ssh://github.com/vrslev/ikea-api-parser.git
+vk_api
+requests

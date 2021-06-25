@@ -56,16 +56,14 @@
    "fieldtype": "Link",
    "in_global_search": 1,
    "label": "Account Paid From",
-   "options": "Account",
-   "reqd": 1
+   "options": "Account"
   },
   {
    "fieldname": "paid_to",
    "fieldtype": "Link",
    "in_global_search": 1,
    "label": "Account Paid To",
-   "options": "Account",
-   "reqd": 1
+   "options": "Account"
   },
   {
    "fieldname": "party",
@@ -149,7 +147,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-01-14 17:29:05.252951",
+ "modified": "2021-06-23 22:14:23.174161",
  "modified_by": "Administrator",
  "module": "Accounting",
  "name": "Payment Entry",

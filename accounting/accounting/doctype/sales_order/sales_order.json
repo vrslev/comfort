@@ -1,45 +1,43 @@
 {
  "actions": [],
- "autoname": "naming_series:",
+ "autoname": "SO-.YYYY.-",
  "creation": "2021-01-01 18:33:35.831110",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "naming_series",
-  "party",
-  "column_break_3",
+  "customer",
   "company",
+  "column_break_3",
   "posting_date",
-  "delivery_date",
   "section_break_7",
   "items",
   "totals_section",
   "total_quantity",
+  "per_paid",
   "column_break_11",
+  "paid_amount",
   "total_amount",
+  "pending_amount",
+  "section_break_13",
+  "child_items",
+  "status_section",
+  "status",
+  "payment_status",
+  "delivery_status",
   "amended_from"
  ],
  "fields": [
   {
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "label": "Series",
-   "no_copy": 1,
-   "options": "ACC-SORD-.YYYY.-",
-   "print_hide": 1,
-   "reqd": 1,
-   "set_only_once": 1
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
   },
   {
-   "fieldname": "party",
+   "fieldname": "company",
    "fieldtype": "Link",
-   "in_standard_filter": 1,
-   "label": "Customer",
-   "options": "Party",
-   "print_hide": 1,
-   "reqd": 1,
-   "search_index": 1
+   "hidden": 1,
+   "label": "Company",
+   "options": "Company"
   },
   {
    "default": "Today",
@@ -52,10 +50,8 @@
    "search_index": 1
   },
   {
-   "fieldname": "delivery_date",
-   "fieldtype": "Date",
-   "in_list_view": 1,
-   "label": "Delivery Date"
+   "fieldname": "section_break_7",
+   "fieldtype": "Section Break"
   },
   {
    "allow_bulk_edit": 1,
@@ -66,6 +62,12 @@
    "reqd": 1
   },
   {
+   "fieldname": "totals_section",
+   "fieldtype": "Section Break",
+   "label": "Totals",
+   "options": "Company:company:default_currency"
+  },
+  {
    "fieldname": "total_quantity",
    "fieldtype": "Float",
    "label": "Total Quantity",
@@ -73,9 +75,14 @@
    "read_only": 1
   },
   {
+   "fieldname": "column_break_11",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "total_amount",
    "fieldtype": "Currency",
    "label": "Total Amount",
+   "options": "Company:company:default_currency",
    "precision": "2",
    "read_only": 1
   },
@@ -89,35 +96,94 @@
    "read_only": 1
   },
   {
-   "fieldname": "company",
+   "fieldname": "payment_status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Payment Status",
+   "no_copy": 1,
+   "options": "\nUnpaid\nPartially Paid\nPaid\nOverpaid",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "delivery_status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Delivery Status",
+   "no_copy": 1,
+   "options": "\nTo Purchase\nPurchased\nTo Deliver\nDelivered",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "no_copy": 1,
+   "options": "\nDraft\nIn Progress\nClosed",
+   "print_hide": 1,
+   "read_only": 1,
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "status_section",
+   "fieldtype": "Section Break",
+   "label": "Status"
+  },
+  {
+   "fieldname": "section_break_13",
+   "fieldtype": "Section Break",
+   "read_only": 1
+  },
+  {
+   "fieldname": "child_items",
+   "fieldtype": "Table",
+   "label": "Child Items",
+   "options": "Sales Order Child Item",
+   "read_only": 1
+  },
+  {
+   "fieldname": "customer",
    "fieldtype": "Link",
    "in_standard_filter": 1,
-   "label": "Company",
-   "options": "Company",
-   "reqd": 1
+   "label": "Customer",
+   "options": "Customer",
+   "print_hide": 1,
+   "reqd": 1,
+   "search_index": 1
   },
   {
-   "fieldname": "column_break_3",
-   "fieldtype": "Column Break"
+   "default": "0",
+   "fieldname": "per_paid",
+   "fieldtype": "Percent",
+   "label": "% Paid",
+   "read_only": 1
   },
   {
-   "fieldname": "section_break_7",
-   "fieldtype": "Section Break"
+   "default": "0",
+   "fieldname": "paid_amount",
+   "fieldtype": "Currency",
+   "label": "Paid Amount",
+   "options": "Company:company:default_currency",
+   "read_only": 1
   },
   {
-   "fieldname": "totals_section",
-   "fieldtype": "Section Break",
-   "label": "Totals"
-  },
-  {
-   "fieldname": "column_break_11",
-   "fieldtype": "Column Break"
+   "fieldname": "pending_amount",
+   "fieldtype": "Currency",
+   "label": "Pending Amount",
+   "options": "Company:company:default_currency",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-01-14 19:28:56.213648",
+ "modified": "2021-06-24 03:47:06.181944",
  "modified_by": "Administrator",
  "module": "Accounting",
  "name": "Sales Order",

@@ -1,0 +1,101 @@
+{
+ "actions": [],
+ "allow_events_in_timeline": 1,
+ "allow_import": 1,
+ "allow_rename": 1,
+ "autoname": "field:party_name",
+ "creation": "2020-12-29 15:27:53.782555",
+ "doctype": "DocType",
+ "document_type": "Setup",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "basic_info",
+  "party_name",
+  "vk_id",
+  "contact_details_section",
+  "vk_url",
+  "column_break_1",
+  "party_number",
+  "image"
+ ],
+ "fields": [
+  {
+   "bold": 1,
+   "fieldname": "party_name",
+   "fieldtype": "Data",
+   "in_global_search": 1,
+   "in_list_view": 1,
+   "label": "Party Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "party_number",
+   "fieldtype": "Data",
+   "label": "Phone No"
+  },
+  {
+   "fieldname": "image",
+   "fieldtype": "Attach Image",
+   "hidden": 1,
+   "label": "Image"
+  },
+  {
+   "fieldname": "basic_info",
+   "fieldtype": "Section Break",
+   "label": "Name and Type",
+   "options": "fa fa-user"
+  },
+  {
+   "fieldname": "contact_details_section",
+   "fieldtype": "Section Break",
+   "label": "Contact Details"
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "vk_id",
+   "fieldtype": "Data",
+   "label": "VK ID",
+   "unique": 1
+  },
+  {
+   "fieldname": "vk_url",
+   "fieldtype": "Data",
+   "label": "VK URL"
+  }
+ ],
+ "icon": "fa fa-user",
+ "image_field": "image",
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2021-06-24 03:41:20.284467",
+ "modified_by": "Administrator",
+ "module": "Accounting",
+ "name": "Customer",
+ "name_case": "Title Case",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "search_fields": "party_name",
+ "show_name_in_global_search": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "title_field": "party_name",
+ "track_changes": 1
+}

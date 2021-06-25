@@ -4,11 +4,12 @@
 from __future__ import unicode_literals
 
 import frappe
-from frappe.utils import cstr
-from unidecode import unidecode
-from six import iteritems
-from frappe.utils.nestedset import rebuild_tree
 from frappe import _
+from frappe.utils import cstr
+from frappe.utils.nestedset import rebuild_tree
+from six import iteritems
+from unidecode import unidecode
+
 
 def create_charts(company, abbr):
 		chart = {
@@ -20,7 +21,9 @@ def create_charts(company, abbr):
 						}
 					},
 					_("Bank Accounts"): {
-						"is_group": 1
+						_("Bank"): {
+							"account_type": "Bank"
+						}
 					},
 					_("Cash In Hand"): {
 						_("Cash"): {

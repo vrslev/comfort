@@ -30,11 +30,10 @@ class TestSalesOrder(unittest.TestCase):
 		so = make_sales_order('Poco F2', 0, 'Rohan', False, False)
 		self.assertRaises(frappe.exceptions.ValidationError, so.insert)
 
-def make_sales_order(item_name, qty, party, save=True, submit=False):
+def make_sales_order(item_name, qty, customer, save=True, submit=False):
 	so = frappe.new_doc("Sales Order")
-	so.party = party
+	so.customer = customer
 	so.posting_date = nowdate()
-	so.delivery_date = nowdate()
 	so.company = '_Test Company'
 	so.set("items",[
 		{

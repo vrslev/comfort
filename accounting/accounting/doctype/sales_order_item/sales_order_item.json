@@ -6,67 +6,72 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "item",
+  "item_code",
   "item_name",
-  "delivery_date",
   "qty",
   "rate",
-  "amount"
+  "amount",
+  "weight",
+  "total_weight"
  ],
  "fields": [
   {
-   "bold": 1,
-   "fieldname": "item",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Item",
-   "options": "Item",
-   "print_hide": 1,
-   "search_index": 1
-  },
-  {
    "fieldname": "item_name",
    "fieldtype": "Data",
-   "label": "Item Name"
-  },
-  {
-   "fieldname": "delivery_date",
-   "fieldtype": "Date",
-   "in_list_view": 1,
-   "label": "Delivery Date",
+   "label": "Item Name",
    "reqd": 1
   },
   {
    "fieldname": "qty",
-   "fieldtype": "Float",
+   "fieldtype": "Int",
    "in_list_view": 1,
    "label": "Quantity",
-   "precision": "2"
+   "precision": "2",
+   "reqd": 1
   },
   {
    "fieldname": "rate",
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Rate",
-   "options": "Currency:INR",
+   "options": "Company:company:default_currency",
    "precision": "2",
-   "reqd": 1
+   "read_only": 1
   },
   {
    "fieldname": "amount",
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Amount",
-   "options": "Currency:INR",
+   "options": "Company:company:default_currency",
    "precision": "2",
-   "read_only": 1,
-   "reqd": 1
+   "read_only": 1
+  },
+  {
+   "bold": 1,
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Item Code",
+   "options": "Item",
+   "print_hide": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "weight",
+   "fieldtype": "Float",
+   "label": "Weight"
+  },
+  {
+   "fieldname": "total_weight",
+   "fieldtype": "Float",
+   "label": "Total Weight"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-01-05 19:26:19.475943",
+ "modified": "2021-06-24 02:15:37.537000",
  "modified_by": "Administrator",
  "module": "Accounting",
  "name": "Sales Order Item",

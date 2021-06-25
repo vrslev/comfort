@@ -1,85 +1,36 @@
 {
  "actions": [],
- "allow_events_in_timeline": 1,
- "allow_import": 1,
- "allow_rename": 1,
- "autoname": "field:party_name",
- "creation": "2020-12-29 15:27:53.782555",
+ "creation": "2021-06-24 00:20:25.370343",
  "doctype": "DocType",
- "document_type": "Setup",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "basic_info",
-  "party_name",
   "party_type",
-  "contact_details_section",
-  "party_email",
-  "column_break_1",
-  "party_number",
-  "image"
+  "party_name"
  ],
  "fields": [
-  {
-   "bold": 1,
-   "fieldname": "party_name",
-   "fieldtype": "Data",
-   "in_global_search": 1,
-   "label": "Party Name",
-   "reqd": 1,
-   "unique": 1
-  },
   {
    "fieldname": "party_type",
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Party Type",
-   "options": "Supplier\nCustomer",
+   "options": "\nCustomer\nSupplier",
    "reqd": 1
   },
   {
-   "fieldname": "party_email",
+   "fieldname": "party_name",
    "fieldtype": "Data",
-   "label": "Email",
-   "reqd": 1,
-   "unique": 1
-  },
-  {
-   "fieldname": "party_number",
-   "fieldtype": "Data",
-   "label": "Phone No"
-  },
-  {
-   "fieldname": "image",
-   "fieldtype": "Attach Image",
-   "hidden": 1,
-   "label": "Image"
-  },
-  {
-   "fieldname": "basic_info",
-   "fieldtype": "Section Break",
-   "label": "Name and Type",
-   "options": "fa fa-user"
-  },
-  {
-   "fieldname": "contact_details_section",
-   "fieldtype": "Section Break",
-   "label": "Contact Details"
-  },
-  {
-   "fieldname": "column_break_1",
-   "fieldtype": "Column Break"
+   "in_list_view": 1,
+   "label": "Party Name",
+   "reqd": 1
   }
  ],
- "icon": "fa fa-user",
- "image_field": "image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-01-13 14:52:03.286886",
+ "modified": "2021-06-24 00:20:29.710422",
  "modified_by": "Administrator",
  "module": "Accounting",
  "name": "Party",
- "name_case": "Title Case",
  "owner": "Administrator",
  "permissions": [
   {
@@ -95,10 +46,7 @@
    "write": 1
   }
  ],
- "search_fields": "party_name, party_type",
- "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
- "title_field": "party_name",
  "track_changes": 1
 }
