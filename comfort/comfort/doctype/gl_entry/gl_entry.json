@@ -1,6 +1,6 @@
 {
  "actions": [],
- "autoname": "ACC-GLE-.YYYY.-.#####",
+ "autoname": "GLE-.YYYY.-.#####",
  "creation": "2020-12-29 15:53:39.714645",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -10,7 +10,6 @@
   "party",
   "is_cancelled",
   "column_break_2",
-  "company",
   "posting_date",
   "account_section",
   "account",
@@ -47,13 +46,13 @@
    "fieldname": "debit_amount",
    "fieldtype": "Currency",
    "label": "Debit Amount",
-   "options": "Currency:INR"
+   "options": "Currency:RUB"
   },
   {
    "fieldname": "credit_amount",
    "fieldtype": "Currency",
    "label": "Credit Amount",
-   "options": "Currency:INR"
+   "options": "Currency:RUB"
   },
   {
    "fieldname": "voucher_type",
@@ -88,13 +87,6 @@
    "fieldname": "remarks",
    "fieldtype": "Small Text",
    "label": "Remarks"
-  },
-  {
-   "fieldname": "company",
-   "fieldtype": "Link",
-   "in_standard_filter": 1,
-   "label": "Company",
-   "options": "Company"
   },
   {
    "fieldname": "column_break_2",
@@ -132,7 +124,7 @@
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-06-24 00:49:50.352010",
+ "modified": "2021-06-25 04:30:04.299533",
  "modified_by": "Administrator",
  "module": "Comfort",
  "name": "GL Entry",
@@ -151,7 +143,6 @@
    "write": 1
   }
  ],
- "quick_entry": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
  "track_changes": 1

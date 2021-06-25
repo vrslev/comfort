@@ -9,8 +9,6 @@ def make_gl_entry(self, account, dr, cr, transaction_type=None):
     else:
         party = None
 
-    default_company = frappe.db.get_single_value('Defaults', 'default_company')
-
     gl_entry = frappe.get_doc({
         'doctype': 'GL Entry',
         'transaction_type': transaction_type,
@@ -20,8 +18,7 @@ def make_gl_entry(self, account, dr, cr, transaction_type=None):
         'credit_amount': cr,
         'voucher_type': self.doctype,
         'voucher_no': self.name,
-        'party': party,
-        'company': default_company
+        'party': party
     })
     gl_entry.insert()
 
