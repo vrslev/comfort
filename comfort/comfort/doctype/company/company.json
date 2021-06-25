@@ -87,43 +87,50 @@
    "fieldname": "default_bank_account",
    "fieldtype": "Link",
    "label": "Default Bank Account",
-   "options": "Account"
+   "options": "Account",
+   "search_index": 1
   },
   {
    "fieldname": "default_cash_account",
    "fieldtype": "Link",
    "label": "Default Cash Account",
-   "options": "Account"
+   "options": "Account",
+   "search_index": 1
   },
   {
    "fieldname": "default_receivable_account",
    "fieldtype": "Link",
    "label": "Default Receivable Account",
-   "options": "Account"
+   "options": "Account",
+   "search_index": 1
   },
   {
    "fieldname": "default_payable_account",
    "fieldtype": "Link",
    "label": "Default Payable Account",
-   "options": "Account"
+   "options": "Account",
+   "search_index": 1
   },
   {
    "fieldname": "default_income_account",
    "fieldtype": "Link",
    "label": "Default Income Account",
-   "options": "Account"
+   "options": "Account",
+   "search_index": 1
   },
   {
    "fieldname": "default_cost_of_goods_sold_account",
    "fieldtype": "Link",
    "label": "Default Cost of Goods Sold Account",
-   "options": "Account"
+   "options": "Account",
+   "search_index": 1
   },
   {
    "fieldname": "default_inventory_account",
    "fieldtype": "Link",
    "label": "Default Inventory Account",
-   "options": "Account"
+   "options": "Account",
+   "search_index": 1
   },
   {
    "fieldname": "abbr",
@@ -152,13 +159,14 @@
    "fieldname": "stock_received_but_not_billed",
    "fieldtype": "Link",
    "label": "Stock Received But Not Billed",
-   "options": "Account"
+   "options": "Account",
+   "search_index": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2021-01-05 23:31:52.291486",
+ "modified": "2021-06-25 04:23:55.927889",
  "modified_by": "Administrator",
  "module": "Comfort",
  "name": "Company",
