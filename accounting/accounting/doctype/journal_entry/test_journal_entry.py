@@ -1,13 +1,12 @@
-# -*- coding: utf-8 -*-
-# Copyright (c) 2020, Shariq and Contributors
-# See license.txt
-from __future__ import unicode_literals
+
+
+import unittest
 
 import frappe
-from frappe.utils import flt, nowdate
-import unittest
-from accounting.accounting.doctype.company.test_company import create_company
 from accounting.accounting.doctype.account.test_account import create_account
+from accounting.accounting.doctype.company.test_company import create_company
+from frappe.utils import flt, nowdate
+
 
 class TestJournalEntry(unittest.TestCase):
 
