@@ -7,7 +7,7 @@ frappe.ui.form.on('Sales Order', {
 					label: 'Paid Amount',
 					fieldname: 'paid_amount',
 					fieldtype: 'Currency',
-					options: 'Company:company:default_currency'
+					options: 'Currency:RUB'
 				}, (values) => {
 					frm.call({
 						doc: frm.doc,
@@ -54,7 +54,7 @@ frappe.ui.form.on("Sales Order Item", {
 			frappe.db.get_doc('Item', child.item_code)
 				.then(doc => {
 					frappe.model.set_value(cdt, cdn, 'qty', 1.00)
-					frappe.model.set_value(cdt, cdn, 'rate', doc.standard_purchase_rate)
+					frappe.model.set_value(cdt, cdn, 'rate', doc.rate)
 				})
 		}
 	}

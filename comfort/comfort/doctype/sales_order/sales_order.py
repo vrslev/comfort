@@ -12,11 +12,11 @@ class SalesOrder(Document):
     # TODO: Discount
     # TODO: Services
     # TODO: Hide button "DELIVERED" when PO not recevied yet
+    # TODO: Calculate total weight
     def validate(self):
         self.validate_quantity()
         self.set_item_rate_amount()
         self.set_totals()
-        self.set_company()
         self.set_child_items()
         self.set_paid_and_pending_per_amount()
         self.set_delivery_status()
@@ -32,7 +32,7 @@ class SalesOrder(Document):
     def set_item_rate_amount(self):
         for item in self.items:
             item.rate = frappe.db.get_value(
-                'Item', item.item_code, 'standard_purchase_rate')
+                'Item', item.item_code, 'rate')
             item.amount = flt(item.qty) * item.rate
 
     def set_totals(self):
@@ -40,13 +40,6 @@ class SalesOrder(Document):
         for item in self.items:
             self.total_quantity = flt(self.total_quantity) + flt(item.qty)
             self.total_amount = flt(self.total_amount) + flt(item.amount)
-
-    def set_company(self):
-        if not self.company:
-            self.company = frappe.db.get_single_value(
-                'Defaults', 'default_company')
-            if not self.company:
-                frappe.throw(_('Set default company in Defaults'))
 
     def set_child_items(self):
         self.child_items = []
@@ -133,13 +126,15 @@ class SalesOrder(Document):
         }):
             frappe.throw(_("Already marked as delivered"))
 
+        company = frappe.db.get_single_value('Defaults', 'default_company')
+
         income_account = frappe.db.get_value(
-            'Company', self.company, 'default_inventory_account')
+            'Company', company, 'default_inventory_account')
         make_gl_entry(self,
                       income_account, 0, self.total_amount, transaction_type)
 
         debit_to = frappe.db.get_value(
-            'Company', self.company, 'default_cost_of_goods_sold_account')
+            'Company', company, 'default_cost_of_goods_sold_account')
         make_gl_entry(self, debit_to, self.total_amount, 0, transaction_type)
 
     def update_actual_qty(self):
@@ -162,12 +157,16 @@ class SalesOrder(Document):
 
     def make_invoice_gl_entries(self, paid_amount):
         transaction_type = 'Invoice'
+
+        company = frappe.db.get_single_value('Defaults', 'default_company')
+
         income_account = frappe.db.get_value(
-            'Company', self.company, 'default_income_account')
-        debit_to = frappe.db.get_value(
-            'Company', self.company, 'default_bank_account')
+            'Company', company, 'default_income_account')
         make_gl_entry(self,
                       income_account, 0, paid_amount, transaction_type)
+
+        debit_to = frappe.db.get_value(
+            'Company', company, 'default_bank_account')
         make_gl_entry(self, debit_to, paid_amount, 0, transaction_type)
 
     def set_paid_and_pending_per_amount(self, additional_paid_amount=0):

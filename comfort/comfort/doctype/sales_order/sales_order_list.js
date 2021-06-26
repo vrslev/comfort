@@ -5,10 +5,14 @@ frappe.listview_settings['Sales Order'] = {
 			var colors = {
 				"In Progress": "orange",
 				"Completed": "green",
-				"To Purchase": "orange",
+				"To Purchase": "red",
 				"Purchased": "orange",
 				"To Deliver": "orange",
-				"Delivered": "green"
+				"Delivered": "green"	,
+				"Unpaid": "red",
+				"Partially Paid": "orange",
+				"Paid": "green",
+				"Overpaid": "orange"
 			};
 			if (colors[text]) {
 				return colors[text];

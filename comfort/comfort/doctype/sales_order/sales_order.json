@@ -1,13 +1,12 @@
 {
  "actions": [],
- "autoname": "SO-.YYYY.-",
+ "autoname": "SO-.YYYY.-.####",
  "creation": "2021-01-01 18:33:35.831110",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
   "customer",
-  "company",
   "column_break_3",
   "posting_date",
   "section_break_7",
@@ -31,13 +30,6 @@
   {
    "fieldname": "column_break_3",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "company",
-   "fieldtype": "Link",
-   "hidden": 1,
-   "label": "Company",
-   "options": "Company"
   },
   {
    "default": "Today",
@@ -64,8 +56,7 @@
   {
    "fieldname": "totals_section",
    "fieldtype": "Section Break",
-   "label": "Totals",
-   "options": "Company:company:default_currency"
+   "label": "Totals"
   },
   {
    "fieldname": "total_quantity",
@@ -82,7 +73,7 @@
    "fieldname": "total_amount",
    "fieldtype": "Currency",
    "label": "Total Amount",
-   "options": "Company:company:default_currency",
+   "options": "Currency:RUB",
    "precision": "2",
    "read_only": 1
   },
@@ -121,6 +112,7 @@
    "default": "Draft",
    "fieldname": "status",
    "fieldtype": "Select",
+   "hidden": 1,
    "in_list_view": 1,
    "label": "Status",
    "no_copy": 1,
@@ -169,21 +161,21 @@
    "fieldname": "paid_amount",
    "fieldtype": "Currency",
    "label": "Paid Amount",
-   "options": "Company:company:default_currency",
+   "options": "Currency:RUB",
    "read_only": 1
   },
   {
    "fieldname": "pending_amount",
    "fieldtype": "Currency",
    "label": "Pending Amount",
-   "options": "Company:company:default_currency",
+   "options": "Currency:RUB",
    "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-06-24 03:47:06.181944",
+ "modified": "2021-06-26 10:43:51.189233",
  "modified_by": "Administrator",
  "module": "Comfort",
  "name": "Sales Order",
