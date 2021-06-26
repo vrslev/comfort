@@ -9,6 +9,8 @@ app_color = "grey"
 app_email = "levwint@gmail.com"
 app_license = "MIT"
 
+fixtures = ['List View Settings']
+
 # Includes in <head>
 # ------------------
 
