@@ -23,7 +23,6 @@
    "unique": 1
   },
   {
-   "default": "0",
    "fieldname": "reserved_actual",
    "fieldtype": "Int",
    "in_list_view": 1,
@@ -31,7 +30,6 @@
    "read_only": 1
   },
   {
-   "default": "0",
    "fieldname": "available_actual",
    "fieldtype": "Int",
    "in_list_view": 1,
@@ -39,7 +37,6 @@
    "read_only": 1
   },
   {
-   "default": "0",
    "fieldname": "reserved_purchased",
    "fieldtype": "Int",
    "in_list_view": 1,
@@ -47,7 +44,6 @@
    "read_only": 1
   },
   {
-   "default": "0",
    "fieldname": "available_purchased",
    "fieldtype": "Int",
    "in_list_view": 1,
@@ -55,7 +51,6 @@
    "read_only": 1
   },
   {
-   "default": "0",
    "fieldname": "projected",
    "fieldtype": "Int",
    "in_list_view": 1,
@@ -66,7 +61,7 @@
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-06-26 10:32:51.093461",
+ "modified": "2021-06-26 16:58:17.635637",
  "modified_by": "Administrator",
  "module": "Comfort",
  "name": "Bin",
