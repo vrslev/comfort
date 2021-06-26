@@ -5,7 +5,7 @@ frappe.ui.form.on('Item', {
 				filters: {
 					'name': ['!=', frm.doc.name]
 				}
-			}
-		})
+			};
+		});
 	}
 });

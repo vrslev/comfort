@@ -28,7 +28,7 @@
 						<h4 class="card-title"><span class="text-muted" >Name: </span>
 							<a class="text-dark" href="/{{ frappe.db.get_value('Item', d.item, 'route') }}">{{ d.item }}</a>
 						</h4>
-						<h5 class="card-title"><span class="text-muted" >Price: </span>₹ {{ frappe.db.get_value('Item', d.item, 'standard_selling_rate')  }}</h5>
+						<h5 class="card-title"><span class="text-muted" >Price: </span>₹ {{ frappe.db.get_value('Item', d.item, 'rate')  }}</h5>
 					</div>
 				</div>
 				<div class="col-6 col-md-3 py-6">
