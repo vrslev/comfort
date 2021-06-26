@@ -68,9 +68,6 @@ class TestJournalEntry(unittest.TestCase):
 def make_journal_entry(posting_date, account1, account2, amount, save=True, submit=False):
     jv = frappe.new_doc('Journal Entry')
     jv.posting_date = posting_date or nowdate()
-    jv.reference_number = '12345'
-    jv.reference_date = nowdate()
-    jv.company = "_Test Company"
     jv.set('accounting_entries', [
         {
             "account": account1,

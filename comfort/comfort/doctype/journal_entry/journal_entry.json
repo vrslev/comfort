@@ -1,37 +1,24 @@
 {
  "actions": [],
- "allow_auto_repeat": 1,
- "allow_import": 1,
- "autoname": "naming_series:",
+ "autoname": "JE-.YYYY.-.###",
  "creation": "2020-12-29 16:18:32.359347",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "naming_series",
-  "party",
+  "customer",
   "column_break_3",
-  "company",
   "posting_date",
   "section_break_6",
   "accounting_entries",
   "section_break_8",
-  "reference_number",
-  "reference_date",
-  "column_break_11",
   "total_debit",
   "total_credit",
+  "column_break_11",
   "difference",
   "amended_from"
  ],
  "fields": [
-  {
-   "fieldname": "party",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Party",
-   "options": "Party"
-  },
   {
    "default": "Now",
    "fieldname": "posting_date",
@@ -52,7 +39,7 @@
    "in_list_view": 1,
    "label": "Total Debit",
    "no_copy": 1,
-   "options": "Currency:INR",
+   "options": "Currency:RUB",
    "print_hide": 1,
    "read_only": 1
   },
@@ -62,7 +49,7 @@
    "in_list_view": 1,
    "label": "Total Credit",
    "no_copy": 1,
-   "options": "Currency:INR",
+   "options": "Currency:RUB",
    "print_hide": 1,
    "read_only": 1
   },
@@ -70,15 +57,8 @@
    "fieldname": "difference",
    "fieldtype": "Currency",
    "label": "Difference (Dr - Cr)",
-   "options": "Currency:INR",
+   "options": "Currency:RUB",
    "read_only": 1
-  },
-  {
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "label": "Series",
-   "options": "ACC-JV-.YYYY.-",
-   "reqd": 1
   },
   {
    "fieldname": "amended_from",
@@ -88,14 +68,6 @@
    "options": "Journal Entry",
    "print_hide": 1,
    "read_only": 1
-  },
-  {
-   "fieldname": "company",
-   "fieldtype": "Link",
-   "in_standard_filter": 1,
-   "label": "Company",
-   "options": "Company",
-   "reqd": 1
   },
   {
    "fieldname": "column_break_3",
@@ -110,27 +82,21 @@
    "fieldtype": "Section Break"
   },
   {
-   "fieldname": "reference_number",
-   "fieldtype": "Data",
-   "label": "Reference Number",
-   "reqd": 1
-  },
-  {
-   "default": "Today",
-   "fieldname": "reference_date",
-   "fieldtype": "Date",
-   "label": "Reference Date",
-   "reqd": 1
-  },
-  {
    "fieldname": "column_break_11",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Customer",
+   "options": "Customer"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-01-14 19:28:40.248945",
+ "modified": "2021-06-25 14:45:27.735850",
  "modified_by": "Administrator",
  "module": "Comfort",
  "name": "Journal Entry",
