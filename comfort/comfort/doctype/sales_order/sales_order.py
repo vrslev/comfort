@@ -270,7 +270,8 @@ def calculate_commission(items_cost, commission=None):
                     'Wrong conditions (applied more or less than 1 rule)')
             commission = commission_percentages[0]
 
-        margin = round(items_cost * commission / 100, -1)
+        items_cost_rounding = round(items_cost, -1) - items_cost
+        margin = round(items_cost * commission / 100, -1) + items_cost_rounding
 
     return {
         'commission': commission,

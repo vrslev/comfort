@@ -1,5 +1,3 @@
-from . import __version__ as app_version
-
 app_name = "comfort"
 app_title = "Comfort"
 app_publisher = "vrslev"
@@ -16,7 +14,7 @@ fixtures = ['List View Settings']
 
 # include js, css files in header of desk.html
 # app_include_css = "/assets/comfort/css/comfort.css"
-# app_include_js = "/assets/comfort/js/comfort.js"
+app_include_js = "/assets/comfort/js/index.js"
 
 # include js, css files in header of web template
 # web_include_css = "/assets/comfort/css/comfort.css"

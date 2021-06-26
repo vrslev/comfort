@@ -1,5 +1,19 @@
 frappe.ui.form.on('Sales Order', {
 	// TODO: Ask if paid to bank or cash
+	onload_post_render(frm) {
+		frm.fields_dict.items.$wrapper
+			.unbind('paste')
+			.on('paste', e => {
+				e.preventDefault();
+				let clipboard_data = e.clipboardData || window.clipboardData || e.originalEvent.clipboardData;
+				let pasted_data = clipboard_data.getData('Text');
+				if (!pasted_data) return;
+
+				quick_add_items(pasted_data);
+			});
+		return false;
+	},
+
 	refresh(frm) {
 		if (!frm.is_new() && frm.doc.per_paid < 100) {
 			frm.add_custom_button(__('Paid'), () => {
@@ -162,7 +176,36 @@ function calculate_total_weight(frm) {
 
 function recalculate(frm) {
 	calculate_items_cost(frm);
-	apply_commission(frm);
 	calculate_total_quantity(frm);
 	calculate_total_weight(frm);
+}
+
+
+async function quick_add_items(text) {
+	// frappe.dom.freeze();
+	comfort.fetch_items(text).then(r => {
+		let promises = [];
+		function callback(d) {
+			let doc = cur_frm.add_child('items', { 'item_code': d });
+			let cdt = doc.doctype;
+			let cdn = doc.name;
+
+			return frappe.db.get_value('Item', doc.item_code, ['rate', 'weight']).then(r => {
+				doc.qty = 1;
+				doc.rate = r.message.rate;
+				doc.weight = r.message.weight;
+
+				calculate_item_amount(cur_frm, cdt, cdn);
+				calculate_item_total_weight(cur_frm, cdt, cdn);
+			});
+		}
+		for (var d of r.successful) {
+			promises.push(callback(d));
+		}
+
+		return Promise.all(promises).then(() => {
+			recalculate(cur_frm);
+			refresh_field('items');
+		});
+	});
 }
