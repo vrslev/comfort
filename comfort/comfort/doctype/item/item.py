@@ -4,13 +4,14 @@ from frappe.model.document import Document
 
 
 class Item(Document):
+    # TODO: Validate URL
     def validate(self):
         self.validate_child_items()
         self.set_name()
         self.calculate_weight()
 
     def validate_child_items(self):
-        if frappe.db.exists('Child Item', {'parent': ['in', [d.item_code for d in self.child_items]]}):
+        if self.child_items and frappe.db.exists('Child Item', {'parent': ['in', [d.item_code for d in self.child_items]]}):
             frappe.throw(_("Can't add child item that contains child items"))
 
     def set_name(self):
@@ -55,10 +56,11 @@ class Item(Document):
             bin.insert()
 
     def on_trash(self):
-        bin = frappe.get_doc('Bin', self.item_code)
-        if (bin.actual + bin.available_actual + bin.ordered
-                + bin.available_ordered + bin.projected) > 0:
-            frappe.throw(
-                _("Can't delete item that have been used in transactions"))
-        else:
-            bin.delete()
+        if frappe.db.exists('Bin', self.item_code):
+            bin = frappe.get_doc('Bin', self.item_code)
+            if (bin.reserved_actual + bin.available_actual + bin.reserved_purchased
+                    + bin.available_purchased + bin.projected) > 0:
+                frappe.throw(
+                    _("Can't delete item that have been used in transactions"))
+            else:
+                bin.delete()
