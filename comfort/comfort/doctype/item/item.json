@@ -12,6 +12,7 @@
   "item_code",
   "item_name",
   "item_categories",
+  "url",
   "column_break_3",
   "rate",
   "weight",
@@ -90,6 +91,12 @@
    "fieldtype": "Table MultiSelect",
    "label": "Item Categories",
    "options": "Item Category Table"
+  },
+  {
+   "fieldname": "url",
+   "fieldtype": "Data",
+   "label": "URL",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-tag",
@@ -97,7 +104,7 @@
  "index_web_pages_for_search": 1,
  "links": [],
  "max_attachments": 1,
- "modified": "2021-06-26 10:38:29.487953",
+ "modified": "2021-06-26 16:57:10.897521",
  "modified_by": "Administrator",
  "module": "Comfort",
  "name": "Item",
