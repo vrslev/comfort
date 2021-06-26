@@ -11,18 +11,29 @@
   "posting_date",
   "section_break_7",
   "items",
+  "section_break_6",
+  "commission",
+  "edit_commission",
+  "column_break_7",
+  "discount",
   "totals_section",
-  "total_quantity",
-  "per_paid",
-  "column_break_11",
-  "paid_amount",
   "total_amount",
+  "total_quantity",
+  "items_cost",
+  "column_break_11",
+  "total_weight",
+  "margin",
+  "payment_section",
+  "paid_amount",
+  "column_break_20",
   "pending_amount",
   "section_break_13",
   "child_items",
   "status_section",
   "status",
   "payment_status",
+  "per_paid",
+  "column_break_24",
   "delivery_status",
   "amended_from"
  ],
@@ -60,7 +71,7 @@
   },
   {
    "fieldname": "total_quantity",
-   "fieldtype": "Float",
+   "fieldtype": "Int",
    "label": "Total Quantity",
    "precision": "2",
    "read_only": 1
@@ -74,7 +85,7 @@
    "fieldtype": "Currency",
    "label": "Total Amount",
    "options": "Currency:RUB",
-   "precision": "2",
+   "precision": "0",
    "read_only": 1
   },
   {
@@ -162,6 +173,7 @@
    "fieldtype": "Currency",
    "label": "Paid Amount",
    "options": "Currency:RUB",
+   "precision": "0",
    "read_only": 1
   },
   {
@@ -169,13 +181,78 @@
    "fieldtype": "Currency",
    "label": "Pending Amount",
    "options": "Currency:RUB",
+   "precision": "0",
    "read_only": 1
+  },
+  {
+   "fieldname": "column_break_7",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "items_cost",
+   "fieldtype": "Currency",
+   "label": "Items Cost",
+   "options": "Currency:RUB",
+   "precision": "0",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_6",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "total_weight",
+   "fieldtype": "Float",
+   "label": "Total Weight",
+   "precision": "2",
+   "read_only": 1
+  },
+  {
+   "fieldname": "commission",
+   "fieldtype": "Percent",
+   "label": "Commission",
+   "precision": "0",
+   "read_only_depends_on": "eval:doc.edit_commission == 0"
+  },
+  {
+   "default": "0",
+   "fieldname": "edit_commission",
+   "fieldtype": "Check",
+   "label": "Edit Commission"
+  },
+  {
+   "fieldname": "column_break_24",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "margin",
+   "fieldtype": "Currency",
+   "label": "Margin",
+   "precision": "0",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "discount",
+   "fieldtype": "Currency",
+   "label": "Discount",
+   "non_negative": 1,
+   "precision": "0"
+  },
+  {
+   "fieldname": "payment_section",
+   "fieldtype": "Section Break",
+   "label": "Payment"
+  },
+  {
+   "fieldname": "column_break_20",
+   "fieldtype": "Column Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-06-26 10:43:51.189233",
+ "modified": "2021-06-26 13:24:24.319073",
  "modified_by": "Administrator",
  "module": "Comfort",
  "name": "Sales Order",

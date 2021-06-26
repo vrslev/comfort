@@ -2,26 +2,19 @@ import frappe
 from comfort.comfort.general_ledger import make_gl_entry, make_reverse_gl_entry
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import flt
 
 
 class SalesOrder(Document):
-    # TODO: Set statuses
     # TODO: Item query
     # TODO: Make returns
-    # TODO: Discount
     # TODO: Services
     # TODO: Hide button "DELIVERED" when PO not recevied yet
-    # TODO: Calculate total weight
+    # TODO: Make GL Entries to all kinds of stuff
     def validate(self):
         self.validate_quantity()
-        self.set_item_rate_amount()
-        self.set_totals()
+        self.calculate()
         self.set_child_items()
-        self.set_paid_and_pending_per_amount()
-        self.set_delivery_status()
-        self.set_payment_status()
-        self.set_status()
+        self.set_statuses()
 
     def validate_quantity(self):
         for item in self.items:
@@ -29,17 +22,47 @@ class SalesOrder(Document):
                 frappe.throw(
                     "One or more quantity is required for each product")
 
-    def set_item_rate_amount(self):
-        for item in self.items:
-            item.rate = frappe.db.get_value(
-                'Item', item.item_code, 'rate')
-            item.amount = flt(item.qty) * item.rate
+    def calculate(self):
+        self.set_item_rate_amount()
+        self.calculate_item_totals()
+        self.calculate_commission_and_totals()
+        self.set_paid_and_pending_per_amount()
 
-    def set_totals(self):
-        self.total_quantity, self.total_amount = 0, 0
-        for item in self.items:
-            self.total_quantity = flt(self.total_quantity) + flt(item.qty)
-            self.total_amount = flt(self.total_amount) + flt(item.amount)
+    def set_item_rate_amount(self):
+        for d in self.items:
+            doc = frappe.get_cached_doc('Item', d.item_code)
+            d.rate = doc.rate
+            d.amount = d.rate * d.qty
+            d.weight = doc.weight
+            d.total_weight = d.weight * d.qty
+
+    def calculate_item_totals(self):
+        self.total_quantity, self.total_weight, self.items_cost = 0, 0, 0
+        for d in self.items:
+            self.total_quantity += d.qty
+            self.total_weight += d.total_weight
+            self.items_cost += d.amount
+
+    def calculate_commission_and_totals(self):
+        if self.edit_commission:
+            r = calculate_commission(self.items_cost, self.commission)
+        else:
+            r = calculate_commission(self.items_cost)
+
+        self.margin = r['margin']
+        self.commission = r['commission']
+
+        self.total_amount = self.items_cost + self.margin - self.discount
+
+    def set_paid_and_pending_per_amount(self, additional_paid_amount=0):
+        self.db_set('paid_amount', self.paid_amount + additional_paid_amount)
+
+        if int(self.total_amount) == 0:
+            per_paid = 100
+        else:
+            per_paid = self.paid_amount / self.total_amount * 100
+        self.db_set('per_paid', per_paid)
+        self.db_set('pending_amount', self.total_amount - self.paid_amount)
 
     def set_child_items(self):
         self.child_items = []
@@ -64,6 +87,11 @@ class SalesOrder(Document):
             d.qty = d.qty * items_to_qty_map[d.parent_item_code]
 
         self.extend('child_items', child_items)
+
+    def set_statuses(self):
+        self.set_delivery_status()
+        self.set_payment_status()
+        self.set_status()
 
     def set_payment_status(self):
         if self.docstatus == 2:
@@ -169,17 +197,6 @@ class SalesOrder(Document):
             'Company', company, 'default_bank_account')
         make_gl_entry(self, debit_to, paid_amount, 0, transaction_type)
 
-    def set_paid_and_pending_per_amount(self, additional_paid_amount=0):
-        self.db_set('paid_amount', self.paid_amount + additional_paid_amount)
-
-        if int(self.total_amount) == 0:
-            per_paid = 100
-        else:
-            per_paid = self.paid_amount / self.total_amount * 100
-        self.db_set('per_paid', per_paid)
-
-        self.db_set('pending_amount', self.total_amount - self.paid_amount)
-
     @frappe.whitelist()
     def set_paid(self, paid_amount):
         if int(self.total_amount) != 0:
@@ -200,3 +217,62 @@ class SalesOrder(Document):
 
         self.db_set('payment_status', '')
         self.db_set('delivery_status', '')
+
+
+CONDITIONS = [
+    {
+        'start': 0,
+        'end': 9900,
+        'commission_percentage': 15
+    }, {
+        'start': 9901,
+        'end': 19900,
+        'commission_percentage': 13
+    }, {
+        'start': 19901,
+        'end': 39900,
+        'commission_percentage': 11
+    }, {
+        'start': 39901,
+        'end': 49900,
+        'commission_percentage': 9
+    }, {
+        'start': 49901,
+        'end': 69900,
+        'commission_percentage': 7
+    }, {
+        'start': 69901,
+        'end': 1000000,
+        'commission_percentage': 5
+    },
+]
+
+
+@frappe.whitelist()
+def calculate_commission(items_cost, commission=None):
+    items_cost = float(items_cost)
+    if commission is not None:
+        commission = float(commission)
+
+    if items_cost <= 0:
+        margin = 0
+        commission = 0
+    else:
+        if commission is None:
+            commission_percentages = []
+            for condition in CONDITIONS:
+                if condition['start'] <= items_cost <= condition['end']:
+                    commission_percentages.append(
+                        condition['commission_percentage'])
+            # Check if rules only one condition is applied
+            if len(commission_percentages) != 1:
+                raise ValueError(
+                    'Wrong conditions (applied more or less than 1 rule)')
+            commission = commission_percentages[0]
+
+        margin = round(items_cost * commission / 100, -1)
+
+    return {
+        'commission': commission,
+        'margin': margin,
+    }
