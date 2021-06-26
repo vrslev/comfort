@@ -12,6 +12,9 @@ class Customer(Document):
         self.set_vk_id()
 
     def validate_vk_url(self):
+        if not self.vk_url:
+            return
+
         parsed = urlparse(self.vk_url)
         ok = False
         if 'vk.com' in parsed.netloc and 'im' in parsed.path:
@@ -23,6 +26,9 @@ class Customer(Document):
             frappe.throw(_('Wrong VK URL'))
 
     def set_vk_id(self):
+        if not self.vk_url:
+            return
+
         if self.vk_url:
             res = re.findall(r'sel=(\d+)', self.vk_url)
             if len(res) > 0:
@@ -30,4 +36,3 @@ class Customer(Document):
 
         if not self.vk_id:
             frappe.throw(_('Cannot extract VK ID from URL'))
-
