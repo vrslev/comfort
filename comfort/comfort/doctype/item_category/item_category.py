@@ -11,5 +11,5 @@ class ItemCategory(Document):
 
     def validate_url(self):
         if self.url:
-            if len(re.findall(r'ikea.com/\w+/\w+/cat-\d+', self.url)) == 0:
+            if len(re.findall(r'ikea.com/\w+/\w+/cat/-\d+', self.url)) == 0:
                 frappe.throw(_('Invalid category URL'))
