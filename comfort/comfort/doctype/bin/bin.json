@@ -17,7 +17,6 @@
   {
    "fieldname": "item_code",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "label": "Item Code",
    "options": "Item",
    "read_only": 1,
@@ -51,6 +50,7 @@
    "default": "0",
    "fieldname": "available_purchased",
    "fieldtype": "Int",
+   "in_list_view": 1,
    "label": "Available Purchased",
    "read_only": 1
   },
@@ -58,13 +58,15 @@
    "default": "0",
    "fieldname": "projected",
    "fieldtype": "Int",
+   "in_list_view": 1,
    "label": "Projected",
    "read_only": 1
   }
  ],
+ "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-06-24 11:45:41.277937",
+ "modified": "2021-06-26 10:32:51.093461",
  "modified_by": "Administrator",
  "module": "Comfort",
  "name": "Bin",
