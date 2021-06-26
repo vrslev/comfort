@@ -63,7 +63,7 @@
 	},
 	"root": true,
 	"globals": {
-		"cih": true,
+		"comfort": true,
 		"frappe": true,
 		"Vue": true,
 		"erpnext": true,

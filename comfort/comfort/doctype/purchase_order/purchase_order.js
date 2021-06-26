@@ -1,6 +1,6 @@
-frappe.provide("cih");
+frappe.provide("comfort");
 
-cih.IkeaCartController = frappe.ui.form.Controller.extend({
+comfort.IkeaCartController = frappe.ui.form.Controller.extend({
 	setup() {
 		this.setup_sales_order_query();
 	},
@@ -226,7 +226,7 @@ cih.IkeaCartController = frappe.ui.form.Controller.extend({
 	},
 
 	quick_add_items(text) {
-		cih.quick_add_items(text, fetch_callback, 'items_to_sell');
+		comfort.quick_add_items(text, fetch_callback, 'items_to_sell');
 		for (var i of this.frm.doc.items_to_sell) {
 			if (!i.item_name || i.item_name == '' || !i.item_code || i.item_code == '') {
 				this.frm.doc.items_to_sell.pop(i);
@@ -413,4 +413,4 @@ function show_items_cannot_be_added_dialog() {
 
 
 }
-$.extend(cur_frm.cscript, new cih.IkeaCartController({ frm: cur_frm }));
+$.extend(cur_frm.cscript, new comfort.IkeaCartController({ frm: cur_frm }));
