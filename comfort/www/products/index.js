@@ -1,11 +1,10 @@
-frappe.ready(function(){
+frappe.ready(function () {
 	$('.add-to-cart').on('click', (e) => {
 		$(e.currentTarget).prop('disabled', true);
-		var item_name = $(e.currentTarget).data('item-name')
-		if(frappe.session.user === 'Guest'){
-			window.location.href = "/login"
-		}
-		else{
+		var item_name = $(e.currentTarget).data('item-name');
+		if (frappe.session.user === 'Guest') {
+			window.location.href = "/login";
+		} else {
 			frappe.call({
 				method: 'comfort.comfort.doctype.sales_invoice.sales_invoice.add_to_cart',
 				args: {
@@ -15,14 +14,14 @@ frappe.ready(function(){
 					save: true
 				},
 				callback: (r) => {
-					$('.add-to-cart').prop('disabled', false)
+					$('.add-to-cart').prop('disabled', false);
 					frappe.msgprint({
 						title: 'Success',
 						indicator: 'green',
 						message: `<strong>${item_name}</strong> is successfully added to your <a href="/cart">Cart</a>`
 					});
 				}
-			})
+			});
 		}
-	})
-})
+	});
+});

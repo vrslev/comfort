@@ -3,7 +3,7 @@ frappe.ui.form.on('Sales Order', {
 	setup(frm) {
 		frm.page.sidebar.hide();
 	},
-	
+
 	onload_post_render(frm) {
 		frm.fields_dict.items.$wrapper
 			.unbind('paste')

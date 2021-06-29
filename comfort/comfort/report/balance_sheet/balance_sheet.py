@@ -4,26 +4,31 @@ import frappe
 def execute(filters=None):
     columns, data = [], []
 
-    if filters.filter_based_on == 'Fiscal Year':
-        year = frappe.db.sql(""" SELECT
+    if filters.filter_based_on == "Fiscal Year":
+        year = frappe.db.sql(
+            """ SELECT
 						year_start_date, year_end_date
 					FROM
 						`tabFiscal Year`
 					WHERE
-						year=%s""", filters.fiscal_year, as_dict=1)[0]
+						year=%s""",
+            filters.fiscal_year,
+            as_dict=1,
+        )[0]
         date = [year.year_start_date, year.year_end_date]
-        period_key, period_label = "{}".format(filters.fiscal_year.replace(
-            " ", "_").replace("-", "_")), filters.fiscal_year
-    elif filters.filter_based_on == 'Date Range':
+        period_key, period_label = (
+            "{}".format(filters.fiscal_year.replace(" ", "_").replace("-", "_")),
+            filters.fiscal_year,
+        )
+    elif filters.filter_based_on == "Date Range":
         period_key, period_label = "Date Range", "Date Range"
         date = [filters.from_date, filters.to_date]
 
     columns = get_columns(period_key, period_label)
 
-    asset = get_data(date, filters.company, 'Asset', 'Debit', period_key)
-    liability = get_data(date, filters.company,
-                         'Liability', 'Credit', period_key)
-    equity = get_data(date, filters.company, 'Equity', 'Credit', period_key)
+    asset = get_data(date, filters.company, "Asset", "Debit", period_key)
+    liability = get_data(date, filters.company, "Liability", "Credit", period_key)
+    equity = get_data(date, filters.company, "Equity", "Credit", period_key)
 
     data = []
     data.extend(asset or [])
@@ -31,13 +36,14 @@ def execute(filters=None):
     data.extend(equity or [])
 
     profit_loss, total, asset, liability, equity = get_profit_loss_total_amount(
-        data, period_key)
-    data.append({"account": 'Provisional Profit/Loss (Credit)',
-                period_key: profit_loss})
-    data.append({"account": 'Total (Credit)', period_key: total})
+        data, period_key
+    )
+    data.append(
+        {"account": "Provisional Profit/Loss (Credit)", period_key: profit_loss}
+    )
+    data.append({"account": "Total (Credit)", period_key: total})
 
-    chart = get_chart_data(filters, columns, asset,
-                           liability, equity, period_key)
+    chart = get_chart_data(filters, columns, asset, liability, equity, period_key)
     report_summary = get_report_summary(data, period_key)
 
     return columns, data, None, chart, report_summary
@@ -50,15 +56,15 @@ def get_columns(period_key, period_label):
             "label": "Account",
             "fieldtype": "Link",
             "options": "Account",
-            "width": 300
+            "width": 300,
         },
         {
             "fieldname": period_key,
             "label": period_label,
             "fieldtype": "Currency",
             "options": "currency",
-            "width": 150
-        }
+            "width": 150,
+        },
     ]
     return columns
 
@@ -69,19 +75,19 @@ def get_data(date, company, root_type, dr_cr, period_key):
     if accounts:
         i = 0
         for d in accounts:
-            if d.parent_account == None or d.parent_account == data[-1]['account']:
+            if d.parent_account == None or d.parent_account == data[-1]["account"]:
                 append(data, d, i, period_key)
                 i += 1
             else:
                 for a in data:
-                    if a['account'] == d.parent_account:
-                        i = a['indent'] + 1
+                    if a["account"] == d.parent_account:
+                        i = a["indent"] + 1
                         break
                 append(data, d, i, period_key)
                 i += 1
     temp = []
     for d in data:
-        bal = get_account_balance(d['account'], date)
+        bal = get_account_balance(d["account"], date)
         if bal:
             d[period_key] = abs(bal)
             temp.append(d)
@@ -95,55 +101,65 @@ def get_data(date, company, root_type, dr_cr, period_key):
                     d[period_key] += t[period_key]
     data = [d for d in data if d[period_key] != 0]
     if data:
-        data.append({
-            "account": "Total " + root_type + " (" + dr_cr + ")",
-            period_key: data[0][period_key]
-        })
+        data.append(
+            {
+                "account": "Total " + root_type + " (" + dr_cr + ")",
+                period_key: data[0][period_key],
+            }
+        )
         data.append({})
     return data
 
 
 def append(data, d, i, period_key):
-    data.append({
-        "account": d.name,
-        "account_type": d.account_type,
-        "parent_account": d.parent_account,
-        "indent": i,
-        "has_value": d.is_group,
-        period_key: 0
-    })
+    data.append(
+        {
+            "account": d.name,
+            "account_type": d.account_type,
+            "parent_account": d.parent_account,
+            "indent": i,
+            "has_value": d.is_group,
+            period_key: 0,
+        }
+    )
 
 
 def get_accounts(company, root_type):
-    return frappe.db.sql(""" SELECT
+    return frappe.db.sql(
+        """ SELECT
 				name, parent_account, lft, root_type, account_type, is_group
 			FROM 
 				tabAccount
 			WHERE 
 				company=%s and root_type=%s 
 			ORDER BY
-				lft""", (company, root_type), as_dict=1)
+				lft""",
+        (company, root_type),
+        as_dict=1,
+    )
 
 
 def get_account_balance(account, date):
-    return frappe.db.sql(""" SELECT 
+    return frappe.db.sql(
+        """ SELECT 
 					sum(debit_amount) - sum(credit_amount) 
 				FROM 
 					`tabGL Entry` 
 				WHERE 
 					is_cancelled=0 and account=%s and posting_date>=%s and posting_date<=%s""",
-                         (account, date[0], date[1]))[0][0]
+        (account, date[0], date[1]),
+    )[0][0]
 
 
 def get_profit_loss_total_amount(data, period_key):
     debit, credit, l_credit, e_credit = 0, 0, 0, 0
     for d in data:
-        if d and d['account'] == 'Total Asset (Debit)':
+        if d and d["account"] == "Total Asset (Debit)":
             debit = d[period_key]
-        elif d and d['account'] == 'Total Liability (Credit)':
+        elif d and d["account"] == "Total Liability (Credit)":
             l_credit = d[period_key]
             credit = d[period_key]
-        elif d and d['account'] == 'Total Equity (Credit)':
+        elif d and d["account"] == "Total Equity (Credit)":
             e_credit = d[period_key]
             credit += d[period_key]
     profit_loss = debit - credit
@@ -153,7 +169,8 @@ def get_profit_loss_total_amount(data, period_key):
 
 def get_report_summary(data, period_key):
     profit, total, asset, liability, equity = get_profit_loss_total_amount(
-        data, period_key)
+        data, period_key
+    )
 
     report_summary = [
         {
@@ -161,29 +178,29 @@ def get_report_summary(data, period_key):
             "indicator": "Green",
             "label": "Total Asset",
             "datatype": "Currency",
-            "currency": "₹"
+            "currency": "₹",
         },
         {
             "value": liability,
             "indicator": "Red",
             "label": "Total Liability",
             "datatype": "Currency",
-            "currency": "₹"
+            "currency": "₹",
         },
         {
             "value": equity,
             "indicator": "Blue",
             "label": "Total Equity",
             "datatype": "Currency",
-            "currency": "₹"
+            "currency": "₹",
         },
         {
             "value": profit,
             "indicator": "Green" if profit > 0 else "Red",
             "label": "Provisional Profit / Loss (Credit)",
             "datatype": "Currency",
-            "currency": "₹"
-        }
+            "currency": "₹",
+        },
     ]
     return report_summary
 
@@ -202,18 +219,13 @@ def get_chart_data(filters, columns, asset, liability, equity, period_key):
 
     datasets = []
     if asset_data:
-        datasets.append({'name': 'Assets', 'values': asset_data})
+        datasets.append({"name": "Assets", "values": asset_data})
     if liability_data:
-        datasets.append({'name': 'Liabilities', 'values': liability_data})
+        datasets.append({"name": "Liabilities", "values": liability_data})
     if equity_data:
-        datasets.append({'name': 'Equity', 'values': equity_data})
+        datasets.append({"name": "Equity", "values": equity_data})
 
-    chart = {
-        "data": {
-            'labels': labels,
-            'datasets': datasets
-        }
-    }
+    chart = {"data": {"labels": labels, "datasets": datasets}}
 
     if filters.chart_type == "Bar Chart":
         chart["type"] = "bar"

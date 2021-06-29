@@ -4,8 +4,7 @@ from io import BytesIO
 
 import aiohttp
 import frappe
-from comfort.ikea.utils import (extract_item_codes,
-                                get_item_codes_from_ingka_pagelinks)
+from comfort.ikea.utils import extract_item_codes, get_item_codes_from_ingka_pagelinks
 from frappe.utils import parse_json
 from ikea_api.endpoints.item.item_iows import WrongItemCodeError
 from ikea_api_extender import get_items_immortally
@@ -20,14 +19,14 @@ def fetch_new_items(item_codes, force_update=False, download_images=True):
     download_images = parse_json(download_images)
 
     if isinstance(item_codes, str):
-        if 'ingka.page.link/[0-9A-z]+' in item_codes:
+        if "ingka.page.link/[0-9A-z]+" in item_codes:
             item_codes = get_item_codes_from_ingka_pagelinks(item_codes)
         else:
             item_codes = extract_item_codes(item_codes)
 
     items_to_fetch, items_already_exist = [], []
     for d in item_codes:  # TODO: Make it in bulk mode
-        if frappe.db.exists('Item', d):
+        if frappe.db.exists("Item", d):
             items_already_exist.append(d)
             if force_update:
                 items_to_fetch.append(d)
@@ -35,10 +34,10 @@ def fetch_new_items(item_codes, force_update=False, download_images=True):
             items_to_fetch.append(d)
 
     res = {
-        'fetched': [],
-        'already_exist': items_already_exist,
-        'unsuccessful': [],
-        'successful': item_codes
+        "fetched": [],
+        "already_exist": items_already_exist,
+        "unsuccessful": [],
+        "successful": item_codes,
     }
     if len(items_to_fetch) == 0:
         return res
@@ -46,12 +45,12 @@ def fetch_new_items(item_codes, force_update=False, download_images=True):
     try:
         response = get_items_immortally(items_to_fetch)
     except WrongItemCodeError:
-        frappe.throw('Неверный артикул')
+        frappe.throw("Неверный артикул")
 
-    parsed_items = response['items']
-    res['unsuccessful'] = response['unsuccessful']
-    res['fetched_items'] = response['fetched']
-    res['successful'] = [d for d in item_codes if d not in res['unsuccessful']]
+    parsed_items = response["items"]
+    res["unsuccessful"] = response["unsuccessful"]
+    res["fetched_items"] = response["fetched"]
+    res["successful"] = [d for d in item_codes if d not in res["unsuccessful"]]
     # if download_images:
     #     # TODO: No need to download every time
     #     images = download_items_images(parsed_items)
@@ -74,12 +73,12 @@ def download_items_images(items):
                 raw_content = await r.content.read()
 
             image = Image.open(BytesIO(raw_content))
-            file_name = '/' + item.image_url.rsplit("/", 1)[1]
-            path = '/'.join(('items', item.item_code))
-            full_path = os.path.abspath(frappe.get_site_path('public', path))
+            file_name = "/" + item.image_url.rsplit("/", 1)[1]
+            path = "/".join(("items", item.item_code))
+            full_path = os.path.abspath(frappe.get_site_path("public", path))
             frappe.create_folder(full_path)
             image.save(full_path + file_name)
-            return item.item_code, '/' + path + file_name
+            return item.item_code, "/" + path + file_name
 
         async def fetch_all(session, items):
             tasks = []
@@ -109,52 +108,64 @@ def add_item(item, force_update):
     # raise Exception(item.__dict__)
     if item.is_combination:
         response = fetch_new_items(
-            [d['item_code'] for d in item.bundle_items], force_update=force_update)
-        for d in response['unsuccessful']:
-            _make_item(d['item_code'], d['item_name'], d['weight'])
-    _make_item(item.item_code, item.name, item.weight,
-               item.group_name, item.price, item.url, item.bundle_items)
+            [d["item_code"] for d in item.bundle_items], force_update=force_update
+        )
+        for d in response["unsuccessful"]:
+            _make_item(d["item_code"], d["item_name"], d["weight"])
+    _make_item(
+        item.item_code,
+        item.name,
+        item.weight,
+        item.group_name,
+        item.price,
+        item.url,
+        item.bundle_items,
+    )
 
 
 def make_item_category(name, url):
-    if not frappe.db.exists('Item Category', name):
-        return frappe.get_doc({
-            'doctype': 'Item Category',
-            'item_category_name': name,
-            'url': url
-        }).insert()
+    if not frappe.db.exists("Item Category", name):
+        return frappe.get_doc(
+            {"doctype": "Item Category", "item_category_name": name, "url": url}
+        ).insert()
 
 
-def _make_item(item_code, item_name, weight, item_category=None, rate=0, url=None, child_items=[]):
-    if frappe.db.exists('Item', item_code):
-        doc = frappe.get_doc('Item', item_code)
+def _make_item(
+    item_code, item_name, weight, item_category=None, rate=0, url=None, child_items=[]
+):
+    if frappe.db.exists("Item", item_code):
+        doc = frappe.get_doc("Item", item_code)
         doc.item_name = item_name
         categories = [d.item_category for d in doc.item_categories]
         if item_category not in categories:
-            doc.append('item_categories', {'item_category': item_category})
+            doc.append("item_categories", {"item_category": item_category})
         doc.url = url
         doc.rate = rate
         doc.weight = weight
         if child_items and len(child_items) > 0:
-            cur_child_items = [{'item_code': d.item_code,
-                                'qty': d.qty} for d in doc.child_items]
-            new_child_items = [{'item_code': d['item_code'],
-                                'qty': d['qty']} for d in child_items]
+            cur_child_items = [
+                {"item_code": d.item_code, "qty": d.qty} for d in doc.child_items
+            ]
+            new_child_items = [
+                {"item_code": d["item_code"], "qty": d["qty"]} for d in child_items
+            ]
             if len([d for d in cur_child_items if d not in new_child_items]) > 0:
                 doc.child_items = []
-                doc.extend('child_items', child_items)
+                doc.extend("child_items", child_items)
         doc.save()
     else:
-        doc = frappe.get_doc({
-            'doctype': 'Item',
-            'item_code': item_code,
-            'item_name': item_name,
-            'url': url,
-            'rate': rate,
-            'weight': weight,
-            'child_items': child_items
-        })
+        doc = frappe.get_doc(
+            {
+                "doctype": "Item",
+                "item_code": item_code,
+                "item_name": item_name,
+                "url": url,
+                "rate": rate,
+                "weight": weight,
+                "child_items": child_items,
+            }
+        )
         if item_category:
-            doc.append('item_categories', {'item_category': item_category})
+            doc.append("item_categories", {"item_category": item_category})
         doc.insert()
     return doc

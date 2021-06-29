@@ -4,11 +4,12 @@
 
 {% block page_content %}
 <style>
-	input[type=number]::-webkit-inner-spin-button, 
-	input[type=number]::-webkit-outer-spin-button { 
+	input[type=number]::-webkit-inner-spin-button,
+	input[type=number]::-webkit-outer-spin-button {
 		-webkit-appearance: none;
 	}
-	.qty{
+
+	.qty {
 		max-width: 2rem;
 		border-width: 0 0;
 		font-size: 1rem;
@@ -34,9 +35,11 @@
 					{{ item_description or '<i class="text-muted">No description</i>' }}
 				</p>
 				<div class="mb-2">
-					<button onclick="this.parentNode.querySelector('input[type=number]').stepDown()" class="minus btn btn-light btn-sm">-</button>
+					<button onclick="this.parentNode.querySelector('input[type=number]').stepDown()"
+						class="minus btn btn-light btn-sm">-</button>
 					<input class="qty" min="1" value="1" type="number">
-					<button onclick="this.parentNode.querySelector('input[type=number]').stepUp()" class="plus btn btn-light btn-sm">+</button>
+					<button onclick="this.parentNode.querySelector('input[type=number]').stepUp()"
+						class="plus btn btn-light btn-sm">+</button>
 				</div>
 				<h3>PRICE: ₹ {{ rate }}</h3>
 				<button data-item-name='{{ name }}' class="add-to-cart btn btn-danger mt-3">Add to Cart</button>
@@ -52,7 +55,7 @@
 <script type="text/javascript" src="/assets/js/control.min.js"></script>
 <script type="text/javascript" src="/assets/js/dialog.min.js"></script>
 <script type="text/javascript" src="/assets/js/bootstrap-4-web.min.js"></script>
-<script> {% include "comfort/comfort/doctype/item/templates/item.js" %} </script>
+<script> {% include "comfort/comfort/doctype/item/templates/item.js" %}</script>
 {% endblock %}
 
 <!-- this is a sample default web page template -->

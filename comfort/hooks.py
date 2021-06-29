@@ -7,7 +7,7 @@ app_color = "grey"
 app_email = "levwint@gmail.com"
 app_license = "MIT"
 
-fixtures = ['List View Settings']
+fixtures = ["List View Settings"]
 
 # Includes in <head>
 # ------------------
@@ -44,7 +44,7 @@ app_include_js = "/assets/comfort/js/index.js"
 
 # website user home page (by Role)
 # role_home_page = {
-#	"Role": "home_page"
+# 	"Role": "home_page"
 # }
 
 # Generators
@@ -94,7 +94,7 @@ app_include_js = "/assets/comfort/js/index.js"
 # 		"on_update": "method",
 # 		"on_cancel": "method",
 # 		"on_trash": "method"
-#	}
+# 	}
 # }
 
 # Scheduled Tasks
@@ -161,9 +161,7 @@ user_data_fields = [
         "doctype": "{doctype_3}",
         "strict": False,
     },
-    {
-        "doctype": "{doctype_4}"
-    }
+    {"doctype": "{doctype_4}"},
 ]
 
 # Authentication and authorization
@@ -173,4 +171,4 @@ user_data_fields = [
 # 	"comfort.auth.validate"
 # ]
 
-treeviews = ['Account']
+treeviews = ["Account"]

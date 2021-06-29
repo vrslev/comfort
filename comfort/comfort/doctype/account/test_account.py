@@ -4,15 +4,18 @@ import frappe
 
 
 class TestAccount(unittest.TestCase):
-
     def test_account_created(self):
-        self.assertTrue(create_account('_Test Company',
-                        'SBI - _C', 'Asset', 'Bank', 'Bank Accounts - _C'))
+        self.assertTrue(
+            create_account(
+                "_Test Company", "SBI - _C", "Asset", "Bank", "Bank Accounts - _C"
+            )
+        )
 
 
 def create_account(company, account_name, root_type, account_type, parent_account):
     account = frappe.db.get_value(
-        'Account', filters={'account_name': account_name, "company": company})
+        "Account", filters={"account_name": account_name, "company": company}
+    )
     if account:
         return account
     else:

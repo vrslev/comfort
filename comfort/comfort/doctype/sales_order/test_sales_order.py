@@ -6,12 +6,11 @@ from frappe.utils import flt, nowdate
 
 
 class TestSalesOrder(unittest.TestCase):
-
     def setUp(self):
-        create_company('_Test Company')
+        create_company("_Test Company")
 
     def test_sales_order_creation(self):
-        so = make_sales_order('Poco F2', 10, 'Rohan', True, False)
+        so = make_sales_order("Poco F2", 10, "Rohan", True, False)
         self.assertTrue(get_sales_order(so.name))
         items_quantity, items_amount = 0, 0
         for item in so.items:
@@ -21,10 +20,10 @@ class TestSalesOrder(unittest.TestCase):
         self.assertEqual(so.total_amount, items_amount)
 
     def test_sales_order_validation(self):
-        so = make_sales_order('Poco F2', -10, 'Rohan', False, False)
+        so = make_sales_order("Poco F2", -10, "Rohan", False, False)
         self.assertRaises(frappe.exceptions.ValidationError, so.insert)
 
-        so = make_sales_order('Poco F2', 0, 'Rohan', False, False)
+        so = make_sales_order("Poco F2", 0, "Rohan", False, False)
         self.assertRaises(frappe.exceptions.ValidationError, so.insert)
 
 
@@ -32,13 +31,8 @@ def make_sales_order(item_name, qty, customer, save=True, submit=False):
     so = frappe.new_doc("Sales Order")
     so.customer = customer
     so.posting_date = nowdate()
-    so.company = '_Test Company'
-    so.set("items", [
-        {
-            "item": item_name,
-            "qty": qty
-        }
-    ])
+    so.company = "_Test Company"
+    so.set("items", [{"item": item_name, "qty": qty}])
 
     if save or submit:
         so.insert()
@@ -49,9 +43,13 @@ def make_sales_order(item_name, qty, customer, save=True, submit=False):
 
 
 def get_sales_order(name):
-    return frappe.db.sql(""" SELECT
+    return frappe.db.sql(
+        """ SELECT
 					*
 				FROM
 					`tabSales Order`
 				WHERE
-					name=%s """, name, as_dict=1)
+					name=%s """,
+        name,
+        as_dict=1,
+    )

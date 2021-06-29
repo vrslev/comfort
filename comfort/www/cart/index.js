@@ -6,7 +6,7 @@ frappe.ready(function () {
 			primary_action: {
 				'label': 'Proceed',
 				action() {
-					var si = $(e.currentTarget).data('buy-item')
+					var si = $(e.currentTarget).data('buy-item');
 					frappe.call({
 						method: "comfort.comfort.doctype.sales_invoice.sales_invoice.update_sales_invoice",
 						args: {
@@ -17,16 +17,16 @@ frappe.ready(function () {
 						},
 						callback: (r) => {
 							$(e.currentTarget).prop('disabled', false);
-							window.location.reload()
+							window.location.reload();
 							frappe.msgprint({
 								title: 'Success',
 								indicator: 'green',
 								message: `<h6>Invoice: ${si}</h6><p>Thank You for shopping :)</p>`
 							});
 						}
-					})
+					});
 				}
 			}
-		})
-	})
-})
+		});
+	});
+});

@@ -1,11 +1,11 @@
-
+# fmt: off
 import frappe
 from frappe import _
 from frappe.utils.nestedset import rebuild_tree
 from six import iteritems
 
 
-def create_charts(company, abbr):
+def create_charts(company, abbr): 
 		chart = {
 			_("Application of Funds (Assets)"): {
 				_("Current Assets"): {
