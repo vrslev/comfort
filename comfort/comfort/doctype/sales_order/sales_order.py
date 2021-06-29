@@ -211,9 +211,7 @@ class SalesOrder(Document):
         make_reverse_gl_entry(self.doctype, self.name, 'Delivery')
         make_reverse_gl_entry(self.doctype, self.name, 'Invoice')
 
-        self.db_set('paid_amount', 0)
-        self.db_set('per_paid', 0)
-        self.set_pending_amount()
+        self.set_paid_and_pending_per_amount(-self.paid_amount)
 
         self.db_set('payment_status', '')
         self.db_set('delivery_status', '')
