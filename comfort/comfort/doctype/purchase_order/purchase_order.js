@@ -20,6 +20,9 @@ comfort.IkeaCartController = frappe.ui.form.Controller.extend({
 				}
 			};
 		});
+		this.frm.fields_dict.sales_orders.grid
+			.get_docfield('sales_order_name')
+			.only_select = 1;
 	},
 
 	onload_post_render() {
@@ -68,11 +71,11 @@ comfort.IkeaCartController = frappe.ui.form.Controller.extend({
 						frappe.show_alert({
 							message: __('Purchase Order completed'),
 							indicator: 'green'
-						})
-						this.frm.refresh()
+						});
+						this.frm.refresh();
 					}
-				})
-			})
+				});
+			});
 		}
 
 		this.render_unavailable_items_buttons();
@@ -143,7 +146,7 @@ comfort.IkeaCartController = frappe.ui.form.Controller.extend({
 					callback: (res) => {
 						if (res.message) {
 							var args = res.message;
-							args.purchase_id = purchase_id
+							args.purchase_id = purchase_id;
 
 							if (!res.message.purchase_info_loaded) {
 								frappe.prompt({
@@ -152,17 +155,17 @@ comfort.IkeaCartController = frappe.ui.form.Controller.extend({
 									fieldtype: 'Currency',
 									reqd: 1
 								}, ({ delivery_cost }) => {
-									args.delivery_cost = delivery_cost
+									args.delivery_cost = delivery_cost;
 									cur_frm.call({
 										method: 'before_submit_events',
 										doc: cur_frm.doc,
 										args: args,
 										freeze: 1,
 										callback: () => {
-											cur_frm.reload_doc()
-											resolve()
+											cur_frm.reload_doc();
+											resolve();
 										}
-									})
+									});
 								});
 							} else {
 								cur_frm.call({
@@ -171,10 +174,10 @@ comfort.IkeaCartController = frappe.ui.form.Controller.extend({
 									args: args,
 									freeze: 1,
 									callback: () => {
-										cur_frm.reload_doc()
-										resolve()
+										cur_frm.reload_doc();
+										resolve();
 									}
-								})
+								});
 							}
 						}
 					}
