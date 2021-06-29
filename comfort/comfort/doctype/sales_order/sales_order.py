@@ -277,3 +277,8 @@ def calculate_commission(items_cost, commission=None):
         'commission': commission,
         'margin': margin,
     }
+
+@frappe.whitelist()
+def get_sales_orders_in_purchase_order():
+    return [d.sales_order_name for d in \
+        frappe.get_all('Purchase Order Sales Order', 'sales_order_name')]
