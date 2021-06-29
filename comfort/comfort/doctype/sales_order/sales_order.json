@@ -91,7 +91,6 @@
   {
    "fieldname": "amended_from",
    "fieldtype": "Link",
-   "in_standard_filter": 1,
    "label": "Amended From",
    "no_copy": 1,
    "options": "Sales Order",
@@ -256,7 +255,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-06-29 00:49:54.127582",
+ "modified": "2021-06-29 04:22:38.899072",
  "modified_by": "Administrator",
  "module": "Comfort",
  "name": "Sales Order",

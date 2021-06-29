@@ -1,5 +1,9 @@
+// TODO: Ask if paid to bank or cash
 frappe.ui.form.on('Sales Order', {
-	// TODO: Ask if paid to bank or cash
+	setup(frm) {
+		frm.page.sidebar.hide();
+	},
+	
 	onload_post_render(frm) {
 		frm.fields_dict.items.$wrapper
 			.unbind('paste')

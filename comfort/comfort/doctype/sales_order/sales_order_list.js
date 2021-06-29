@@ -2,7 +2,8 @@ frappe.listview_settings['Sales Order'] = {
 	onload(list) {
 		substitute_status_colours();
 		add_not_in_po_check(list);
-	},
+		list.page.sidebar.remove();
+	}
 };
 
 
