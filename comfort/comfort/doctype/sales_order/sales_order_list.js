@@ -20,7 +20,8 @@ function substitute_status_colours() {
 			"Unpaid": "red",
 			"Partially Paid": "orange",
 			"Paid": "green",
-			"Overpaid": "orange"
+			"Overpaid": "orange",
+			"": " "
 		};
 		if (colors[text]) {
 			return colors[text];
