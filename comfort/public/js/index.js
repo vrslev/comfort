@@ -38,3 +38,9 @@ frappe.form.link_formatters['Item'] = (value, doc) => {
 		return value;
 	}
 };
+
+frappe.ui.form.ControlLink = frappe.ui.form.ControlLink.extend({
+	get_filter_description() {
+		return;
+	}
+});
