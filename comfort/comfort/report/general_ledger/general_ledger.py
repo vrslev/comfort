@@ -104,9 +104,6 @@ def get_gl_entries(filters):
 def get_conditions(filters):
     conditions = []
 
-    if filters.get("company"):
-        conditions.append("company=%(company)s")
-
     if filters.get("account"):
         conditions.append("account=%(account)s")
 
