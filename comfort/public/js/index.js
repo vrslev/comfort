@@ -1,6 +1,6 @@
 frappe.provide('comfort');
 
-comfort.fetch_items = (item_codes, force_update=true, download_images=true) => {
+comfort.fetch_items = (item_codes, force_update = true, download_images = true) => {
 	var promise = new Promise(resolve => {
 		let isResolved = false;
 		frappe.call({
@@ -26,4 +26,15 @@ comfort.fetch_items = (item_codes, force_update=true, download_images=true) => {
 		}, 1000);
 	});
 	return promise;
+};
+
+// From ERPNext
+frappe.form.link_formatters['Item'] = (value, doc) => {
+	if (doc && value && doc.item_name && doc.item_name !== value && doc.item_code === value) {
+		return value + ': ' + doc.item_name;
+	} else if (!value && doc.doctype && doc.item_name) {
+		return doc.item_name;
+	} else {
+		return value;
+	}
 };

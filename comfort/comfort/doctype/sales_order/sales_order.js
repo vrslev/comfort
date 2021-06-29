@@ -108,8 +108,9 @@ frappe.ui.form.on("Sales Order Item", {
 	item_code(frm, cdt, cdn) {
 		var doc = frappe.get_doc(cdt, cdn);
 		if (doc.item_code) {
-			frappe.db.get_value('Item', doc.item_code, ['rate', 'weight']).then(r => {
+			frappe.db.get_value('Item', doc.item_code, ['item_name', 'rate', 'weight']).then(r => {
 				frappe.model.set_value(cdt, cdn, 'qty', 1);
+				frappe.model.set_value(cdt, cdn, 'item_name', r.message.item_name);
 				frappe.model.set_value(cdt, cdn, 'rate', r.message.rate);
 				frappe.model.set_value(cdt, cdn, 'weight', r.message.weight);
 			});
@@ -190,8 +191,9 @@ async function quick_add_items(text) {
 			let cdt = doc.doctype;
 			let cdn = doc.name;
 
-			return frappe.db.get_value('Item', doc.item_code, ['rate', 'weight']).then(r => {
+			return frappe.db.get_value('Item', doc.item_code, ['item_name', 'rate', 'weight']).then(r => {
 				doc.qty = 1;
+				doc.item_name = r.message.item_name;
 				doc.rate = r.message.rate;
 				doc.weight = r.message.weight;
 
