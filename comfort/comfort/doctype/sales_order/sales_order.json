@@ -57,7 +57,6 @@
    "fieldtype": "Section Break"
   },
   {
-   "allow_bulk_edit": 1,
    "fieldname": "items",
    "fieldtype": "Table",
    "label": "Items",
@@ -255,7 +254,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-06-29 04:22:38.899072",
+ "modified": "2021-06-29 06:11:07.522868",
  "modified_by": "Administrator",
  "module": "Comfort",
  "name": "Sales Order",
