@@ -1,0 +1,187 @@
+{
+ "actions": [],
+ "autoname": "RE-.YYYY.-.###",
+ "creation": "2021-06-29 06:19:12.148345",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "voucher_section",
+  "voucher_type",
+  "column_break_3",
+  "voucher_no",
+  "return_section",
+  "money_to_clients",
+  "items_from_clients",
+  "column_break_9",
+  "money_from_supplier",
+  "items_to_supplier",
+  "section_break_7",
+  "split_combinations",
+  "items",
+  "section_break_16",
+  "amount_to_pay",
+  "column_break_16",
+  "amount_to_receive",
+  "section_break_17",
+  "posting_date",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "default": "Sales Order",
+   "fieldname": "voucher_type",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Voucher Type",
+   "options": "DocType",
+   "read_only_depends_on": "items",
+   "reqd": 1
+  },
+  {
+   "fieldname": "voucher_no",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "Voucher No",
+   "options": "voucher_type",
+   "read_only_depends_on": "items",
+   "reqd": 1
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Items",
+   "mandatory_depends_on": "eval:doc.items_from_clients || doc.items_to_supplier",
+   "options": "Return Item"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Return",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "voucher_section",
+   "fieldtype": "Section Break",
+   "label": "Voucher"
+  },
+  {
+   "depends_on": "eval:doc.items_from_clients || doc.items_to_supplier",
+   "fieldname": "section_break_7",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "split_combinations",
+   "fieldtype": "Check",
+   "label": "Split Combinations"
+  },
+  {
+   "default": "Today",
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Posting Date",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "money_to_clients",
+   "fieldtype": "Check",
+   "label": "Money to clients"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.voucher_type == 'Purchase Order'",
+   "fieldname": "money_from_supplier",
+   "fieldtype": "Check",
+   "label": "Money from supplier"
+  },
+  {
+   "default": "0",
+   "fieldname": "items_from_clients",
+   "fieldtype": "Check",
+   "label": "Items from clients"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.voucher_type == 'Purchase Order'",
+   "fieldname": "items_to_supplier",
+   "fieldtype": "Check",
+   "label": "Items to supplier"
+  },
+  {
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "depends_on": "money_to_clients",
+   "fieldname": "amount_to_pay",
+   "fieldtype": "Currency",
+   "label": "Amount to Pay",
+   "mandatory_depends_on": "money_to_clients",
+   "precision": "0"
+  },
+  {
+   "depends_on": "money_from_supplier",
+   "fieldname": "amount_to_receive",
+   "fieldtype": "Currency",
+   "label": "Amount to Receive",
+   "mandatory_depends_on": "money_from_supplier",
+   "precision": "0"
+  },
+  {
+   "fieldname": "return_section",
+   "fieldtype": "Section Break",
+   "label": "Return"
+  },
+  {
+   "depends_on": "eval:doc.money_from_supplier || doc.money_to_clients",
+   "fieldname": "section_break_16",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "section_break_17",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_16",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2021-07-02 05:07:15.433643",
+ "modified_by": "Administrator",
+ "module": "Comfort",
+ "name": "Return",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "search_fields": "voucher_no",
+ "show_name_in_global_search": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
