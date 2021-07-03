@@ -10,16 +10,41 @@ class SalesOrder(Document):
     # TODO: Services
     # TODO: Hide button "DELIVERED" when PO not recevied yet
     # TODO: Make GL Entries to all kinds of stuff
-    def validate(self):
-        self.validate_quantity()
+    # TODO: Calculate quantity by child items (by package)
+    # TODO: Automatically allocate GL Entries without voucher (so return could work)
+    def validate(self):  # TODO: Validate Items length == 0
+        self.merge_same_items()
+        self.delete_empty_items()
         self.calculate()
         self.set_child_items()
         self.set_statuses()
 
-    def validate_quantity(self):
-        for item in self.items:
-            if item.qty <= 0:
-                frappe.throw("One or more quantity is required for each product")
+    def merge_same_items(self):  # TODO: Test this
+        items_map = {}
+        for idx, item in enumerate(self.items):
+            items_map.setdefault(item.item_code, []).append(idx)
+
+        to_remove = []
+        for value in items_map.values():
+            if len(value) > 1:
+                full_qty = 0
+                for d in value:
+                    full_qty += self.items[d].qty
+                self.items[value[0]].qty = full_qty
+                for d in value[1:]:
+                    to_remove.append(self.items[d])
+
+        for d in to_remove:
+            self.items.remove(d)
+
+    def delete_empty_items(self):
+        to_remove = []
+        for d in self.items:
+            if d.qty <= 0:
+                to_remove.append(d)
+
+        for d in to_remove:
+            self.items.remove(d)
 
     def calculate(self):
         self.set_item_rate_amount()
@@ -65,6 +90,8 @@ class SalesOrder(Document):
 
     def set_child_items(self):
         self.child_items = []
+        if len(self.items) == 0:
+            return
 
         items_to_qty_map = {}
         prepared_for_query = []
@@ -221,6 +248,42 @@ class SalesOrder(Document):
 
         self.db_set("payment_status", "")
         self.db_set("delivery_status", "")
+
+    @frappe.whitelist()
+    def split_combinations(self, combos_to_split, save):
+
+        selected_child_items = [
+            d for d in self.child_items if d.parent_item_code in combos_to_split
+        ]
+
+        to_remove = []
+        for d in self.items:
+            if d.item_code in combos_to_split:
+                to_remove.append(d)
+
+        for d in to_remove:
+            self.items.remove(d)
+
+        for d in selected_child_items:
+            self.append(
+                "items",
+                {
+                    "item_code": d.item_code,
+                    "item_name": d.item_name,
+                    "qty": d.qty,
+                },
+            )
+
+        for d in combos_to_split:
+            child = frappe.get_doc(
+                "Sales Order Item", {"parent": self.name, "item_code": d}
+            )
+            if child.docstatus == 1:
+                child.cancel()
+            child.delete()
+
+        if save:
+            self.save()
 
 
 CONDITIONS = [

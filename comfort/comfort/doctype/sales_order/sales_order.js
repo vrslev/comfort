@@ -53,6 +53,71 @@ frappe.ui.form.on('Sales Order', {
 				});
 			}).removeClass('btn-default').addClass('btn-primary');
 		}
+
+		if (frm.doc.docstatus == 0 && frm.doc.child_items && frm.doc.child_items.length > 0) {
+			frm.add_custom_button(__('Split Combinations'), () => {
+				const fields = [{
+					fieldtype: 'Link',
+					fieldname: "item_code",
+					options: 'Item',
+					in_list_view: 1,
+					label: __('Item Code')
+				}];
+
+				var dialog = new frappe.ui.Dialog({
+					title: __("Split Combinations"),
+					fields: [{
+						fieldname: "combinations",
+						fieldtype: "Table",
+						label: "Combinations",
+						cannot_add_rows: true,
+						size: 'large',
+						reqd: 1,
+						data: [],
+						fields: fields
+					}],
+					primary_action: () => {
+						let selected = dialog.fields_dict.combinations.grid.get_selected_children();
+						selected = selected.filter(d => d.__checked);
+						selected = selected.map(d => d.item_code);
+						frm.call({
+							doc: frm.doc,
+							method: 'split_combinations',
+							freeze: 1,
+							args: {
+								combos_to_split: selected,
+								save: true
+							}
+						});
+						dialog.hide();
+					},
+					primary_action_label: __('Save')
+				});
+
+				var parent_items = [];
+				frm.doc.child_items.forEach(d => {
+					parent_items.push(d.parent_item_code);
+				});
+				frm.doc.items.forEach(d => {
+					if (parent_items.includes(d.item_code)) {
+						dialog.fields_dict.combinations.df.data.push({
+							"name": d.name,
+							"item_code": d.item_code,
+							"item_name": d.item_name
+						});
+					}
+				});
+				dialog.fields_dict.combinations.grid.refresh();
+				if (!frm.doc.child_items || frm.doc.child_items.length == 0 || dialog.fields_dict.combinations.grid.data.length == 0) {
+					frappe.msgprint('В заказе нет комбинаций');
+					return;
+				}
+
+				dialog.fields_dict.combinations.grid.display_status = 'Read';
+				dialog.fields_dict.combinations.grid.grid_buttons.hide();
+				dialog.show();
+			});
+		}
 	},
 
 	validate(frm) {
