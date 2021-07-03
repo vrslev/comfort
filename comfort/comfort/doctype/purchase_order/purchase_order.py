@@ -1,5 +1,3 @@
-# pylint: disable=no-member
-# pylint: disable=access-member-before-definition
 import re
 
 import frappe
@@ -20,8 +18,8 @@ from ikea_api.errors import NoDeliveryOptionsAvailableError, WrongItemCodeError
 from ikea_api_parser import DeliveryOptions, PurchaseHistory, PurchaseInfo
 
 # TODO: Validate and reset status
+# TODO: Set Sales Order status
 # TODO: Create SERVICES Account
-# TODO: Accounts not applying (because of Defaults)
 
 
 class PurchaseOrder(Document):
@@ -92,7 +90,7 @@ class PurchaseOrder(Document):
             )
             d.total = total if status != 2 else 0
 
-    def calculate_totals(self):  # TODO: Refactor
+    def calculate_totals(self):
         (
             self.total_weight,
             self.total_amount,
@@ -354,12 +352,14 @@ class IkeaCartUtils:
         self.authorized_token = settings.authorized_token
 
     def get_token(self, authorize=False):
+        from datetime import datetime
+
         doc = frappe.get_single("Ikea Cart Settings")
         if not authorize:
-            if (
-                not self.guest_token
-                or get_datetime(doc.guest_token_expiration_time) <= now_datetime()
-            ):
+            guest_token_expiration_time: datetime = get_datetime(
+                doc.guest_token_expiration_time
+            )
+            if not self.guest_token or guest_token_expiration_time <= now_datetime():
                 self.guest_token = get_guest_token()
                 doc.guest_token = self.guest_token
                 doc.guest_token_expiration_time = add_to_date(None, hours=720)
@@ -367,9 +367,12 @@ class IkeaCartUtils:
                 frappe.db.commit()
             return self.guest_token
         else:
+            authorized_token_expiration_time: datetime = get_datetime(
+                doc.authorized_token_expiration_time
+            )
             if (
                 not self.authorized_token
-                or get_datetime(doc.authorized_token_expiration_time) <= now_datetime()
+                or authorized_token_expiration_time <= now_datetime()
             ):
                 if not self.username and not self.password:
                     frappe.throw("Введите логин и пароль в настройках")

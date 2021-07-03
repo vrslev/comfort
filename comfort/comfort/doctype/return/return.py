@@ -234,7 +234,7 @@ class Return(Document):
         )
         make_gl_entry(self, credit_to, self.amount_to_receive, 0, "Delivery")
 
-    def make_sales_invoice_gl_entries(self):  # TODO: Perfomance
+    def make_sales_invoice_gl_entries(self):
         if not self.money_to_clients:
             return
 

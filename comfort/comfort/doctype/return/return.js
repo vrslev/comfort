@@ -43,7 +43,7 @@ comfort.ReturnController = frappe.ui.form.Controller.extend({
 
 	refresh() {
 		this.frm.set_df_property('voucher_type', 'only_select', 1);
-		this.frm.set_df_property('voucher_no', 'only_select', 1); // TODO: getting overwritten (transfer to refresh)
+		this.frm.set_df_property('voucher_no', 'only_select', 1);
 		this.setup_add_items_button();
 	},
 

@@ -1,7 +1,7 @@
 import frappe
 from frappe.utils.nestedset import NestedSet
 
-
+# TODO: Instead of company make Account Settings etc
 class Company(NestedSet):
     def on_update(self):
         NestedSet.on_update(self)

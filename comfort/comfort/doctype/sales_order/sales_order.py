@@ -6,10 +6,9 @@ from frappe.model.document import Document
 
 class SalesOrder(Document):
     # TODO: Item query
-    # TODO: Make returns
-    # TODO: Services
+    # TODO: Services account
     # TODO: Hide button "DELIVERED" when PO not recevied yet
-    # TODO: Make GL Entries to all kinds of stuff
+    # TODO: Make GL Entries to all kinds of stuff (separate services, margin and items cost)
     # TODO: Calculate quantity by child items (by package)
     # TODO: Automatically allocate GL Entries without voucher (so return could work)
     def validate(self):  # TODO: Validate Items length == 0
