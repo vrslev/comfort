@@ -21,6 +21,7 @@ from ikea_api_parser import DeliveryOptions, PurchaseHistory, PurchaseInfo
 
 # TODO: Validate and reset status
 # TODO: Create SERVICES Account
+# TODO: Accounts not applying (because of Defaults)
 
 
 class PurchaseOrder(Document):
@@ -61,14 +62,35 @@ class PurchaseOrder(Document):
         self.name = "{0}-{1}".format(this_month, cart_no)
 
     def validate(self):
+        self.validate_empty()
+        self.delete_sales_order_dublicates()
+        self.set_customer_and_total_in_sales_orders()
+        self.calculate_totals()
+
+    def validate_empty(self):
         if not (self.sales_orders or self.items_to_sell):
             frappe.throw("Добавьте заказы или товары на продажу")
-        self.validate_quantity()
 
-    def validate_quantity(self):
-        for item in self.items_to_sell:
-            if item.qty <= 0:
-                frappe.throw("One or more quantity is required for each product")
+    def delete_sales_order_dublicates(self):
+        # TODO: Check if there any IkeaCarts that contains those Sales Orders
+        sales_order_names = list(set([s.sales_order_name for s in self.sales_orders]))
+        sales_orders_no_dublicates = []
+
+        for s in self.sales_orders:
+            if s.sales_order_name in sales_order_names:
+                sales_orders_no_dublicates.append(s)
+                sales_order_names.remove(s.sales_order_name)
+
+        self.sales_orders = sales_orders_no_dublicates
+
+    def set_customer_and_total_in_sales_orders(self):
+        for d in self.sales_orders:
+            d.customer, total, status = frappe.get_value(
+                "Sales Order",
+                d.sales_order_name,
+                ("customer", "total_amount", "docstatus"),
+            )
+            d.total = total if status != 2 else 0
 
     def calculate_totals(self):  # TODO: Refactor
         (
@@ -78,15 +100,22 @@ class PurchaseOrder(Document):
             self.items_to_sell_cost,
         ) = (0, 0, 0, 0)
 
-        for d in self.sales_orders:
-            so_items = frappe.get_all(
-                "Sales Order Item",
-                filters={"parent": d.sales_order_name},
-                fields=["item_code", "qty", "rate", "total_weight"],
-            )
-            for item in so_items:
-                self.sales_order_cost += item.rate * item.qty
-                self.total_weight += item.total_weight
+        so_items = frappe.get_all(
+            "Sales Order Item",
+            filters={
+                "parent": ["in", [d.sales_order_name for d in self.sales_orders]],
+                "docstatus": ["!=", 2],
+            },
+            fields=[
+                f"SUM(qty * rate) AS sales_order_cost",
+                "SUM(total_weight) AS total_weight",
+            ],
+        )[0]
+
+        self.sales_order_cost = (
+            so_items.sales_order_cost if so_items.sales_order_cost else 0
+        )
+        self.total_weight = so_items.total_weight if so_items.total_weight else 0
 
         for d in self.items_to_sell:
             self.items_to_sell_cost += d.rate * d.qty
@@ -95,6 +124,27 @@ class PurchaseOrder(Document):
         self.total_amount = self.sales_order_cost + self.items_to_sell_cost
         if self.delivery_cost:
             self.total_amount += self.delivery_cost
+
+    def before_save(self):
+        self.get_delivery_services()
+
+    def get_delivery_services(self):
+        templated_items = self.get_templated_items_for_api(True)
+        delivery_services = IkeaCartUtils().get_delivery_services(templated_items)
+        self.update(
+            {
+                "delivery_options": delivery_services["options"],
+                "cannot_add_items": as_json(delivery_services["cannot_add"])
+                if delivery_services["cannot_add"]
+                else None,
+            }
+        )
+
+    @frappe.whitelist()
+    def checkout(self):
+        items = self.get_templated_items_for_api(False)
+        u = IkeaCartUtils()
+        return [u.add_items_to_cart_authorized(items)]
 
     def get_templated_items_for_api(self, split_combinations=False):
         all_items = []
@@ -139,42 +189,6 @@ class PurchaseOrder(Document):
             templated_items[d.item_code] += int(d.qty)
 
         return templated_items
-
-    def get_delivery_services(self):
-        templated_items = self.get_templated_items_for_api(True)
-        delivery_services = IkeaCartUtils().get_delivery_services(templated_items)
-        self.update(
-            {
-                "delivery_options": delivery_services["options"],
-                "cannot_add_items": as_json(delivery_services["cannot_add"])
-                if delivery_services["cannot_add"]
-                else None,
-            }
-        )
-
-    def before_save(self):
-        # TODO: Check if there any IkeaCarts that contains those Sales Orders
-        sales_order_names = list(set([s.sales_order_name for s in self.sales_orders]))
-        sales_orders_no_dublicates = []
-
-        for s in self.sales_orders:
-            if s.sales_order_name in sales_order_names:
-                s.customer, s.total = frappe.get_value(
-                    "Sales Order", s.sales_order_name, ("customer", "total_amount")
-                )
-                sales_orders_no_dublicates.append(s)
-                sales_order_names.remove(s.sales_order_name)
-
-        self.sales_orders = sales_orders_no_dublicates
-
-        self.calculate_totals()
-        self.get_delivery_services()
-
-    @frappe.whitelist()
-    def checkout(self):
-        items = self.get_templated_items_for_api(False)
-        u = IkeaCartUtils()
-        return [u.add_items_to_cart_authorized(items)]
 
     def before_submit(self):
         self.delivery_options = []
@@ -225,6 +239,19 @@ class PurchaseOrder(Document):
         self.status = "To Receive"
         self.submit()
 
+    def update_purchased_qty(self):
+        so_items = self.get_sales_order_items_for_bin()
+        for item_code, qty in so_items:
+            bin = frappe.get_doc("Bin", item_code)
+            bin.reserved_purchased += qty
+            bin.save()
+
+        items_to_sell = self.get_items_to_sell_for_bin()
+        for item_code, qty in items_to_sell:
+            bin = frappe.get_doc("Bin", item_code)
+            bin.available_purchased += qty
+            bin.save()
+
     def get_sales_order_items_for_bin(self):
         if not self.sales_orders and len(self.sales_orders) > 0:
             return
@@ -271,19 +298,6 @@ class PurchaseOrder(Document):
                 items_map[d.item_code] = 0
             items_map[d.item_code] += d.qty
         return items_map.items()
-
-    def update_purchased_qty(self):
-        so_items = self.get_sales_order_items_for_bin()
-        for item_code, qty in so_items:
-            bin = frappe.get_doc("Bin", item_code)
-            bin.reserved_purchased += qty
-            bin.save()
-
-        items_to_sell = self.get_items_to_sell_for_bin()
-        for item_code, qty in items_to_sell:
-            bin = frappe.get_doc("Bin", item_code)
-            bin.available_purchased += qty
-            bin.save()
 
     def on_submit(self):
         self.update_purchased_qty()
