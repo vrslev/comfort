@@ -1,13 +1,13 @@
 import frappe
 
 
+# TODO: Is return attribute
 def make_gl_entry(self, account, dr, cr, transaction_type=None):
-    if hasattr("self", "party"):
+    party = None
+    if hasattr(self, "party") and self.get("party"):
         party = self.party
-    elif hasattr("self", "customer"):
+    elif hasattr(self, "customer"):
         party = self.customer
-    else:
-        party = None
 
     gl_entry = frappe.get_doc(
         {
@@ -22,7 +22,7 @@ def make_gl_entry(self, account, dr, cr, transaction_type=None):
             "party": party,
         }
     )
-    gl_entry.insert()
+    gl_entry.submit()
 
 
 def make_reverse_gl_entry(voucher_type=None, voucher_no=None, transaction_type=None):
@@ -58,7 +58,6 @@ def make_reverse_gl_entry(voucher_type=None, voucher_no=None, transaction_type=N
 def make_cancelled_gl_entry(entry):
     gl_entry = frappe.new_doc("GL Entry")
     gl_entry.update(entry)
-    gl_entry.insert()
     gl_entry.submit()
 
 
