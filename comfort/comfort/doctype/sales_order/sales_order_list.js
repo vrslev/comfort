@@ -1,4 +1,14 @@
 frappe.listview_settings['Sales Order'] = {
+	add_fields: ["status"],
+	get_indicator: function (doc) {
+		if (in_list(["Cancelled", "Draft"], doc.status)) {
+			return [__(doc.status), "red"];
+		} else if (doc.status == "In Progress") {
+			return [__(doc.status), "orange"];
+		} else if (doc.status === "Completed") {
+			return [__(doc.status), "green"];
+		}
+	},
 	onload(list) {
 		substitute_status_colours();
 		add_not_in_po_check(list);
