@@ -1,4 +1,5 @@
 // TODO: Ask if paid to bank or cash
+// TODO: Delete current empty row in fetch items
 frappe.ui.form.on('Sales Order', {
 	setup(frm) {
 		frm.page.sidebar.hide();
@@ -25,7 +26,8 @@ frappe.ui.form.on('Sales Order', {
 					label: 'Paid Amount',
 					fieldname: 'paid_amount',
 					fieldtype: 'Currency',
-					options: 'Currency:RUB'
+					precision: "0",
+					default: frm.doc.pending_amount,
 				}, (values) => {
 					frm.call({
 						doc: frm.doc,
@@ -33,7 +35,7 @@ frappe.ui.form.on('Sales Order', {
 						args: {
 							'paid_amount': values.paid_amount
 						},
-						default: frm.doc.pending_amount,
+						
 						callback: () => {
 							frm.reload_doc();
 						}
@@ -42,7 +44,7 @@ frappe.ui.form.on('Sales Order', {
 			}).removeClass('btn-default').addClass('btn-primary');
 		}
 
-		if (frm.doc.docstatus == 1 && frm.doc.delivery_status != 'Delivered') {
+		if (frm.doc.delivery_status == 'To Deliver') {
 			frm.add_custom_button(__('Delivered'), () => {
 				frm.call({
 					doc: frm.doc,
