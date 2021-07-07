@@ -25,6 +25,7 @@
  ],
  "fields": [
   {
+   "default": "Today",
    "fieldname": "posting_date",
    "fieldtype": "Date",
    "in_filter": 1,
@@ -124,7 +125,7 @@
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-06-25 04:30:04.299533",
+ "modified": "2021-07-05 23:55:40.689393",
  "modified_by": "Administrator",
  "module": "Comfort",
  "name": "GL Entry",
