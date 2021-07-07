@@ -11,18 +11,14 @@
   "column_break_3",
   "voucher_no",
   "return_section",
-  "money_to_clients",
-  "items_from_clients",
+  "return_items",
   "column_break_9",
-  "money_from_supplier",
-  "items_to_supplier",
+  "return_money",
   "section_break_7",
   "split_combinations",
   "items",
   "section_break_16",
-  "amount_to_pay",
-  "column_break_16",
-  "amount_to_receive",
+  "amount",
   "section_break_17",
   "posting_date",
   "amended_from"
@@ -51,7 +47,6 @@
    "fieldname": "items",
    "fieldtype": "Table",
    "label": "Items",
-   "mandatory_depends_on": "eval:doc.items_from_clients || doc.items_to_supplier",
    "options": "Return Item"
   },
   {
@@ -74,7 +69,7 @@
    "label": "Voucher"
   },
   {
-   "depends_on": "eval:doc.items_from_clients || doc.items_to_supplier",
+   "depends_on": "return_items",
    "fieldname": "section_break_7",
    "fieldtype": "Section Break"
   },
@@ -92,51 +87,8 @@
    "reqd": 1
   },
   {
-   "default": "0",
-   "fieldname": "money_to_clients",
-   "fieldtype": "Check",
-   "label": "Money to clients"
-  },
-  {
-   "default": "0",
-   "depends_on": "eval:doc.voucher_type == 'Purchase Order'",
-   "fieldname": "money_from_supplier",
-   "fieldtype": "Check",
-   "label": "Money from supplier"
-  },
-  {
-   "default": "0",
-   "fieldname": "items_from_clients",
-   "fieldtype": "Check",
-   "label": "Items from clients"
-  },
-  {
-   "default": "0",
-   "depends_on": "eval:doc.voucher_type == 'Purchase Order'",
-   "fieldname": "items_to_supplier",
-   "fieldtype": "Check",
-   "label": "Items to supplier"
-  },
-  {
    "fieldname": "column_break_9",
    "fieldtype": "Column Break"
-  },
-  {
-   "default": "0",
-   "depends_on": "money_to_clients",
-   "fieldname": "amount_to_pay",
-   "fieldtype": "Currency",
-   "label": "Amount to Pay",
-   "mandatory_depends_on": "money_to_clients",
-   "precision": "0"
-  },
-  {
-   "depends_on": "money_from_supplier",
-   "fieldname": "amount_to_receive",
-   "fieldtype": "Currency",
-   "label": "Amount to Receive",
-   "mandatory_depends_on": "money_from_supplier",
-   "precision": "0"
   },
   {
    "fieldname": "return_section",
@@ -144,7 +96,7 @@
    "label": "Return"
   },
   {
-   "depends_on": "eval:doc.money_from_supplier || doc.money_to_clients",
+   "depends_on": "return_money",
    "fieldname": "section_break_16",
    "fieldtype": "Section Break"
   },
@@ -153,14 +105,30 @@
    "fieldtype": "Section Break"
   },
   {
-   "fieldname": "column_break_16",
-   "fieldtype": "Column Break"
+   "default": "0",
+   "fieldname": "return_items",
+   "fieldtype": "Check",
+   "label": "Items"
+  },
+  {
+   "default": "0",
+   "fieldname": "return_money",
+   "fieldtype": "Check",
+   "label": "Money"
+  },
+  {
+   "default": "0",
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "label": "Amount",
+   "mandatory_depends_on": "money_to_clients",
+   "precision": "0"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-07-02 05:07:15.433643",
+ "modified": "2021-07-05 07:45:51.736678",
  "modified_by": "Administrator",
  "module": "Comfort",
  "name": "Return",

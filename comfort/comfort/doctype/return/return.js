@@ -157,12 +157,6 @@ comfort.ReturnController = frappe.ui.form.Controller.extend({
 		}
 	},
 
-	items_to_supplier(doc) {
-		if (doc.items_to_supplier) {
-			this.frm.set_value('items_from_clients', true);
-		}
-	},
-
 });
 
 function toggle_sales_order_column() {

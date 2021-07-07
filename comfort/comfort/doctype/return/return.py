@@ -1,6 +1,11 @@
 import frappe
+from comfort.comfort.doctype.purchase_order.purchase_order import PurchaseOrder
 from comfort.comfort.doctype.sales_order.sales_order import calculate_commission
-from comfort.comfort.general_ledger import make_gl_entry
+from comfort.comfort.general_ledger import (
+    get_default_accounts,
+    get_paid_amount,
+    make_gl_entries,
+)
 from frappe import _
 from frappe.model.document import Document
 
@@ -107,23 +112,17 @@ class Return(Document):
             self.voucher_type, self.voucher_no, "commission"
         )
         commission, margin = calculate_commission(items_cost, commission).values()
-        self.amount_to_pay = items_cost + margin
-        self.amount_to_receive = items_cost
+
+        if self.voucher_type == "Sales Order":
+            self.amount = items_cost + margin
+        else:
+            self.amount = items_cost
 
     def validate(self):
-        if self.money_to_clients and (
-            not self.get("amount_to_pay") or self.amount_to_pay == 0
-        ):
-            frappe.throw(_("Set Amount to Pay"))
+        if self.return_money and (not self.get("amount") or self.amount == 0):
+            frappe.throw(_("Set Amount"))
 
-        if self.money_from_supplier and (
-            not self.get("amount_to_receive") or self.amount_to_receive == 0
-        ):
-            frappe.throw(_("Set Amount to Receive"))
-
-        if (self.items_from_clients or self.items_to_supplier) and (
-            not self.get("items") or len(self.items) == 0
-        ):
+        if self.return_items and (not self.get("items") or len(self.items) == 0):
             frappe.throw(_("Set Items"))
 
         for d in self.items:
@@ -132,165 +131,259 @@ class Return(Document):
                     _("No reference name or doctype for item: {0}").format(d.item_code)
                 )
 
-        if self.items_to_supplier:
-            self.items_from_clients = True
+        # if self.voucher_type == "Sales Order" and self.return_items:
+        #     self.return_money = True
 
     def before_submit(self):
-        self.delete_items_from_sales_orders()
-        self.delete_items_from_purchase_order()
+        self.created_sales_orders = []
+        is_po = self.voucher_type == "Purchase Order"
 
-        self.make_purchase_invoice_gl_entries()
-        self.make_purchase_delivery_gl_entries()
-
-        self.make_sales_invoice_gl_entries()
-        self.make_sales_delivery_gl_entries()
+        if is_po:
+            self.make_purchase_return()
+        else:
+            items = self.get_sales_order_item_map()[self.voucher_no].values()
+            amount = self.get_items_amount(items)
+            self.make_sales_return(self.voucher_no, items, amount, False)
 
         self.update_bin()
 
-    def delete_items_from_sales_orders(self):
-        if not self.items_from_clients:
+    def make_purchase_return(self):
+        if self.voucher_type != "Purchase Order":
             return
 
+        is_received = (
+            frappe.get_value(self.voucher_type, self.voucher_no, "status")
+            == "Completed"
+        )
+
+        # Compensation
+        if self.return_money and not self.return_items:
+            accounts = ["purchase_compensations", "cash"]
+
+        elif self.return_money and self.return_items:
+            accounts = [
+                "inventory"
+                if is_received  # Defect
+                else "prepaid_inventory",  # Initiated by supplier
+                "cash",
+            ]
+            self.return_sales_orders()
+            self.update_purchase_order()
+
+        elif not self.return_money and self.return_items:
+            if is_received:  # Defect
+                accounts = ["inventory", "prepaid_inventory"]
+                self.return_sales_orders()
+                self.update_purchase_order()
+                self.create_new_paid_purchase_order()
+
+            else:
+                frappe.throw(
+                    _(
+                        "Cannot return items without money when Purchase Order is not received"
+                    )
+                )
+        else:
+            frappe.throw("")
+
+        accounts = get_default_accounts(accounts)
+
+        make_gl_entries(
+            frappe._dict({"doctype": self.voucher_type, "name": self.voucher_no}),
+            accounts[0],
+            accounts[1],
+            self.amount,
+        )
+
+    def get_sales_order_item_map(self):
         orders_to_items = {}
         for d in self.items:
             if d.sales_order not in orders_to_items:
                 orders_to_items[d.sales_order] = {}
-            if d.item_code in orders_to_items[d.sales_order]:
-                orders_to_items[d.sales_order][d.item_code].qty += d.qty
-            orders_to_items[d.sales_order][d.item_code] = d
+            if d.item_code not in orders_to_items[d.sales_order]:
+                orders_to_items[d.sales_order][d.item_code] = d
+            orders_to_items[d.sales_order][d.item_code].qty += d.qty
 
+        return orders_to_items
+
+    def get_items_amount(self, items):
+        amount = 0
+        for d in items:
+            amount += d.qty * d.rate
+        return amount
+
+    def return_sales_orders(self):
+        if not self.voucher_type == "Purchase Order":
+            return
+
+        orders_to_items = self.get_sales_order_item_map()
         for order_name, cur_items in orders_to_items.items():
-            doc = frappe.get_doc("Sales Order", order_name)
-            doc.flags.ignore_validate_update_after_submit = True
+            items = cur_items.values()
+            amount = self.get_items_amount(items)
+            self.make_sales_return(order_name, items, amount, True)
 
-            child_item_names = [
-                d.reference_name
-                for d in cur_items.values()
-                if d.reference_doctype == child_item_doctype
-            ]
+    def make_sales_return(self, order_name, items, amount, from_purchase_return=False):
+        doc = frappe.get_doc("Sales Order", order_name)
 
-            doc.split_combinations(
-                [
-                    d.parent_item_code
-                    for d in doc.child_items
-                    if d.name in child_item_names
-                ],
-                save=False,
-            )
+        if doc.docstatus == 2:
+            return
 
-            item_codes = list(cur_items.keys())
-            for d in doc.items:
-                if d.item_code in item_codes:
-                    d.qty -= cur_items[d.item_code].qty
+        def validate_paid_amt():
+            paid_amount = get_paid_amount(doc.doctype, doc.name)
+            if amount > paid_amount:
+                frappe.throw(
+                    _(f"Cannot return Amount greater than Paid Amount ({doc.name})")
+                )
 
-            doc.validate()
-            if not doc.items or len(doc.items) == 0:
-                doc.reload()
-                doc.flags.ignore_links = True
-                doc.cancel()
+        # Compensation
+        if self.return_money and not self.return_items:
+            validate_paid_amt()
+            accounts = get_default_accounts(["cash", "sales_compensations"])
+            make_gl_entries(doc, accounts[0], accounts[1], amount)
+
+        elif (self.return_money and self.return_items) or from_purchase_return:
+            # Initiated by customer or Purchase Return
+            if doc.delivery_status == "Delivered" or from_purchase_return:
+                validate_paid_amt()
+
+                self.split_order(
+                    doc, items, amount, create_new_doc=from_purchase_return
+                )
+
+                sales_accounts = get_default_accounts(["cash", "sales"])
+                make_gl_entries(doc, sales_accounts[0], sales_accounts[1], amount)
+
+                if doc.service_amount:
+                    delivery_accounts = get_default_accounts(["cash", "delivery"])
+                    make_gl_entries(
+                        doc,
+                        delivery_accounts[0],
+                        delivery_accounts[1],
+                        doc.service_amount,
+                    )
+
+                # TODO: Continue after creating Services table
+                # installation_accounts = get_default_accounts(["cash", "installation"])
+                # make_gl_entries(
+                #     doc, installation_accounts[0], installation_accounts[1], amount
+                # )
+
+                inventory_accounts = get_default_accounts(
+                    ["cost_of_goods_sold", "inventory"]
+                )
+                make_gl_entries(
+                    doc, inventory_accounts[0], inventory_accounts[1], amount
+                )
+
             else:
-                doc.save()
+                frappe.throw(
+                    _(
+                        f"Cannot return items when Sales Order is not delivered: ({doc.name})"
+                    )
+                )
 
-    def delete_items_from_purchase_order(self):
-        if self.voucher_type != "Purchase Order" or not self.items_to_supplier:
-            return
+        else:
+            frappe.throw("")
 
-        doc = frappe.get_doc("Purchase Order", self.voucher_no)
-        doc.flags.ignore_links = True
+    def split_order(self, doc, items, amount, create_new_doc):
+        doc.flags.ignore_validate_update_after_submit = True
+
+        child_item_names = [
+            d.reference_name for d in items if d.reference_doctype == child_item_doctype
+        ]
+        doc.split_combinations(
+            [d.parent_item_code for d in doc.child_items if d.name in child_item_names],
+            save=False,
+        )
+
+        item_codes = []
+        items_map = {}
+        for d in items:
+            if d.item_code not in items_map:
+                items_map[d.item_code] = 0
+            items_map[d.item_code] += d.qty
+
+            item_codes.append(d.item_code)
+
+        items_for_new_order = {}
+
+        for d in doc.items:
+            if d.item_code in item_codes:
+                cur_qty = items_map[d.item_code]
+                d.qty -= cur_qty
+
+                if d.item_code not in items_for_new_order:
+                    items_for_new_order[d.item_code] = 0
+                items_for_new_order[d.item_code] += cur_qty
+
         doc.validate()
-        doc.db_update_all()
+        if not doc.items or len(doc.items) == 0:
+            doc.reload()
+            doc.flags.ignore_links = True
+            doc.cancel()
+        else:
+            doc.edit_commission = True
+            doc.save()
 
-    def make_purchase_invoice_gl_entries(self):
-        if self.voucher_type != "Purchase Order" or not self.money_from_supplier:
+        if create_new_doc:
+            new_doc = frappe.get_doc(
+                {
+                    "doctype": "Sales Order",
+                    "customer": doc.customer,
+                    "items": [
+                        {"item_code": key, "qty": value}
+                        for key, value in items_for_new_order.items()
+                    ],
+                    "commission": doc.commission,
+                    "edit_commission": True,
+                }
+            )
+            new_doc.insert()
+            new_doc.make_invoice_gl_entries(amount)
+            new_doc.save()
+
+            self.created_sales_orders.append(new_doc.name)
+
+    def get_items_for_sales_return(self):
+        items_map = {}
+        for d in self.items:
+            if d.item_code in items_map:
+                items_map[d.item_code].qty += d.qty
+            items_map[d.item_code] = d
+        return items_map.values()
+
+    def update_purchase_order(self):
+        if not (self.voucher_type == "Purchase Order" and self.return_items):
             return
-
-        transaction_type = "Invoice"
-
-        company = frappe.db.get_single_value("Defaults", "default_company")
-
-        expense_account = frappe.db.get_value(
-            "Company", company, "stock_received_but_not_billed"
-        )
 
         doc = frappe.get_doc("Purchase Order", self.voucher_no)
-        make_gl_entry(doc, expense_account, 0, self.amount_to_receive, transaction_type)
+        # doc.flags.ignore_links = True
+        doc.flags.ignore_validate_update_after_submit = True
+        doc.validate()
+        # doc.flags.ignore_links = True
+        doc.save()
 
-        credit_to = frappe.db.get_value("Company", company, "default_bank_account")
-        make_gl_entry(doc, credit_to, self.amount_to_receive, 0, transaction_type)
+        # doc.validate()
+        # doc.db_update_all()
 
-    def make_purchase_delivery_gl_entries(self):
-        if self.voucher_type != "Purchase Order" or not self.items_to_supplier:
+    def create_new_paid_purchase_order(self):
+        if (
+            not hasattr(self, "created_sales_orders")
+            or len(self.created_sales_orders) == 0
+        ):
             return
 
-        company = frappe.db.get_single_value("Defaults", "default_company")
+        doc: PurchaseOrder = frappe.get_doc(
+            {
+                "doctype": "Purchase Order",
+                "sales_orders": [
+                    {"sales_order_name": d} for d in self.created_sales_orders
+                ],
+            }
+        ).insert()
+        doc.make_invoice_gl_entries()
+        doc.save()
+        return doc.name
 
-        expense_account = frappe.db.get_value(
-            "Company", company, "default_inventory_account"
-        )
-        make_gl_entry(self, expense_account, 0, self.amount_to_receive, "Delivery")
-
-        credit_to = frappe.db.get_value(
-            "Company", company, "stock_received_but_not_billed"
-        )
-        make_gl_entry(self, credit_to, self.amount_to_receive, 0, "Delivery")
-
-    def make_sales_invoice_gl_entries(self):
-        if not self.money_to_clients:
-            return
-
-        transaction_type = "Invoice"
-
-        company = frappe.db.get_single_value("Defaults", "default_company")
-
-        income_account = frappe.db.get_value(
-            "Company", company, "default_income_account"
-        )
-        debit_to = frappe.db.get_value("Company", company, "default_bank_account")
-
-        self.sales_order_map = self.get_sales_orders_map_for_gl_entries()
-
-        for doc, amount in self.get_sales_orders_map_for_gl_entries():
-            if doc.docstatus == 1:
-                make_gl_entry(doc, income_account, amount, 0, transaction_type)
-                make_gl_entry(doc, debit_to, 0, amount, transaction_type)
-
-    def make_sales_delivery_gl_entries(self):
-        if not self.items_from_clients:
-            return
-
-        transaction_type = "Delivery"
-
-        company = frappe.db.get_single_value("Defaults", "default_company")
-
-        income_account = frappe.db.get_value(
-            "Company", company, "default_inventory_account"
-        )
-        debit_to = frappe.db.get_value(
-            "Company", company, "default_cost_of_goods_sold_account"
-        )
-
-        if not self.sales_order_map:
-            self.sales_order_map = self.get_sales_orders_map_for_gl_entries()
-
-        for doc, amount in self.sales_order_map:
-            if doc.docstatus == 1:
-                make_gl_entry(doc, income_account, amount, 0, transaction_type)
-                make_gl_entry(doc, debit_to, 0, amount, transaction_type)
-
-    def get_sales_orders_map_for_gl_entries(self):
-        sales_order_amount_map = {}
-        for d in self.items:
-            if not d.sales_order in sales_order_amount_map:
-                sales_order_amount_map[d.sales_order] = 0
-            sales_order_amount_map[d.sales_order] += d.qty * d.rate
-
-        gl_entries_raw = []
-        for order_name, amount in sales_order_amount_map.items():
-            doc: frappe._dict = frappe.get_value(
-                "Sales Order", order_name, ["customer", "docstatus"], as_dict=True
-            )
-            doc.doctype = "Sales Order"
-            doc.name = order_name
-            doc.posting_date = self.posting_date
-            gl_entries_raw.append((doc, amount))
-        return gl_entries_raw
+    def update_bin(self):
+        pass
