@@ -1,9 +1,16 @@
+from comfort.comfort.doctype.bin.bin import update_bin
 import frappe
-from comfort.comfort.general_ledger import make_gl_entry, make_reverse_gl_entry
+from comfort.comfort.general_ledger import (
+    get_default_accounts,
+    get_paid_amount,
+    make_gl_entries,
+    make_reverse_gl_entry,
+)
 from frappe import _
 from frappe.model.document import Document
 
-
+# TODO: Cancel payment and delivery
+# TODO: Updating Delivery status not working
 class SalesOrder(Document):
     # TODO: Item query
     # TODO: Services account
@@ -18,7 +25,7 @@ class SalesOrder(Document):
         self.set_child_items()
         self.set_statuses()
 
-    def merge_same_items(self):  # TODO: Test this
+    def merge_same_items(self):
         items_map = {}
         for idx, item in enumerate(self.items):
             items_map.setdefault(item.item_code, []).append(idx)
@@ -28,7 +35,9 @@ class SalesOrder(Document):
             if len(value) > 1:
                 full_qty = 0
                 for d in value:
-                    full_qty += self.items[d].qty
+                    qty = self.items[d].qty
+                    if qty > 0:
+                        full_qty += qty
                 self.items[value[0]].qty = full_qty
                 for d in value[1:]:
                     to_remove.append(self.items[d])
@@ -39,24 +48,26 @@ class SalesOrder(Document):
     def delete_empty_items(self):
         to_remove = []
         for d in self.items:
-            if d.qty <= 0:
+            if d.qty == 0:
                 to_remove.append(d)
 
         for d in to_remove:
             self.items.remove(d)
 
     def calculate(self):
-        self.set_item_rate_amount()
+        self.set_item_values()
         self.calculate_item_totals()
         self.calculate_commission_and_totals()
         self.set_paid_and_pending_per_amount()
 
-    def set_item_rate_amount(self):
+    def set_item_values(self):
         for d in self.items:
             doc = frappe.get_cached_doc("Item", d.item_code)
+            d.item_name = doc.item_name
             d.rate = doc.rate
-            d.amount = d.rate * d.qty
             d.weight = doc.weight
+
+            d.amount = d.rate * d.qty
             d.total_weight = d.weight * d.qty
 
     def calculate_item_totals(self):
@@ -72,20 +83,18 @@ class SalesOrder(Document):
         else:
             r = calculate_commission(self.items_cost)
 
-        self.margin = r["margin"]
-        self.commission = r["commission"]
-
+        self.update(r)
         self.total_amount = self.items_cost + self.margin - self.discount
 
-    def set_paid_and_pending_per_amount(self, additional_paid_amount=0):
-        self.db_set("paid_amount", self.paid_amount + additional_paid_amount)
+    def set_paid_and_pending_per_amount(self):
+        self.paid_amount = get_paid_amount(self.doctype, self.name)
 
         if int(self.total_amount) == 0:
-            per_paid = 100
+            self.per_paid = 100
         else:
-            per_paid = self.paid_amount / self.total_amount * 100
-        self.db_set("per_paid", per_paid)
-        self.db_set("pending_amount", self.total_amount - self.paid_amount)
+            self.per_paid = self.paid_amount / self.total_amount * 100
+
+        self.pending_amount = self.total_amount - self.paid_amount
 
     def set_child_items(self):
         self.child_items = []
@@ -119,7 +128,7 @@ class SalesOrder(Document):
     def set_statuses(self):
         self.set_delivery_status()
         self.set_payment_status()
-        self.set_status()
+        self.set_document_status()
 
     def set_payment_status(self):
         if self.docstatus == 2:
@@ -136,11 +145,12 @@ class SalesOrder(Document):
         else:
             status = "Unpaid"
 
-        self.db_set("payment_status", status)
+        self.db_set("payment_status", status, update_modified=False)
 
     def set_delivery_status(self):
         if self.docstatus == 2 or self.delivery_status == "Delivered":
             return
+
         status = None
 
         po_name = frappe.get_all(
@@ -150,7 +160,7 @@ class SalesOrder(Document):
         )
         if len(po_name) > 0:
             po_name = po_name[0].parent
-            po_status = frappe.get_cached_value("Purchase Order", po_name, "status")
+            po_status = frappe.get_value("Purchase Order", po_name, "status")
             if po_status == "To Receive":
                 status = "Purchased"
             elif po_status == "Completed":
@@ -159,9 +169,9 @@ class SalesOrder(Document):
         if not status:
             status = "To Purchase"
 
-        self.db_set("delivery_status", status)
+        self.db_set("delivery_status", status, update_modified=False)
 
-    def set_status(self):
+    def set_document_status(self):
         if self.docstatus == 0:
             status = "Draft"
         elif self.docstatus == 1:
@@ -172,84 +182,76 @@ class SalesOrder(Document):
         else:
             status = "Cancelled"
 
-        self.db_set("status", status)
+        self.db_set("status", status, update_modified=False)
 
-    def make_delivery_gl_entries(self):
-        transaction_type = "Delivery"
-        if frappe.db.exists(
-            {
-                "doctype": "GL Entry",
-                "transaction_type": transaction_type,
-                "voucher_type": self.doctype,
-                "voucher_no": self.name,
-            }
-        ):
-            frappe.throw(_("Already marked as delivered"))
-
-        company = frappe.db.get_single_value("Defaults", "default_company")
-
-        income_account = frappe.db.get_value(
-            "Company", company, "default_inventory_account"
-        )
-        make_gl_entry(self, income_account, 0, self.total_amount, transaction_type)
-
-        debit_to = frappe.db.get_value(
-            "Company", company, "default_cost_of_goods_sold_account"
-        )
-        make_gl_entry(self, debit_to, self.total_amount, 0, transaction_type)
-
-    def update_actual_qty(self):
-        items_map = {}
-        for d in self.items:
-            if d.item_code not in items_map:
-                items_map[d.item_code] = 0
-            items_map[d.item_code] += d.qty
-
-        for item_code, qty in items_map.items():
-            bin = frappe.get_doc("Bin", item_code)
-            bin.actual_qty -= qty
-            bin.save()
-
-    @frappe.whitelist()
-    def set_delivered(self):
-        self.make_delivery_gl_entries()
-        self.update_actual_qty()
-        self.db_set("delivery_status", "Delivered")
-
-    def make_invoice_gl_entries(self, paid_amount):
-        transaction_type = "Invoice"
-
-        company = frappe.db.get_single_value("Defaults", "default_company")
-
-        income_account = frappe.db.get_value(
-            "Company", company, "default_income_account"
-        )
-        make_gl_entry(self, income_account, 0, paid_amount, transaction_type)
-
-        debit_to = frappe.db.get_value("Company", company, "default_bank_account")
-        make_gl_entry(self, debit_to, paid_amount, 0, transaction_type)
+    def before_submit(self):
+        self.edit_commission = True
 
     @frappe.whitelist()
     def set_paid(self, paid_amount):
         if int(self.total_amount) != 0:
             self.make_invoice_gl_entries(paid_amount)
 
-        self.set_paid_and_pending_per_amount(paid_amount)
-        self.set_payment_status()
+        self.set_paid_and_pending_per_amount()
+        self.set_statuses()
+        self.db_update()
 
-    def on_cancel(self):
-        self.ignore_linked_doctypes = "GL Entry"
+    def make_invoice_gl_entries(self, paid_amount):
+        if paid_amount == 0:
+            return
 
-        make_reverse_gl_entry(self.doctype, self.name, "Delivery")
-        make_reverse_gl_entry(self.doctype, self.name, "Invoice")
+        if self.service_amount > 0:
+            sales_amt = self.total_amount - self.service_amount
+            service_amt_paid = 0
+            if paid_amount > sales_amt:
+                sales_amt_paid = sales_amt
+                service_amt_paid = paid_amount - sales_amt
+            else:
+                sales_amt_paid = paid_amount
+        else:
+            sales_amt_paid = paid_amount
 
-        self.set_paid_and_pending_per_amount(-self.paid_amount)
+        sales_accounts = get_default_accounts(["sales", "cash"])
+        make_gl_entries(self, sales_accounts[0], sales_accounts[1], sales_amt_paid)
 
-        self.db_set("payment_status", "")
-        self.db_set("delivery_status", "")
+        if self.service_amount > 0:
+            service_accounts = get_default_accounts(["delivery", "cash"])
+            make_gl_entries(
+                self, service_accounts[0], service_accounts[1], service_amt_paid
+            )
+            # TODO: Installation as separate entry
+
+    @frappe.whitelist()
+    def set_delivered(self):
+        self.set_statuses()
+        self.db_update()
+        if self.delivery_status == "Delivered":
+            self.make_delivery_gl_entries()
+            self.update_actual_qty()
+        else:
+            frappe.throw(_("Not able to set Delivered"))
+
+    def make_delivery_gl_entries(self):
+        delivery_accounts = get_default_accounts(["inventory", "cost_of_goods_sold"])
+        make_gl_entries(
+            self, delivery_accounts[0], delivery_accounts[1], self.items_cost
+        )
+
+    def update_actual_qty(self):
+        items_map = {}
+        parents = [d.parent_item_code for d in self.child_items]
+        for d in self.items + self.child_items:
+            if d.item_code not in parents:
+                if d.item_code not in items_map:
+                    items_map[d.item_code] = 0
+                items_map[d.item_code] += d.qty
+
+        for item_code, qty in items_map.items():
+            update_bin(item_code, reserved_actual=-qty)
 
     @frappe.whitelist()
     def split_combinations(self, combos_to_split, save):
+        combos_to_split = list(set(combos_to_split))
 
         selected_child_items = [
             d for d in self.child_items if d.parent_item_code in combos_to_split
@@ -283,6 +285,18 @@ class SalesOrder(Document):
 
         if save:
             self.save()
+
+    def on_cancel(self):
+        self.ignore_linked_doctypes = "GL Entry"
+
+        make_reverse_gl_entry(self.doctype, self.name)
+
+        self.set_paid_and_pending_per_amount()
+
+        self.db_set("payment_status", "")
+        self.db_set("delivery_status", "")
+
+        # TODO: Update bin
 
 
 CONDITIONS = [

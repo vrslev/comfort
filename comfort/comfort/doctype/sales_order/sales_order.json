@@ -20,6 +20,7 @@
   "total_amount",
   "items_cost",
   "margin",
+  "service_amount",
   "column_break_11",
   "total_quantity",
   "total_weight",
@@ -130,7 +131,7 @@
    "in_standard_filter": 1,
    "label": "Status",
    "no_copy": 1,
-   "options": "\nDraft\nIn Progress\nClosed",
+   "options": "\nDraft\nIn Progress\nCompleted\nCancelled",
    "print_hide": 1,
    "read_only": 1,
    "reqd": 1,
@@ -252,12 +253,18 @@
   {
    "fieldname": "column_break_20",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "service_amount",
+   "fieldtype": "Currency",
+   "label": "Service Amount",
+   "precision": "0"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-06-30 00:02:39.979413",
+ "modified": "2021-07-07 03:14:45.511085",
  "modified_by": "Administrator",
  "module": "Comfort",
  "name": "Sales Order",
