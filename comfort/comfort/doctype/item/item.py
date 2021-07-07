@@ -1,12 +1,14 @@
+import re
+
 import frappe
 from frappe import _
 from frappe.model.document import Document
 
 
 class Item(Document):
-    # TODO: Validate URL
     def validate(self):
         self.validate_child_items()
+        self.validate_url()
         self.set_name()
         self.calculate_weight()
 
@@ -15,6 +17,11 @@ class Item(Document):
             "Child Item", {"parent": ["in", [d.item_code for d in self.child_items]]}
         ):
             frappe.throw(_("Can't add child item that contains child items"))
+
+    def validate_url(self):
+        if self.url:
+            if len(re.findall(r"ikea.com/\w+/\w+/p/-s?\d+", self.url)) == 0:
+                frappe.throw(_("Invalid URL"))
 
     def set_name(self):
         if not self.item_name:
