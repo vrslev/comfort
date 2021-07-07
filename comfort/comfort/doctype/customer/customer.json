@@ -47,7 +47,8 @@
   {
    "fieldname": "vk_url",
    "fieldtype": "Data",
-   "label": "VK URL"
+   "label": "VK URL",
+   "options": "URL"
   },
   {
    "fieldname": "basic_info_section",
@@ -90,7 +91,7 @@
  "image_field": "image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-06-26 10:32:38.057328",
+ "modified": "2021-07-03 10:35:43.442558",
  "modified_by": "Administrator",
  "module": "Comfort",
  "name": "Customer",
