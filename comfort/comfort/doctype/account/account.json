@@ -8,7 +8,6 @@
  "engine": "InnoDB",
  "field_order": [
   "account_name",
-  "company",
   "root_type",
   "is_group",
   "column_break_3",
@@ -79,14 +78,6 @@
    "options": "Currency"
   },
   {
-   "fieldname": "company",
-   "fieldtype": "Link",
-   "in_standard_filter": 1,
-   "label": "Company",
-   "options": "Company",
-   "reqd": 1
-  },
-  {
    "fieldname": "root_type",
    "fieldtype": "Select",
    "in_standard_filter": 1,
@@ -101,7 +92,7 @@
  "index_web_pages_for_search": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2021-06-25 04:32:07.125133",
+ "modified": "2021-07-05 13:56:04.475468",
  "modified_by": "Administrator",
  "module": "Comfort",
  "name": "Account",

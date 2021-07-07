@@ -4,30 +4,13 @@ import frappe
 def execute(filters=None):
     columns, data = [], []
 
-    if filters.filter_based_on == "Fiscal Year":
-        year = frappe.db.sql(
-            """ SELECT
-						year_start_date, year_end_date
-					FROM
-						`tabFiscal Year`
-					WHERE
-						year=%s""",
-            filters.fiscal_year,
-            as_dict=1,
-        )[0]
-        date = [year.year_start_date, year.year_end_date]
-        period_key, period_label = (
-            "{}".format(filters.fiscal_year.replace(" ", "_").replace("-", "_")),
-            filters.fiscal_year,
-        )
-    elif filters.filter_based_on == "Date Range":
-        period_key, period_label = "Date Range", "Date Range"
-        date = [filters.from_date, filters.to_date]
+    period_key, period_label = "Date Range", "Date Range"
+    date = [filters.from_date, filters.to_date]
 
     columns = get_columns(period_key, period_label)
 
-    income = get_data(date, filters.company, "Income", "Credit", period_key)
-    expense = get_data(date, filters.company, "Expense", "Debit", period_key)
+    income = get_data(date, "Income", "Credit", period_key)
+    expense = get_data(date, "Expense", "Debit", period_key)
 
     data = []
     data.extend(income or [])
@@ -64,8 +47,8 @@ def get_columns(period_key, period_label):
     return columns
 
 
-def get_data(date, company, root_type, dr_cr, period_key):
-    accounts = get_accounts(company, root_type)
+def get_data(date, root_type, dr_cr, period_key):
+    accounts = get_accounts(root_type)
     data = []
     if accounts:
         i = 0
@@ -119,17 +102,17 @@ def append(data, d, i, period_key):
     )
 
 
-def get_accounts(company, root_type):
+def get_accounts(root_type):
     return frappe.db.sql(
         """ SELECT 
 				name, parent_account, lft, root_type, account_type, is_group
 			FROM 
 				tabAccount
 			WHERE 
-				company=%s and root_type=%s 
+				root_type=%s 
 			ORDER BY 
 				lft""",
-        (company, root_type),
+        (root_type),
         as_dict=1,
     )
 

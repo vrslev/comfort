@@ -6,15 +6,9 @@ from frappe.utils.nestedset import NestedSet
 class Account(NestedSet):
     nsm_parent_field = "parent_account"
 
-    def after_insert(self):
-        if self.account_type == "Bank":
-            company = frappe.get_doc("Company", self.company)
-            if not company.default_bank_account:
-                company.db_set("default_bank_account", self.account_name)
-
 
 @frappe.whitelist()
-def get_children(doctype, parent=None, company=None, is_root=False):
+def get_children(doctype, parent=None, is_root=False):
 
     if is_root:
         parent = ""
@@ -23,7 +17,6 @@ def get_children(doctype, parent=None, company=None, is_root=False):
     filters = [
         ["docstatus", "<", "2"],
         ['ifnull(`parent_account`, "")', "=", parent],
-        ["company", "in", (company, None, "")],
     ]
 
     accounts = frappe.get_list(doctype, fields=fields, filters=filters, order_by="name")
@@ -42,10 +35,5 @@ def add_node():
 
     frappe.get_doc(args).insert()
 
-
-@frappe.whitelist()
-def get_company():
-    company = []
-    for d in frappe.db.sql("SELECT name FROM tabCompany"):
-        company.append(d[0])
-    return company
+def get_account_setting(field_name):
+    frappe.get_cached_value('Accounts Settings', 'Accounts Settings', field_name)
