@@ -188,17 +188,19 @@ class SalesOrder(Document):
         self.edit_commission = True
 
     @frappe.whitelist()
-    def set_paid(self, paid_amount):
+    def set_paid(self, paid_amount, cash):
         if int(self.total_amount) != 0:
-            self.make_invoice_gl_entries(paid_amount)
+            self.make_invoice_gl_entries(paid_amount, cash)
 
         self.set_paid_and_pending_per_amount()
         self.set_statuses()
         self.db_update()
 
-    def make_invoice_gl_entries(self, paid_amount):
+    def make_invoice_gl_entries(self, paid_amount, cash=True):
         if paid_amount == 0:
             return
+
+        paid_to = 'cash' if cash else 'bank'
 
         if self.service_amount > 0:
             sales_amt = self.total_amount - self.service_amount
@@ -211,11 +213,11 @@ class SalesOrder(Document):
         else:
             sales_amt_paid = paid_amount
 
-        sales_accounts = get_default_accounts(["sales", "cash"])
+        sales_accounts = get_default_accounts(["sales", paid_to])
         make_gl_entries(self, sales_accounts[0], sales_accounts[1], sales_amt_paid)
 
         if self.service_amount > 0:
-            service_accounts = get_default_accounts(["delivery", "cash"])
+            service_accounts = get_default_accounts(["delivery", paid_to])
             make_gl_entries(
                 self, service_accounts[0], service_accounts[1], service_amt_paid
             )

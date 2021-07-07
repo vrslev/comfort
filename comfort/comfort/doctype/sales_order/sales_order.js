@@ -1,5 +1,3 @@
-// TODO: Ask if paid to bank or cash
-// TODO: Delete current empty row in fetch items
 frappe.ui.form.on('Sales Order', {
 	setup(frm) {
 		frm.page.sidebar.hide();
@@ -22,20 +20,26 @@ frappe.ui.form.on('Sales Order', {
 	refresh(frm) {
 		if (!frm.is_new() && frm.doc.per_paid < 100) {
 			frm.add_custom_button(__('Paid'), () => {
-				frappe.prompt({
+				frappe.prompt([{
 					label: 'Paid Amount',
 					fieldname: 'paid_amount',
 					fieldtype: 'Currency',
 					precision: "0",
 					default: frm.doc.pending_amount,
-				}, (values) => {
+				},
+				{
+					label: 'Account',
+					fieldname: 'account',
+					fieldtype: 'Select',
+					options: 'Cash\nBank'
+				}], (values) => {
 					frm.call({
 						doc: frm.doc,
 						method: 'set_paid',
 						args: {
-							'paid_amount': values.paid_amount
+							paid_amount: values.paid_amount,
+							cash: values.account == 'Cash'
 						},
-						
 						callback: () => {
 							frm.reload_doc();
 						}
@@ -254,30 +258,46 @@ function recalculate(frm) {
 
 
 async function quick_add_items(text) {
-	// frappe.dom.freeze();
 	comfort.fetch_items(text).then(r => {
 		let promises = [];
 		function callback(d) {
-			let doc = cur_frm.add_child('items', { 'item_code': d });
-			let cdt = doc.doctype;
-			let cdn = doc.name;
-
-			return frappe.db.get_value('Item', doc.item_code, ['item_name', 'rate', 'weight']).then(r => {
-				doc.qty = 1;
-				doc.item_name = r.message.item_name;
-				doc.rate = r.message.rate;
-				doc.weight = r.message.weight;
+			return frappe.db.get_value('Item', d, ['item_name', 'rate', 'weight']).then(r => {
+				let doc = cur_frm.add_child('items', {
+					item_code: d,
+					qty: 1,
+					item_name: r.message.item_name,
+					rate: r.message.rate,
+					weight: r.message.weight
+				});
+				let cdt = doc.doctype;
+				let cdn = doc.name;
 
 				calculate_item_amount(cur_frm, cdt, cdn);
 				calculate_item_total_weight(cur_frm, cdt, cdn);
 			});
 		}
+
 		for (var d of r.successful) {
 			promises.push(callback(d));
 		}
 
 		return Promise.all(promises).then(() => {
 			recalculate(cur_frm);
+
+			let grid = cur_frm.fields_dict.items.grid;
+
+			// loose focus from current row
+			grid.add_new_row(null, null, true);
+			grid.grid_rows[grid.grid_rows.length - 1].toggle_editable_row();
+
+			let grid_rows = grid.grid_rows;
+			for (var i = grid_rows.length; i--;) {
+				let doc = grid_rows[i].doc;
+				if (!(doc.item_name && doc.item_code)) {
+					grid_rows[i].remove();
+				}
+			}
+
 			refresh_field('items');
 		});
 	});
