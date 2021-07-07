@@ -1,8 +1,13 @@
 import re
 
 import frappe
-from comfort.comfort.general_ledger import make_gl_entry, make_reverse_gl_entry
-from frappe import as_json
+from comfort.comfort.general_ledger import (
+    get_default_accounts,
+    get_paid_amount,
+    make_gl_entries,
+    make_reverse_gl_entry,
+)
+from frappe import _, as_json
 from frappe.model.document import Document
 from frappe.utils import parse_json
 from frappe.utils.data import add_to_date, get_datetime, getdate, now_datetime, today
@@ -17,8 +22,6 @@ from ikea_api import (
 from ikea_api.errors import NoDeliveryOptionsAvailableError, WrongItemCodeError
 from ikea_api_parser import DeliveryOptions, PurchaseHistory, PurchaseInfo
 
-# TODO: Validate and reset status
-# TODO: Set Sales Order status
 # TODO: Create SERVICES Account
 
 
@@ -58,6 +61,9 @@ class PurchaseOrder(Document):
             cart_no = 1
 
         self.name = "{0}-{1}".format(this_month, cart_no)
+
+    def before_insert(self):
+        self.status = "Draft"
 
     def validate(self):
         self.validate_empty()
@@ -122,21 +128,27 @@ class PurchaseOrder(Document):
         self.total_amount = self.sales_order_cost + self.items_to_sell_cost
         if self.delivery_cost:
             self.total_amount += self.delivery_cost
+        else:
+            self.delivery_cost = 0
 
     def before_save(self):
-        self.get_delivery_services()
+        if self.docstatus == 0:
+            self.get_delivery_services()
 
     def get_delivery_services(self):
-        templated_items = self.get_templated_items_for_api(True)
-        delivery_services = IkeaCartUtils().get_delivery_services(templated_items)
-        self.update(
-            {
-                "delivery_options": delivery_services["options"],
-                "cannot_add_items": as_json(delivery_services["cannot_add"])
-                if delivery_services["cannot_add"]
-                else None,
-            }
-        )
+        try:
+            templated_items = self.get_templated_items_for_api(True)
+            delivery_services = IkeaCartUtils().get_delivery_services(templated_items)
+            self.update(
+                {
+                    "delivery_options": delivery_services["options"],
+                    "cannot_add_items": as_json(delivery_services["cannot_add"])
+                    if delivery_services["cannot_add"]
+                    else None,
+                }
+            )
+        except Exception as e:
+            frappe.msgprint("\n".join([str(d) for d in e.args]), _("Error"))
 
     @frappe.whitelist()
     def checkout(self):
@@ -193,15 +205,31 @@ class PurchaseOrder(Document):
         self.cannot_add_items = None
 
     def make_invoice_gl_entries(self):
-        company = frappe.db.get_single_value("Defaults", "default_company")
+        already_paid_amount = get_paid_amount(self.doctype, self.name)
 
-        expense_account = frappe.db.get_value(
-            "Company", company, "stock_received_but_not_billed"
-        )
-        make_gl_entry(self, expense_account, self.total_amount, 0, "Invoice")
+        if self.total_amount != already_paid_amount:
+            if self.delivery_cost > 0:
+                amt_to_pay = self.total_amount - already_paid_amount
+                amt_without_delivery = self.sales_order_cost + self.items_to_sell_cost
+                delivery_amt_paid = 0
+                if amt_to_pay > amt_without_delivery:
+                    delivery_amt_paid = amt_to_pay - amt_without_delivery
+                    inventory_amt_paid = amt_without_delivery
+                else:
+                    inventory_amt_paid = amt_to_pay
+            else:
+                inventory_amt_paid = self.total_amount - already_paid_amount
 
-        credit_to = frappe.db.get_value("Company", company, "default_bank_account")
-        make_gl_entry(self, credit_to, 0, self.total_amount, "Invoice")
+            inventory_accounts = get_default_accounts(["cash", "prepaid_inventory"])
+            make_gl_entries(
+                self, inventory_accounts[0], inventory_accounts[1], inventory_amt_paid
+            )
+
+            if self.delivery_cost > 0:
+                delivery_accounts = get_default_accounts(["cash", "purchase_delivery"])
+                make_gl_entries(
+                    self, delivery_accounts[0], delivery_accounts[1], delivery_amt_paid
+                )
 
     @frappe.whitelist()
     def before_submit_events(
@@ -297,21 +325,28 @@ class PurchaseOrder(Document):
             items_map[d.item_code] += d.qty
         return items_map.items()
 
+    def update_status_in_sales_orders(self):
+        for d in self.sales_orders:
+            frappe.get_doc("Sales Order", d.sales_order_name).set_statuses()
+
     def on_submit(self):
         self.update_purchased_qty()
+        self.update_status_in_sales_orders()
+
+    @frappe.whitelist()
+    def set_completed(self):
+        self.make_delivery_gl_entries()
+        self.update_actual_qty()
+        self.db_set("status", "Completed")
 
     def make_delivery_gl_entries(self):
-        company = frappe.db.get_single_value("Defaults", "default_company")
-
-        expense_account = frappe.db.get_value(
-            "Company", company, "default_inventory_account"
+        accounts = get_default_accounts(["prepaid_inventory", "inventory"])
+        make_gl_entries(
+            self,
+            accounts[0],
+            accounts[1],
+            self.items_to_sell_cost + self.sales_order_cost,
         )
-        make_gl_entry(self, expense_account, self.total_amount, 0, "Delivery")
-
-        credit_to = frappe.db.get_value(
-            "Company", company, "stock_received_but_not_billed"
-        )
-        make_gl_entry(self, credit_to, 0, self.total_amount, "Delivery")
 
     def update_actual_qty(self):
         so_items = self.get_sales_order_items_for_bin()
@@ -324,20 +359,15 @@ class PurchaseOrder(Document):
         items_to_sell = self.get_items_to_sell_for_bin()
         for item_code, qty in items_to_sell:
             bin = frappe.get_doc("Bin", item_code)
-            bin.reserved_purchased -= qty
-            bin.reserved_actual += qty
+            bin.available_purchased -= qty
+            bin.available_actual += qty
             bin.save()
-
-    @frappe.whitelist()
-    def set_completed(self):
-        self.make_delivery_gl_entries()
-        self.update_actual_qty()
-        self.db_set("status", "Completed")
 
     def on_cancel(self):
         self.ignore_linked_doctypes = "GL Entry"
-        make_reverse_gl_entry(self.doctype, self.name, "Invoice")
-        make_reverse_gl_entry(self.doctype, self.name, "Delivery")
+        make_reverse_gl_entry(self.doctype, self.name)
+        self.update_status_in_sales_orders()
+        # TODO: UPDATE BIN
 
 
 class IkeaCartUtils:
@@ -533,16 +563,14 @@ def get_sales_order_query(doctype, txt, searchfield, start, page_len, filters):
     )
     dont_pass = [d[0] for d in dont_pass]
     dont_pass += filters["not in"]
-    dont_pass = "(" + ",".join(["'" + d + "'" for d in dont_pass]) + ")"
     dont_pass_cond = ""
     if len(dont_pass) > 0:
+        dont_pass = "(" + ",".join(["'" + d + "'" for d in dont_pass]) + ")"
         dont_pass_cond = f"name NOT IN {dont_pass} AND"
 
-    # raise Exception(dont_pass_cond)
     searchfields = frappe.get_meta("Sales Order").get_search_fields()
     if searchfield:
-        searchfields.append(searchfield)
-    searchfields = " or ".join([field + " LIKE %(txt)s" for field in searchfields])
+        searchfields = " or ".join([field + " LIKE %(txt)s" for field in searchfields])
 
     res = frappe.db.sql(
         """
@@ -557,7 +585,6 @@ def get_sales_order_query(doctype, txt, searchfield, start, page_len, filters):
         ),
         {"txt": "%%%s%%" % txt, "start": start, "page_len": page_len},
         as_list=True,
-        formatted=True,
     )
 
     for d in res:
