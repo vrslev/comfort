@@ -1,3 +1,4 @@
+# This is fork of https://github.com/shariquerik/accounting
 from setuptools import find_packages, setup
 
 with open("requirements.txt") as f:
