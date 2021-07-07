@@ -89,6 +89,10 @@ after_install = "comfort.install.after_install"
 # ---------------
 # Hook on document methods and events
 
+default_query = "comfort.comfort.queries.default_query"
+set_query_in_doctypes = ['Customer', 'Item', "Purchase Order", "Sales Order"]
+standard_queries = {d:default_query for d in set_query_in_doctypes}
+
 # doc_events = {
 # 	"*": {
 # 		"on_update": "method",

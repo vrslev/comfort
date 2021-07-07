@@ -91,7 +91,7 @@
  "image_field": "image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-07-03 10:35:43.442558",
+ "modified": "2021-07-07 06:34:10.467936",
  "modified_by": "Administrator",
  "module": "Comfort",
  "name": "Customer",
@@ -111,7 +111,7 @@
    "write": 1
   }
  ],
- "search_fields": "phone",
+ "search_fields": "customer_group,phone",
  "show_name_in_global_search": 1,
  "show_preview_popup": 1,
  "sort_field": "modified",

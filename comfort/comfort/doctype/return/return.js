@@ -22,6 +22,7 @@ comfort.ReturnController = frappe.ui.form.Controller.extend({
 		// 	};
 		// });
 
+		// TODO: Not working
 		this.frm.set_query('item_code', 'items', () => {
 			return {
 				query: 'comfort.comfort.doctype.return.return.items_query',

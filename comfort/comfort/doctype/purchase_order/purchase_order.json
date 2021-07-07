@@ -160,7 +160,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2021-07-02 00:22:14.967780",
+ "modified": "2021-07-07 06:47:32.644968",
  "modified_by": "Administrator",
  "module": "Comfort",
  "name": "Purchase Order",
@@ -179,6 +179,7 @@
    "write": 1
   }
  ],
+ "search_fields": "status,total_amount,total_weight",
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",

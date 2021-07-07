@@ -2,7 +2,7 @@ import frappe
 from frappe.utils import cint
 from frappe.utils.nestedset import NestedSet
 
-
+# TODO: Account types
 class Account(NestedSet):
     nsm_parent_field = "parent_account"
 

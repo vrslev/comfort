@@ -264,7 +264,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-07-07 03:14:45.511085",
+ "modified": "2021-07-07 06:48:59.078371",
  "modified_by": "Administrator",
  "module": "Comfort",
  "name": "Sales Order",
@@ -284,8 +284,11 @@
   }
  ],
  "quick_entry": 1,
+ "search_fields": "status,customer,total_amount",
+ "show_name_in_global_search": 1,
  "show_preview_popup": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "title_field": "customer",
  "track_changes": 1
 }

@@ -92,7 +92,7 @@
  "index_web_pages_for_search": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2021-07-05 13:56:04.475468",
+ "modified": "2021-07-07 06:38:16.471854",
  "modified_by": "Administrator",
  "module": "Comfort",
  "name": "Account",
@@ -112,6 +112,7 @@
    "write": 1
   }
  ],
+ "search_fields": "account_type,parent_account",
  "sort_field": "modified",
  "sort_order": "DESC",
  "track_changes": 1

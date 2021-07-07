@@ -10,15 +10,9 @@ from frappe import _
 from frappe.model.document import Document
 
 # TODO: Cancel payment and delivery
-# TODO: Updating Delivery status not working
+# TODO: Services account
 class SalesOrder(Document):
-    # TODO: Item query
-    # TODO: Services account
-    # TODO: Hide button "DELIVERED" when PO not recevied yet
-    # TODO: Make GL Entries to all kinds of stuff (separate services, margin and items cost)
-    # TODO: Calculate quantity by child items (by package)
-    # TODO: Automatically allocate GL Entries without voucher (so return could work)
-    def validate(self):  # TODO: Validate Items length == 0
+    def validate(self):
         self.merge_same_items()
         self.delete_empty_items()
         self.calculate()
