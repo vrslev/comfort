@@ -258,47 +258,37 @@ function recalculate(frm) {
 
 
 async function quick_add_items(text) {
-	comfort.fetch_items(text).then(r => {
-		let promises = [];
-		function callback(d) {
-			return frappe.db.get_value('Item', d, ['item_name', 'rate', 'weight']).then(r => {
-				let doc = cur_frm.add_child('items', {
-					item_code: d,
-					qty: 1,
-					item_name: r.message.item_name,
-					rate: r.message.rate,
-					weight: r.message.weight
-				});
-				let cdt = doc.doctype;
-				let cdn = doc.name;
-
-				calculate_item_amount(cur_frm, cdt, cdn);
-				calculate_item_total_weight(cur_frm, cdt, cdn);
+	comfort.fetch_items(text, false, true, ['item_name', 'rate', 'weight']).then(r => {
+		for (var d of r.values) {
+			let doc = cur_frm.add_child('items', {
+				item_code: d.item_code,
+				qty: 1,
+				item_name: d.item_name,
+				rate: d.rate,
+				weight: d.weight
 			});
+			let cdt = doc.doctype;
+			let cdn = doc.name;
+
+			calculate_item_amount(cur_frm, cdt, cdn);
+			calculate_item_total_weight(cur_frm, cdt, cdn);
 		}
 
-		for (var d of r.successful) {
-			promises.push(callback(d));
-		}
+		let grid = cur_frm.fields_dict.items.grid;
 
-		return Promise.all(promises).then(() => {
-			recalculate(cur_frm);
+		// loose focus from current row
+		grid.add_new_row(null, null, true);
+		grid.grid_rows[grid.grid_rows.length - 1].toggle_editable_row();
 
-			let grid = cur_frm.fields_dict.items.grid;
-
-			// loose focus from current row
-			grid.add_new_row(null, null, true);
-			grid.grid_rows[grid.grid_rows.length - 1].toggle_editable_row();
-
-			let grid_rows = grid.grid_rows;
-			for (var i = grid_rows.length; i--;) {
-				let doc = grid_rows[i].doc;
-				if (!(doc.item_name && doc.item_code)) {
-					grid_rows[i].remove();
-				}
+		let grid_rows = grid.grid_rows;
+		for (var i = grid_rows.length; i--;) {
+			let doc = grid_rows[i].doc;
+			if (!(doc.item_name && doc.item_code)) {
+				grid_rows[i].remove();
 			}
+		}
 
-			refresh_field('items');
-		});
+		recalculate(cur_frm);
+		refresh_field('items');
 	});
 }

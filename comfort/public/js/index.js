@@ -1,6 +1,6 @@
 frappe.provide('comfort');
 
-comfort.fetch_items = (item_codes, force_update = false, download_images = true) => {
+comfort.fetch_items = (item_codes, force_update = false, download_images = true, return_values) => {
 	var promise = new Promise(resolve => {
 		let isResolved = false;
 		frappe.call({
@@ -8,7 +8,8 @@ comfort.fetch_items = (item_codes, force_update = false, download_images = true)
 			args: {
 				item_codes: item_codes,
 				force_update: force_update,
-				download_images: download_images
+				download_images: download_images,
+				return_values: return_values
 			},
 			callback: (r) => {
 				if (r.message.unsuccessful.length > 0) {

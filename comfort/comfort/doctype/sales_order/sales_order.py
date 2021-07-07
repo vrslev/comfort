@@ -194,7 +194,7 @@ class SalesOrder(Document):
         if paid_amount == 0:
             return
 
-        paid_to = 'cash' if cash else 'bank'
+        paid_to = "cash" if cash else "bank"
 
         if self.service_amount > 0:
             sales_amt = self.total_amount - self.service_amount
