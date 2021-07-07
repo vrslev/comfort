@@ -1,6 +1,6 @@
 frappe.provide('comfort');
 
-comfort.fetch_items = (item_codes, force_update = true, download_images = true) => {
+comfort.fetch_items = (item_codes, force_update = false, download_images = true) => {
 	var promise = new Promise(resolve => {
 		let isResolved = false;
 		frappe.call({
