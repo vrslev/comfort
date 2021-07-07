@@ -1,6 +1,4 @@
 import asyncio
-import os
-from io import BytesIO
 
 import aiohttp
 import frappe
@@ -8,9 +6,6 @@ from comfort.ikea.utils import extract_item_codes, get_item_codes_from_ingka_pag
 from frappe.utils import parse_json
 from ikea_api.endpoints.item.item_iows import WrongItemCodeError
 from ikea_api_extender import get_items_immortally
-from PIL import Image
-
-# TODO: Download images
 
 
 @frappe.whitelist()
@@ -51,61 +46,76 @@ def fetch_new_items(item_codes, force_update=False, download_images=True):
     res["unsuccessful"] = response["unsuccessful"]
     res["fetched_items"] = response["fetched"]
     res["successful"] = [d for d in item_codes if d not in res["unsuccessful"]]
-    # if download_images:
-    #     # TODO: No need to download every time
-    #     images = download_items_images(parsed_items)
-    #     for d in parsed_items:
-    #         d.image = images[d.item_code]
 
     for d in parsed_items:
         add_item(d, force_update=force_update)
+
+    if download_images:
+        frappe.enqueue(
+            "comfort.ikea.item.download_items_images",
+            items=[
+                {"item_code": d.item_code, "image_url": d.image_url}
+                for d in parsed_items
+                if d.item_code in res["fetched_items"]
+            ],
+            queue="short",
+        )
 
     return res
 
 
 def download_items_images(items):
+    async def fetch(session, item):
+        if not item["image_url"]:
+            return
+
+        async with session.get(item["image_url"]) as r:
+            content = await r.content.read()
+
+        fpath = f"files/items/{item['item_code']}"
+        fname = f"{item['image_url'].rsplit('/', 1)[1]}"
+        site_path = frappe.get_site_path("public", fpath)
+
+        frappe.create_folder(site_path)
+        with open(f"{site_path}/{fname}", "wb+") as f:
+            f.write(content)
+
+        dt = "Item"
+        frappe.db.set_value(
+            dt,
+            item["item_code"],
+            "image",
+            f"/{fpath}/{fname}",
+            update_modified=False,
+        )
+
     async def main(items):
-        async def fetch(session, item):
-            if not item.image_url:
-                return item.item_code, None
-
-            async with session.get(item.image_url, allow_redirects=0) as r:
-                raw_content = await r.content.read()
-
-            image = Image.open(BytesIO(raw_content))
-            file_name = "/" + item.image_url.rsplit("/", 1)[1]
-            path = "/".join(("items", item.item_code))
-            full_path = os.path.abspath(frappe.get_site_path("public", path))
-            frappe.create_folder(full_path)
-            image.save(full_path + file_name)
-            return item.item_code, "/" + path + file_name
-
-        async def fetch_all(session, items):
+        async with aiohttp.ClientSession() as session:
             tasks = []
-            loop = asyncio.get_event_loop()
-            for item in items:
-                task = loop.create_task(fetch(session, item))
+            for d in items:
+                task = fetch(session, d)
                 tasks.append(task)
             results = await asyncio.gather(*tasks)
             return results
 
-        async with aiohttp.ClientSession() as session:
-            res = await fetch_all(session, items)
-            return res
+    have_image = [
+        d.item_code
+        for d in frappe.get_all(
+            "Item",
+            ["item_code", "image"],
+            {"item_code": ["in", [d["item_code"] for d in items]]},
+        )
+        if d.image
+    ]
+    items = [d for d in items if d not in have_image]
 
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    res_list = loop.run_until_complete(main(items))
-    res = {}
-    for i in res_list:
-        if i:
-            res[i[0]] = i[1]
-    return res
+    if len(items) > 0:
+        asyncio.run(main(items))
+        frappe.db.commit()
 
 
 def add_item(item, force_update):
     make_item_category(item.group_name, item.group_url)
-    # raise Exception(item.__dict__)
     if item.is_combination:
         response = fetch_new_items(
             [d["item_code"] for d in item.bundle_items], force_update=force_update
