@@ -85,7 +85,6 @@
    "fieldtype": "Currency",
    "in_preview": 1,
    "label": "Total Amount",
-   "options": "Currency:RUB",
    "precision": "0",
    "read_only": 1
   },
@@ -177,7 +176,6 @@
    "fieldname": "paid_amount",
    "fieldtype": "Currency",
    "label": "Paid Amount",
-   "options": "Currency:RUB",
    "precision": "0",
    "read_only": 1
   },
@@ -185,7 +183,6 @@
    "fieldname": "pending_amount",
    "fieldtype": "Currency",
    "label": "Pending Amount",
-   "options": "Currency:RUB",
    "precision": "0",
    "read_only": 1
   },
@@ -197,7 +194,6 @@
    "fieldname": "items_cost",
    "fieldtype": "Currency",
    "label": "Items Cost",
-   "options": "Currency:RUB",
    "precision": "0",
    "read_only": 1
   },
@@ -233,7 +229,6 @@
    "fieldname": "margin",
    "fieldtype": "Currency",
    "label": "Margin",
-   "options": "Currency:RUB",
    "precision": "0",
    "read_only": 1
   },
@@ -264,7 +259,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-07-07 06:48:59.078371",
+ "modified": "2021-07-08 02:16:26.410482",
  "modified_by": "Administrator",
  "module": "Comfort",
  "name": "Sales Order",

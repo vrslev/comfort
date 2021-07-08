@@ -81,7 +81,6 @@
    "in_preview": 1,
    "label": "Rate",
    "non_negative": 1,
-   "options": "Currency:RUB",
    "precision": "0",
    "search_index": 1
   },
@@ -104,7 +103,7 @@
  "index_web_pages_for_search": 1,
  "links": [],
  "max_attachments": 1,
- "modified": "2021-07-07 09:21:42.346445",
+ "modified": "2021-07-08 02:28:25.007685",
  "modified_by": "Administrator",
  "module": "Comfort",
  "name": "Item",

@@ -32,13 +32,15 @@
    "fieldname": "debit",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Debit"
+   "label": "Debit",
+   "precision": "0"
   },
   {
    "fieldname": "credit",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Credit"
+   "label": "Credit",
+   "precision": "0"
   },
   {
    "fieldname": "reason",
@@ -49,7 +51,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-06-24 00:10:10.871421",
+ "modified": "2021-07-08 02:27:42.677567",
  "modified_by": "Administrator",
  "module": "Comfort",
  "name": "Journal Entry Account",

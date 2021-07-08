@@ -59,6 +59,8 @@ app_include_js = "/assets/comfort/js/index.js"
 # before_install = "comfort.install.before_install"
 after_install = "comfort.install.after_install"
 
+boot_session = "comfort.boot.boot_session"
+
 # Desk Notifications
 # ------------------
 # See frappe.core.notifications.get_notification_config
@@ -90,8 +92,8 @@ after_install = "comfort.install.after_install"
 # Hook on document methods and events
 
 default_query = "comfort.comfort.queries.default_query"
-set_query_in_doctypes = ['Customer', 'Item', "Purchase Order", "Sales Order"]
-standard_queries = {d:default_query for d in set_query_in_doctypes}
+set_query_in_doctypes = ["Customer", "Item", "Purchase Order", "Sales Order"]
+standard_queries = {d: default_query for d in set_query_in_doctypes}
 
 # doc_events = {
 # 	"*": {
