@@ -2,7 +2,7 @@ import frappe
 from frappe.utils import cint
 from frappe.utils.nestedset import NestedSet
 
-# TODO: Account types
+
 class Account(NestedSet):
     nsm_parent_field = "parent_account"
 
@@ -34,6 +34,3 @@ def add_node():
         args.parent_account = None
 
     frappe.get_doc(args).insert()
-
-def get_account_setting(field_name):
-    frappe.get_cached_value('Accounts Settings', 'Accounts Settings', field_name)

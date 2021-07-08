@@ -17,11 +17,6 @@ frappe.treeview_settings["Account"] = {
 			fieldtype: 'Select', fieldname: 'root_type', label: __('Root Type'),
 			options: ['Asset', 'Liability', 'Equity', 'Income', 'Expense'].join('\n'),
 			depends_on: 'eval:doc.is_group && !doc.parent_account'
-		},
-		{
-			fieldtype: 'Select', fieldname: 'account_type', label: __('Account Type'),
-			options: frappe.get_meta("Account").fields.filter(d => d.fieldname == 'account_type')[0].options,
-			description: __("Optional. This setting will be used to filter in various transactions.")
 		}
 	],
 	ignore_fields: ["parent_account"]

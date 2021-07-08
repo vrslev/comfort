@@ -19,7 +19,6 @@
   "default_inventory_account",
   "default_purchase_delivery_account",
   "default_delivery_account",
-  "default_prepaid_orders_account",
   "default_purchase_compensations_account",
   "default_sales_compensations_account"
  ],
@@ -102,12 +101,6 @@
    "options": "Account"
   },
   {
-   "fieldname": "default_prepaid_orders_account",
-   "fieldtype": "Link",
-   "label": "Default Prepaid Orders Account",
-   "options": "Account"
-  },
-  {
    "fieldname": "default_purchase_compensations_account",
    "fieldtype": "Link",
    "label": "Default Purchase Compensations Account",
@@ -123,7 +116,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-07-06 07:08:17.304672",
+ "modified": "2021-07-08 01:00:30.756257",
  "modified_by": "Administrator",
  "module": "Comfort",
  "name": "Accounts Settings",

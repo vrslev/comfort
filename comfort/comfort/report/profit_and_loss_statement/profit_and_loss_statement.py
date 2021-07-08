@@ -93,7 +93,6 @@ def append(data, d, i, period_key):
     data.append(
         {
             "account": d.name,
-            "account_type": d.account_type,
             "parent_account": d.parent_account,
             "indent": i,
             "has_value": d.is_group,
@@ -105,7 +104,7 @@ def append(data, d, i, period_key):
 def get_accounts(root_type):
     return frappe.db.sql(
         """ SELECT 
-				name, parent_account, lft, root_type, account_type, is_group
+				name, parent_account, lft, root_type, is_group
 			FROM 
 				tabAccount
 			WHERE 

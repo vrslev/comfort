@@ -12,7 +12,6 @@
   "is_group",
   "column_break_3",
   "parent_account",
-  "account_type",
   "currency",
   "lft",
   "rgt",
@@ -27,12 +26,6 @@
    "no_copy": 1,
    "reqd": 1,
    "unique": 1
-  },
-  {
-   "fieldname": "account_type",
-   "fieldtype": "Select",
-   "label": "Account Type",
-   "options": "\nReceivable\nBank\nCash\nStock\nCost of Goods Sold\nIncome Account\nPayable\nStock Received But Not Billed\nAsset Received But Not Billed\nEquity"
   },
   {
    "default": "0",
@@ -92,7 +85,7 @@
  "index_web_pages_for_search": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2021-07-07 06:38:16.471854",
+ "modified": "2021-07-08 01:07:41.196035",
  "modified_by": "Administrator",
  "module": "Comfort",
  "name": "Account",
@@ -112,7 +105,7 @@
    "write": 1
   }
  ],
- "search_fields": "account_type,parent_account",
+ "search_fields": "parent_account",
  "sort_field": "modified",
  "sort_order": "DESC",
  "track_changes": 1

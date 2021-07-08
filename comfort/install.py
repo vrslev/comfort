@@ -19,7 +19,6 @@ def create_accounts():
     doc.default_sales_account = "Sales"
     doc.default_delivery_account = "Delivery"
     doc.default_installation_account = "Installation"
-    doc.default_prepaid_orders_account = "Prepaid Orders"
     doc.default_sales_compensations_account = "Sales Compensations"
     doc.default_purchase_compensations_account = "Purchase Compensations"
     doc.save()
