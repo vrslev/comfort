@@ -4,7 +4,13 @@ import frappe
 from frappe import _, as_json
 from frappe.model.document import Document
 from frappe.utils import parse_json
-from frappe.utils.data import add_to_date, get_datetime, getdate, now_datetime, today
+from frappe.utils.data import (
+    add_to_date,
+    get_datetime,
+    getdate,
+    now_datetime,
+    today,
+)
 from frappe.utils.password import get_decrypted_password
 from ikea_api import (
     Cart,
@@ -280,7 +286,7 @@ class PurchaseOrder(Document):
             bin.save()
 
     def get_sales_order_items_for_bin(
-        self
+        self,
     ):  # TODO: use templated items instead (one that generates for cart)
         if not self.sales_orders and len(self.sales_orders) > 0:
             return

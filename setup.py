@@ -1,5 +1,8 @@
 # This is fork of https://github.com/shariquerik/accounting
-from setuptools import find_packages, setup  # pyright: reportMissingTypeStubs=false
+from setuptools import (  # pyright: reportMissingTypeStubs=false
+    find_packages,
+    setup,
+)
 
 with open("requirements.txt") as f:
     install_requires = f.read().strip().split("\n")
