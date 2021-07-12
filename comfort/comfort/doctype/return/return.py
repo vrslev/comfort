@@ -1,13 +1,10 @@
 import frappe
-from comfort.comfort.doctype.purchase_order.purchase_order import PurchaseOrder
-from comfort.comfort.doctype.sales_order.sales_order import calculate_commission
-from comfort.comfort.general_ledger import (
-    get_account,
-    get_paid_amount,
-    make_gl_entries,
-)
 from frappe import _
 from frappe.model.document import Document
+
+from comfort.comfort.doctype.purchase_order.purchase_order import PurchaseOrder
+from comfort.comfort.doctype.sales_order.sales_order import calculate_commission
+from comfort.comfort.general_ledger import get_account, get_paid_amount, make_gl_entries
 
 item_doctype = "Sales Order Item"
 child_item_doctype = "Sales Order Child Item"
@@ -48,10 +45,7 @@ class Return(Document):
                 "parent AS sales_order",
                 f"'{item_doctype}' AS doctype",
             ],
-            {
-                "parent": ["in", parents],
-                "name": ["not in", cur_items],
-            },
+            {"parent": ["in", parents], "name": ["not in", cur_items]},
         )
 
         if self.split_combinations:
@@ -66,10 +60,7 @@ class Return(Document):
                     "parent AS sales_order",
                     f"'{child_item_doctype}' AS doctype",
                 ],
-                {
-                    "parent": ["in", parents],
-                    "name": ["not in", cur_child_items],
-                },
+                {"parent": ["in", parents], "name": ["not in", cur_child_items]},
             )
             rates = frappe.get_all(
                 "Item",
@@ -268,9 +259,7 @@ class Return(Document):
                 #     doc, installation_accounts[0], installation_accounts[1], amount
                 # )
 
-                inventory_accounts = get_account(
-                    ["cost_of_goods_sold", "inventory"]
-                )
+                inventory_accounts = get_account(["cost_of_goods_sold", "inventory"])
                 make_gl_entries(
                     doc, inventory_accounts[0], inventory_accounts[1], amount
                 )

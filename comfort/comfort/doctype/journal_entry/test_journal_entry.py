@@ -1,8 +1,9 @@
 import unittest
 
 import frappe
-from comfort.comfort.doctype.account.test_account import create_account
 from frappe.utils import nowdate
+
+from comfort.comfort.doctype.account.test_account import create_account
 
 
 class TestJournalEntry(unittest.TestCase):
@@ -95,8 +96,8 @@ def make_journal_entry(
 
 def get_journal_entry(jv_name):
     return frappe.db.sql(
-        """ SELECT 
-						* 
+        """ SELECT
+						*
 					FROM
 						`tabJournal Entry`
 					WHERE
@@ -108,11 +109,11 @@ def get_journal_entry(jv_name):
 
 def get_gl_entries(voucher_no, voucher_type):
     return frappe.db.sql(
-        """ SELECT 
-						* 
-					FROM 
-						`tabGL Entry` 
-					WHERE 
+        """ SELECT
+						*
+					FROM
+						`tabGL Entry`
+					WHERE
 						voucher_no=%s and voucher_type=%s """,
         (voucher_no, voucher_type),
         as_dict=1,

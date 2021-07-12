@@ -5,7 +5,6 @@ from frappe.utils import flt, nowdate
 
 
 class TestSalesOrder(unittest.TestCase):
-
     def test_sales_order_creation(self):
         so = make_sales_order("Poco F2", 10, "Rohan", True, False)
         self.assertTrue(get_sales_order(so.name))

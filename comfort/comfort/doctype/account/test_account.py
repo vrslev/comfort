@@ -6,9 +6,7 @@ import frappe
 class TestAccount(unittest.TestCase):
     def test_account_created(self):
         self.assertTrue(
-            create_account(
-                "_Test Company", "SBI - _C", "Asset", "Bank Accounts - _C"
-            )
+            create_account("_Test Company", "SBI - _C", "Asset", "Bank Accounts - _C")
         )
 
 

@@ -1,5 +1,6 @@
 import frappe
 
+
 def test():
     for d in (
         # 'Account',
@@ -11,8 +12,7 @@ def test():
         "Purchase Order Item To Sell",
         "Purchase Order Sales Order",
         "Return",
-        "Return Item"
+        "Return Item",
     ):
         print(frappe.db.sql(f"""DELETE FROM `tab{d}`"""))
         frappe.db.commit()
-        

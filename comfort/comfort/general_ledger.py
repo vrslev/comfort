@@ -30,10 +30,7 @@ def make_gl_entry(self, account, dr, cr):
 def make_reverse_gl_entry(voucher_type=None, voucher_no=None):
     gl_entries = frappe.get_all(
         "GL Entry",
-        filters={
-            "voucher_type": voucher_type,
-            "voucher_no": voucher_no,
-        },
+        filters={"voucher_type": voucher_type, "voucher_no": voucher_no},
         fields=["*"],
     )
 

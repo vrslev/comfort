@@ -1,12 +1,6 @@
 import re
 
 import frappe
-from comfort.comfort.general_ledger import (
-    get_account,
-    get_paid_amount,
-    make_gl_entries,
-    make_reverse_gl_entry,
-)
 from frappe import _, as_json
 from frappe.model.document import Document
 from frappe.utils import parse_json
@@ -21,6 +15,13 @@ from ikea_api import (
 )
 from ikea_api.errors import NoDeliveryOptionsAvailableError, WrongItemCodeError
 from ikea_api_parser import DeliveryOptions, PurchaseHistory, PurchaseInfo
+
+from comfort.comfort.general_ledger import (
+    get_account,
+    get_paid_amount,
+    make_gl_entries,
+    make_reverse_gl_entry,
+)
 
 # TODO: Create SERVICES Account
 
@@ -278,7 +279,9 @@ class PurchaseOrder(Document):
             bin.available_purchased += qty
             bin.save()
 
-    def get_sales_order_items_for_bin(self): # TODO: use templated items instead (one that generates for cart)
+    def get_sales_order_items_for_bin(
+        self
+    ):  # TODO: use templated items instead (one that generates for cart)
         if not self.sales_orders and len(self.sales_orders) > 0:
             return
         sales_order_names = [d.sales_order_name for d in self.sales_orders]

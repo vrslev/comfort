@@ -158,15 +158,8 @@ user_data_fields = [
         "redact_fields": ["{field_1}", "{field_2}"],
         "partial": 1,
     },
-    {
-        "doctype": "{doctype_2}",
-        "filter_by": "{filter_by}",
-        "partial": 1,
-    },
-    {
-        "doctype": "{doctype_3}",
-        "strict": False,
-    },
+    {"doctype": "{doctype_2}", "filter_by": "{filter_by}", "partial": 1},
+    {"doctype": "{doctype_3}", "strict": False},
     {"doctype": "{doctype_4}"},
 ]
 

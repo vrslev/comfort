@@ -21,16 +21,10 @@ def create_charts():
         _("Income"): {
             _("Purchase Compensations"): {},
             _("Sales"): {},
-            _("Service"): {
-                _("Delivery"): {},
-                _("Installation"): {},
-            },
+            _("Service"): {_("Delivery"): {}, _("Installation"): {}},
             "root_type": "Income",
         },
-        _("Liabilities"): {
-            "root_type": "Liability",
-            "is_group": 1,
-        },
+        _("Liabilities"): {"root_type": "Liability", "is_group": 1},
     }
 
     def _import_accounts(children, parent, root_type, root_account=False):

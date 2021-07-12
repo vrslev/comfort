@@ -2,7 +2,7 @@
 
 **Sales Order**
 if not return money:
-    return items from customer to order new ones 
+    return items from customer to order new ones
                  or to cancel after Purchase Return
 else:
     return money to customer
@@ -38,7 +38,7 @@ if money and items:
         Inventory -> Cash
     else: # Initiated by supplier
         Prepaid Inventory -> Cash
-    
+
 if items:
     if received: # Defect
         Inventory -> Prepaid Inventory

@@ -110,10 +110,10 @@ def get_accounts(root_type):
     return frappe.db.sql(
         """ SELECT
 				name, parent_account, lft, root_type, is_group
-			FROM 
+			FROM
 				tabAccount
-			WHERE 
-				root_type=%s 
+			WHERE
+				root_type=%s
 			ORDER BY
 				lft""",
         (root_type),
@@ -123,11 +123,11 @@ def get_accounts(root_type):
 
 def get_account_balance(account, date):
     return frappe.db.sql(
-        """ SELECT 
-					sum(debit_amount) - sum(credit_amount) 
-				FROM 
-					`tabGL Entry` 
-				WHERE 
+        """ SELECT
+					sum(debit_amount) - sum(credit_amount)
+				FROM
+					`tabGL Entry`
+				WHERE
 					is_cancelled=0 and account=%s and posting_date>=%s and posting_date<=%s""",
         (account, date[0], date[1]),
     )[0][0]

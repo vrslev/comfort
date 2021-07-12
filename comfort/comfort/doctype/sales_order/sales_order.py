@@ -1,5 +1,8 @@
-from comfort.comfort.doctype.bin.bin import update_bin
 import frappe
+from frappe import _
+from frappe.model.document import Document
+
+from comfort.comfort.doctype.bin.bin import update_bin
 from comfort.comfort.general_ledger import (
     get_account,
     get_paid_amount,
@@ -7,8 +10,7 @@ from comfort.comfort.general_ledger import (
     make_gl_entry,
     make_reverse_gl_entry,
 )
-from frappe import _
-from frappe.model.document import Document
+
 
 class SalesOrder(Document):
     def validate(self):
@@ -306,11 +308,7 @@ class SalesOrder(Document):
         for d in selected_child_items:
             self.append(
                 "items",
-                {
-                    "item_code": d.item_code,
-                    "item_name": d.item_name,
-                    "qty": d.qty,
-                },
+                {"item_code": d.item_code, "item_name": d.item_name, "qty": d.qty},
             )
 
         for d in combos_to_split:
@@ -370,10 +368,7 @@ def calculate_commission(items_cost, commission=None):
         items_cost_rounding = round(items_cost, -1) - items_cost
         margin = round(items_cost * commission / 100, -1) + items_cost_rounding
 
-    return {
-        "commission": commission,
-        "margin": margin,
-    }
+    return {"commission": commission, "margin": margin}
 
 
 @frappe.whitelist()
