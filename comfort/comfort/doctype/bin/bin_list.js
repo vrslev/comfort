@@ -1,3 +1,3 @@
-frappe.listview_settings['Bin'] = {
-	hide_name_column: true
+frappe.listview_settings["Bin"] = {
+    hide_name_column: true,
 };

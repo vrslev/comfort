@@ -1,85 +1,85 @@
 {
- "actions": [],
- "autoname": "field:item_code",
- "creation": "2021-06-23 23:00:37.611695",
- "doctype": "DocType",
- "editable_grid": 1,
- "engine": "InnoDB",
- "field_order": [
-  "item_code",
-  "reserved_actual",
-  "available_actual",
-  "reserved_purchased",
-  "available_purchased",
-  "projected"
- ],
- "fields": [
-  {
-   "fieldname": "item_code",
-   "fieldtype": "Link",
-   "label": "Item Code",
-   "options": "Item",
-   "read_only": 1,
-   "unique": 1
-  },
-  {
-   "fieldname": "reserved_actual",
-   "fieldtype": "Int",
-   "in_list_view": 1,
-   "label": "Reserved Actual",
-   "read_only": 1
-  },
-  {
-   "fieldname": "available_actual",
-   "fieldtype": "Int",
-   "in_list_view": 1,
-   "label": "Available Actual",
-   "read_only": 1
-  },
-  {
-   "fieldname": "reserved_purchased",
-   "fieldtype": "Int",
-   "in_list_view": 1,
-   "label": "Reserved Purchased",
-   "read_only": 1
-  },
-  {
-   "fieldname": "available_purchased",
-   "fieldtype": "Int",
-   "in_list_view": 1,
-   "label": "Available Purchased",
-   "read_only": 1
-  },
-  {
-   "fieldname": "projected",
-   "fieldtype": "Int",
-   "in_list_view": 1,
-   "label": "Projected",
-   "read_only": 1
-  }
- ],
- "in_create": 1,
- "index_web_pages_for_search": 1,
- "links": [],
- "modified": "2021-06-26 16:58:17.635637",
- "modified_by": "Administrator",
- "module": "Comfort",
- "name": "Bin",
- "owner": "Administrator",
- "permissions": [
-  {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "System Manager",
-   "share": 1,
-   "write": 1
-  }
- ],
- "sort_field": "modified",
- "sort_order": "DESC"
+    "actions": [],
+    "autoname": "field:item_code",
+    "creation": "2021-06-23 23:00:37.611695",
+    "doctype": "DocType",
+    "editable_grid": 1,
+    "engine": "InnoDB",
+    "field_order": [
+        "item_code",
+        "reserved_actual",
+        "available_actual",
+        "reserved_purchased",
+        "available_purchased",
+        "projected"
+    ],
+    "fields": [
+        {
+            "fieldname": "item_code",
+            "fieldtype": "Link",
+            "label": "Item Code",
+            "options": "Item",
+            "read_only": 1,
+            "unique": 1
+        },
+        {
+            "fieldname": "reserved_actual",
+            "fieldtype": "Int",
+            "in_list_view": 1,
+            "label": "Reserved Actual",
+            "read_only": 1
+        },
+        {
+            "fieldname": "available_actual",
+            "fieldtype": "Int",
+            "in_list_view": 1,
+            "label": "Available Actual",
+            "read_only": 1
+        },
+        {
+            "fieldname": "reserved_purchased",
+            "fieldtype": "Int",
+            "in_list_view": 1,
+            "label": "Reserved Purchased",
+            "read_only": 1
+        },
+        {
+            "fieldname": "available_purchased",
+            "fieldtype": "Int",
+            "in_list_view": 1,
+            "label": "Available Purchased",
+            "read_only": 1
+        },
+        {
+            "fieldname": "projected",
+            "fieldtype": "Int",
+            "in_list_view": 1,
+            "label": "Projected",
+            "read_only": 1
+        }
+    ],
+    "in_create": 1,
+    "index_web_pages_for_search": 1,
+    "links": [],
+    "modified": "2021-06-26 16:58:17.635637",
+    "modified_by": "Administrator",
+    "module": "Comfort",
+    "name": "Bin",
+    "owner": "Administrator",
+    "permissions": [
+        {
+            "create": 1,
+            "delete": 1,
+            "email": 1,
+            "export": 1,
+            "print": 1,
+            "read": 1,
+            "report": 1,
+            "role": "System Manager",
+            "share": 1,
+            "write": 1
+        }
+    ],
+    "sort_field": "modified",
+    "sort_order": "DESC"
 }

@@ -1,150 +1,150 @@
 {
- "actions": [],
- "autoname": "GLE-.YYYY.-.#####",
- "creation": "2020-12-29 15:53:39.714645",
- "doctype": "DocType",
- "editable_grid": 1,
- "engine": "InnoDB",
- "field_order": [
-  "transaction_type",
-  "party",
-  "is_cancelled",
-  "column_break_2",
-  "posting_date",
-  "account_section",
-  "account",
-  "column_break_9",
-  "debit_amount",
-  "credit_amount",
-  "voucher_section",
-  "voucher_type",
-  "column_break_13",
-  "voucher_no",
-  "section_break_14",
-  "remarks"
- ],
- "fields": [
-  {
-   "default": "Today",
-   "fieldname": "posting_date",
-   "fieldtype": "Date",
-   "in_filter": 1,
-   "in_list_view": 1,
-   "label": "Posting Date",
-   "search_index": 1
-  },
-  {
-   "fieldname": "account",
-   "fieldtype": "Link",
-   "in_filter": 1,
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Account",
-   "options": "Account",
-   "search_index": 1
-  },
-  {
-   "fieldname": "debit_amount",
-   "fieldtype": "Currency",
-   "label": "Debit Amount",
-   "precision": "0"
-  },
-  {
-   "fieldname": "credit_amount",
-   "fieldtype": "Currency",
-   "label": "Credit Amount",
-   "precision": "0"
-  },
-  {
-   "fieldname": "voucher_type",
-   "fieldtype": "Link",
-   "in_filter": 1,
-   "label": "Voucher Type",
-   "options": "DocType",
-   "search_index": 1
-  },
-  {
-   "fieldname": "voucher_no",
-   "fieldtype": "Dynamic Link",
-   "in_filter": 1,
-   "in_standard_filter": 1,
-   "label": "Voucher No",
-   "options": "voucher_type",
-   "search_index": 1
-  },
-  {
-   "fieldname": "party",
-   "fieldtype": "Link",
-   "label": "Party",
-   "options": "Customer"
-  },
-  {
-   "default": "0",
-   "fieldname": "is_cancelled",
-   "fieldtype": "Check",
-   "label": "Is Cancelled"
-  },
-  {
-   "fieldname": "remarks",
-   "fieldtype": "Small Text",
-   "label": "Remarks"
-  },
-  {
-   "fieldname": "column_break_2",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "column_break_9",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "voucher_section",
-   "fieldtype": "Section Break",
-   "label": "Voucher "
-  },
-  {
-   "fieldname": "section_break_14",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "account_section",
-   "fieldtype": "Section Break",
-   "label": "Account"
-  },
-  {
-   "fieldname": "column_break_13",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "transaction_type",
-   "fieldtype": "Select",
-   "label": "Transaction Type",
-   "options": "\nDelivery\nInvoice"
-  }
- ],
- "in_create": 1,
- "index_web_pages_for_search": 1,
- "links": [],
- "modified": "2021-07-08 02:28:43.954922",
- "modified_by": "Administrator",
- "module": "Comfort",
- "name": "GL Entry",
- "owner": "Administrator",
- "permissions": [
-  {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "System Manager",
-   "share": 1,
-   "write": 1
-  }
- ],
- "sort_field": "modified",
- "sort_order": "DESC",
- "track_changes": 1
+    "actions": [],
+    "autoname": "GLE-.YYYY.-.#####",
+    "creation": "2020-12-29 15:53:39.714645",
+    "doctype": "DocType",
+    "editable_grid": 1,
+    "engine": "InnoDB",
+    "field_order": [
+        "transaction_type",
+        "party",
+        "is_cancelled",
+        "column_break_2",
+        "posting_date",
+        "account_section",
+        "account",
+        "column_break_9",
+        "debit_amount",
+        "credit_amount",
+        "voucher_section",
+        "voucher_type",
+        "column_break_13",
+        "voucher_no",
+        "section_break_14",
+        "remarks"
+    ],
+    "fields": [
+        {
+            "default": "Today",
+            "fieldname": "posting_date",
+            "fieldtype": "Date",
+            "in_filter": 1,
+            "in_list_view": 1,
+            "label": "Posting Date",
+            "search_index": 1
+        },
+        {
+            "fieldname": "account",
+            "fieldtype": "Link",
+            "in_filter": 1,
+            "in_list_view": 1,
+            "in_standard_filter": 1,
+            "label": "Account",
+            "options": "Account",
+            "search_index": 1
+        },
+        {
+            "fieldname": "debit_amount",
+            "fieldtype": "Currency",
+            "label": "Debit Amount",
+            "precision": "0"
+        },
+        {
+            "fieldname": "credit_amount",
+            "fieldtype": "Currency",
+            "label": "Credit Amount",
+            "precision": "0"
+        },
+        {
+            "fieldname": "voucher_type",
+            "fieldtype": "Link",
+            "in_filter": 1,
+            "label": "Voucher Type",
+            "options": "DocType",
+            "search_index": 1
+        },
+        {
+            "fieldname": "voucher_no",
+            "fieldtype": "Dynamic Link",
+            "in_filter": 1,
+            "in_standard_filter": 1,
+            "label": "Voucher No",
+            "options": "voucher_type",
+            "search_index": 1
+        },
+        {
+            "fieldname": "party",
+            "fieldtype": "Link",
+            "label": "Party",
+            "options": "Customer"
+        },
+        {
+            "default": "0",
+            "fieldname": "is_cancelled",
+            "fieldtype": "Check",
+            "label": "Is Cancelled"
+        },
+        {
+            "fieldname": "remarks",
+            "fieldtype": "Small Text",
+            "label": "Remarks"
+        },
+        {
+            "fieldname": "column_break_2",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "column_break_9",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "voucher_section",
+            "fieldtype": "Section Break",
+            "label": "Voucher "
+        },
+        {
+            "fieldname": "section_break_14",
+            "fieldtype": "Section Break"
+        },
+        {
+            "fieldname": "account_section",
+            "fieldtype": "Section Break",
+            "label": "Account"
+        },
+        {
+            "fieldname": "column_break_13",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "transaction_type",
+            "fieldtype": "Select",
+            "label": "Transaction Type",
+            "options": "\nDelivery\nInvoice"
+        }
+    ],
+    "in_create": 1,
+    "index_web_pages_for_search": 1,
+    "links": [],
+    "modified": "2021-07-08 02:28:43.954922",
+    "modified_by": "Administrator",
+    "module": "Comfort",
+    "name": "GL Entry",
+    "owner": "Administrator",
+    "permissions": [
+        {
+            "create": 1,
+            "delete": 1,
+            "email": 1,
+            "export": 1,
+            "print": 1,
+            "read": 1,
+            "report": 1,
+            "role": "System Manager",
+            "share": 1,
+            "write": 1
+        }
+    ],
+    "sort_field": "modified",
+    "sort_order": "DESC",
+    "track_changes": 1
 }

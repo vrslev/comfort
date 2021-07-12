@@ -1,94 +1,94 @@
 {
- "actions": [],
- "autoname": "hash",
- "creation": "2021-01-01 18:29:09.563357",
- "doctype": "DocType",
- "editable_grid": 1,
- "engine": "InnoDB",
- "field_order": [
-  "item_code",
-  "item_name",
-  "qty",
-  "rate",
-  "amount",
-  "weight",
-  "total_weight"
- ],
- "fields": [
-  {
-   "fieldname": "item_name",
-   "fieldtype": "Data",
-   "label": "Item Name",
-   "reqd": 1
-  },
-  {
-   "columns": 1,
-   "fieldname": "qty",
-   "fieldtype": "Int",
-   "in_list_view": 1,
-   "label": "Quantity",
-   "non_negative": 1,
-   "precision": "2",
-   "reqd": 1
-  },
-  {
-   "fieldname": "rate",
-   "fieldtype": "Currency",
-   "in_list_view": 1,
-   "label": "Rate",
-   "non_negative": 1,
-   "options": "Company:company:default_currency",
-   "precision": "0",
-   "read_only": 1
-  },
-  {
-   "fieldname": "amount",
-   "fieldtype": "Currency",
-   "in_list_view": 1,
-   "label": "Amount",
-   "non_negative": 1,
-   "options": "Company:company:default_currency",
-   "precision": "0",
-   "read_only": 1
-  },
-  {
-   "bold": 1,
-   "fieldname": "item_code",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Item Code",
-   "options": "Item",
-   "print_hide": 1,
-   "search_index": 1
-  },
-  {
-   "fieldname": "weight",
-   "fieldtype": "Float",
-   "label": "Weight",
-   "non_negative": 1,
-   "precision": "2",
-   "read_only": 1
-  },
-  {
-   "fieldname": "total_weight",
-   "fieldtype": "Float",
-   "label": "Total Weight",
-   "non_negative": 1,
-   "precision": "2",
-   "read_only": 1
-  }
- ],
- "index_web_pages_for_search": 1,
- "istable": 1,
- "links": [],
- "modified": "2021-06-29 09:07:03.226051",
- "modified_by": "Administrator",
- "module": "Comfort",
- "name": "Sales Order Item",
- "owner": "Administrator",
- "permissions": [],
- "quick_entry": 1,
- "sort_field": "modified",
- "sort_order": "DESC",
- "track_changes": 1
+    "actions": [],
+    "autoname": "hash",
+    "creation": "2021-01-01 18:29:09.563357",
+    "doctype": "DocType",
+    "editable_grid": 1,
+    "engine": "InnoDB",
+    "field_order": [
+        "item_code",
+        "item_name",
+        "qty",
+        "rate",
+        "amount",
+        "weight",
+        "total_weight"
+    ],
+    "fields": [
+        {
+            "fieldname": "item_name",
+            "fieldtype": "Data",
+            "label": "Item Name",
+            "reqd": 1
+        },
+        {
+            "columns": 1,
+            "fieldname": "qty",
+            "fieldtype": "Int",
+            "in_list_view": 1,
+            "label": "Quantity",
+            "non_negative": 1,
+            "precision": "2",
+            "reqd": 1
+        },
+        {
+            "fieldname": "rate",
+            "fieldtype": "Currency",
+            "in_list_view": 1,
+            "label": "Rate",
+            "non_negative": 1,
+            "options": "Company:company:default_currency",
+            "precision": "0",
+            "read_only": 1
+        },
+        {
+            "fieldname": "amount",
+            "fieldtype": "Currency",
+            "in_list_view": 1,
+            "label": "Amount",
+            "non_negative": 1,
+            "options": "Company:company:default_currency",
+            "precision": "0",
+            "read_only": 1
+        },
+        {
+            "bold": 1,
+            "fieldname": "item_code",
+            "fieldtype": "Link",
+            "in_list_view": 1,
+            "label": "Item Code",
+            "options": "Item",
+            "print_hide": 1,
+            "search_index": 1
+        },
+        {
+            "fieldname": "weight",
+            "fieldtype": "Float",
+            "label": "Weight",
+            "non_negative": 1,
+            "precision": "2",
+            "read_only": 1
+        },
+        {
+            "fieldname": "total_weight",
+            "fieldtype": "Float",
+            "label": "Total Weight",
+            "non_negative": 1,
+            "precision": "2",
+            "read_only": 1
+        }
+    ],
+    "index_web_pages_for_search": 1,
+    "istable": 1,
+    "links": [],
+    "modified": "2021-06-29 09:07:03.226051",
+    "modified_by": "Administrator",
+    "module": "Comfort",
+    "name": "Sales Order Item",
+    "owner": "Administrator",
+    "permissions": [],
+    "quick_entry": 1,
+    "sort_field": "modified",
+    "sort_order": "DESC",
+    "track_changes": 1
 }

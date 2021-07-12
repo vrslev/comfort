@@ -1,121 +1,121 @@
 {
- "actions": [],
- "autoname": "JE-.YYYY.-.###",
- "creation": "2020-12-29 16:18:32.359347",
- "doctype": "DocType",
- "editable_grid": 1,
- "engine": "InnoDB",
- "field_order": [
-  "customer",
-  "column_break_3",
-  "posting_date",
-  "section_break_6",
-  "accounting_entries",
-  "section_break_8",
-  "total_debit",
-  "total_credit",
-  "column_break_11",
-  "difference",
-  "amended_from"
- ],
- "fields": [
-  {
-   "default": "Now",
-   "fieldname": "posting_date",
-   "fieldtype": "Date",
-   "label": "Posting Date",
-   "reqd": 1
-  },
-  {
-   "fieldname": "accounting_entries",
-   "fieldtype": "Table",
-   "label": "Accounting Entries",
-   "options": "Journal Entry Account",
-   "reqd": 1
-  },
-  {
-   "fieldname": "total_debit",
-   "fieldtype": "Currency",
-   "in_list_view": 1,
-   "label": "Total Debit",
-   "no_copy": 1,
-   "precision": "0",
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
-   "fieldname": "total_credit",
-   "fieldtype": "Currency",
-   "in_list_view": 1,
-   "label": "Total Credit",
-   "no_copy": 1,
-   "precision": "0",
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
-   "fieldname": "difference",
-   "fieldtype": "Currency",
-   "label": "Difference (Dr - Cr)",
-   "read_only": 1
-  },
-  {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Journal Entry",
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
-   "fieldname": "column_break_3",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "section_break_6",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "section_break_8",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "column_break_11",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "customer",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Customer",
-   "options": "Customer"
-  }
- ],
- "index_web_pages_for_search": 1,
- "is_submittable": 1,
- "links": [],
- "modified": "2021-07-08 02:27:33.313189",
- "modified_by": "Administrator",
- "module": "Comfort",
- "name": "Journal Entry",
- "owner": "Administrator",
- "permissions": [
-  {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "System Manager",
-   "share": 1,
-   "write": 1
-  }
- ],
- "quick_entry": 1,
- "sort_field": "modified",
- "sort_order": "DESC",
- "track_changes": 1
+    "actions": [],
+    "autoname": "JE-.YYYY.-.###",
+    "creation": "2020-12-29 16:18:32.359347",
+    "doctype": "DocType",
+    "editable_grid": 1,
+    "engine": "InnoDB",
+    "field_order": [
+        "customer",
+        "column_break_3",
+        "posting_date",
+        "section_break_6",
+        "accounting_entries",
+        "section_break_8",
+        "total_debit",
+        "total_credit",
+        "column_break_11",
+        "difference",
+        "amended_from"
+    ],
+    "fields": [
+        {
+            "default": "Now",
+            "fieldname": "posting_date",
+            "fieldtype": "Date",
+            "label": "Posting Date",
+            "reqd": 1
+        },
+        {
+            "fieldname": "accounting_entries",
+            "fieldtype": "Table",
+            "label": "Accounting Entries",
+            "options": "Journal Entry Account",
+            "reqd": 1
+        },
+        {
+            "fieldname": "total_debit",
+            "fieldtype": "Currency",
+            "in_list_view": 1,
+            "label": "Total Debit",
+            "no_copy": 1,
+            "precision": "0",
+            "print_hide": 1,
+            "read_only": 1
+        },
+        {
+            "fieldname": "total_credit",
+            "fieldtype": "Currency",
+            "in_list_view": 1,
+            "label": "Total Credit",
+            "no_copy": 1,
+            "precision": "0",
+            "print_hide": 1,
+            "read_only": 1
+        },
+        {
+            "fieldname": "difference",
+            "fieldtype": "Currency",
+            "label": "Difference (Dr - Cr)",
+            "read_only": 1
+        },
+        {
+            "fieldname": "amended_from",
+            "fieldtype": "Link",
+            "label": "Amended From",
+            "no_copy": 1,
+            "options": "Journal Entry",
+            "print_hide": 1,
+            "read_only": 1
+        },
+        {
+            "fieldname": "column_break_3",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "section_break_6",
+            "fieldtype": "Section Break"
+        },
+        {
+            "fieldname": "section_break_8",
+            "fieldtype": "Section Break"
+        },
+        {
+            "fieldname": "column_break_11",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "customer",
+            "fieldtype": "Link",
+            "in_list_view": 1,
+            "label": "Customer",
+            "options": "Customer"
+        }
+    ],
+    "index_web_pages_for_search": 1,
+    "is_submittable": 1,
+    "links": [],
+    "modified": "2021-07-08 02:27:33.313189",
+    "modified_by": "Administrator",
+    "module": "Comfort",
+    "name": "Journal Entry",
+    "owner": "Administrator",
+    "permissions": [
+        {
+            "create": 1,
+            "delete": 1,
+            "email": 1,
+            "export": 1,
+            "print": 1,
+            "read": 1,
+            "report": 1,
+            "role": "System Manager",
+            "share": 1,
+            "write": 1
+        }
+    ],
+    "quick_entry": 1,
+    "sort_field": "modified",
+    "sort_order": "DESC",
+    "track_changes": 1
 }

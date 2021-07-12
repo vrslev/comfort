@@ -21,6 +21,13 @@ repos:
       rev: v7.30.0
       hooks:
           - id: eslint
+            args:
+                - "--fix"
+
+    - repo: https://github.com/pre-commit/mirrors-prettier
+      rev: v2.3.2
+      hooks:
+          - id: prettier
 
     - repo: https://github.com/pre-commit/pre-commit-hooks
       rev: v3.2.0

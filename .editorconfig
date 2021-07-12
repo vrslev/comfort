@@ -1,14 +1,15 @@
-# Root editor config file
 root = true
 
-# Common settings
 [*]
-end_of_line = lf
-insert_final_newline = true
-trim_trailing_whitespace = true
-charset = utf-8
-
-# python, js indentation settings
-[{*.py,*.js}]
-indent_style = space
 indent_size = 4
+indent_style = space
+end_of_line = lf
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+[*.{yaml,yml}]
+max_line_length = 100
+
+[*.py]
+max_line_length = 80
