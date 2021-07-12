@@ -31,7 +31,8 @@ frappe.ui.form.on('Sales Order', {
 					label: 'Account',
 					fieldname: 'account',
 					fieldtype: 'Select',
-					options: 'Cash\nBank'
+					options: 'Cash\nBank',
+					default: 'Cash'
 				}], (values) => {
 					frm.call({
 						doc: frm.doc,
@@ -146,16 +147,21 @@ frappe.ui.form.on('Sales Order', {
 	},
 
 	total_amount(frm) {
-		frm.set_value('pending_amount', frm.doc.total_amount - frm.doc.paid_amount);
+		frm.set_value('pending_amount', (frm.doc.total_amount - frm.doc.paid_amount) || null);
 	},
 
 	items_cost(frm) {
 		apply_commission(frm);
+	},
+
+	service_amount(frm) {
+		calculate_total_amount(frm);
 	}
 });
 
+
 function calculate_total_amount(frm) {
-	frm.set_value('total_amount', frm.doc.items_cost + frm.doc.margin - frm.doc.discount);
+	frm.set_value('total_amount', (frm.doc.items_cost + frm.doc.margin + frm.doc.service_amount - frm.doc.discount) || null);
 }
 
 async function apply_commission(frm) {
@@ -164,7 +170,6 @@ async function apply_commission(frm) {
 	};
 	if (frm.doc.edit_commission == 1) {
 		args.commission = frm.doc.commission;
-
 	}
 	await frappe.call({
 		method: 'comfort.comfort.doctype.sales_order.sales_order.calculate_commission',
@@ -219,10 +224,15 @@ frappe.ui.form.on("Sales Order Item", {
 	}
 });
 
+
 function calculate_items_cost(frm) {
-	var total = frm.doc.items
-		.map(d => d.amount ? d.amount : 0)
-		.reduce((a, b) => a + b);
+	if (frm.doc.items && frm.doc.items.length > 0) {
+		var total = frm.doc.items
+			.map(d => d.amount ? d.amount : 0)
+			.reduce((a, b) => a + b);
+	} else {
+		total = null;
+	}
 	frm.set_value("items_cost", total);
 }
 
@@ -232,9 +242,13 @@ function calculate_item_total_weight(frm, cdt, cdn) {
 }
 
 function calculate_total_quantity(frm) {
-	var qty = frm.doc.items
-		.map(d => d.amount ? d.qty : 0)
-		.reduce((a, b) => a + b);
+	if (frm.doc.items && frm.doc.items.length > 0) {
+		var qty = frm.doc.items
+			.map(d => d.amount ? d.qty : 0)
+			.reduce((a, b) => a + b);
+	} else {
+		qty = null;
+	}
 	frm.set_value("total_quantity", qty);
 }
 
@@ -244,10 +258,58 @@ function calculate_item_amount(frm, cdt, cdn) {
 }
 
 function calculate_total_weight(frm) {
-	var total = frm.doc.items
-		.map(d => d.total_weight ? d.total_weight : 0)
-		.reduce((a, b) => a + b);
+	if (frm.doc.items && frm.doc.items.length > 0) {
+		var total = frm.doc.items
+			.map(d => d.total_weight ? d.total_weight : 0)
+			.reduce((a, b) => a + b);
+	} else {
+		total = null;
+	}
 	frm.set_value("total_weight", total);
+}
+
+function calculate_service_amount(frm) {
+	if (frm.doc.services && frm.doc.services.length > 0) {
+		var total = frm.doc.services
+			.map(d => d.rate ? d.rate : 0)
+			.reduce((a, b) => a + b);
+	} else {
+		total = null;
+	}
+	frm.set_value("service_amount", total);
+}
+
+
+frappe.ui.form.on("Sales Order Service", {
+	type(frm, cdt, cdn) {
+		var rates = {
+			"Delivery to Apartment": 100,
+			"Delivery to Entrance": 300
+		};
+		let doc = frappe.get_doc(cdt, cdn);
+		frappe.model.set_value(cdt, cdn, 'rate', rates[doc.type] || 0);
+		toggle_services_add_row_btn();
+	},
+
+	rate(frm) {
+		calculate_service_amount(frm);
+	},
+
+	services_remove(frm) {
+		calculate_service_amount(frm);
+	}
+});
+
+
+function toggle_services_add_row_btn() {
+	let btn = cur_frm.fields_dict.services.grid.wrapper.find(".grid-add-row");
+	let services_joined = cur_frm.doc.services.map(d => d.type).join();
+	btn.hide();
+	if (services_joined.match('Delivery') && services_joined.match('Installation')) {
+		btn.hide();
+	} else {
+		btn.show();
+	}
 }
 
 function recalculate(frm) {
@@ -255,7 +317,6 @@ function recalculate(frm) {
 	calculate_total_quantity(frm);
 	calculate_total_weight(frm);
 }
-
 
 async function quick_add_items(text) {
 	comfort.fetch_items(text, false, true, ['item_name', 'rate', 'weight']).then(r => {
