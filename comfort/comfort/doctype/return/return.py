@@ -2,7 +2,7 @@ import frappe
 from comfort.comfort.doctype.purchase_order.purchase_order import PurchaseOrder
 from comfort.comfort.doctype.sales_order.sales_order import calculate_commission
 from comfort.comfort.general_ledger import (
-    get_default_accounts,
+    get_account,
     get_paid_amount,
     make_gl_entries,
 )
@@ -186,7 +186,7 @@ class Return(Document):
         else:
             frappe.throw("")
 
-        accounts = get_default_accounts(accounts)
+        accounts = get_account(accounts)
 
         make_gl_entries(
             frappe._dict({"doctype": self.voucher_type, "name": self.voucher_no}),
@@ -238,7 +238,7 @@ class Return(Document):
         # Compensation
         if self.return_money and not self.return_items:
             validate_paid_amt()
-            accounts = get_default_accounts(["cash", "sales_compensations"])
+            accounts = get_account(["cash", "sales_compensations"])
             make_gl_entries(doc, accounts[0], accounts[1], amount)
 
         elif (self.return_money and self.return_items) or from_purchase_return:
@@ -250,11 +250,11 @@ class Return(Document):
                     doc, items, amount, create_new_doc=from_purchase_return
                 )
 
-                sales_accounts = get_default_accounts(["cash", "sales"])
+                sales_accounts = get_account(["cash", "sales"])
                 make_gl_entries(doc, sales_accounts[0], sales_accounts[1], amount)
 
                 if doc.service_amount:
-                    delivery_accounts = get_default_accounts(["cash", "delivery"])
+                    delivery_accounts = get_account(["cash", "delivery"])
                     make_gl_entries(
                         doc,
                         delivery_accounts[0],
@@ -268,7 +268,7 @@ class Return(Document):
                 #     doc, installation_accounts[0], installation_accounts[1], amount
                 # )
 
-                inventory_accounts = get_default_accounts(
+                inventory_accounts = get_account(
                     ["cost_of_goods_sold", "inventory"]
                 )
                 make_gl_entries(
