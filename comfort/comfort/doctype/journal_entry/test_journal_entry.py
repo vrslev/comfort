@@ -2,13 +2,11 @@ import unittest
 
 import frappe
 from comfort.comfort.doctype.account.test_account import create_account
-from comfort.comfort.doctype.company.test_company import create_company
 from frappe.utils import nowdate
 
 
 class TestJournalEntry(unittest.TestCase):
     def setUp(self):
-        create_company("_Test Company")
         create_account(
             "_Test Company", "Capital Stock - _C", "Asset", "Bank", "Equity - _C"
         )

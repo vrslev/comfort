@@ -1,13 +1,10 @@
 import unittest
 
 import frappe
-from comfort.comfort.doctype.company.test_company import create_company
 from frappe.utils import flt, nowdate
 
 
 class TestSalesOrder(unittest.TestCase):
-    def setUp(self):
-        create_company("_Test Company")
 
     def test_sales_order_creation(self):
         so = make_sales_order("Poco F2", 10, "Rohan", True, False)
