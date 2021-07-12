@@ -46,7 +46,7 @@ class PurchaseOrder(Document):
         carts_in_this_month = frappe.db.sql(
             """
             SELECT name from `tabPurchase Order`
-            WHERE name LIKE '{0}-%'
+            WHERE name LIKE '{}-%'
             ORDER BY CAST(REGEXP_SUBSTR(name, '[0-9]+$') as int) DESC
             """.format(
                 this_month
@@ -61,7 +61,7 @@ class PurchaseOrder(Document):
         else:
             cart_no = 1
 
-        self.name = "{0}-{1}".format(this_month, cart_no)
+        self.name = f"{this_month}-{cart_no}"
 
     def before_insert(self):
         self.status = "Draft"
@@ -78,7 +78,7 @@ class PurchaseOrder(Document):
 
     def delete_sales_order_dublicates(self):
         # TODO: Check if there any IkeaCarts that contains those Sales Orders
-        sales_order_names = list(set([s.sales_order_name for s in self.sales_orders]))
+        sales_order_names = list({s.sales_order_name for s in self.sales_orders})
         sales_orders_no_dublicates = []
 
         for s in self.sales_orders:

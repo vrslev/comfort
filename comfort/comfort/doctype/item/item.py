@@ -53,7 +53,7 @@ class Item(Document):
         parent_items = frappe.get_all(
             "Child Item", "parent", {"item_code": self.item_code}
         )
-        parent_items = list(set([d.parent for d in parent_items]))
+        parent_items = list({d.parent for d in parent_items})
         for d in parent_items:
             doc = frappe.get_doc("Item", d)
             doc.calculate_weight()

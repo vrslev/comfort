@@ -65,7 +65,7 @@ def create_charts():
 def identify_is_group(child):
     if child.get("is_group"):
         is_group = child.get("is_group")
-    elif len(set(child.keys()) - set(["root_type", "is_group"])):
+    elif len(set(child.keys()) - {"root_type", "is_group"}):
         is_group = 1
     else:
         is_group = 0
