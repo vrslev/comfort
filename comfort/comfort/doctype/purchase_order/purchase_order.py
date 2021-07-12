@@ -2,7 +2,7 @@ import re
 
 import frappe
 from comfort.comfort.general_ledger import (
-    get_default_accounts,
+    get_account,
     get_paid_amount,
     make_gl_entries,
     make_reverse_gl_entry,
@@ -220,13 +220,13 @@ class PurchaseOrder(Document):
             else:
                 inventory_amt_paid = self.total_amount - already_paid_amount
 
-            inventory_accounts = get_default_accounts(["cash", "prepaid_inventory"])
+            inventory_accounts = get_account(["cash", "prepaid_inventory"])
             make_gl_entries(
                 self, inventory_accounts[0], inventory_accounts[1], inventory_amt_paid
             )
 
             if self.delivery_cost > 0:
-                delivery_accounts = get_default_accounts(["cash", "purchase_delivery"])
+                delivery_accounts = get_account(["cash", "purchase_delivery"])
                 make_gl_entries(
                     self, delivery_accounts[0], delivery_accounts[1], delivery_amt_paid
                 )
@@ -278,7 +278,7 @@ class PurchaseOrder(Document):
             bin.available_purchased += qty
             bin.save()
 
-    def get_sales_order_items_for_bin(self):
+    def get_sales_order_items_for_bin(self): # TODO: use templated items instead (one that generates for cart)
         if not self.sales_orders and len(self.sales_orders) > 0:
             return
         sales_order_names = [d.sales_order_name for d in self.sales_orders]
@@ -340,7 +340,7 @@ class PurchaseOrder(Document):
         self.db_set("status", "Completed")
 
     def make_delivery_gl_entries(self):
-        accounts = get_default_accounts(["prepaid_inventory", "inventory"])
+        accounts = get_account(["prepaid_inventory", "inventory"])
         make_gl_entries(
             self,
             accounts[0],

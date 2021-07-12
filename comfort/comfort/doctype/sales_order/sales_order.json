@@ -7,42 +7,40 @@
  "engine": "InnoDB",
  "field_order": [
   "customer",
-  "column_break_3",
+  "column_break_2",
   "posting_date",
-  "section_break_7",
+  "section_break_4",
   "items",
   "section_break_6",
+  "services",
+  "section_break_9",
   "commission",
   "edit_commission",
   "column_break_7",
   "discount",
-  "totals_section",
+  "section_break_14",
   "total_amount",
-  "items_cost",
-  "margin",
-  "service_amount",
-  "column_break_11",
-  "total_quantity",
-  "total_weight",
   "payment_section",
   "paid_amount",
-  "column_break_20",
+  "column_break_18",
   "pending_amount",
-  "section_break_13",
+  "totals_section",
+  "total_quantity",
+  "items_cost",
+  "service_amount",
+  "column_break_25",
+  "total_weight",
+  "margin",
   "child_items",
   "status_section",
   "status",
   "payment_status",
   "per_paid",
-  "column_break_24",
+  "column_break_32",
   "delivery_status",
   "amended_from"
  ],
  "fields": [
-  {
-   "fieldname": "column_break_3",
-   "fieldtype": "Column Break"
-  },
   {
    "default": "Today",
    "fieldname": "posting_date",
@@ -52,10 +50,6 @@
    "print_hide": 1,
    "reqd": 1,
    "search_index": 1
-  },
-  {
-   "fieldname": "section_break_7",
-   "fieldtype": "Section Break"
   },
   {
    "fieldname": "items",
@@ -75,10 +69,6 @@
    "label": "Total Quantity",
    "precision": "2",
    "read_only": 1
-  },
-  {
-   "fieldname": "column_break_11",
-   "fieldtype": "Column Break"
   },
   {
    "fieldname": "total_amount",
@@ -142,11 +132,6 @@
    "label": "Status"
   },
   {
-   "fieldname": "section_break_13",
-   "fieldtype": "Section Break",
-   "read_only": 1
-  },
-  {
    "fieldname": "child_items",
    "fieldtype": "Table",
    "label": "Child Items",
@@ -165,14 +150,12 @@
    "search_index": 1
   },
   {
-   "default": "0",
    "fieldname": "per_paid",
    "fieldtype": "Percent",
    "label": "% Paid",
    "read_only": 1
   },
   {
-   "default": "0",
    "fieldname": "paid_amount",
    "fieldtype": "Currency",
    "label": "Paid Amount",
@@ -198,10 +181,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "section_break_6",
-   "fieldtype": "Section Break"
-  },
-  {
    "fieldname": "total_weight",
    "fieldtype": "Float",
    "label": "Total Weight",
@@ -209,6 +188,7 @@
    "read_only": 1
   },
   {
+   "default": "15",
    "fieldname": "commission",
    "fieldtype": "Percent",
    "label": "Commission",
@@ -222,10 +202,6 @@
    "label": "Edit Commission"
   },
   {
-   "fieldname": "column_break_24",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "margin",
    "fieldtype": "Currency",
    "label": "Margin",
@@ -237,7 +213,6 @@
    "fieldname": "discount",
    "fieldtype": "Currency",
    "label": "Discount",
-   "non_negative": 1,
    "precision": "0"
   },
   {
@@ -246,20 +221,57 @@
    "label": "Payment"
   },
   {
-   "fieldname": "column_break_20",
+   "fieldname": "services",
+   "fieldtype": "Table",
+   "label": "Services",
+   "options": "Sales Order Service"
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_4",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "section_break_6",
+   "fieldtype": "Section Break",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_9",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "section_break_14",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_18",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "items",
+   "fieldname": "column_break_25",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_32",
    "fieldtype": "Column Break"
   },
   {
    "fieldname": "service_amount",
    "fieldtype": "Currency",
    "label": "Service Amount",
-   "precision": "0"
+   "precision": "0",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-07-08 02:16:26.410482",
+ "modified": "2021-07-12 07:21:03.632700",
  "modified_by": "Administrator",
  "module": "Comfort",
  "name": "Sales Order",

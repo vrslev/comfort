@@ -62,8 +62,8 @@ def make_cancelled_gl_entry(entry):
 def cancel_gl_entry(voucher_type, voucher_no):
     frappe.db.sql(
         """
-        UPDATE `tabGL Entry` 
-        SET is_cancelled=1 
+        UPDATE `tabGL Entry`
+        SET is_cancelled=1
         WHERE voucher_type=%s
         AND voucher_no=%s AND is_cancelled=0
         """,
@@ -79,20 +79,24 @@ def get_account_balance(accounts, conditions="") -> int:
         conditions = "AND " + conditions
     try:
         return cint(
-                frappe.db.sql(
-                    f"""
-            SELECT SUM(debit_amount) - SUM(credit_amount) 
-            FROM `tabGL Entry` 
+            frappe.db.sql(
+                f"""
+            SELECT SUM(debit_amount) - SUM(credit_amount)
+            FROM `tabGL Entry`
             WHERE is_cancelled=0 and account IN ({accounts})
             {conditions}
             """
-                )[0][0]
+            )[0][0]
         )
     except IndexError:
         pass
 
 
-def get_default_accounts(field_names):
+def get_account(field_names):
+    return_str = False
+    if isinstance(field_names, str):
+        field_names = [field_names]
+        return_str = True
     settings_name = "Accounts Settings"
     settings = frappe.get_cached_doc(settings_name, settings_name)
     accounts = []
@@ -101,12 +105,14 @@ def get_default_accounts(field_names):
         if hasattr(settings, account):
             accounts.append(getattr(settings, account))
 
-    return accounts
+    return accounts[0] if return_str else accounts
 
 
 def get_paid_amount(dt, dn):
-    accounts = get_default_accounts(["cash", "bank"])
-    balance = get_account_balance(accounts, f"voucher_type='{dt}' AND voucher_no='{dn}'")
-    if dt == 'Purchase Order':
+    accounts = get_account(["cash", "bank"])
+    balance = get_account_balance(
+        accounts, f"voucher_type='{dt}' AND voucher_no='{dn}'"
+    )
+    if dt == "Purchase Order":
         balance = -balance
     return balance

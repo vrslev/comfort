@@ -1,20 +1,20 @@
 from comfort.comfort.doctype.bin.bin import update_bin
 import frappe
 from comfort.comfort.general_ledger import (
-    get_default_accounts,
+    get_account,
     get_paid_amount,
     make_gl_entries,
+    make_gl_entry,
     make_reverse_gl_entry,
 )
 from frappe import _
 from frappe.model.document import Document
 
-# TODO: Cancel payment and delivery
-# TODO: Services account
 class SalesOrder(Document):
     def validate(self):
         self.merge_same_items()
         self.delete_empty_items()
+        self.set_services_table()
         self.calculate()
         self.set_child_items()
         self.set_statuses()
@@ -48,10 +48,19 @@ class SalesOrder(Document):
         for d in to_remove:
             self.items.remove(d)
 
+    def set_services_table(self):
+        if not self.get("services"):
+            self.services = []
+        for d in self.services:
+            if not d.get("rate"):
+                d.rate = 0
+
     def calculate(self):
         self.set_item_values()
         self.calculate_item_totals()
-        self.calculate_commission_and_totals()
+        self.calculate_service_amount()
+        self.calculate_commission()
+        self.calculate_total_amount()
         self.set_paid_and_pending_per_amount()
 
     def set_item_values(self):
@@ -71,14 +80,24 @@ class SalesOrder(Document):
             self.total_weight += d.total_weight
             self.items_cost += d.amount
 
-    def calculate_commission_and_totals(self):
+    def calculate_service_amount(self):
+        self.service_amount = 0
+        for d in self.services:
+            self.service_amount += d.rate
+
+    def calculate_commission(self):
         if self.edit_commission:
             r = calculate_commission(self.items_cost, self.commission)
         else:
             r = calculate_commission(self.items_cost)
 
-        self.update(r)
-        self.total_amount = self.items_cost + self.margin - self.discount
+        self.commission = r["commission"]
+        self.margin = r["margin"]
+
+    def calculate_total_amount(self):
+        self.total_amount = (
+            self.items_cost + self.margin + self.service_amount - self.discount
+        )
 
     def set_paid_and_pending_per_amount(self):
         self.paid_amount = get_paid_amount(self.doctype, self.name)
@@ -194,10 +213,8 @@ class SalesOrder(Document):
         if paid_amount == 0:
             return
 
-        paid_to = "cash" if cash else "bank"
-
         if self.service_amount > 0:
-            sales_amt = self.total_amount - self.service_amount
+            sales_amt = self.items_cost + self.margin - self.discount
             service_amt_paid = 0
             if paid_amount > sales_amt:
                 sales_amt_paid = sales_amt
@@ -207,15 +224,40 @@ class SalesOrder(Document):
         else:
             sales_amt_paid = paid_amount
 
-        sales_accounts = get_default_accounts(["sales", paid_to])
-        make_gl_entries(self, sales_accounts[0], sales_accounts[1], sales_amt_paid)
+        make_gl_entry(self, get_account("cash" if cash else "bank"), paid_amount, 0)
+        make_gl_entry(self, get_account("sales"), 0, sales_amt_paid)
 
+        delivery_amt_paid, installation_amt_paid = 0, 0
         if self.service_amount > 0:
-            service_accounts = get_default_accounts(["delivery", paid_to])
-            make_gl_entries(
-                self, service_accounts[0], service_accounts[1], service_amt_paid
-            )
-            # TODO: Installation as separate entry
+            delivery_amt, installation_amt = 0, 0
+            for d in self.services:
+                if "Delivery" in d.type:  # TODO: Test this with translation
+                    delivery_amt += d.rate
+                elif "Installation" in d.type:
+                    installation_amt += d.rate
+
+            if installation_amt == 0:
+                delivery_amt_paid = service_amt_paid
+            elif delivery_amt == 0:
+                installation_amt_paid = service_amt_paid
+            else:
+                if delivery_amt_paid >= service_amt_paid:
+                    delivery_amt_paid = service_amt_paid
+                    installation_amt_paid = 0
+                else:
+                    delivery_amt_paid = delivery_amt
+                    installation_amt_paid = service_amt_paid - delivery_amt_paid
+
+            if delivery_amt_paid > 0:
+                make_gl_entry(self, get_account("delivery"), 0, delivery_amt_paid)
+
+            if installation_amt_paid > 0:
+                make_gl_entry(
+                    self, get_account("installation"), 0, installation_amt_paid
+                )
+
+        if (sales_amt_paid + delivery_amt_paid + installation_amt_paid) != paid_amount:
+            frappe.throw(_("Cannot calculate amount for GL Entries properly"))
 
     @frappe.whitelist()
     def set_delivered(self):
@@ -228,7 +270,7 @@ class SalesOrder(Document):
             frappe.throw(_("Not able to set Delivered"))
 
     def make_delivery_gl_entries(self):
-        delivery_accounts = get_default_accounts(["inventory", "cost_of_goods_sold"])
+        delivery_accounts = get_account(["inventory", "cost_of_goods_sold"])
         make_gl_entries(
             self, delivery_accounts[0], delivery_accounts[1], self.items_cost
         )
@@ -283,6 +325,8 @@ class SalesOrder(Document):
             self.save()
 
     def on_cancel(self):
+        # TODO: Cancel payment and delivery
+        # TODO: Update bin
         self.ignore_linked_doctypes = "GL Entry"
 
         make_reverse_gl_entry(self.doctype, self.name)
@@ -291,8 +335,6 @@ class SalesOrder(Document):
 
         self.db_set("payment_status", "")
         self.db_set("delivery_status", "")
-
-        # TODO: Update bin
 
 
 CONDITIONS = [
