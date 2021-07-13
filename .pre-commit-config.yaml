@@ -1,3 +1,6 @@
+default_language_version:
+    python: python3.7
+
 repos:
     - repo: https://github.com/asottile/pyupgrade
       rev: v2.21.0
@@ -9,30 +12,35 @@ repos:
       rev: 21.6b0
       hooks:
           - id: black
+            args: [--quiet]
 
     - repo: https://github.com/pycqa/isort
       rev: 5.9.2
       hooks:
           - id: isort
-            files: ".*"
-            args: [--profile=black]
+            name: isort (python)
+          - id: isort
+            name: isort (cython)
+            types: [cython]
+          - id: isort
+            name: isort (pyi)
+            types: [pyi]
+
+    - repo: https://github.com/PyCQA/bandit
+      rev: 1.7.0
+      hooks:
+          - id: bandit
+            args: [-c=.bandit.yaml]
 
     - repo: https://github.com/pre-commit/mirrors-eslint
       rev: v7.30.0
       hooks:
           - id: eslint
             args: [--fix]
+            additional_dependencies:
+                - eslint-plugin-prettier # test it
 
     - repo: https://github.com/pre-commit/mirrors-prettier
       rev: v2.3.2
       hooks:
           - id: prettier
-
-    - repo: local
-      hooks:
-          - id: update-requirements-txt
-            name: update-requirements-txt
-            language: system
-            entry: ../../env/bin/poetry
-            args: [export, --output, requirements.txt, --without-hashes]
-            pass_filenames: false
