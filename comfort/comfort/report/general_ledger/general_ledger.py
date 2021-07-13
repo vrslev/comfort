@@ -1,4 +1,3 @@
-# pyright: reportPrivateUsage=false
 import frappe
 from frappe import _, _dict
 from frappe.utils import flt

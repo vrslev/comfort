@@ -35,7 +35,7 @@ known_first_party = ["frappe"]
 
 [tool.pyright]
 # https://github.com/microsoft/pyright/blob/main/docs/configuration.md
-exclude = ["**/node_modules", "**/__pycache__"]
+exclude = ["**/node_modules", "**/__pycache__", "typings"]
 typeCheckingMode = "strict"
 reportGeneralTypeIssues = false
 reportUnboundVariable = false
@@ -47,5 +47,5 @@ reportUnknownParameterType = false
 reportUnknownLambdaType = false
 reportOptionalSubscript = false
 reportOptionalIterable = false
-# reportUntypedFunctionDecorator = false
-# reportPrivateUsage = false
+reportUntypedFunctionDecorator = false
+reportPrivateUsage = false

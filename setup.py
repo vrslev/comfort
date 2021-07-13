@@ -14,8 +14,8 @@ if __name__ == "__main__":
         description=meta["description"],
         url=meta["repository"],
         author=meta["authors"][0],
-        packages=find_packages(),
         license=meta["license"],
+        packages=find_packages(),
         include_package_data=True,
         zip_safe=False,
     )

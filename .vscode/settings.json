@@ -20,6 +20,6 @@
             "password": "123"
         }
     ],
-    "python.analysis.extraPaths": ["../apps/frappe"],
+    "python.analysis.extraPaths": ["../apps"],
     "python.analysis.indexing": true
 }

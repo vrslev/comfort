@@ -150,7 +150,13 @@ def get_profit_loss_total_amount(data, period_key):
 
 
 def get_report_summary(data, period_key):
-    profit, total, asset, liability, equity = get_profit_loss_total_amount(
+    (
+        profit,
+        total,
+        asset,
+        liability,
+        equity,
+    ) = get_profit_loss_total_amount(  # pyright: reportUnusedVariable=false
         data, period_key
     )
 
