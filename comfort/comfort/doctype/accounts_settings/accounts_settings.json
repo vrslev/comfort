@@ -1,140 +1,140 @@
 {
-    "actions": [],
-    "allow_rename": 1,
-    "creation": "2021-07-05 13:57:47.248304",
-    "doctype": "DocType",
-    "editable_grid": 1,
-    "engine": "InnoDB",
-    "field_order": [
-        "default_values_section",
-        "default_currency",
-        "default_accounts_section",
-        "default_bank_account",
-        "default_prepaid_inventory_account",
-        "default_cost_of_goods_sold_account",
-        "default_sales_account",
-        "default_installation_account",
-        "section_break_10",
-        "default_cash_account",
-        "default_inventory_account",
-        "default_purchase_delivery_account",
-        "default_delivery_account",
-        "default_purchase_compensations_account",
-        "default_sales_compensations_account"
-    ],
-    "fields": [
-        {
-            "fieldname": "default_values_section",
-            "fieldtype": "Section Break",
-            "label": "Default Values"
-        },
-        {
-            "default": "RUB",
-            "fieldname": "default_currency",
-            "fieldtype": "Link",
-            "in_list_view": 1,
-            "label": "Default Currency",
-            "options": "Currency",
-            "reqd": 1
-        },
-        {
-            "fieldname": "default_accounts_section",
-            "fieldtype": "Section Break",
-            "label": "Default Accounts"
-        },
-        {
-            "fieldname": "default_bank_account",
-            "fieldtype": "Link",
-            "label": "Default Bank Account",
-            "options": "Account"
-        },
-        {
-            "fieldname": "default_prepaid_inventory_account",
-            "fieldtype": "Link",
-            "label": "Default Prepaid Inventory Account",
-            "options": "Account"
-        },
-        {
-            "fieldname": "default_cost_of_goods_sold_account",
-            "fieldtype": "Link",
-            "label": "Default Cost of Goods Sold Account",
-            "options": "Account"
-        },
-        {
-            "fieldname": "default_sales_account",
-            "fieldtype": "Link",
-            "label": "Default Sales Account",
-            "options": "Account"
-        },
-        {
-            "fieldname": "default_installation_account",
-            "fieldtype": "Link",
-            "label": "Default Installation Account",
-            "options": "Account"
-        },
-        {
-            "fieldname": "section_break_10",
-            "fieldtype": "Column Break"
-        },
-        {
-            "fieldname": "default_cash_account",
-            "fieldtype": "Link",
-            "label": "Default Cash Account",
-            "options": "Account"
-        },
-        {
-            "fieldname": "default_inventory_account",
-            "fieldtype": "Link",
-            "label": "Default Inventory Account",
-            "options": "Account"
-        },
-        {
-            "fieldname": "default_purchase_delivery_account",
-            "fieldtype": "Link",
-            "label": "Default Purchase Delivery Account",
-            "options": "Account"
-        },
-        {
-            "fieldname": "default_delivery_account",
-            "fieldtype": "Link",
-            "label": "Default Delivery Account",
-            "options": "Account"
-        },
-        {
-            "fieldname": "default_purchase_compensations_account",
-            "fieldtype": "Link",
-            "label": "Default Purchase Compensations Account",
-            "options": "Account"
-        },
-        {
-            "fieldname": "default_sales_compensations_account",
-            "fieldtype": "Link",
-            "label": "Default Sales Compensations Account",
-            "options": "Account"
-        }
-    ],
-    "index_web_pages_for_search": 1,
-    "issingle": 1,
-    "links": [],
-    "modified": "2021-07-08 01:00:30.756257",
-    "modified_by": "Administrator",
-    "module": "Comfort",
-    "name": "Accounts Settings",
-    "nsm_parent_field": "parent_company",
-    "owner": "Administrator",
-    "permissions": [
-        {
-            "create": 1,
-            "delete": 1,
-            "email": 1,
-            "print": 1,
-            "read": 1,
-            "role": "System Manager",
-            "share": 1,
-            "write": 1
-        }
-    ],
-    "sort_field": "modified",
-    "sort_order": "DESC",
-    "track_changes": 1
+  "actions": [],
+  "allow_rename": 1,
+  "creation": "2021-07-05 13:57:47.248304",
+  "doctype": "DocType",
+  "editable_grid": 1,
+  "engine": "InnoDB",
+  "field_order": [
+    "default_values_section",
+    "default_currency",
+    "default_accounts_section",
+    "default_bank_account",
+    "default_prepaid_inventory_account",
+    "default_cost_of_goods_sold_account",
+    "default_sales_account",
+    "default_installation_account",
+    "section_break_10",
+    "default_cash_account",
+    "default_inventory_account",
+    "default_purchase_delivery_account",
+    "default_delivery_account",
+    "default_purchase_compensations_account",
+    "default_sales_compensations_account"
+  ],
+  "fields": [
+    {
+      "fieldname": "default_values_section",
+      "fieldtype": "Section Break",
+      "label": "Default Values"
+    },
+    {
+      "default": "RUB",
+      "fieldname": "default_currency",
+      "fieldtype": "Link",
+      "in_list_view": 1,
+      "label": "Default Currency",
+      "options": "Currency",
+      "reqd": 1
+    },
+    {
+      "fieldname": "default_accounts_section",
+      "fieldtype": "Section Break",
+      "label": "Default Accounts"
+    },
+    {
+      "fieldname": "default_bank_account",
+      "fieldtype": "Link",
+      "label": "Default Bank Account",
+      "options": "Account"
+    },
+    {
+      "fieldname": "default_prepaid_inventory_account",
+      "fieldtype": "Link",
+      "label": "Default Prepaid Inventory Account",
+      "options": "Account"
+    },
+    {
+      "fieldname": "default_cost_of_goods_sold_account",
+      "fieldtype": "Link",
+      "label": "Default Cost of Goods Sold Account",
+      "options": "Account"
+    },
+    {
+      "fieldname": "default_sales_account",
+      "fieldtype": "Link",
+      "label": "Default Sales Account",
+      "options": "Account"
+    },
+    {
+      "fieldname": "default_installation_account",
+      "fieldtype": "Link",
+      "label": "Default Installation Account",
+      "options": "Account"
+    },
+    {
+      "fieldname": "section_break_10",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "default_cash_account",
+      "fieldtype": "Link",
+      "label": "Default Cash Account",
+      "options": "Account"
+    },
+    {
+      "fieldname": "default_inventory_account",
+      "fieldtype": "Link",
+      "label": "Default Inventory Account",
+      "options": "Account"
+    },
+    {
+      "fieldname": "default_purchase_delivery_account",
+      "fieldtype": "Link",
+      "label": "Default Purchase Delivery Account",
+      "options": "Account"
+    },
+    {
+      "fieldname": "default_delivery_account",
+      "fieldtype": "Link",
+      "label": "Default Delivery Account",
+      "options": "Account"
+    },
+    {
+      "fieldname": "default_purchase_compensations_account",
+      "fieldtype": "Link",
+      "label": "Default Purchase Compensations Account",
+      "options": "Account"
+    },
+    {
+      "fieldname": "default_sales_compensations_account",
+      "fieldtype": "Link",
+      "label": "Default Sales Compensations Account",
+      "options": "Account"
+    }
+  ],
+  "index_web_pages_for_search": 1,
+  "issingle": 1,
+  "links": [],
+  "modified": "2021-07-08 01:00:30.756257",
+  "modified_by": "Administrator",
+  "module": "Comfort",
+  "name": "Accounts Settings",
+  "nsm_parent_field": "parent_company",
+  "owner": "Administrator",
+  "permissions": [
+    {
+      "create": 1,
+      "delete": 1,
+      "email": 1,
+      "print": 1,
+      "read": 1,
+      "role": "System Manager",
+      "share": 1,
+      "write": 1
+    }
+  ],
+  "sort_field": "modified",
+  "sort_order": "DESC",
+  "track_changes": 1
 }

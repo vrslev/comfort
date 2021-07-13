@@ -1,101 +1,101 @@
 env:
-    browser: true
-    node: true
-    es6: true
+  browser: true
+  node: true
+  es6: true
 parserOptions:
-    ecmaVersion: 9
-    sourceType: module
+  ecmaVersion: 9
+  sourceType: module
 extends:
-    - eslint:recommended
-    - prettier
+  - eslint:recommended
+  - prettier
 rules:
-    indent: error
-    brace-style:
-        - error
-        - 1tbs
-    space-unary-ops:
-        - error
-        - words: true
-    linebreak-style:
-        - error
-        - unix
-    semi:
-        - warn
-        - always
-    camelcase:
-        - "off"
-    no-unused-vars:
-        - warn
-    no-redeclare:
-        - warn
-    no-console:
-        - warn
-    space-before-blocks: warn
-    keyword-spacing: warn
-    comma-spacing: warn
-    key-spacing: warn
+  indent: "off"
+  brace-style:
+    - error
+    - 1tbs
+  space-unary-ops:
+    - error
+    - words: true
+  linebreak-style:
+    - error
+    - unix
+  semi:
+    - warn
+    - always
+  camelcase:
+    - "off"
+  no-unused-vars:
+    - warn
+  no-redeclare:
+    - warn
+  no-console:
+    - warn
+  space-before-blocks: warn
+  keyword-spacing: warn
+  comma-spacing: warn
+  key-spacing: warn
 plugins:
-    - prettier
+  - prettier
 root: true
 globals:
-    comfort: true
-    frappe: true
-    erpnext: true
-    "$": true
-    moment: true
-    Awesomplete: true
-    __: true
-    locals: true
-    cint: true
-    cstr: true
-    cur_frm: true
-    cur_dialog: true
-    cur_page: true
-    cur_list: true
-    cur_tree: true
-    is_null: true
-    in_list: true
-    has_common: true
-    has_words: true
-    validate_email: true
-    get_number_format: true
-    format_number: true
-    format_currency: true
-    round_based_on_smallest_currency_fraction: true
-    roundNumber: true
-    comment_when: true
-    replace_newlines: true
-    open_url_post: true
-    toTitle: true
-    lstrip: true
-    strip: true
-    strip_html: true
-    replace_all: true
-    flt: true
-    precision: true
-    copy_dict: true
-    get_number_format_info: true
-    print_table: true
-    web_form_settings: true
-    refresh_many: true
-    refresh_field: true
-    toggle_field: true
-    get_field_obj: true
-    get_query_params: true
-    unhide_field: true
-    hide_field: true
-    set_field_options: true
-    getCookie: true
-    getCookies: true
-    get_url_arg: true
-    get_server_fields: true
-    set_multiple: true
-    QUnit: true
-    Chart: true
-    Cypress: true
-    cy: true
-    it: true
-    context: true
-    before: true
-    beforeEach: true
-    onScan: true
+  comfort: true
+  frappe: true
+  erpnext: true
+  "$": true
+  moment: true
+  Awesomplete: true
+  __: true
+  locals: true
+  cint: true
+  cstr: true
+  cur_frm: true
+  cur_dialog: true
+  cur_page: true
+  cur_list: true
+  cur_tree: true
+  is_null: true
+  in_list: true
+  has_common: true
+  has_words: true
+  validate_email: true
+  get_number_format: true
+  format_number: true
+  format_currency: true
+  round_based_on_smallest_currency_fraction: true
+  roundNumber: true
+  comment_when: true
+  replace_newlines: true
+  open_url_post: true
+  toTitle: true
+  lstrip: true
+  strip: true
+  strip_html: true
+  replace_all: true
+  flt: true
+  precision: true
+  copy_dict: true
+  get_number_format_info: true
+  print_table: true
+  web_form_settings: true
+  refresh_many: true
+  refresh_field: true
+  toggle_field: true
+  get_field_obj: true
+  get_query_params: true
+  unhide_field: true
+  hide_field: true
+  set_field_options: true
+  getCookie: true
+  getCookies: true
+  get_url_arg: true
+  get_server_fields: true
+  set_multiple: true
+  QUnit: true
+  Chart: true
+  Cypress: true
+  cy: true
+  it: true
+  context: true
+  before: true
+  beforeEach: true
+  onScan: true

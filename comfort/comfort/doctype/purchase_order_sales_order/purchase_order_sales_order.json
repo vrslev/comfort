@@ -1,48 +1,48 @@
 {
-    "actions": [],
-    "creation": "2021-06-24 02:49:15.349954",
-    "doctype": "DocType",
-    "editable_grid": 1,
-    "engine": "InnoDB",
-    "field_order": ["sales_order_name", "customer", "total"],
-    "fields": [
-        {
-            "fieldname": "sales_order_name",
-            "fieldtype": "Link",
-            "in_list_view": 1,
-            "in_preview": 1,
-            "label": "Sales Order Name",
-            "options": "Sales Order",
-            "reqd": 1
-        },
-        {
-            "fetch_from": "sales_order_name.customer",
-            "fieldname": "customer",
-            "fieldtype": "Data",
-            "in_list_view": 1,
-            "label": "Customer",
-            "read_only": 1
-        },
-        {
-            "depends_on": "eval:doc.docstatus == 0",
-            "fieldname": "total",
-            "fieldtype": "Currency",
-            "in_list_view": 1,
-            "label": "Total",
-            "read_only": 1
-        }
-    ],
-    "index_web_pages_for_search": 1,
-    "istable": 1,
-    "links": [],
-    "modified": "2021-06-26 10:37:36.928753",
-    "modified_by": "Administrator",
-    "module": "Comfort",
-    "name": "Purchase Order Sales Order",
-    "owner": "Administrator",
-    "permissions": [],
-    "quick_entry": 1,
-    "sort_field": "modified",
-    "sort_order": "DESC",
-    "track_changes": 1
+  "actions": [],
+  "creation": "2021-06-24 02:49:15.349954",
+  "doctype": "DocType",
+  "editable_grid": 1,
+  "engine": "InnoDB",
+  "field_order": ["sales_order_name", "customer", "total"],
+  "fields": [
+    {
+      "fieldname": "sales_order_name",
+      "fieldtype": "Link",
+      "in_list_view": 1,
+      "in_preview": 1,
+      "label": "Sales Order Name",
+      "options": "Sales Order",
+      "reqd": 1
+    },
+    {
+      "fetch_from": "sales_order_name.customer",
+      "fieldname": "customer",
+      "fieldtype": "Data",
+      "in_list_view": 1,
+      "label": "Customer",
+      "read_only": 1
+    },
+    {
+      "depends_on": "eval:doc.docstatus == 0",
+      "fieldname": "total",
+      "fieldtype": "Currency",
+      "in_list_view": 1,
+      "label": "Total",
+      "read_only": 1
+    }
+  ],
+  "index_web_pages_for_search": 1,
+  "istable": 1,
+  "links": [],
+  "modified": "2021-06-26 10:37:36.928753",
+  "modified_by": "Administrator",
+  "module": "Comfort",
+  "name": "Purchase Order Sales Order",
+  "owner": "Administrator",
+  "permissions": [],
+  "quick_entry": 1,
+  "sort_field": "modified",
+  "sort_order": "DESC",
+  "track_changes": 1
 }

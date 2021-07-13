@@ -1,3 +1,3 @@
 {
-    "js/comfort.min.js": ["public/js/index.js"]
+  "js/comfort.min.js": ["public/js/index.js"]
 }

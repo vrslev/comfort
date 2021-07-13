@@ -1,90 +1,90 @@
 {
-    "actions": [],
-    "autoname": "hash",
-    "creation": "2021-06-29 06:31:17.559319",
-    "doctype": "DocType",
-    "editable_grid": 1,
-    "engine": "InnoDB",
-    "field_order": [
-        "item_code",
-        "item_name",
-        "sales_order",
-        "qty",
-        "rate",
-        "reference_doctype",
-        "reference_name"
-    ],
-    "fields": [
-        {
-            "bold": 1,
-            "fieldname": "item_code",
-            "fieldtype": "Link",
-            "in_list_view": 1,
-            "label": "Item Code",
-            "options": "Item",
-            "print_hide": 1,
-            "search_index": 1
-        },
-        {
-            "fieldname": "item_name",
-            "fieldtype": "Data",
-            "hidden": 1,
-            "label": "Item Name",
-            "read_only": 1
-        },
-        {
-            "columns": 1,
-            "fieldname": "qty",
-            "fieldtype": "Int",
-            "in_list_view": 1,
-            "label": "Quantity",
-            "non_negative": 1,
-            "precision": "2",
-            "reqd": 1
-        },
-        {
-            "fieldname": "reference_doctype",
-            "fieldtype": "Link",
-            "hidden": 1,
-            "label": "Reference DocType",
-            "options": "DocType",
-            "read_only": 1
-        },
-        {
-            "fieldname": "reference_name",
-            "fieldtype": "Dynamic Link",
-            "hidden": 1,
-            "label": "Reference Name",
-            "options": "reference_doctype",
-            "read_only": 1
-        },
-        {
-            "fieldname": "rate",
-            "fieldtype": "Currency",
-            "label": "Rate",
-            "read_only": 1
-        },
-        {
-            "depends_on": "eval:doc.voucher_type == 'Purchase Order'",
-            "fieldname": "sales_order",
-            "fieldtype": "Link",
-            "in_list_view": 1,
-            "label": "Sales Order",
-            "options": "Sales Order",
-            "read_only": 1
-        }
-    ],
-    "index_web_pages_for_search": 1,
-    "istable": 1,
-    "links": [],
-    "modified": "2021-06-30 01:51:31.958413",
-    "modified_by": "Administrator",
-    "module": "Comfort",
-    "name": "Return Item",
-    "owner": "Administrator",
-    "permissions": [],
-    "quick_entry": 1,
-    "sort_field": "modified",
-    "sort_order": "DESC",
-    "track_changes": 1
+  "actions": [],
+  "autoname": "hash",
+  "creation": "2021-06-29 06:31:17.559319",
+  "doctype": "DocType",
+  "editable_grid": 1,
+  "engine": "InnoDB",
+  "field_order": [
+    "item_code",
+    "item_name",
+    "sales_order",
+    "qty",
+    "rate",
+    "reference_doctype",
+    "reference_name"
+  ],
+  "fields": [
+    {
+      "bold": 1,
+      "fieldname": "item_code",
+      "fieldtype": "Link",
+      "in_list_view": 1,
+      "label": "Item Code",
+      "options": "Item",
+      "print_hide": 1,
+      "search_index": 1
+    },
+    {
+      "fieldname": "item_name",
+      "fieldtype": "Data",
+      "hidden": 1,
+      "label": "Item Name",
+      "read_only": 1
+    },
+    {
+      "columns": 1,
+      "fieldname": "qty",
+      "fieldtype": "Int",
+      "in_list_view": 1,
+      "label": "Quantity",
+      "non_negative": 1,
+      "precision": "2",
+      "reqd": 1
+    },
+    {
+      "fieldname": "reference_doctype",
+      "fieldtype": "Link",
+      "hidden": 1,
+      "label": "Reference DocType",
+      "options": "DocType",
+      "read_only": 1
+    },
+    {
+      "fieldname": "reference_name",
+      "fieldtype": "Dynamic Link",
+      "hidden": 1,
+      "label": "Reference Name",
+      "options": "reference_doctype",
+      "read_only": 1
+    },
+    {
+      "fieldname": "rate",
+      "fieldtype": "Currency",
+      "label": "Rate",
+      "read_only": 1
+    },
+    {
+      "depends_on": "eval:doc.voucher_type == 'Purchase Order'",
+      "fieldname": "sales_order",
+      "fieldtype": "Link",
+      "in_list_view": 1,
+      "label": "Sales Order",
+      "options": "Sales Order",
+      "read_only": 1
+    }
+  ],
+  "index_web_pages_for_search": 1,
+  "istable": 1,
+  "links": [],
+  "modified": "2021-06-30 01:51:31.958413",
+  "modified_by": "Administrator",
+  "module": "Comfort",
+  "name": "Return Item",
+  "owner": "Administrator",
+  "permissions": [],
+  "quick_entry": 1,
+  "sort_field": "modified",
+  "sort_order": "DESC",
+  "track_changes": 1
 }

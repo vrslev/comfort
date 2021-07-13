@@ -1,8 +1,6 @@
-.DS_Store
-*.pyc
 *.egg-info
-*.swp
-tags
-comfort/docs/current
+__pycache__/
+*.py[cod]
 node_modules
 .ipynb_checkpoints
+.DS_Store

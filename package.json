@@ -1,25 +1,25 @@
 {
-    "name": "comfort",
-    "version": "1.0.0",
-    "description": "Lite-weight ERPNext alternative for specific business",
-    "main": "index.js",
-    "dependencies": {
-        "eslint-plugin-prettier": "^3.4.0",
-        "eslint-config-prettier": "^8.3.0",
-        "eslint": "^7.30.0"
-    },
-    "devDependencies": {},
-    "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
-    },
-    "repository": {
-        "type": "git",
-        "url": "git+https://github.com/vrslev/comfort.git"
-    },
-    "author": "",
-    "license": "ISC",
-    "bugs": {
-        "url": "https://github.com/vrslev/comfort/issues"
-    },
-    "homepage": "https://github.com/vrslev/comfort#readme"
+  "name": "comfort",
+  "version": "1.0.0",
+  "description": "Lite-weight ERPNext alternative for specific business",
+  "main": "index.js",
+  "dependencies": {
+    "eslint-plugin-prettier": "^3.4.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint": "^7.30.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vrslev/comfort.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/vrslev/comfort/issues"
+  },
+  "homepage": "https://github.com/vrslev/comfort#readme"
 }
