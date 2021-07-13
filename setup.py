@@ -1,23 +1,21 @@
 # This is fork of https://github.com/shariquerik/accounting
 
-from setuptools import (  # pyright: reportMissingTypeStubs=false
-    find_packages,
-    setup,
-)
+if __name__ == "__main__":
+    import toml
+    from setuptools import find_packages, setup  # pyright: reportMissingTypeStubs=false
 
-with open("requirements.txt") as f:
-    install_requires = f.read().strip().split("\n")
+    with open("pyproject.toml") as f:
+        config = toml.load(f)
+    meta = config["tool"]["poetry"]
 
-from comfort import __version__ as version
-
-setup(
-    name="comfort",
-    version=version,
-    description="Lite-weight ERPNext alternative for specific business",
-    author="vrslev",
-    author_email="levwint@gmail.com",
-    packages=find_packages(),
-    zip_safe=False,
-    include_package_data=True,
-    install_requires=install_requires,
-)
+    setup(
+        name=meta["name"],
+        version=meta["version"],
+        description=meta["description"],
+        url=meta["repository"],
+        author=meta["authors"][0],
+        packages=find_packages(),
+        license=meta["license"],
+        include_package_data=True,
+        zip_safe=False,
+    )
