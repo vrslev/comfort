@@ -1,0 +1,25 @@
+{
+    "python.pythonPath": "/Users/lev/test/env/bin/python3.7",
+    "eslint.options": {
+        "configFile": ".eslintrc.yml"
+    },
+    "git.ignoredRepositories": ["../."],
+    "sqltools.connections": [
+        {
+            "mysqlOptions": {
+                "authProtocol": "default"
+            },
+            "previewLimit": 50,
+            "server": "localhost",
+            "port": 3306,
+            "driver": "MariaDB",
+            "name": "DB",
+            "socketPath": "/tmp/mysql.sock",
+            "database": "_c099a42a5555825c",
+            "username": "root",
+            "password": "123"
+        }
+    ],
+    "python.analysis.extraPaths": ["../apps/frappe"],
+    "python.analysis.indexing": true
+}
