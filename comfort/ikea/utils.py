@@ -1,7 +1,8 @@
 import re
 
-import frappe
 from ikea_api_extender import unshorten_ingka_pagelinks
+
+import frappe
 
 
 def extract_item_codes(message):

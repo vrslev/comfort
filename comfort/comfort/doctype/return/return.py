@@ -1,14 +1,9 @@
+from comfort.comfort.doctype.purchase_order.purchase_order import PurchaseOrder
+from comfort.comfort.doctype.sales_order.sales_order import calculate_commission
+from comfort.comfort.general_ledger import get_account, get_paid_amount, make_gl_entries
 import frappe
 from frappe import _
 from frappe.model.document import Document
-
-from comfort.comfort.doctype.purchase_order.purchase_order import PurchaseOrder
-from comfort.comfort.doctype.sales_order.sales_order import calculate_commission
-from comfort.comfort.general_ledger import (
-    get_account,
-    get_paid_amount,
-    make_gl_entries,
-)
 
 item_doctype = "Sales Order Item"
 child_item_doctype = "Sales Order Child Item"

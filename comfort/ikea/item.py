@@ -3,16 +3,13 @@ import json
 from typing import List
 
 import aiohttp
-import frappe
-from frappe import _
-from frappe.utils import parse_json
 from ikea_api.endpoints.item.item_iows import WrongItemCodeError
 from ikea_api_extender import get_items_immortally
 
-from comfort.ikea.utils import (
-    extract_item_codes,
-    get_item_codes_from_ingka_pagelinks,
-)
+from comfort.ikea.utils import extract_item_codes, get_item_codes_from_ingka_pagelinks
+import frappe
+from frappe import _
+from frappe.utils import parse_json
 
 
 @frappe.whitelist()

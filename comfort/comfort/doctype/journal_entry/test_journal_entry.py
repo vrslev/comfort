@@ -1,9 +1,8 @@
 import unittest
 
+from comfort.comfort.doctype.account.test_account import create_account
 import frappe
 from frappe.utils import nowdate
-
-from comfort.comfort.doctype.account.test_account import create_account
 
 
 class TestJournalEntry(unittest.TestCase):
