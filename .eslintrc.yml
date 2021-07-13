@@ -5,7 +5,9 @@ env:
 parserOptions:
     ecmaVersion: 9
     sourceType: module
-extends: eslint:recommended
+extends:
+    - eslint:recommended
+    - prettier
 rules:
     indent: error
     brace-style:
@@ -32,6 +34,8 @@ rules:
     keyword-spacing: warn
     comma-spacing: warn
     key-spacing: warn
+plugins:
+    - prettier
 root: true
 globals:
     comfort: true
