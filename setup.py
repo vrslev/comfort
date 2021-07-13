@@ -1,8 +1,8 @@
 # This is fork of https://github.com/shariquerik/accounting
 
 if __name__ == "__main__":
-    import toml
     from setuptools import find_packages, setup  # pyright: reportMissingTypeStubs=false
+    import toml
 
     with open("pyproject.toml") as f:
         config = toml.load(f)
