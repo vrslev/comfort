@@ -1,7 +1,12 @@
 {
-  "python.pythonPath": "/Users/lev/test/env/bin/python3.7",
+  "python.pythonPath": "../../env/bin/python3.7",
+  "python.analysis.extraPaths": ["../apps"],
+  "python.analysis.stubPath": ".vscode/stubs",
+  "python.analysis.indexing": true,
+  "python.analysis.diagnosticMode": "workspace",
   "eslint.options": {
-    "configFile": ".eslintrc.yml"
+    "configFile": ".eslintrc.yml",
+    "ignorePath": ".eslintignore"
   },
   "git.ignoredRepositories": ["../."],
   "sqltools.connections": [
@@ -19,7 +24,5 @@
       "username": "root",
       "password": "123"
     }
-  ],
-  "python.analysis.extraPaths": ["../apps"],
-  "python.analysis.indexing": true
+  ]
 }
