@@ -35,5 +35,14 @@ repos:
           - id: check-json
           - id: check-yaml
           - id: check-added-large-files
-          - id: name-tests-test
-          - id: requirements-txt-fixer
+          #   - id: name-tests-test
+          #   - id: requirements-txt-fixer
+
+    - repo: local
+      hooks:
+          - id: update-requirements-txt
+            name: update-requirements-txt
+            language: system
+            entry: ../../env/bin/poetry
+            args: [export, --output, requirements.txt, --without-hashes]
+            pass_filenames: false

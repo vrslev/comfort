@@ -1,4 +1,5 @@
 # This is fork of https://github.com/shariquerik/accounting
+
 from setuptools import (  # pyright: reportMissingTypeStubs=false
     find_packages,
     setup,
