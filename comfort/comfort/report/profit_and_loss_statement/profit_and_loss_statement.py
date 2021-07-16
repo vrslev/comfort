@@ -176,8 +176,6 @@ def get_chart_data(filters, columns, income, expense, profit, period_key):
     if profit_data:
         datasets.append({"name": "Net Profit/Loss", "values": profit_data})
 
-    chart = {"data": {"labels": labels, "datasets": datasets}}
-
-    chart["type"] = "bar"
+    chart = {"data": {"labels": labels, "datasets": datasets}, "type": "bar"}
 
     return chart

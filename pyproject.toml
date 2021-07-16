@@ -14,15 +14,11 @@ known_first_party = "frappe"
 # https://github.com/microsoft/pyright/blob/main/docs/configuration.md
 exclude = ["**/node_modules", "**/__pycache__", ".vscode/stubs"]
 typeCheckingMode = "strict"
+pythonVersion = "3.7"
 reportGeneralTypeIssues = false
-reportUnboundVariable = false
-# reportMissingTypeStubs = false
 reportUnknownArgumentType = false
 reportUnknownMemberType = false
 reportUnknownVariableType = false
 reportUnknownParameterType = false
 reportUnknownLambdaType = false
-reportOptionalSubscript = false
-reportOptionalIterable = false
 reportUntypedFunctionDecorator = false
-reportPrivateUsage = false

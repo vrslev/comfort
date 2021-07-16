@@ -215,6 +215,8 @@ class SalesOrder(Document):
             return
 
         if self.service_amount > 0:
+            # TODO: Refactor, for now:
+            # pyright: reportUnboundVariable=false
             sales_amt = self.items_cost + self.margin - self.discount
             service_amt_paid = 0
             if paid_amount > sales_amt:
@@ -237,7 +239,7 @@ class SalesOrder(Document):
                 elif "Installation" in d.type:
                     installation_amt += d.rate
 
-            if installation_amt == 0:
+            if installation_amt == 0:  # TODO: Refactor
                 delivery_amt_paid = service_amt_paid
             elif delivery_amt == 0:
                 installation_amt_paid = service_amt_paid

@@ -213,11 +213,9 @@ def get_chart_data(filters, columns, asset, liability, equity, period_key):
     if equity_data:
         datasets.append({"name": "Equity", "values": equity_data})
 
-    chart = {"data": {"labels": labels, "datasets": datasets}}
-
-    if filters.chart_type == "Bar Chart":
-        chart["type"] = "bar"
-    else:
-        chart["type"] = "line"
+    chart = {
+        "data": {"labels": labels, "datasets": datasets},
+        "type": "bar" if filters.chart_type == "Bar Chart" else "line",
+    }
 
     return chart

@@ -139,11 +139,11 @@ def get_updated_entries(filters, gl_entries):
         closing.debit_amount += flt(gl_entry.debit_amount)
         closing.credit_amount += flt(gl_entry.credit_amount)
 
-    return _dict(opening=opening, total=total, closing=closing)
+    return _dict(opening=opening, total=total, closing=closing)  # type: ignore
 
 
 def get_opening_total_closing(label):
-    return _dict(account=label, debit_amount=0.0, credit_amount=0.0, balance=0.0)
+    return _dict(account=label, debit_amount=0.0, credit_amount=0.0, balance=0.0)  # type: ignore
 
 
 def add_balance_in_entries(data):

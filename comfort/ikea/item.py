@@ -1,6 +1,5 @@
 import asyncio
 import json
-from typing import List
 
 import aiohttp
 from ikea_api.endpoints.item.item_iows import WrongItemCodeError
@@ -17,7 +16,7 @@ from frappe.utils import parse_json
 
 @frappe.whitelist()
 def fetch_new_items(
-    item_codes, force_update=False, download_images=True, return_values=[]
+    item_codes, force_update=False, download_images=True, values_from_db=[]
 ):
 
     try:
@@ -25,12 +24,12 @@ def fetch_new_items(
     except json.decoder.JSONDecodeError:
         item_codes = str(item_codes)
 
-    force_update, download_images, return_values = (
+    force_update, download_images, values_from_db = (
         parse_json(force_update),
         parse_json(download_images),
-        parse_json(return_values),
+        parse_json(values_from_db),
     )
-    return_values: List[str]
+    # values_from_db: List[str]
 
     if isinstance(item_codes, int):
         item_codes = str(item_codes)
@@ -61,7 +60,7 @@ def fetch_new_items(
         try:
             response = get_items_immortally(items_to_fetch)
         except WrongItemCodeError:
-            frappe.throw(_("Wrong Item Code"))
+            return frappe.throw(_("Wrong Item Code"))
 
         parsed_items = response["items"]
         res.update(
@@ -77,13 +76,13 @@ def fetch_new_items(
         for d in parsed_items:
             add_item(d, force_update=force_update)
 
-    if return_values and len(return_values) > 0:
-        if "item_code" in return_values:
-            return_values.remove("item_code")
-        return_values.insert(0, "item_code")
+    if values_from_db and len(values_from_db) > 0:
+        if "item_code" in values_from_db:
+            values_from_db.remove("item_code")
+        values_from_db.insert(0, "item_code")
 
         res["values"] = frappe.get_all(
-            "Item", return_values, {"item_code": ["in", res["successful"]]}
+            "Item", values_from_db, {"item_code": ["in", res["successful"]]}
         )
 
     if download_images and parsed_items:

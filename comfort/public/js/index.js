@@ -4,7 +4,7 @@ comfort.fetch_items = (
   item_codes,
   force_update = false,
   download_images = true,
-  return_values
+  values_from_db
 ) => {
   var promise = new Promise((resolve) => {
     let isResolved = false;
@@ -14,7 +14,7 @@ comfort.fetch_items = (
         item_codes: item_codes,
         force_update: force_update,
         download_images: download_images,
-        return_values: return_values,
+        values_from_db: values_from_db,
       },
       callback: (r) => {
         if (r.message.unsuccessful.length > 0) {

@@ -1,4 +1,5 @@
 import re
+from typing import Any, Dict, Tuple
 
 from ikea_api import (
     Cart,
@@ -63,8 +64,8 @@ class PurchaseOrder(Document):
             latest_cart_name_no_ = re.findall(r"-(\d+)", latest_cart_name)
             if len(latest_cart_name_no_) > 0:
                 latest_cart_name_no = latest_cart_name_no_[0]
-            cart_no = int(latest_cart_name_no) + 1
-        else:
+            cart_no = int(latest_cart_name_no) + 1  # type: ignore
+        else:  # TODO: Refactor
             cart_no = 1
 
         self.name = f"{this_month}-{cart_no}"
@@ -145,7 +146,9 @@ class PurchaseOrder(Document):
     def get_delivery_services(self):
         try:
             templated_items = self.get_templated_items_for_api(True)
-            delivery_services = IkeaCartUtils().get_delivery_services(templated_items)
+            delivery_services: Dict[Any, Any] = IkeaCartUtils().get_delivery_services(
+                templated_items
+            )
             self.update(
                 {
                     "delivery_options": delivery_services["options"],
@@ -235,8 +238,11 @@ class PurchaseOrder(Document):
             if self.delivery_cost > 0:
                 delivery_accounts = get_account(["cash", "purchase_delivery"])
                 make_gl_entries(
-                    self, delivery_accounts[0], delivery_accounts[1], delivery_amt_paid
-                )
+                    self,
+                    delivery_accounts[0],
+                    delivery_accounts[1],
+                    delivery_amt_paid,  # type:ignore
+                )  # TODO: Refactor
 
     @frappe.whitelist()
     def before_submit_events(
@@ -287,7 +293,9 @@ class PurchaseOrder(Document):
 
     def get_sales_order_items_for_bin(
         self,
-    ):  # TODO: use templated items instead (one that generates for cart)
+    ) -> Tuple[
+        str, int
+    ]:  # TODO: use templated items instead (one that generates for cart)
         if not self.sales_orders and len(self.sales_orders) > 0:
             return
         sales_order_names = [d.sales_order_name for d in self.sales_orders]

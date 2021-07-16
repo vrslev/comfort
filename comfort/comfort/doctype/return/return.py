@@ -174,18 +174,18 @@ class Return(Document):
                 self.create_new_paid_purchase_order()
 
             else:
-                frappe.throw(
+                return frappe.throw(
                     _(
                         "Cannot return items without money when Purchase Order is not received"
                     )
                 )
         else:
-            frappe.throw("")
+            return frappe.throw("")
 
         accounts = get_account(accounts)
 
         make_gl_entries(
-            frappe._dict({"doctype": self.voucher_type, "name": self.voucher_no}),
+            frappe._dict({"doctype": self.voucher_type, "name": self.voucher_no}),  # type: ignore
             accounts[0],
             accounts[1],
             self.amount,

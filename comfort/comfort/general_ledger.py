@@ -1,3 +1,5 @@
+from typing import Optional
+
 import frappe
 from frappe.utils.data import cint
 
@@ -68,7 +70,7 @@ def cancel_gl_entry(voucher_type, voucher_no):
     )
 
 
-def get_account_balance(accounts, conditions="") -> int:
+def get_account_balance(accounts, conditions="") -> Optional[int]:
     if isinstance(accounts, str):
         accounts = [accounts]
     accounts = ", ".join(["'" + d + "'" for d in accounts])
@@ -110,6 +112,5 @@ def get_paid_amount(dt, dn):
     balance = get_account_balance(
         accounts, f"voucher_type='{dt}' AND voucher_no='{dn}'"
     )
-    if dt == "Purchase Order":
-        balance = -balance
-    return balance
+    if balance:
+        return balance if dt != "Purchase Order" else -balance
