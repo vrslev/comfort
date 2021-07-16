@@ -1,4 +1,4 @@
-skips:
+skips: # TODO: Fix SQL Injection issues
   - B105
   - B608
   - B110
