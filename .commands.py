@@ -16,15 +16,22 @@ def hello(bench):
         content = json.load(fp)
     port = content["webserver_port"]
 
+    vscode_path = os.path.join(path, "apps", "comfort")
+    if not os.path.exists(vscode_path):
+        vscode_path = os.path.join(path, "apps", "cih")
+    if not os.path.exists(vscode_path):
+        vscode_path = path
+
     command = """
     brew services start mariadb
     open -a "/Applications/Google Chrome.app" 'http://127.0.0.1:%s'
     cd %s
-    code .
+    code %s
     bench start
     """ % (
         port,
         path,
+        vscode_path,
     )
     subprocess.call(command, shell=True)  # nosec
 
