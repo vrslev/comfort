@@ -1,28 +1,3 @@
-# https://www.python.org/dev/peps/pep-0518/
-[tool.poetry]
-name = "comfort"
-version = "0.1.0"
-description = "Lite-weight ERPNext alternative for specific business"
-authors = ["Lev <5225148+vrslev@users.noreply.github.com>"]
-repository = "https://github.com/vrslev/comfort"
-license = "MIT"
-
-[tool.poetry.dependencies]
-# https://python-poetry.org/docs/pyproject#the-pyprojecttoml-file
-python = "^3.7"
-erpnext-telegram-integration = { git = "https://github.com/vrslev/erpnext_telegram" }
-ikea-api-extender = { git = "ssh://github.com/vrslev/ikea-api-extender.git" }
-vk-api = "^11.9.4"
-black = "^21.6b0"
-pytest = "^6.2.4"
-poetry = "^1.1.7"
-
-[tool.poetry.dev-dependencies]
-
-[build-system]
-requires = ["poetry-core>=1.0.0", "setuptools", "wheel", "toml"]
-build-backend = "poetry.core.masonry.api"
-
 [tool.black]
 # https://black.readthedocs.io/en/stable/usage_and_configuration/the_basics.html#configuration-format
 target-version = ["py37"]

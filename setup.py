@@ -1,24 +1,4 @@
-# This is fork of https://github.com/shariquerik/accounting
+from setuptools import setup  # type: ignore
 
 if __name__ == "__main__":
-    from setuptools import (  # pyright: reportMissingTypeStubs=false
-        find_packages,
-        setup,
-    )
-    import toml
-
-    with open("pyproject.toml") as f:
-        config = toml.load(f)
-    meta = config["tool"]["poetry"]
-
-    setup(
-        name=meta["name"],
-        version=meta["version"],
-        description=meta["description"],
-        url=meta["repository"],
-        author=meta["authors"][0],
-        license=meta["license"],
-        packages=find_packages(),
-        include_package_data=True,
-        zip_safe=False,
-    )
+    setup()
