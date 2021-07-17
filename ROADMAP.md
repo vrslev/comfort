@@ -1,14 +1,10 @@
-# Low level
+# Plan
 
--   [ ] Stock Ledger Entry (for each Transaction) - _does system need this?_
--   [ ] Bin improvement and close integration
-
-# Middle level
-
--   [ ] Order Cancellations
--   [ ] Return
-
-# High level
-
--   [ ] Integrations (compensation, vk form, comfort-employee etc)
--   [ ] Delivery Trip
+-   [ ] Integrate bin closely
+-   [ ] Add option to add Sales Order from Actual stock (from Items to Sell)
+-   [ ] Add options to cancel payment/delivery in Sales Order
+-   [ ] Fix issues with Order Cancellation
+-   [ ] Decide if I need warehouse management
+-   [ ] Create Delivery Trip
+-   [ ] Finish up Return
+-   [ ] Add integrations (compensation, vk form, comfort-employee etc)
