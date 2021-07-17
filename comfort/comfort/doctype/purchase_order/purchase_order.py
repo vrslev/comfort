@@ -30,6 +30,8 @@ from frappe.utils.data import (
 )
 from frappe.utils.password import get_decrypted_password
 
+from ..bin.bin import update_bin
+
 # TODO: Create SERVICES Account
 
 
@@ -50,14 +52,14 @@ class PurchaseOrder(Document):
             12: "Декабрь",
         }
         this_month = months[now_datetime().month].title()
+        this_month = this_month + "-%"
         carts_in_this_month = frappe.db.sql(
             """
             SELECT name from `tabPurchase Order`
-            WHERE name LIKE '{}-%'
+            WHERE name LIKE '%s'
             ORDER BY CAST(REGEXP_SUBSTR(name, '[0-9]+$') as int) DESC
-            """.format(
-                this_month
-            )
+            """,
+            values=(this_month,),
         )
         if carts_in_this_month:
             latest_cart_name = carts_in_this_month[0][0]
@@ -278,19 +280,6 @@ class PurchaseOrder(Document):
         self.status = "To Receive"
         self.submit()
 
-    def update_purchased_qty(self):
-        so_items = self.get_sales_order_items_for_bin()
-        for item_code, qty in so_items:
-            bin = frappe.get_doc("Bin", item_code)
-            bin.reserved_purchased += qty
-            bin.save()
-
-        items_to_sell = self.get_items_to_sell_for_bin()
-        for item_code, qty in items_to_sell:
-            bin = frappe.get_doc("Bin", item_code)
-            bin.available_purchased += qty
-            bin.save()
-
     def get_sales_order_items_for_bin(
         self,
     ) -> Tuple[
@@ -342,13 +331,22 @@ class PurchaseOrder(Document):
             items_map[d.item_code] += d.qty
         return items_map.items()
 
-    def update_status_in_sales_orders(self):
-        for d in self.sales_orders:
-            frappe.get_doc("Sales Order", d.sales_order_name).set_statuses()
-
     def on_submit(self):
         self.update_purchased_qty()
         self.update_status_in_sales_orders()
+
+    def update_purchased_qty(self):
+        so_items = self.get_sales_order_items_for_bin()
+        for item_code, qty in so_items:
+            update_bin(item_code, reserved_purchased=qty)
+
+        items_to_sell = self.get_items_to_sell_for_bin()
+        for item_code, qty in items_to_sell:
+            update_bin(item_code, available_purchased=qty)
+
+    def update_status_in_sales_orders(self):
+        for d in self.sales_orders:
+            frappe.get_doc("Sales Order", d.sales_order_name).set_statuses()
 
     @frappe.whitelist()
     def set_completed(self):
@@ -366,19 +364,11 @@ class PurchaseOrder(Document):
         )
 
     def update_actual_qty(self):
-        so_items = self.get_sales_order_items_for_bin()
-        for item_code, qty in so_items:
-            bin = frappe.get_doc("Bin", item_code)
-            bin.reserved_purchased -= qty
-            bin.reserved_actual += qty
-            bin.save()
+        for item_code, qty in self.get_sales_order_items_for_bin():
+            update_bin(item_code, reserved_purchased=-qty, reserved_actual=qty)
 
-        items_to_sell = self.get_items_to_sell_for_bin()
-        for item_code, qty in items_to_sell:
-            bin = frappe.get_doc("Bin", item_code)
-            bin.available_purchased -= qty
-            bin.available_actual += qty
-            bin.save()
+        for item_code, qty in self.get_items_to_sell_for_bin():
+            update_bin(item_code, available_purchased=-qty, available_actual=qty)
 
     def on_cancel(self):
         self.ignore_linked_doctypes = "GL Entry"
@@ -575,15 +565,15 @@ def get_unavailable_items_in_cart_by_orders(
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_sales_order_query(doctype, txt, searchfield, start, page_len, filters):
-    dont_pass = frappe.db.sql(
+    ignore_orders = frappe.db.sql(
         "SELECT sales_order_name from `tabPurchase Order Sales Order`"
     )
-    dont_pass = [d[0] for d in dont_pass]
-    dont_pass += filters["not in"]
-    dont_pass_cond = ""
-    if len(dont_pass) > 0:
-        dont_pass = "(" + ",".join(["'" + d + "'" for d in dont_pass]) + ")"
-        dont_pass_cond = f"name NOT IN {dont_pass} AND"
+    ignore_orders = [d[0] for d in ignore_orders]
+    ignore_orders += filters["not in"]
+    ignore_orders_cond = ""
+    if len(ignore_orders) > 0:
+        ignore_orders = "(" + ",".join(["'" + d + "'" for d in ignore_orders]) + ")"
+        ignore_orders_cond = f"name NOT IN {ignore_orders} AND"
 
     searchfields = frappe.get_meta("Sales Order").get_search_fields()
     if searchfield:
@@ -592,13 +582,13 @@ def get_sales_order_query(doctype, txt, searchfield, start, page_len, filters):
     res = frappe.db.sql(
         """
         SELECT name, customer, total_amount from `tabSales Order`
-        WHERE {dont_pass_cond}
+        WHERE {ignore_orders_cond}
         status NOT IN ('Closed', 'Completed', 'Cancelled')
         AND ({scond})
         ORDER BY modified DESC
         LIMIT %(start)s, %(page_len)s
-        """.format(
-            scond=searchfields, dont_pass_cond=dont_pass_cond
+        """.format(  # nosec
+            scond=searchfields, ignore_orders_cond=ignore_orders_cond
         ),
         {"txt": "%%%s%%" % txt, "start": start, "page_len": page_len},
         as_list=True,
@@ -620,8 +610,8 @@ def get_purchase_info(purchase_id, use_lite_id):
     purchase_info = None
     try:
         purchase_info = utils.get_purchase_info(purchase_id, use_lite_id=use_lite_id)
-    except Exception:
-        pass
+    except Exception as e:
+        frappe.log_error(", ".join(e.args))
     return {
         "purchase_info_loaded": True if purchase_info else False,
         "purchase_info": purchase_info,

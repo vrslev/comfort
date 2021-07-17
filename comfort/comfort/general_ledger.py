@@ -79,12 +79,13 @@ def get_account_balance(accounts, conditions="") -> Optional[int]:
     try:
         return cint(
             frappe.db.sql(
-                f"""
+                """
             SELECT SUM(debit_amount) - SUM(credit_amount)
             FROM `tabGL Entry`
-            WHERE is_cancelled=0 and account IN ({accounts})
-            {conditions}
-            """
+            WHERE is_cancelled=0 and account IN (%(accounts)s)
+            %(conditions)s
+            """,
+                values={"accounts": accounts, "conditions": conditions},
             )[0][0]
         )
     except IndexError:

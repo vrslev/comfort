@@ -1,3 +1,19 @@
+# BIN CHANGES
+# X 1. Purchased
+#    +reserved_purchased
+#    +available_purchased
+# X 2. Received
+#    -reserved_purchased
+#    +reserved_actual
+#    -available_purchased
+#    +available_actual
+# *. Got from stock
+#    -available_actual
+#    +reserved_actual
+# X 3. Delivered
+#    -reserved_actual
+# 4. Cancel?
+
 from comfort.comfort.doctype.bin.bin import update_bin
 from comfort.comfort.general_ledger import (
     get_account,
@@ -124,11 +140,12 @@ class SalesOrder(Document):
             items_to_qty_map[d.item_code] += d.qty
 
         child_items = frappe.db.sql(
-            f"""
+            """
             SELECT parent as parent_item_code, item_code, item_name, qty
             FROM `tabChild Item`
-            WHERE parent IN ({','.join(prepared_for_query)})
+            WHERE parent IN (%s)
         """,
+            values=(",".join(prepared_for_query),),
             as_dict=True,
         )
 
@@ -264,8 +281,8 @@ class SalesOrder(Document):
 
     @frappe.whitelist()
     def set_delivered(self):
-        self.set_statuses()
-        self.db_update()
+        self.set_statuses()  # TODO: Is this really sets delivery status?
+        self.db_update()  # TODO: Is it appropriate?
         if self.delivery_status == "Delivered":
             self.make_delivery_gl_entries()
             self.update_actual_qty()
