@@ -61,7 +61,7 @@
   "in_create": 1,
   "index_web_pages_for_search": 1,
   "links": [],
-  "modified": "2021-06-26 16:58:17.635637",
+  "modified": "2021-07-17 01:50:36.368561",
   "modified_by": "Administrator",
   "module": "Comfort",
   "name": "Bin",
@@ -81,5 +81,6 @@
     }
   ],
   "sort_field": "modified",
-  "sort_order": "DESC"
+  "sort_order": "DESC",
+  "track_changes": 1
 }
