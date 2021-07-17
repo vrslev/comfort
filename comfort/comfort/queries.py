@@ -54,7 +54,7 @@ def default_query(doctype, txt, searchfield, start, page_len, filters):
     conditions = []
     fields = get_fields(doctype, ["name"])
 
-    query = frappe.db.sql(
+    query = frappe.db.sql(  # TODO: Security
         f"""
         SELECT {", ".join(fields)} FROM `tab{doctype}`
         WHERE {searchfield} LIKE %(txt)s
