@@ -57,9 +57,9 @@ app_include_js = "/assets/comfort/js/index.js"
 # ------------
 
 # before_install = "comfort.install.before_install"
-after_install = "comfort.install.after_install"
+after_install = "comfort.fixtures.hooks.install.after_install"
 
-boot_session = "comfort.boot.boot_session"
+boot_session = "comfort.fixtures.hooks.boot.boot_session"
 
 # Desk Notifications
 # ------------------
