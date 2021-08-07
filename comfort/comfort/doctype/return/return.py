@@ -2,7 +2,7 @@ from comfort.comfort.doctype.purchase_order.purchase_order import PurchaseOrder
 from comfort.comfort.doctype.sales_order.sales_order import (
     calculate_commission,
 )
-from comfort.comfort.general_ledger import (
+from comfort.comfort.ledger import (
     get_account,
     get_paid_amount,
     make_gl_entries,

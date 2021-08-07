@@ -1,4 +1,4 @@
-from comfort.comfort.general_ledger import make_gl_entry, make_reverse_gl_entry
+from comfort.comfort.ledger import make_gl_entry, make_reverse_gl_entry
 import frappe
 from frappe import _
 from frappe.model.document import Document

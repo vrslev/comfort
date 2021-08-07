@@ -1,5 +1,5 @@
 # Plan
-
+LOOK INTO `stock.py`
 -   [ ] Integrate bin closely
 -   [ ] Add option to add Sales Order from Actual stock (from Items to Sell)
 -   [ ] Add options to cancel payment/delivery in Sales Order

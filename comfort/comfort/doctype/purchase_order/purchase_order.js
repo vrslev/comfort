@@ -1,5 +1,5 @@
 frappe.provide("comfort");
-
+// TODO: Items cannot be added dialog
 comfort.IkeaCartController = frappe.ui.form.Controller.extend({
   setup() {
     this.setup_sales_order_query();
@@ -83,6 +83,126 @@ comfort.IkeaCartController = frappe.ui.form.Controller.extend({
           },
         });
       });
+    }
+
+    // if (this.frm.doc.status == 'To Receive') {
+    if (this.frm.doc.status == "Draft") {
+      this.frm.fields_dict.items_to_sell.grid
+        .add_custom_button(__("Create Sales Order"), () => {
+          const fields = [
+            {
+              fieldtype: "Link",
+              fieldname: "item_code",
+              options: "Item",
+              in_list_view: 1,
+              read_only: 1,
+              formatter: (value, df, options, doc) => {
+                // to delete links
+                if (
+                  doc &&
+                  value &&
+                  doc.item_name &&
+                  doc.item_name !== value &&
+                  doc.item_code === value
+                ) {
+                  return value + ": " + doc.item_name;
+                } else if (!value && doc.doctype && doc.item_name) {
+                  return doc.item_name;
+                } else {
+                  return value;
+                }
+              },
+              label: __("Item Code"),
+            },
+            {
+              fieldtype: "Int",
+              fieldname: "qty",
+              in_list_view: 1,
+              columns: 1,
+              label: __("Qty"),
+            },
+          ];
+
+          var dialog = new frappe.ui.Dialog({
+            title: __("Choose Items for new Sales Order"),
+            fields: [
+              {
+                fieldname: "customer",
+                fieldtype: "Link",
+                label: "Customer",
+                options: "Customer",
+                reqd: 1,
+                only_select: 1,
+              },
+              {
+                fieldtype: "Column Break",
+              },
+              {
+                fieldtype: "Section Break",
+              },
+              {
+                fieldname: "items",
+                fieldtype: "Table",
+                label: "Items",
+                cannot_add_rows: true,
+                reqd: 1,
+                data: [],
+                fields: fields,
+              },
+            ],
+            size: "large",
+            primary_action: (data) => {
+              console.log(data);
+              var selected_items = data.items
+                .filter((d) => d.__checked)
+                .map((d) => {
+                  return {
+                    item_code: d.item_code,
+                    qty: d.qty,
+                    rate: d.rate, // TODO: Need to fix rate. Somehow force it
+                  };
+                });
+              // let selected =
+              //   dialog.fields_dict.items.grid.get_selected_children();
+              // selected = selected.filter((d) => d.__checked);
+
+              this.frm.call({
+                doc: this.frm.doc,
+                method: "create_new_sales_order_from_items_to_sell",
+                args: {
+                  items: selected_items,
+                  customer: data.customer
+                },
+                // callback:
+              });
+              // for (var d of selected) {
+
+              // }
+              dialog.hide();
+            },
+            primary_action_label: __("Choose"),
+          });
+
+          dialog.fields_dict.items.df.data = this.frm.doc.items_to_sell.map(
+            (d) => {
+              return {
+                name: d.name,
+                item_code: d.item_code,
+                item_name: d.item_name,
+                qty: d.qty,
+                rate: d.rate,
+              };
+            }
+          );
+
+          let grid = dialog.fields_dict.items.grid;
+          grid.grid_buttons.hide();
+          grid.refresh();
+          grid.wrapper.find('[data-fieldname="item_code"]').unbind("click");
+
+          dialog.show();
+        })
+        .attr("class", "btn btn-xs btn-secondary btn-custom");
     }
 
     this.render_unavailable_items_buttons();

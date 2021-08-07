@@ -1,6 +1,16 @@
+// TODO: Add `add_multiple` to easily add items when From Actual Stock is checked
 frappe.ui.form.on("Sales Order", {
   setup(frm) {
     frm.page.sidebar.hide();
+
+    frm.set_query("item_code", "items", () => {
+      return {
+        query: "comfort.comfort.doctype.sales_order.sales_order.item_query",
+        filters: {
+          from_actual_stock: frm.doc.from_actual_stock,
+        },
+      };
+    });
   },
 
   onload_post_render(frm) {
@@ -149,6 +159,14 @@ frappe.ui.form.on("Sales Order", {
         dialog.fields_dict.combinations.grid.grid_buttons.hide();
         dialog.show();
       });
+    }
+
+    if (frm.doc.from_not_received_items_to_sell) {
+      for (var d of ["commission", "discount"]) {
+        frm.set_df_property(d, "allow_on_submit", 1);
+      }
+
+      // TODO: If `from_not_received_items_to_sell` is set, add Confirm button to toggle it
     }
   },
 

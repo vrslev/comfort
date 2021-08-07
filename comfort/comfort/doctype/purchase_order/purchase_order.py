@@ -1,5 +1,5 @@
 import re
-from typing import Any, Dict, Tuple
+from typing import Any, Dict
 
 from ikea_api import (
     Cart,
@@ -11,7 +11,7 @@ from ikea_api import (
 from ikea_api.errors import NoDeliveryOptionsAvailableError, WrongItemCodeError
 from ikea_api_parser import DeliveryOptions, PurchaseHistory, PurchaseInfo
 
-from comfort.comfort.general_ledger import (
+from comfort.comfort.ledger import (
     get_account,
     get_paid_amount,
     make_gl_entries,
@@ -30,11 +30,10 @@ from frappe.utils.data import (
 )
 from frappe.utils.password import get_decrypted_password
 
-from ..bin.bin import update_bin
-
-# TODO: Create SERVICES Account
+from ... import stock
 
 
+# TODO: Statuses don't change properly, especially in SO
 class PurchaseOrder(Document):
     def autoname(self):
         months = {
@@ -52,15 +51,15 @@ class PurchaseOrder(Document):
             12: "Декабрь",
         }
         this_month = months[now_datetime().month].title()
-        this_month = this_month + "-%"
         carts_in_this_month = frappe.db.sql(
             """
             SELECT name from `tabPurchase Order`
-            WHERE name LIKE '%s'
+            WHERE name LIKE CONCAT(%s, '-%%')
             ORDER BY CAST(REGEXP_SUBSTR(name, '[0-9]+$') as int) DESC
             """,
             values=(this_month,),
         )
+
         if carts_in_this_month:
             latest_cart_name = carts_in_this_month[0][0]
             latest_cart_name_no_ = re.findall(r"-(\d+)", latest_cart_name)
@@ -280,69 +279,9 @@ class PurchaseOrder(Document):
         self.status = "To Receive"
         self.submit()
 
-    def get_sales_order_items_for_bin(
-        self,
-    ) -> Tuple[
-        str, int
-    ]:  # TODO: use templated items instead (one that generates for cart)
-        if not self.sales_orders and len(self.sales_orders) > 0:
-            return
-        sales_order_names = [d.sales_order_name for d in self.sales_orders]
-        so_items = frappe.db.sql(
-            """
-            SELECT item_code, qty
-            FROM `tabSales Order Item`
-            WHERE parent IN %(sales_orders)s
-            AND qty > 0
-        """,
-            {"sales_orders": sales_order_names},
-            as_dict=True,
-        )
-
-        packed_items = frappe.db.sql(
-            """
-            SELECT parent_item_code, item_code, qty
-            FROM `tabSales Order Child Item`
-            WHERE parent IN %(sales_orders)s
-            AND qty > 0
-        """,
-            {"sales_orders": sales_order_names},
-            as_dict=True,
-        )
-
-        parent_items = [d.parent_item_code for d in packed_items]
-        so_items = [d for d in so_items if d.item_code not in parent_items]
-
-        items = packed_items + so_items
-
-        items_map = {}
-        for d in items:
-            if d.item_code not in items_map:
-                items_map[d.item_code] = 0
-            items_map[d.item_code] += d.qty
-
-        return items_map.items()
-
-    def get_items_to_sell_for_bin(self):
-        items_map = {}
-        for d in self.items_to_sell:
-            if d.item_code not in items_map:
-                items_map[d.item_code] = 0
-            items_map[d.item_code] += d.qty
-        return items_map.items()
-
     def on_submit(self):
-        self.update_purchased_qty()
+        stock.purchase_order_purchased(self)
         self.update_status_in_sales_orders()
-
-    def update_purchased_qty(self):
-        so_items = self.get_sales_order_items_for_bin()
-        for item_code, qty in so_items:
-            update_bin(item_code, reserved_purchased=qty)
-
-        items_to_sell = self.get_items_to_sell_for_bin()
-        for item_code, qty in items_to_sell:
-            update_bin(item_code, available_purchased=qty)
 
     def update_status_in_sales_orders(self):
         for d in self.sales_orders:
@@ -351,7 +290,7 @@ class PurchaseOrder(Document):
     @frappe.whitelist()
     def set_completed(self):
         self.make_delivery_gl_entries()
-        self.update_actual_qty()
+        stock.purchase_order_completed(self)
         self.db_set("status", "Completed")
 
     def make_delivery_gl_entries(self):
@@ -363,19 +302,43 @@ class PurchaseOrder(Document):
             self.items_to_sell_cost + self.sales_order_cost,
         )
 
-    def update_actual_qty(self):
-        for item_code, qty in self.get_sales_order_items_for_bin():
-            update_bin(item_code, reserved_purchased=-qty, reserved_actual=qty)
-
-        for item_code, qty in self.get_items_to_sell_for_bin():
-            update_bin(item_code, available_purchased=-qty, available_actual=qty)
-
     def on_cancel(self):
         self.ignore_linked_doctypes = "GL Entry"
         make_reverse_gl_entry(self.doctype, self.name)
         self.update_status_in_sales_orders()
         # TODO: UPDATE BIN
 
+
+    @frappe.whitelist()
+    def create_new_sales_order_from_items_to_sell(self, items, customer):
+        # raise Exception
+        if self.status != 'Draft': # TODO: Change back
+        # if self.status != 'To Receive':
+            return frappe.throw(_('Cannot create Sales Order from Purchase Order\'s items to sell with status {}').format(self.status))
+
+        item_qty_map = {}
+        for d in self.items_to_sell:
+            if d.item_code not in item_qty_map:
+                item_qty_map[d.item_code] = 0
+            item_qty_map[d.item_code] += d.qty
+
+
+        for d in items:
+            d = frappe._dict(d)
+            if item_qty_map[d.item_code] < d.qty:
+                return frappe.throw(_("Cannot add more items than there is: {}").format(f"{d.item_code}: {d.qty}")) # TODO: Make prettier exception
+
+        doc = frappe.get_doc({
+            'doctype': 'Sales Order',
+            'customer': customer,
+            'items': items,
+            'from_not_received_items_to_sell': True, # Not change
+            "edit_commission": True
+        })
+        doc.submit()
+
+
+        # TODO: Continue working. Add order to Purchase Order
 
 class IkeaCartUtils:
     def __init__(self):

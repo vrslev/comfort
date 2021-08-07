@@ -1,5 +1,3 @@
-from typing import Optional
-
 import frappe
 from frappe.utils.data import cint
 
@@ -70,28 +68,6 @@ def cancel_gl_entry(voucher_type, voucher_no):
     )
 
 
-def get_account_balance(accounts, conditions="") -> Optional[int]:
-    if isinstance(accounts, str):
-        accounts = [accounts]
-    accounts = ", ".join(["'" + d + "'" for d in accounts])
-    if conditions:
-        conditions = "AND " + conditions
-    try:
-        return cint(
-            frappe.db.sql(
-                """
-            SELECT SUM(debit_amount) - SUM(credit_amount)
-            FROM `tabGL Entry`
-            WHERE is_cancelled=0 and account IN (%(accounts)s)
-            %(conditions)s
-            """,
-                values={"accounts": accounts, "conditions": conditions},
-            )[0][0]
-        )
-    except IndexError:
-        pass
-
-
 def get_account(field_names):
     return_str = False
     if isinstance(field_names, str):
@@ -108,10 +84,16 @@ def get_account(field_names):
     return accounts[0] if return_str else accounts
 
 
-def get_paid_amount(dt, dn):
+def get_paid_amount(dt, dn) -> int:
     accounts = get_account(["cash", "bank"])
-    balance = get_account_balance(
-        accounts, f"voucher_type='{dt}' AND voucher_no='{dn}'"
-    )
-    if balance:
+    balance = frappe.get_list('GL Entry', 'SUM(debit_amount - credit_amount) as balance', {
+        'is_cancelled': 0,
+        'account': ['in', accounts],
+        'voucher_type': dt,
+        'voucher_no': dn
+    })
+    if balance and balance[0]:
+        balance = cint(balance[0].balance)
         return balance if dt != "Purchase Order" else -balance
+    else:
+        return 0

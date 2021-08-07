@@ -1,21 +1,6 @@
-# BIN CHANGES
-# X 1. Purchased
-#    +reserved_purchased
-#    +available_purchased
-# X 2. Received
-#    -reserved_purchased
-#    +reserved_actual
-#    -available_purchased
-#    +available_actual
-# *. Got from stock
-#    -available_actual
-#    +reserved_actual
-# X 3. Delivered
-#    -reserved_actual
-# 4. Cancel?
-
-from comfort.comfort.doctype.bin.bin import update_bin
-from comfort.comfort.general_ledger import (
+# TODO: Allow change services on submit
+from ... import stock
+from comfort.comfort.ledger import (
     get_account,
     get_paid_amount,
     make_gl_entries,
@@ -24,6 +9,7 @@ from comfort.comfort.general_ledger import (
 )
 import frappe
 from frappe import _
+from frappe.utils import flt
 from frappe.model.document import Document
 
 
@@ -82,9 +68,10 @@ class SalesOrder(Document):
 
     def set_item_values(self):
         for d in self.items:
-            doc = frappe.get_cached_doc("Item", d.item_code)
+            doc = frappe.get_cached_doc("Item", d.item_code) # TODO: Not save to get value from cache in this case. Should clear all cache on update, probably
             d.item_name = doc.item_name
-            d.rate = doc.rate
+            if not self.from_not_received_items_to_sell:
+                d.rate = doc.rate
             d.weight = doc.weight
 
             d.amount = d.rate * d.qty
@@ -126,18 +113,30 @@ class SalesOrder(Document):
 
         self.pending_amount = self.total_amount - self.paid_amount
 
+    def get_item_qty_map(self, split_combinations=False):
+        item_qty_map = {}
+        if split_combinations:
+            parents = [d.parent_item_code for d in self.child_items]
+            for d in self.items + self.child_items:
+                if d.item_code not in parents:
+                    if d.item_code not in item_qty_map:
+                        item_qty_map[d.item_code] = 0
+                    item_qty_map[d.item_code] += d.qty
+        else:
+            for d in self.items:
+                if d.item_code not in item_qty_map:
+                    item_qty_map[d.item_code] = 0
+                item_qty_map[d.item_code] += d.qty
+        return item_qty_map
+
     def set_child_items(self):
         self.child_items = []
         if len(self.items) == 0:
             return
 
-        items_to_qty_map = {}
         prepared_for_query = []
         for d in self.items:
             prepared_for_query.append(f'"{d.item_code}"')
-            if d.item_code not in items_to_qty_map:
-                items_to_qty_map[d.item_code] = 0
-            items_to_qty_map[d.item_code] += d.qty
 
         child_items = frappe.db.sql(
             """
@@ -149,10 +148,10 @@ class SalesOrder(Document):
             as_dict=True,
         )
 
+        item_qty_map = self.get_item_qty_map()
         for d in child_items:
-            if d.parent_item_code not in items_to_qty_map:
-                continue
-            d.qty = d.qty * items_to_qty_map[d.parent_item_code]
+            if d.parent_item_code in item_qty_map:
+                d.qty = d.qty * item_qty_map[d.parent_item_code]
 
         self.extend("child_items", child_items)
 
@@ -217,6 +216,7 @@ class SalesOrder(Document):
 
     def before_submit(self):
         self.edit_commission = True
+        stock.sales_order_from_stock_submitted(self)
 
     @frappe.whitelist()
     def set_paid(self, paid_amount, cash):
@@ -285,7 +285,7 @@ class SalesOrder(Document):
         self.db_update()  # TODO: Is it appropriate?
         if self.delivery_status == "Delivered":
             self.make_delivery_gl_entries()
-            self.update_actual_qty()
+            stock.sales_order_delivered(self)
         else:
             frappe.throw(_("Not able to set Delivered"))
 
@@ -294,18 +294,6 @@ class SalesOrder(Document):
         make_gl_entries(
             self, delivery_accounts[0], delivery_accounts[1], self.items_cost
         )
-
-    def update_actual_qty(self):
-        items_map = {}
-        parents = [d.parent_item_code for d in self.child_items]
-        for d in self.items + self.child_items:
-            if d.item_code not in parents:
-                if d.item_code not in items_map:
-                    items_map[d.item_code] = 0
-                items_map[d.item_code] += d.qty
-
-        for item_code, qty in items_map.items():
-            update_bin(item_code, reserved_actual=-qty)
 
     @frappe.whitelist()
     def split_combinations(self, combos_to_split, save):
@@ -352,7 +340,10 @@ class SalesOrder(Document):
         self.db_set("payment_status", "")
         self.db_set("delivery_status", "")
 
-
+    def before_update_after_submit(self):
+        if self.from_not_received_items_to_sell:
+            self.flags.ignore_validate_update_after_submit = True
+        self.validate()
 CONDITIONS = [
     {"start": 0, "end": 9900, "commission_percentage": 15},
     {"start": 9901, "end": 19900, "commission_percentage": 13},
@@ -365,7 +356,7 @@ CONDITIONS = [
 
 @frappe.whitelist()
 def calculate_commission(items_cost, commission=None):
-    items_cost = float(items_cost)
+    items_cost = flt(items_cost)
     if commission is not None:
         commission = float(commission)
 
@@ -395,3 +386,22 @@ def get_sales_orders_in_purchase_order():
         d.sales_order_name
         for d in frappe.get_all("Purchase Order Sales Order", "sales_order_name")
     ]
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def item_query(doctype, txt, searchfield, start, page_len, filters):
+    from comfort.comfort.queries import default_query
+
+    field = "from_actual_stock"
+    if filters.get(field) is not None:
+        if filters[field]:
+            available_items = [
+                d.item_code
+                for d in frappe.get_all(
+                    "Bin", "item_code", {"available_actual": [">", 0]}
+                )
+            ]
+            filters["item_code"] = ["in", available_items]
+        del filters[field]
+    return default_query(doctype, txt, searchfield, start, page_len, filters)
