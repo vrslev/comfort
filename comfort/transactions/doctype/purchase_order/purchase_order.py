@@ -3,13 +3,9 @@ from __future__ import annotations
 import re
 from typing import Any
 
-from ikea_api.auth import get_authorized_token, get_guest_token
-from ikea_api.endpoints import Cart, OrderCapture, Purchases
-from ikea_api.errors import IkeaApiError
-from ikea_api_parser import DeliveryOptions, PurchaseHistory, PurchaseInfo
-
 import frappe
 from comfort import stock
+from comfort.comfort_core.ikea.cart_utils import IkeaCartUtils
 from comfort.finance import (
     get_account,
     get_paid_amount,
@@ -19,65 +15,18 @@ from comfort.finance import (
 from frappe import _, as_json
 from frappe.model.document import Document
 from frappe.utils import parse_json
-from frappe.utils.data import add_to_date, get_datetime, getdate, now_datetime, today
-from frappe.utils.password import get_decrypted_password
+from frappe.utils.data import add_to_date, getdate, now_datetime, today
 
 from ..purchase_order_sales_order.purchase_order_sales_order import (
     PurchaseOrderSalesOrder,
 )
 
 
-# TODO: Statuses don't change properly, especially in SO
-class PurchaseOrder(Document):
+class PurchaseOrderMethods(Document):
     sales_orders: list[PurchaseOrderSalesOrder]
     items_to_sell_cost: int
     sales_order_cost: int
     delivery_cost: int
-
-    def autoname(self):
-        months = {
-            1: "Январь",
-            2: "Февраль",
-            3: "Март",
-            4: "Апрель",
-            5: "Май",
-            6: "Июнь",
-            7: "Июль",
-            8: "Август",
-            9: "Сентябрь",
-            10: "Октябрь",
-            11: "Ноябрь",
-            12: "Декабрь",
-        }
-        this_month = months[now_datetime().month].title()
-        carts_in_this_month = frappe.db.sql(
-            """
-            SELECT name from `tabPurchase Order`
-            WHERE name LIKE CONCAT(%s, '-%%')
-            ORDER BY CAST(REGEXP_SUBSTR(name, '[0-9]+$') as int) DESC
-            """,
-            values=(this_month,),
-        )
-
-        if carts_in_this_month:
-            latest_cart_name: str = carts_in_this_month[0][0]
-            latest_cart_name_no_ = re.findall(r"-(\d+)", latest_cart_name)
-            if len(latest_cart_name_no_) > 0:
-                latest_cart_name_no = latest_cart_name_no_[0]
-            cart_no = int(latest_cart_name_no) + 1  # type: ignore
-        else:  # TODO: Refactor
-            cart_no = 1
-
-        self.name = f"{this_month}-{cart_no}"
-
-    def before_insert(self):
-        self.status = "Draft"
-
-    def validate(self):
-        self.validate_empty()
-        self.delete_sales_order_dublicates()
-        self.set_customer_and_total_in_sales_orders()
-        self.calculate_totals()
 
     def validate_empty(self):
         if not (self.sales_orders or self.items_to_sell):
@@ -139,10 +88,6 @@ class PurchaseOrder(Document):
         else:
             self.delivery_cost = 0
 
-    def before_save(self):
-        if self.docstatus == 0:
-            self.get_delivery_services()
-
     def get_delivery_services(self):
         try:
             templated_items = self.get_templated_items_for_api(True)
@@ -159,12 +104,6 @@ class PurchaseOrder(Document):
             )
         except Exception as e:
             frappe.msgprint("\n".join([str(d) for d in e.args]), _("Error"))
-
-    @frappe.whitelist()
-    def checkout(self):
-        items = self.get_templated_items_for_api(False)
-        u = IkeaCartUtils()
-        return [u.add_items_to_cart_authorized(items)]
 
     def get_templated_items_for_api(self, split_combinations: bool = False):
         all_items = []
@@ -211,10 +150,6 @@ class PurchaseOrder(Document):
 
         return templated_items
 
-    def before_submit(self):
-        self.delivery_options = []
-        self.cannot_add_items = None
-
     def make_invoice_gl_entries(self):
         already_paid_amount = get_paid_amount(self.doctype, self.name)
 
@@ -247,6 +182,85 @@ class PurchaseOrder(Document):
                     delivery_amt_paid,  # type:ignore
                 )  # TODO: Refactor
 
+    def update_status_in_sales_orders(self):
+        for d in self.sales_orders:
+            frappe.get_doc("Sales Order", d.sales_order_name).set_statuses()
+
+    def make_delivery_gl_entries(self):
+        accounts = get_account(["prepaid_inventory", "inventory"])
+        make_gl_entries(
+            self,
+            accounts[0],
+            accounts[1],
+            self.items_to_sell_cost + self.sales_order_cost,
+        )
+
+
+# TODO: Statuses don't change properly, especially in SO
+class PurchaseOrder(PurchaseOrderMethods):
+    def autoname(self):
+        months = {
+            1: "Январь",
+            2: "Февраль",
+            3: "Март",
+            4: "Апрель",
+            5: "Май",
+            6: "Июнь",
+            7: "Июль",
+            8: "Август",
+            9: "Сентябрь",
+            10: "Октябрь",
+            11: "Ноябрь",
+            12: "Декабрь",
+        }
+        this_month = months[now_datetime().month].title()
+        carts_in_this_month = frappe.db.sql(
+            """
+            SELECT name from `tabPurchase Order`
+            WHERE name LIKE CONCAT(%s, '-%%')
+            ORDER BY CAST(REGEXP_SUBSTR(name, '[0-9]+$') as int) DESC
+            """,
+            values=(this_month,),
+        )
+
+        if carts_in_this_month:
+            latest_cart_name: str = carts_in_this_month[0][0]
+            latest_cart_name_no_ = re.findall(r"-(\d+)", latest_cart_name)
+            if len(latest_cart_name_no_) > 0:
+                latest_cart_name_no = latest_cart_name_no_[0]
+            cart_no = int(latest_cart_name_no) + 1  # type: ignore
+        else:  # TODO: Refactor
+            cart_no = 1
+
+        self.name = f"{this_month}-{cart_no}"
+
+    def before_insert(self):
+        self.status = "Draft"
+
+    def validate(self):
+        self.validate_empty()
+        self.delete_sales_order_dublicates()
+        self.set_customer_and_total_in_sales_orders()
+        self.calculate_totals()
+
+    def before_save(self):
+        if self.docstatus == 0:
+            self.get_delivery_services()
+
+    def before_submit(self):
+        self.delivery_options = []
+        self.cannot_add_items = None
+
+    def on_submit(self):
+        stock.purchase_order_purchased(self)
+        self.update_status_in_sales_orders()
+
+    def on_cancel(self):
+        self.ignore_linked_doctypes = "GL Entry"
+        make_reverse_gl_entry(self.doctype, self.name)
+        self.update_status_in_sales_orders()
+        # TODO: UPDATE BIN
+
     @frappe.whitelist()
     def before_submit_events(
         self,
@@ -266,7 +280,7 @@ class PurchaseOrder(Document):
         else:
             self.schedule_date = add_to_date(None, weeks=2)
             self.posting_date = today()
-            self.delivery_cost = delivery_cost
+            self.delivery_cost = delivery_cost  # type: ignore
             items_cost = self.total_amount
 
         if len(self.sales_orders) > 0:
@@ -285,34 +299,17 @@ class PurchaseOrder(Document):
         self.status = "To Receive"
         self.submit()
 
-    def on_submit(self):
-        stock.purchase_order_purchased(self)
-        self.update_status_in_sales_orders()
-
-    def update_status_in_sales_orders(self):
-        for d in self.sales_orders:
-            frappe.get_doc("Sales Order", d.sales_order_name).set_statuses()
+    @frappe.whitelist()
+    def checkout(self):
+        items = self.get_templated_items_for_api(False)
+        u = IkeaCartUtils()
+        return [u.add_items_to_cart_authorized(items)]
 
     @frappe.whitelist()
     def set_completed(self):
         self.make_delivery_gl_entries()
         stock.purchase_order_completed(self)
         self.db_set("status", "Completed")
-
-    def make_delivery_gl_entries(self):
-        accounts = get_account(["prepaid_inventory", "inventory"])
-        make_gl_entries(
-            self,
-            accounts[0],
-            accounts[1],
-            self.items_to_sell_cost + self.sales_order_cost,
-        )
-
-    def on_cancel(self):
-        self.ignore_linked_doctypes = "GL Entry"
-        make_reverse_gl_entry(self.doctype, self.name)
-        self.update_status_in_sales_orders()
-        # TODO: UPDATE BIN
 
     @frappe.whitelist()
     def create_new_sales_order_from_items_to_sell(
@@ -354,100 +351,6 @@ class PurchaseOrder(Document):
         doc.submit()
 
         # TODO: Continue working. Add order to Purchase Order
-
-
-class IkeaCartUtils:
-    def __init__(self):
-        settings = frappe.get_single("Ikea Cart Settings")
-        self.zip_code: str = settings.zip_code
-        self.username: str = settings.username
-        self.password: str = get_decrypted_password(
-            "Ikea Cart Settings", "Ikea Cart Settings", raise_exception=False
-        )
-        self.guest_token: str = settings.guest_token
-        self.authorized_token: str = settings.authorized_token
-
-    def get_token(self, authorize: bool = False):
-        from datetime import datetime
-
-        doc = frappe.get_single("Ikea Cart Settings")
-        if not authorize:
-            guest_token_expiration_time: datetime = get_datetime(
-                doc.guest_token_expiration_time
-            )
-            if not self.guest_token or guest_token_expiration_time <= now_datetime():
-                self.guest_token = get_guest_token()
-                doc.guest_token = self.guest_token
-                doc.guest_token_expiration_time = add_to_date(None, hours=720)
-                doc.save()
-                frappe.db.commit()
-            return self.guest_token
-        else:
-            authorized_token_expiration_time: datetime = get_datetime(
-                doc.authorized_token_expiration_time
-            )
-            if (
-                not self.authorized_token
-                or authorized_token_expiration_time <= now_datetime()
-            ):
-                if not self.username and not self.password:
-                    frappe.throw("Введите логин и пароль в настройках")
-                self.authorized_token = get_authorized_token(
-                    self.username, self.password
-                )
-                doc.authorized_token = self.authorized_token
-                doc.authorized_token_expiration_time = add_to_date(None, hours=24)
-                doc.save()
-                frappe.db.commit()
-            return self.authorized_token
-
-    def get_delivery_services(self, items: dict[str, int]) -> dict[str, Any]:
-        self.get_token()
-        adding = self.add_items_to_cart(self.guest_token, items)
-        order_capture = OrderCapture(self.guest_token, self.zip_code)
-        try:
-            response = order_capture.get_delivery_services()
-            parsed = DeliveryOptions(response).parse()
-            return {"options": parsed, "cannot_add": adding["cannot_add"]}
-        except IkeaApiError:  # TODO: Make like in cih
-            frappe.msgprint(
-                "Нет доступных способов доставки", alert=True, indicator="red"
-            )
-
-    def add_items_to_cart(self, token: str, items: dict[str, int]) -> dict[str, Any]:
-        cart = Cart(token)
-        cart.clear()
-        res = {"cannot_add": [], "message": None}
-        while True:
-            try:
-                res["message"] = cart.add_items(items)
-                break
-            except IkeaApiError as e:  # TODO: was WrongItemCodeError (take from cih)
-                [items.pop(i) for i in e.args[0]]
-                if not res["cannot_add"]:
-                    res["cannot_add"] = []
-                res["cannot_add"] += e.args[0]
-        return res
-
-    def add_items_to_cart_authorized(self, items: dict[str, int]):
-        token = self.get_token(authorize=True)
-        self.add_items_to_cart(token, items)
-        return Cart(token).show()
-
-    def get_purchase_history(self) -> list[dict[Any, Any]]:
-        token = self.get_token(authorize=True)
-        purchases = Purchases(token)
-        response = purchases.history()
-        return PurchaseHistory(response).parse()
-
-    def get_purchase_info(
-        self, purchase_id: str | int, use_lite_id: bool = False
-    ) -> dict[Any]:
-        token = self.get_token(authorize=True)
-        purchases = Purchases(token)
-        email = self.username if use_lite_id else None
-        response = purchases.order_info(purchase_id, email=email)
-        return PurchaseInfo(response).parse()
 
 
 @frappe.whitelist()
