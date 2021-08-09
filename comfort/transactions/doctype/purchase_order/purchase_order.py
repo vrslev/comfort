@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 import re
-from typing import Any, Dict
+from typing import Any
 
 from ikea_api.auth import get_authorized_token, get_guest_token
 from ikea_api.endpoints import Cart, OrderCapture, Purchases
@@ -20,9 +22,18 @@ from frappe.utils import parse_json
 from frappe.utils.data import add_to_date, get_datetime, getdate, now_datetime, today
 from frappe.utils.password import get_decrypted_password
 
+from ..purchase_order_sales_order.purchase_order_sales_order import (
+    PurchaseOrderSalesOrder,
+)
+
 
 # TODO: Statuses don't change properly, especially in SO
 class PurchaseOrder(Document):
+    sales_orders: list[PurchaseOrderSalesOrder]
+    items_to_sell_cost: int
+    sales_order_cost: int
+    delivery_cost: int
+
     def autoname(self):
         months = {
             1: "Январь",
@@ -49,7 +60,7 @@ class PurchaseOrder(Document):
         )
 
         if carts_in_this_month:
-            latest_cart_name = carts_in_this_month[0][0]
+            latest_cart_name: str = carts_in_this_month[0][0]
             latest_cart_name_no_ = re.findall(r"-(\d+)", latest_cart_name)
             if len(latest_cart_name_no_) > 0:
                 latest_cart_name_no = latest_cart_name_no_[0]
@@ -135,7 +146,7 @@ class PurchaseOrder(Document):
     def get_delivery_services(self):
         try:
             templated_items = self.get_templated_items_for_api(True)
-            delivery_services: Dict[Any, Any] = IkeaCartUtils().get_delivery_services(
+            delivery_services: dict[Any, Any] = IkeaCartUtils().get_delivery_services(
                 templated_items
             )
             self.update(
@@ -155,7 +166,7 @@ class PurchaseOrder(Document):
         u = IkeaCartUtils()
         return [u.add_items_to_cart_authorized(items)]
 
-    def get_templated_items_for_api(self, split_combinations=False):
+    def get_templated_items_for_api(self, split_combinations: bool = False):
         all_items = []
         all_items += self.items_to_sell  # TODO: Check if there's product bundle
 
@@ -173,7 +184,7 @@ class PurchaseOrder(Document):
             )
 
             if split_combinations:
-                packed_items = frappe.db.sql(
+                packed_items: list[dict[Any, Any]] = frappe.db.sql(
                     """
                     SELECT parent_item_code, item_code, qty
                     FROM `tabSales Order Child Item`
@@ -183,6 +194,7 @@ class PurchaseOrder(Document):
                     {"sales_orders": sales_order_names},
                     as_dict=True,
                 )
+                all_items: Any
                 all_items += packed_items
 
                 parent_items = [d.parent_item_code for d in packed_items]
@@ -190,7 +202,7 @@ class PurchaseOrder(Document):
 
             all_items += so_items
 
-        templated_items = {}
+        templated_items: Any = {}
         for d in all_items:
             d.item_code = str(d.item_code)
             if d.item_code not in templated_items:
@@ -213,19 +225,21 @@ class PurchaseOrder(Document):
                 delivery_amt_paid = 0
                 if amt_to_pay > amt_without_delivery:
                     delivery_amt_paid = amt_to_pay - amt_without_delivery
-                    inventory_amt_paid = amt_without_delivery
+                    inventory_amt_paid: int = amt_without_delivery
                 else:
                     inventory_amt_paid = amt_to_pay
             else:
                 inventory_amt_paid = self.total_amount - already_paid_amount
 
-            inventory_accounts = get_account(["cash", "prepaid_inventory"])
+            inventory_accounts: list[str] = get_account(["cash", "prepaid_inventory"])
             make_gl_entries(
                 self, inventory_accounts[0], inventory_accounts[1], inventory_amt_paid
             )
 
             if self.delivery_cost > 0:
-                delivery_accounts = get_account(["cash", "purchase_delivery"])
+                delivery_accounts: list[str] = get_account(
+                    ["cash", "purchase_delivery"]
+                )
                 make_gl_entries(
                     self,
                     delivery_accounts[0],
@@ -235,7 +249,11 @@ class PurchaseOrder(Document):
 
     @frappe.whitelist()
     def before_submit_events(
-        self, purchase_id, purchase_info_loaded, purchase_info, delivery_cost=None
+        self,
+        purchase_id: int,
+        purchase_info_loaded: bool,
+        purchase_info: dict[str, Any],
+        delivery_cost: int | None = None,
     ):
         self.order_confirmation_no = purchase_id
 
@@ -297,7 +315,9 @@ class PurchaseOrder(Document):
         # TODO: UPDATE BIN
 
     @frappe.whitelist()
-    def create_new_sales_order_from_items_to_sell(self, items, customer):
+    def create_new_sales_order_from_items_to_sell(
+        self, items: dict[Any, Any], customer: str
+    ):
         # raise Exception
         if self.status != "Draft":  # TODO: Change back
             # if self.status != 'To Receive':
@@ -307,7 +327,7 @@ class PurchaseOrder(Document):
                 ).format(self.status)
             )
 
-        item_qty_map = {}
+        item_qty_map: Any = {}
         for d in self.items_to_sell:
             if d.item_code not in item_qty_map:
                 item_qty_map[d.item_code] = 0
@@ -339,15 +359,15 @@ class PurchaseOrder(Document):
 class IkeaCartUtils:
     def __init__(self):
         settings = frappe.get_single("Ikea Cart Settings")
-        self.zip_code = settings.zip_code
-        self.username = settings.username
-        self.password = get_decrypted_password(
+        self.zip_code: str = settings.zip_code
+        self.username: str = settings.username
+        self.password: str = get_decrypted_password(
             "Ikea Cart Settings", "Ikea Cart Settings", raise_exception=False
         )
-        self.guest_token = settings.guest_token
-        self.authorized_token = settings.authorized_token
+        self.guest_token: str = settings.guest_token
+        self.authorized_token: str = settings.authorized_token
 
-    def get_token(self, authorize=False):
+    def get_token(self, authorize: bool = False):
         from datetime import datetime
 
         doc = frappe.get_single("Ikea Cart Settings")
@@ -381,7 +401,7 @@ class IkeaCartUtils:
                 frappe.db.commit()
             return self.authorized_token
 
-    def get_delivery_services(self, items):
+    def get_delivery_services(self, items: dict[str, int]) -> dict[str, Any]:
         self.get_token()
         adding = self.add_items_to_cart(self.guest_token, items)
         order_capture = OrderCapture(self.guest_token, self.zip_code)
@@ -394,7 +414,7 @@ class IkeaCartUtils:
                 "Нет доступных способов доставки", alert=True, indicator="red"
             )
 
-    def add_items_to_cart(self, token, items):
+    def add_items_to_cart(self, token: str, items: dict[str, int]) -> dict[str, Any]:
         cart = Cart(token)
         cart.clear()
         res = {"cannot_add": [], "message": None}
@@ -409,18 +429,20 @@ class IkeaCartUtils:
                 res["cannot_add"] += e.args[0]
         return res
 
-    def add_items_to_cart_authorized(self, items):
+    def add_items_to_cart_authorized(self, items: dict[str, int]):
         token = self.get_token(authorize=True)
         self.add_items_to_cart(token, items)
         return Cart(token).show()
 
-    def get_purchase_history(self):
+    def get_purchase_history(self) -> list[dict[Any, Any]]:
         token = self.get_token(authorize=True)
         purchases = Purchases(token)
         response = purchases.history()
         return PurchaseHistory(response).parse()
 
-    def get_purchase_info(self, purchase_id, use_lite_id=False):
+    def get_purchase_info(
+        self, purchase_id: str | int, use_lite_id: bool = False
+    ) -> dict[Any]:
         token = self.get_token(authorize=True)
         purchases = Purchases(token)
         email = self.username if use_lite_id else None
@@ -429,7 +451,9 @@ class IkeaCartUtils:
 
 
 @frappe.whitelist()
-def get_sales_orders_containing_items(items_in_options, sales_orders):
+def get_sales_orders_containing_items(
+    items_in_options: str | list[str], sales_orders: str | list[str]
+) -> dict[str, list[Any]]:
     items_in_options = parse_json(items_in_options)
     sales_orders = parse_json(sales_orders)
     items_in_sales_orders_by_options = {}
@@ -449,13 +473,13 @@ def get_sales_orders_containing_items(items_in_options, sales_orders):
 
 @frappe.whitelist()
 def get_unavailable_items_in_cart_by_orders(
-    unavailable_items, sales_orders, items_to_sell
+    unavailable_items: str | Any, sales_orders: str | list[str], items_to_sell: Any
 ):
-    unavailable_items = parse_json(unavailable_items)
+    unavailable_items: list[Any] = parse_json(unavailable_items)
     sales_orders = parse_json(sales_orders)
     items_to_sell = parse_json(items_to_sell)
 
-    unavailable_items_map = {}
+    unavailable_items_map: dict[str, Any] = {}
     for d in unavailable_items:
         if d["item_code"] in unavailable_items_map:
             item = unavailable_items_map[d["item_code"]]
@@ -490,8 +514,8 @@ def get_unavailable_items_in_cart_by_orders(
         d["parent"] = ""
         d["item_name"] = item_names_map[d["item_code"]]
 
-    res = []
-    unallocated_items = unavailable_items_map
+    res: list[dict[str, Any]] = []
+    unallocated_items: dict[Any, Any] = unavailable_items_map
     for d in so_items + items_to_sell:
         if not d["item_code"] in unallocated_items:
             continue
@@ -523,8 +547,10 @@ def get_unavailable_items_in_cart_by_orders(
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def get_sales_order_query(doctype, txt, searchfield, start, page_len, filters):
-    ignore_orders = frappe.db.sql(
+def get_sales_order_query(
+    doctype: str, txt: str, searchfield: str, start: str, page_len: str, filters: str
+) -> dict[str, Any]:
+    ignore_orders: list[str] = frappe.db.sql(
         "SELECT sales_order_name from `tabPurchase Order Sales Order`"
     )
     ignore_orders = [d[0] for d in ignore_orders]
@@ -534,11 +560,11 @@ def get_sales_order_query(doctype, txt, searchfield, start, page_len, filters):
         ignore_orders = "(" + ",".join(["'" + d + "'" for d in ignore_orders]) + ")"
         ignore_orders_cond = f"name NOT IN {ignore_orders} AND"
 
-    searchfields = frappe.get_meta("Sales Order").get_search_fields()
+    searchfields: Any = frappe.get_meta("Sales Order").get_search_fields()
     if searchfield:
         searchfields = " or ".join([field + " LIKE %(txt)s" for field in searchfields])
 
-    res = frappe.db.sql(
+    res = frappe.db.sql(  # nosec
         """
         SELECT name, customer, total_amount from `tabSales Order`
         WHERE {ignore_orders_cond}
@@ -564,7 +590,7 @@ def get_purchase_history():
 
 
 @frappe.whitelist()
-def get_purchase_info(purchase_id, use_lite_id):
+def get_purchase_info(purchase_id: int, use_lite_id: bool) -> dict[str, Any]:
     utils = IkeaCartUtils()
     purchase_info = None
     try:

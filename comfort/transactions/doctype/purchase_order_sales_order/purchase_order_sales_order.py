@@ -2,4 +2,4 @@ from frappe.model.document import Document
 
 
 class PurchaseOrderSalesOrder(Document):
-    pass
+    sales_order_name: str

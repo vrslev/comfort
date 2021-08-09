@@ -1,8 +1,15 @@
+from __future__ import annotations
+
 import unittest
+from datetime import datetime
 
 import frappe
 from comfort.finance.doctype.account.test_account import create_account
+from frappe.model.document import Document
 from frappe.utils import nowdate
+
+# TODO:
+# pyright: reportUnknownArgumentType=false
 
 
 class TestJournalEntry(unittest.TestCase):
@@ -65,9 +72,14 @@ class TestJournalEntry(unittest.TestCase):
 
 
 def make_journal_entry(
-    posting_date, account1, account2, amount, save=True, submit=False
+    posting_date: datetime,
+    account1: str,
+    account2: str,
+    amount: int,
+    save: bool = True,
+    submit: bool = False,
 ):
-    jv = frappe.new_doc("Journal Entry")
+    jv: Document = frappe.new_doc("Journal Entry")
     jv.posting_date = posting_date or nowdate()
     jv.set(
         "accounting_entries",
@@ -93,7 +105,7 @@ def make_journal_entry(
     return jv
 
 
-def get_journal_entry(jv_name):
+def get_journal_entry(jv_name: str) -> frappe._dict:
     return frappe.db.sql(
         """ SELECT
 						*
@@ -106,7 +118,7 @@ def get_journal_entry(jv_name):
     )
 
 
-def get_gl_entries(voucher_no, voucher_type):
+def get_gl_entries(voucher_no: str, voucher_type: str) -> list[frappe._dict]:
     return frappe.db.sql(
         """ SELECT
 						*

@@ -6,6 +6,8 @@ from frappe.model.document import Document
 
 
 class ItemCategory(Document):
+    url: str
+
     def validate(self):
         self.validate_url()
 

@@ -8,9 +8,9 @@ license = "MIT"
 [tool.poetry.dependencies]
 python = "^3.7"
 ikea-api = "^0.5.1"
-ikea-api-extender = {git = "ssh://github.com/vrslev/ikea-api-extender.git"}
+ikea-api-extender = { git = "ssh://github.com/vrslev/ikea-api-extender.git" }
 vk-api = "^11.9.4"
-erpnext-telegram-integration = {git = "https://github.com/vrslev/erpnext_telegram.git"}
+erpnext-telegram-integration = { git = "https://github.com/vrslev/erpnext_telegram.git" }
 toml = "^0.10.2"
 
 [tool.poetry.dev-dependencies]
@@ -28,14 +28,11 @@ known_first_party = "frappe"
 exclude = ["**/node_modules", "**/__pycache__"]
 typeCheckingMode = "strict"
 pythonVersion = "3.7"
-reportGeneralTypeIssues = false
-reportUnknownArgumentType = false
+reportGeneralTypeIssues = false # unknown members and methods
 reportUnknownMemberType = false
 reportUnknownVariableType = false
-reportUnknownParameterType = false
-reportUnknownLambdaType = false
-reportUntypedFunctionDecorator = false
 reportMissingTypeStubs = false
+reportPrivateUsage = false
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

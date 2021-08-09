@@ -8,12 +8,13 @@ from frappe.model.meta import Meta
 from frappe.utils import unique
 
 
-def get_fields(doctype: str, fields: list[str] | None = None) -> list[Any]:
+def get_fields(doctype: str, fields: list[Any] | None = None) -> list[Any]:
     # From ERPNext
     if fields is None:
         fields = []
     meta: Meta = frappe.get_meta(doctype)
-    fields.extend(meta.get_search_fields())
+    search_fields: list[Any] = meta.get_search_fields()
+    fields.extend(search_fields)  # type: ignore
 
     if meta.title_field and not meta.title_field.strip() in fields:
         fields.insert(1, meta.title_field.strip())

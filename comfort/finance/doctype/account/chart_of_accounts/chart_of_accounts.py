@@ -1,10 +1,14 @@
+from __future__ import annotations
+
+from typing import Any
+
 import frappe
 from frappe import _
 from frappe.utils.nestedset import rebuild_tree
 
 
 def create_charts():
-    chart = {
+    chart: dict[str, Any] = {
         _("Assets"): {
             _("Bank"): {},
             _("Cash"): {},
@@ -27,7 +31,12 @@ def create_charts():
         _("Liabilities"): {"root_type": "Liability", "is_group": 1},
     }
 
-    def _import_accounts(children, parent, root_type, root_account=False):
+    def _import_accounts(
+        children: dict[Any, Any],
+        parent: str,
+        root_type: str,
+        root_account: bool = False,
+    ):
         for account_name, child in children.items():
             if root_account:
                 root_type = child.get("root_type")
@@ -62,7 +71,7 @@ def create_charts():
     frappe.local.flags.ignore_on_update = False
 
 
-def identify_is_group(child):
+def identify_is_group(child: dict[Any, Any]):
     if child.get("is_group"):
         is_group = child.get("is_group")
     elif len(set(child.keys()) - {"root_type", "is_group"}):
