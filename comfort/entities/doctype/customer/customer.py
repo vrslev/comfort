@@ -7,6 +7,8 @@ from frappe.model.document import Document
 
 
 class Customer(Document):
+    vk_url: str
+
     def validate(self):
         self.validate_vk_url()
         self.set_vk_id()

@@ -8,7 +8,8 @@ from ..sales_order.sales_order import calculate_commission
 
 item_doctype = "Sales Order Item"
 child_item_doctype = "Sales Order Child Item"
-
+# TODO:
+# pyright: reportUnknownArgumentType=false, reportUnknownParameterType=false
 # TODO: Deal with items to sell
 # TODO: Queries improvement for SO (make it global)
 # TODO: Bin

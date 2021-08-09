@@ -1,13 +1,19 @@
+from __future__ import annotations
+
+from typing import Any, overload
+
 import frappe
 from frappe.utils.data import cint
 
+from .doctype.gl_entry.gl_entry import GLEntry
 
-def make_gl_entries(self, account_from, account_to, amount):
+
+def make_gl_entries(self: object, account_from: str, account_to: str, amount: int):
     make_gl_entry(self, account_from, 0, amount)
     make_gl_entry(self, account_to, amount, 0)
 
 
-def make_gl_entry(self, account, dr, cr):
+def make_gl_entry(self: object, account: str, dr: int, cr: int):
     party = None
     if hasattr(self, "party") and self.get("party"):
         party = self.party
@@ -27,8 +33,10 @@ def make_gl_entry(self, account, dr, cr):
     ).submit()
 
 
-def make_reverse_gl_entry(voucher_type=None, voucher_no=None):
-    gl_entries = frappe.get_all(
+def make_reverse_gl_entry(
+    voucher_type: str | None = None, voucher_no: str | None = None
+):
+    gl_entries: list[Any] = frappe.get_all(
         "GL Entry",
         filters={"voucher_type": voucher_type, "voucher_no": voucher_no},
         fields=["*"],
@@ -50,13 +58,13 @@ def make_reverse_gl_entry(voucher_type=None, voucher_no=None):
                 make_cancelled_gl_entry(entry)
 
 
-def make_cancelled_gl_entry(entry):
+def make_cancelled_gl_entry(entry: GLEntry):
     gl_entry = frappe.new_doc("GL Entry")
     gl_entry.update(entry)
     gl_entry.submit()
 
 
-def cancel_gl_entry(voucher_type, voucher_no):
+def cancel_gl_entry(voucher_type: str, voucher_no: str):
     frappe.db.sql(
         """
         UPDATE `tabGL Entry`
@@ -68,7 +76,17 @@ def cancel_gl_entry(voucher_type, voucher_no):
     )
 
 
-def get_account(field_names):
+@overload
+def get_account(field_names: str) -> str:
+    ...
+
+
+@overload
+def get_account(field_names: list[str]) -> list[str]:
+    ...
+
+
+def get_account(field_names: str | list[str]) -> str | list[str]:
     return_str = False
     if isinstance(field_names, str):
         field_names = [field_names]
@@ -84,7 +102,7 @@ def get_account(field_names):
     return accounts[0] if return_str else accounts
 
 
-def get_paid_amount(dt, dn) -> int:
+def get_paid_amount(dt: str, dn: str) -> int:
     accounts = get_account(["cash", "bank"])
     balance = frappe.get_list(
         "GL Entry",

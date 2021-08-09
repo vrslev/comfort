@@ -1,6 +1,7 @@
 import unittest
 
 import frappe
+from frappe.model.document import Document
 
 
 class TestAccount(unittest.TestCase):
@@ -10,8 +11,10 @@ class TestAccount(unittest.TestCase):
         )
 
 
-def create_account(company, account_name, root_type, parent_account):
-    account = frappe.db.get_value(
+def create_account(
+    company: str, account_name: str, root_type: str, parent_account: str
+):
+    account: Document = frappe.db.get_value(
         "Account", filters={"account_name": account_name, "company": company}
     )
     if account:

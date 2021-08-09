@@ -1,5 +1,8 @@
 import frappe
 
+# TODO:
+# pyright: reportUnknownArgumentType=false, reportUnknownParameterType=false
+
 
 def execute(filters=None):
     columns, data = [], []

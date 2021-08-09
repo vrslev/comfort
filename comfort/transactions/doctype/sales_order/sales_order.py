@@ -1,4 +1,8 @@
+from __future__ import annotations
+
 # TODO: Allow change services on submit
+from typing import Any
+
 import frappe
 from comfort import stock
 from comfort.finance import (
@@ -12,8 +16,15 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt
 
+from ..sales_order_item.sales_order_item import SalesOrderItem
+
 
 class SalesOrder(Document):
+    items: list[SalesOrderItem]
+    items_cost: int
+    commission: int
+    total_amount: int
+
     def validate(self):
         self.merge_same_items()
         self.delete_empty_items()
@@ -23,27 +34,27 @@ class SalesOrder(Document):
         self.set_statuses()
 
     def merge_same_items(self):
-        items_map = {}
+        items_map: dict[str, int] = {}
         for idx, item in enumerate(self.items):
             items_map.setdefault(item.item_code, []).append(idx)
 
-        to_remove = []
+        to_remove: list[Any] = []
         for value in items_map.values():
             if len(value) > 1:
                 full_qty = 0
-                for d in value:
-                    qty = self.items[d].qty
+                for d in value:  # TODO: Does this work?
+                    qty = self.items[d].qty  # type: ignore
                     if qty > 0:
                         full_qty += qty
-                self.items[value[0]].qty = full_qty
+                self.items[value[0]].qty = full_qty  # type: ignore
                 for d in value[1:]:
-                    to_remove.append(self.items[d])
+                    to_remove.append(self.items[d])  # type: ignore
 
         for d in to_remove:
             self.items.remove(d)
 
     def delete_empty_items(self):
-        to_remove = []
+        to_remove: list[Any] = []
         for d in self.items:
             if d.qty == 0:
                 to_remove.append(d)
@@ -115,8 +126,8 @@ class SalesOrder(Document):
 
         self.pending_amount = self.total_amount - self.paid_amount
 
-    def get_item_qty_map(self, split_combinations=False):
-        item_qty_map = {}
+    def get_item_qty_map(self, split_combinations: bool = False):
+        item_qty_map: dict[str, Any] = {}
         if split_combinations:
             parents = [d.parent_item_code for d in self.child_items]
             for d in self.items + self.child_items:
@@ -136,11 +147,11 @@ class SalesOrder(Document):
         if len(self.items) == 0:
             return
 
-        prepared_for_query = []
+        prepared_for_query: list[str] = []
         for d in self.items:
             prepared_for_query.append(f'"{d.item_code}"')
 
-        child_items = frappe.db.sql(
+        child_items: list[Any] = frappe.db.sql(
             """
             SELECT parent as parent_item_code, item_code, item_name, qty
             FROM `tabChild Item`
@@ -185,14 +196,13 @@ class SalesOrder(Document):
 
         status = None
 
-        po_name = frappe.get_all(
+        po_name: list[frappe._dict] = frappe.get_all(
             "Purchase Order Sales Order",
             "parent",
             {"docstatus": 1, "sales_order_name": self.name},
         )
         if len(po_name) > 0:
-            po_name = po_name[0].parent
-            po_status = frappe.get_value("Purchase Order", po_name, "status")
+            po_status = frappe.get_value("Purchase Order", po_name[0].parent, "status")
             if po_status == "To Receive":
                 status = "Purchased"
             elif po_status == "Completed":
@@ -221,7 +231,7 @@ class SalesOrder(Document):
         stock.sales_order_from_stock_submitted(self)
 
     @frappe.whitelist()
-    def set_paid(self, paid_amount, cash):
+    def set_paid(self, paid_amount: int, cash: bool):
         if int(self.total_amount) != 0:
             self.make_invoice_gl_entries(paid_amount, cash)
 
@@ -229,14 +239,14 @@ class SalesOrder(Document):
         self.set_statuses()
         self.db_update()
 
-    def make_invoice_gl_entries(self, paid_amount, cash=True):
+    def make_invoice_gl_entries(self, paid_amount: int, cash: bool = True):
         if paid_amount == 0:
             return
 
         if self.service_amount > 0:
             # TODO: Refactor, for now:
             # pyright: reportUnboundVariable=false
-            sales_amt = self.items_cost + self.margin - self.discount
+            sales_amt: int = self.items_cost + self.margin - self.discount
             service_amt_paid = 0
             if paid_amount > sales_amt:
                 sales_amt_paid = sales_amt
@@ -249,7 +259,8 @@ class SalesOrder(Document):
         make_gl_entry(self, get_account("cash" if cash else "bank"), paid_amount, 0)
         make_gl_entry(self, get_account("sales"), 0, sales_amt_paid)
 
-        delivery_amt_paid, installation_amt_paid = 0, 0
+        delivery_amt_paid: int = 0
+        installation_amt_paid = 0
         if self.service_amount > 0:
             delivery_amt, installation_amt = 0, 0
             for d in self.services:
@@ -298,14 +309,14 @@ class SalesOrder(Document):
         )
 
     @frappe.whitelist()
-    def split_combinations(self, combos_to_split, save):
+    def split_combinations(self, combos_to_split: list[str], save: bool):
         combos_to_split = list(set(combos_to_split))
 
         selected_child_items = [
             d for d in self.child_items if d.parent_item_code in combos_to_split
         ]
 
-        to_remove = []
+        to_remove: list[SalesOrderItem] = []
         for d in self.items:
             if d.item_code in combos_to_split:
                 to_remove.append(d)
@@ -359,8 +370,8 @@ CONDITIONS = [
 
 
 @frappe.whitelist()
-def calculate_commission(items_cost, commission=None):
-    items_cost = flt(items_cost)
+def calculate_commission(items_cost: float | str | int, commission: int | None = None):
+    items_cost: float = flt(items_cost)
     if commission is not None:
         commission = float(commission)
 
@@ -369,7 +380,7 @@ def calculate_commission(items_cost, commission=None):
         commission = 0
     else:
         if commission is None:
-            commission_percentages = []
+            commission_percentages: list[int] = []
             for condition in CONDITIONS:
                 if condition["start"] <= items_cost <= condition["end"]:
                     commission_percentages.append(condition["commission_percentage"])
@@ -385,7 +396,7 @@ def calculate_commission(items_cost, commission=None):
 
 
 @frappe.whitelist()
-def get_sales_orders_in_purchase_order():
+def get_sales_orders_in_purchase_order() -> list[str]:
     return [
         d.sales_order_name
         for d in frappe.get_all("Purchase Order Sales Order", "sales_order_name")
@@ -394,7 +405,14 @@ def get_sales_orders_in_purchase_order():
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def item_query(doctype, txt, searchfield, start, page_len, filters):
+def item_query(
+    doctype: str,
+    txt: str,
+    searchfield: str,
+    start: str,
+    page_len: str,
+    filters: dict[Any, Any],
+):
     from comfort.fixtures.hooks.queries import default_query
 
     field = "from_actual_stock"

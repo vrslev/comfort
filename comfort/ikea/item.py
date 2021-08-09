@@ -1,5 +1,8 @@
+from __future__ import annotations
+
 import asyncio
 import json
+from typing import Any, Coroutine
 
 import aiohttp
 from ikea_api.endpoints.item.item_iows import WrongItemCodeError
@@ -8,13 +11,17 @@ from ikea_api_extender import get_items_immortally
 import frappe
 from comfort.ikea.utils import extract_item_codes, get_item_codes_from_ingka_pagelinks
 from frappe import _
+from frappe.model.document import Document
 from frappe.utils import parse_json
 
 
 @frappe.whitelist()
 def fetch_new_items(
-    item_codes, force_update=False, download_images=True, values_from_db=[]
-):
+    item_codes: str | list[Any],
+    force_update: str | bool = False,
+    download_images: str | bool = True,
+    values_from_db: str | list[str] = [],
+) -> dict[str, list[Any]]:
 
     try:
         item_codes = json.loads(item_codes)
@@ -36,7 +43,7 @@ def fetch_new_items(
         else:
             item_codes = extract_item_codes(item_codes)
 
-    items_to_fetch = []
+    items_to_fetch: list[str] = []
     exist = [
         d.name
         for d in frappe.get_all("Item", "name", {"item_code": ["in", item_codes]})
@@ -59,7 +66,7 @@ def fetch_new_items(
         except WrongItemCodeError:
             return frappe.throw(_("Wrong Item Code"))
 
-        parsed_items = response["items"]
+        parsed_items: list[Any] = response["items"]
         res.update(
             {
                 "unsuccessful": response["unsuccessful"],
@@ -96,13 +103,13 @@ def fetch_new_items(
     return res
 
 
-def download_items_images(items):
-    async def fetch(session, item):
+def download_items_images(items: dict[str, Any]):
+    async def fetch(session: aiohttp.ClientSession, item: dict[str, Any]):
         if not item["image_url"]:
             return
 
         async with session.get(item["image_url"]) as r:
-            content = await r.content.read()
+            content: str = await r.content.read()
 
         fpath = f"files/items/{item['item_code']}"
         fname = f"{item['image_url'].rsplit('/', 1)[1]}"
@@ -114,12 +121,16 @@ def download_items_images(items):
 
         dt = "Item"
         frappe.db.set_value(
-            dt, item["item_code"], "image", f"/{fpath}/{fname}", update_modified=False
+            dt,
+            item["item_code"],  # type: ignore
+            "image",
+            f"/{fpath}/{fname}",
+            update_modified=False,
         )
 
-    async def main(items):
+    async def main(items: dict[str, Any]):
         async with aiohttp.ClientSession() as session:
-            tasks = []
+            tasks: list[Coroutine[Any, Any, None]] = []
             for d in items:
                 task = fetch(session, d)
                 tasks.append(task)
@@ -142,7 +153,7 @@ def download_items_images(items):
         frappe.db.commit()
 
 
-def add_item(item, force_update):
+def add_item(item: Any, force_update: bool):
     _make_item_category(item.group_name, item.group_url)
     if item.is_combination:
         response = fetch_new_items(
@@ -161,7 +172,7 @@ def add_item(item, force_update):
     )
 
 
-def _make_item_category(name, url):
+def _make_item_category(name: str, url: str) -> Document | None:
     if not frappe.db.exists("Item Category", name):
         return frappe.get_doc(
             {"doctype": "Item Category", "item_category_name": name, "url": url}
@@ -169,8 +180,14 @@ def _make_item_category(name, url):
 
 
 def _make_item(
-    item_code, item_name, weight, item_category=None, rate=0, url=None, child_items=[]
-):
+    item_code: str,
+    item_name: str,
+    weight: float,
+    item_category: str | None = None,
+    rate: int = 0,
+    url: str | None = None,
+    child_items: list[Any] = [],
+) -> Document:
     if frappe.db.exists("Item", item_code):
         doc = frappe.get_doc("Item", item_code)
         doc.item_name = item_name
@@ -181,10 +198,10 @@ def _make_item(
         doc.rate = rate
         doc.weight = weight
         if child_items and len(child_items) > 0:
-            cur_child_items = [
+            cur_child_items: list[dict[str, str | int]] = [
                 {"item_code": d.item_code, "qty": d.qty} for d in doc.child_items
             ]
-            new_child_items = [
+            new_child_items: list[dict[str, str | int]] = [
                 {"item_code": d["item_code"], "qty": d["qty"]} for d in child_items
             ]
             if len([d for d in cur_child_items if d not in new_child_items]) > 0:

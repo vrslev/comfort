@@ -1,14 +1,18 @@
+from __future__ import annotations
+
+from typing import Any
+
 import frappe
 
 
 # TODO: Currency symbol not working
-def boot_session(bootinfo):
+def boot_session(bootinfo: object):
     bootinfo.sysdefaults.currency = frappe.get_cached_value(
         "Accounts Settings", "Accounts Settings", "default_currency"
     )
     bootinfo.sysdefaults.currency_precision = 0
     if bootinfo.sysdefaults.currency:
-        val = frappe.get_cached_value(
+        val: dict[str, Any] = frappe.get_cached_value(
             "Currency",
             bootinfo.sysdefaults.currency,
             [

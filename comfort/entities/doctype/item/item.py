@@ -1,12 +1,21 @@
 # TODO: How to deal with prices that expire???
+from __future__ import annotations
+
 import re
+from typing import Any
 
 import frappe
 from frappe import _
 from frappe.model.document import Document
 
+from ..child_item.child_item import ChildItem
+
 
 class Item(Document):
+    url: str
+    child_items: list[ChildItem]
+    item_code: str
+
     def validate(self):
         self.validate_child_items()
         self.validate_url()
@@ -32,12 +41,12 @@ class Item(Document):
         if not (self.child_items and len(self.child_items) > 0):
             return
 
-        items = frappe.get_all(
+        items: list[frappe._dict] = frappe.get_all(
             "Item",
             ["item_code", "weight"],
             {"item_code": ["in", [d.item_code for d in self.child_items]]},
         )
-        weight_map = {}
+        weight_map: Any = {}
         for d in items:
             if d.item_code not in weight_map:
                 weight_map[d.item_code] = 0
@@ -51,7 +60,7 @@ class Item(Document):
         self.calculate_weight_in_parent_docs()
 
     def calculate_weight_in_parent_docs(self):
-        parent_items = frappe.get_all(
+        parent_items: list[Any] = frappe.get_all(
             "Child Item", "parent", {"item_code": self.item_code}
         )
         parent_items = list({d.parent for d in parent_items})

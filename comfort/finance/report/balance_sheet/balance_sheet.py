@@ -1,7 +1,15 @@
+from __future__ import annotations
+
+from datetime import datetime
+from typing import Any
+
 import frappe
 
+# TODO:
+# pyright: reportUnknownArgumentType=false, reportUnknownParameterType=false
 
-def execute(filters=None):
+
+def execute(filters: dict[str, Any] = None):
     columns, data = [], []
 
     period_key, period_label = "Date Range", "Date Range"
@@ -32,7 +40,7 @@ def execute(filters=None):
     return columns, data, None, chart, report_summary
 
 
-def get_columns(period_key, period_label):
+def get_columns(period_key: str, period_label: str):
     columns = [
         {
             "fieldname": "account",
@@ -52,7 +60,7 @@ def get_columns(period_key, period_label):
     return columns
 
 
-def get_data(date, root_type, dr_cr, period_key):
+def get_data(date, root_type: str, dr_cr, period_key):
     accounts = get_accounts(root_type)
     data = []
     if accounts:
@@ -106,7 +114,7 @@ def append(data, d, i, period_key):
     )
 
 
-def get_accounts(root_type):
+def get_accounts(root_type: str) -> dict[Any, Any]:
     return frappe.db.sql(
         """ SELECT
 				name, parent_account, lft, root_type, is_group
@@ -116,12 +124,12 @@ def get_accounts(root_type):
 				root_type=%s
 			ORDER BY
 				lft""",
-        (root_type),
+        (root_type,),
         as_dict=1,
     )
 
 
-def get_account_balance(account, date):
+def get_account_balance(account: str, date: datetime) -> int:
     return frappe.db.sql(
         """ SELECT
 					sum(debit_amount) - sum(credit_amount)
@@ -133,7 +141,7 @@ def get_account_balance(account, date):
     )[0][0]
 
 
-def get_profit_loss_total_amount(data, period_key):
+def get_profit_loss_total_amount(data: list[dict[Any, Any]], period_key: Any):
     debit, credit, l_credit, e_credit = 0, 0, 0, 0
     for d in data:
         if d and d["account"] == "Total Asset (Debit)":

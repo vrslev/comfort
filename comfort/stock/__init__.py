@@ -46,10 +46,13 @@ STOCK CYCLE
 # TODO: What if someone bought something while items not received yet?
 # TODO: Sales Order added this way should appear in Purchase order
 
-from typing import List, Tuple
+from __future__ import annotations
+
+from typing import Any, ItemsView
 
 import frappe
 from frappe import ValidationError, _
+from frappe.model.document import Document
 from frappe.utils.data import cint
 
 from .doctype.bin.bin import fields
@@ -63,24 +66,24 @@ __all__ = [
 ]
 
 
-def update_bin(item_code: str, **kwargs):
+def update_bin(item_code: str, **kwargs: int):
     doc = frappe.get_doc("Bin", item_code)
 
     for d in kwargs:
         if d not in fields:
-            raise ValidationError(_(f"No such argument in Bin: {d}"))
+            raise ValidationError(_(f"No such argument in Bin: {d}"))  # type: ignore
 
     for attr, qty in kwargs.items():
-        new_qty = cint(getattr(doc, attr)) + cint(qty)
+        new_qty = cint(getattr(doc, attr)) + cint(qty)  # type: ignore
         setattr(doc, attr, new_qty)
 
     doc.save()
 
 
-def get_items_to_sell_for_bin(doc):
+def get_items_to_sell_for_bin(doc: Any) -> ItemsView[str, int]:
     if not doc.sales_orders:
         return []
-    items_map = {}
+    items_map: dict[str, Any] = {}
     for d in doc.items_to_sell:
         if d.item_code not in items_map:
             items_map[d.item_code] = 0
@@ -88,7 +91,7 @@ def get_items_to_sell_for_bin(doc):
     return items_map.items()
 
 
-def get_sales_order_items_for_bin(doc):
+def get_sales_order_items_for_bin(doc: Document) -> ItemsView[str, int]:
     # TODO: use templated items instead (one that generates for cart)
     if not doc.sales_orders:
         return []
@@ -120,7 +123,7 @@ def get_sales_order_items_for_bin(doc):
 
     items = packed_items + so_items
 
-    items_map = {}
+    items_map: Any = {}
     for d in items:
         if d.item_code not in items_map:
             items_map[d.item_code] = 0
@@ -129,7 +132,7 @@ def get_sales_order_items_for_bin(doc):
     return items_map.items()
 
 
-def purchase_order_purchased(doc):
+def purchase_order_purchased(doc: Document):
     for item_code, qty in get_sales_order_items_for_bin(doc):
         update_bin(item_code, reserved_purchased=qty)
 
@@ -137,7 +140,7 @@ def purchase_order_purchased(doc):
         update_bin(item_code, available_purchased=qty)
 
 
-def purchase_order_completed(doc):
+def purchase_order_completed(doc: Document):
     for item_code, qty in get_sales_order_items_for_bin(doc):
         update_bin(item_code, reserved_purchased=-qty, reserved_actual=qty)
 
@@ -146,21 +149,21 @@ def purchase_order_completed(doc):
 
 
 def validate_items_available_for_sales_order_from_stock(
-    doc, item_to_qty: List[Tuple[str]]
+    doc: Document, item_to_qty: list[tuple[str]]
 ):
     field = "available_actual"
-    item_availability = frappe.get_all(
+    item_availability: Any = frappe.get_all(
         "Bin",
         ["item_code", field],
         {"item_code": ["in", [d.item_code for d in doc.items]]},
     )
-    item_availability_map = {}
+    item_availability_map: Any = {}
     for d in item_availability:
         if d.item_code not in item_availability_map:
             item_availability_map[d.item_code] = 0
         item_availability_map[d.item_code] += d[field]
 
-    not_available_items = []
+    not_available_items: list[tuple[str | int]] = []
     for item_code, reqd_qty in item_to_qty:
         available_qty = item_availability_map[item_code]
         lack_qty = reqd_qty - available_qty
@@ -181,14 +184,14 @@ def validate_items_available_for_sales_order_from_stock(
         )
 
 
-def sales_order_from_stock_submitted(doc):
+def sales_order_from_stock_submitted(doc: Document):
     if doc.from_actual_stock:
-        item_to_qty = doc.get_item_qty_map(True).items()
+        item_to_qty: tuple[str, int] = doc.get_item_qty_map(True).items()
         validate_items_available_for_sales_order_from_stock(doc, item_to_qty)
         for item_code, qty in item_to_qty:
-            update_bin(item_code, available_actual=-qty, reserved_actual=qty)
+            update_bin(item_code, available_actual=-qty, reserved_actual=qty)  # type: ignore
 
 
-def sales_order_delivered(doc):
+def sales_order_delivered(doc: Document):
     for item_code, qty in doc.get_item_qty_map(True).items():
-        update_bin(item_code, reserved_actual=-qty)
+        update_bin(item_code, reserved_actual=-qty)  # type: ignore

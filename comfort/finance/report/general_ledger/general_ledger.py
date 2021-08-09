@@ -2,6 +2,9 @@ import frappe
 from frappe import _, _dict
 from frappe.utils import flt
 
+# TODO:
+# pyright: reportUnknownArgumentType=false, reportUnknownParameterType=false
+
 
 def execute(filters=None):
     columns, data = [], []
