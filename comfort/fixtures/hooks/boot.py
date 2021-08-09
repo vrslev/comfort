@@ -1,5 +1,6 @@
 import frappe
 
+
 # TODO: Currency symbol not working
 def boot_session(bootinfo):
     bootinfo.sysdefaults.currency = frappe.get_cached_value(
