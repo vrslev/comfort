@@ -11,16 +11,10 @@ from frappe.model.document import Document
 from ..child_item.child_item import ChildItem
 
 
-class Item(Document):
+class ItemMethods:
     url: str
     child_items: list[ChildItem]
     item_code: str
-
-    def validate(self):
-        self.validate_child_items()
-        self.validate_url()
-        self.set_name()
-        self.calculate_weight()
 
     def validate_child_items(self):
         if self.child_items and frappe.db.exists(
@@ -56,9 +50,6 @@ class Item(Document):
         for d in self.child_items:
             self.weight += weight_map[d.item_code] * d.qty
 
-    def on_update(self):
-        self.calculate_weight_in_parent_docs()
-
     def calculate_weight_in_parent_docs(self):
         parent_items: list[Any] = frappe.get_all(
             "Child Item", "parent", {"item_code": self.item_code}
@@ -68,6 +59,17 @@ class Item(Document):
             doc = frappe.get_doc("Item", d)
             doc.calculate_weight()
             doc.db_update()
+
+
+class Item(Document, ItemMethods):
+    def validate(self):
+        self.validate_child_items()
+        self.validate_url()
+        self.set_name()
+        self.calculate_weight()
+
+    def on_update(self):
+        self.calculate_weight_in_parent_docs()
 
     def after_insert(self):
         if self.child_items and len(self.child_items) > 0:

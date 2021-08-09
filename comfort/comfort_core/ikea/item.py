@@ -5,11 +5,14 @@ import json
 from typing import Any, Coroutine
 
 import aiohttp
-from ikea_api.endpoints.item.item_iows import WrongItemCodeError
+from ikea_api.endpoints.item.item_iows import WrongItemCodeError  # TODO
 from ikea_api_extender import get_items_immortally
 
 import frappe
-from comfort.ikea.utils import extract_item_codes, get_item_codes_from_ingka_pagelinks
+from comfort.comfort_core.ikea.utils import (
+    extract_item_codes,
+    get_item_codes_from_ingka_pagelinks,
+)
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import parse_json

@@ -2,9 +2,7 @@ import frappe
 
 
 def create_accounts():
-    from comfort.finance.doctype.account.chart_of_accounts.chart_of_accounts import (
-        create_charts,
-    )
+    from comfort.finance.chart_of_accounts import create_charts
 
     frappe.local.flags.ignore_root_company_validation = True
     create_charts()

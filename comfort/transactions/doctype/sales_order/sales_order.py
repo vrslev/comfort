@@ -17,21 +17,15 @@ from frappe.model.document import Document
 from frappe.utils import flt
 
 from ..sales_order_item.sales_order_item import SalesOrderItem
+from ..sales_order_service.sales_order_service import SalesOrderService
 
 
-class SalesOrder(Document):
+class SalesOrderMethods(Document):
     items: list[SalesOrderItem]
+    services: list[SalesOrderService]
     items_cost: int
     commission: int
     total_amount: int
-
-    def validate(self):
-        self.merge_same_items()
-        self.delete_empty_items()
-        self.set_services_table()
-        self.calculate()
-        self.set_child_items()
-        self.set_statuses()
 
     def merge_same_items(self):
         items_map: dict[str, int] = {}
@@ -226,19 +220,6 @@ class SalesOrder(Document):
 
         self.db_set("status", status, update_modified=False)
 
-    def before_submit(self):
-        self.edit_commission = True
-        stock.sales_order_from_stock_submitted(self)
-
-    @frappe.whitelist()
-    def set_paid(self, paid_amount: int, cash: bool):
-        if int(self.total_amount) != 0:
-            self.make_invoice_gl_entries(paid_amount, cash)
-
-        self.set_paid_and_pending_per_amount()
-        self.set_statuses()
-        self.db_update()
-
     def make_invoice_gl_entries(self, paid_amount: int, cash: bool = True):
         if paid_amount == 0:
             return
@@ -292,6 +273,52 @@ class SalesOrder(Document):
         if (sales_amt_paid + delivery_amt_paid + installation_amt_paid) != paid_amount:
             frappe.throw(_("Cannot calculate amount for GL Entries properly"))
 
+    def make_delivery_gl_entries(self):
+        delivery_accounts = get_account(["inventory", "cost_of_goods_sold"])
+        make_gl_entries(
+            self, delivery_accounts[0], delivery_accounts[1], self.items_cost
+        )
+
+
+class SalesOrder(SalesOrderMethods):
+    def validate(self):
+        self.merge_same_items()
+        self.delete_empty_items()
+        self.set_services_table()
+        self.calculate()
+        self.set_child_items()
+        self.set_statuses()
+
+    def before_submit(self):
+        self.edit_commission = True
+        stock.sales_order_from_stock_submitted(self)
+
+    def on_cancel(self):
+        # TODO: Cancel payment and delivery
+        # TODO: Update bin
+        self.ignore_linked_doctypes = "GL Entry"
+
+        make_reverse_gl_entry(self.doctype, self.name)
+
+        self.set_paid_and_pending_per_amount()
+
+        self.db_set("payment_status", "")
+        self.db_set("delivery_status", "")
+
+    def before_update_after_submit(self):
+        if self.from_not_received_items_to_sell:
+            self.flags.ignore_validate_update_after_submit = True
+        self.validate()
+
+    @frappe.whitelist()
+    def set_paid(self, paid_amount: int, cash: bool):
+        if int(self.total_amount) != 0:
+            self.make_invoice_gl_entries(paid_amount, cash)
+
+        self.set_paid_and_pending_per_amount()
+        self.set_statuses()
+        self.db_update()
+
     @frappe.whitelist()
     def set_delivered(self):
         self.set_statuses()  # TODO: Is this really sets delivery status?
@@ -301,12 +328,6 @@ class SalesOrder(Document):
             stock.sales_order_delivered(self)
         else:
             frappe.throw(_("Not able to set Delivered"))
-
-    def make_delivery_gl_entries(self):
-        delivery_accounts = get_account(["inventory", "cost_of_goods_sold"])
-        make_gl_entries(
-            self, delivery_accounts[0], delivery_accounts[1], self.items_cost
-        )
 
     @frappe.whitelist()
     def split_combinations(self, combos_to_split: list[str], save: bool):
@@ -340,23 +361,6 @@ class SalesOrder(Document):
 
         if save:
             self.save()
-
-    def on_cancel(self):
-        # TODO: Cancel payment and delivery
-        # TODO: Update bin
-        self.ignore_linked_doctypes = "GL Entry"
-
-        make_reverse_gl_entry(self.doctype, self.name)
-
-        self.set_paid_and_pending_per_amount()
-
-        self.db_set("payment_status", "")
-        self.db_set("delivery_status", "")
-
-    def before_update_after_submit(self):
-        if self.from_not_received_items_to_sell:
-            self.flags.ignore_validate_update_after_submit = True
-        self.validate()
 
 
 CONDITIONS = [
