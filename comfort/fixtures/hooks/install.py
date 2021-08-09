@@ -2,7 +2,7 @@ import frappe
 
 
 def create_accounts():
-    from comfort.comfort.doctype.account.chart_of_accounts.chart_of_accounts import (
+    from comfort.finance.doctype.account.chart_of_accounts.chart_of_accounts import (
         create_charts,
     )
 

@@ -1,18 +1,31 @@
+[tool.poetry]
+name = "comfort"
+version = "0.0.3"
+description = "Lite-weight ERPNext alternative for specific business"
+authors = ["vrslev <mail@vrslev.com>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.7"
+ikea-api = "^0.5.1"
+ikea-api-extender = {git = "ssh://github.com/vrslev/ikea-api-extender.git"}
+vk-api = "^11.9.4"
+erpnext-telegram-integration = {git = "https://github.com/vrslev/erpnext_telegram.git"}
+toml = "^0.10.2"
+
+[tool.poetry.dev-dependencies]
+
 [tool.black]
 # https://black.readthedocs.io/en/stable/usage_and_configuration/the_basics.html#configuration-format
 target-version = ["py37"]
 
 [tool.isort]
-# https://github.com/PyCQA/isort/wiki/isort-Settings
 profile = "black"
-force_sort_within_sections = true
-include_trailing_comma = true
-line_length = 79
 known_first_party = "frappe"
 
 [tool.pyright]
 # https://github.com/microsoft/pyright/blob/main/docs/configuration.md
-exclude = ["**/node_modules", "**/__pycache__", ".vscode/stubs"]
+exclude = ["**/node_modules", "**/__pycache__"]
 typeCheckingMode = "strict"
 pythonVersion = "3.7"
 reportGeneralTypeIssues = false
@@ -22,3 +35,8 @@ reportUnknownVariableType = false
 reportUnknownParameterType = false
 reportUnknownLambdaType = false
 reportUntypedFunctionDecorator = false
+reportMissingTypeStubs = false
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

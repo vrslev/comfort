@@ -1,11 +1,20 @@
-# system
-.DS_Store
+#### macos ####
+# General
+*.DS_Store
 
-# js
-node_modules
-
-# python
+#### python ####
+# Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
-*.egg-info
+*$py.class
+
+# Distribution / packaging
+dist/
+*.egg-info/
+*.egg
+
+# Jupyter Notebook
 .ipynb_checkpoints
+
+#### js ####
+node_modules

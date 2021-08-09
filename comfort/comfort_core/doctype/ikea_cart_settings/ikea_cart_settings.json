@@ -1,0 +1,89 @@
+{
+  "actions": [],
+  "creation": "2021-03-31 17:16:27.100554",
+  "doctype": "DocType",
+  "editable_grid": 1,
+  "engine": "InnoDB",
+  "field_order": [
+    "username",
+    "password",
+    "column_break_3",
+    "zip_code",
+    "guest_token",
+    "guest_token_expiration_time",
+    "authorized_token",
+    "authorized_token_expiration_time"
+  ],
+  "fields": [
+    {
+      "fieldname": "username",
+      "fieldtype": "Data",
+      "label": "Username"
+    },
+    {
+      "fieldname": "password",
+      "fieldtype": "Password",
+      "label": "Password"
+    },
+    {
+      "fieldname": "column_break_3",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "zip_code",
+      "fieldtype": "Data",
+      "label": "Zip Code"
+    },
+    {
+      "fieldname": "guest_token",
+      "fieldtype": "Text",
+      "hidden": 1,
+      "label": "Guest Token",
+      "read_only": 1
+    },
+    {
+      "fieldname": "guest_token_expiration_time",
+      "fieldtype": "Datetime",
+      "hidden": 1,
+      "label": "Guest Token Expiration Time",
+      "read_only": 1
+    },
+    {
+      "fieldname": "authorized_token",
+      "fieldtype": "Text",
+      "hidden": 1,
+      "label": "Authorized Token",
+      "read_only": 1
+    },
+    {
+      "fieldname": "authorized_token_expiration_time",
+      "fieldtype": "Datetime",
+      "hidden": 1,
+      "label": "Authorized Token Expiration Time",
+      "read_only": 1
+    }
+  ],
+  "issingle": 1,
+  "links": [],
+  "modified": "2021-08-09 05:21:08.647463",
+  "modified_by": "Administrator",
+  "module": "Comfort Core",
+  "name": "Ikea Cart Settings",
+  "owner": "Administrator",
+  "permissions": [
+    {
+      "create": 1,
+      "delete": 1,
+      "email": 1,
+      "print": 1,
+      "read": 1,
+      "role": "Purchase User",
+      "share": 1,
+      "write": 1
+    }
+  ],
+  "quick_entry": 1,
+  "sort_field": "modified",
+  "sort_order": "DESC",
+  "track_changes": 1
+}
