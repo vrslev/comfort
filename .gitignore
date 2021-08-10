@@ -17,10 +17,10 @@ dist/
 .ipynb_checkpoints/
 
 # Tests
-.pytest_cache/
+tests/.cache/
 
 # Poetry
 poetry.toml
 
 #### js ####
-node_modules/
+node_modules
