@@ -14,6 +14,8 @@ erpnext-telegram-integration = { git = "https://github.com/vrslev/erpnext_telegr
 toml = "^0.10.2"
 
 [tool.poetry.dev-dependencies]
+pytest = "^6.2.4"
+pytest-cov = "^2.12.1"
 
 [tool.black]
 # https://black.readthedocs.io/en/stable/usage_and_configuration/the_basics.html#configuration-format
@@ -25,18 +27,14 @@ known_first_party = "frappe"
 
 [tool.pyright]
 # https://github.com/microsoft/pyright/blob/main/docs/configuration.md
-exclude = ["**/node_modules", "**/__pycache__"]
+exclude = ["node_modules", "__pycache__", ".ipynb_checkpoints"]
 typeCheckingMode = "strict"
 pythonVersion = "3.7"
-reportGeneralTypeIssues = false # unknown members and methods
+reportGeneralTypeIssues = false # mostly unknown members and methods
 reportUnknownMemberType = false
 reportUnknownVariableType = false
 reportMissingTypeStubs = false
 reportPrivateUsage = false
-
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
 
 [tool.semantic_release]
 branch = "main"
@@ -44,3 +42,20 @@ version_toml = "pyproject.toml:tool.poetry.version"
 build_command = "pip install -U pip poetry && poetry build"
 commit_subject = "сhore: Update version to {version}"
 upload_to_pypi = false
+
+[tool.pytest.ini_options]
+filterwarnings = "ignore:bleach-whitelist|the imp module"
+cache_dir = "tests/.cache"
+addopts = "--cov"
+
+[tool.coverage.report]
+skip_covered = true
+skip_empty = true
+
+[tool.coverage.run]
+source = ["comfort"]
+data_file = "tests/.cache/.coverage"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
