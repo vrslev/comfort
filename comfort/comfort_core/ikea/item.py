@@ -5,7 +5,7 @@ import json
 from typing import Any, Coroutine
 
 import aiohttp
-from ikea_api.endpoints.item.item_iows import WrongItemCodeError  # TODO
+from ikea_api.errors import ItemFetchError
 from ikea_api_extender import get_items_immortally
 
 import frappe
@@ -36,7 +36,6 @@ def fetch_new_items(
         parse_json(download_images),
         parse_json(values_from_db),
     )
-    # values_from_db: List[str]
 
     if isinstance(item_codes, int):
         item_codes = str(item_codes)
@@ -66,8 +65,11 @@ def fetch_new_items(
     if len(items_to_fetch) > 0:
         try:
             response = get_items_immortally(items_to_fetch)
-        except WrongItemCodeError:
-            return frappe.throw(_("Wrong Item Code"))
+        except ItemFetchError as e:
+            if "Wrong Item Code" in e.args[0]:
+                return frappe.throw(_("Wrong Item Code"))
+            else:
+                raise
 
         parsed_items: list[Any] = response["items"]
         res.update(
