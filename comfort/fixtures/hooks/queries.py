@@ -8,7 +8,7 @@ from frappe.model.meta import Meta
 from frappe.utils import unique
 
 
-def get_fields(doctype: str, fields: list[Any] | None = None) -> list[Any]:
+def _get_fields(doctype: str, fields: list[Any] | None = None) -> list[Any]:
     # From ERPNext
     if fields is None:
         fields = []
@@ -22,34 +22,34 @@ def get_fields(doctype: str, fields: list[Any] | None = None) -> list[Any]:
     return unique(fields)
 
 
-def format_money(money: str | int):
+def _format_money(money: str | int):
     return f"{int(money)} ₽"
 
 
-def format_weight(weight: int | float):
+def _format_weight(weight: int | float):
     return f"{float(weight)} кг"
 
 
-def format_item_query(d: list[Any]):
+def _format_item_query(d: list[Any]):
     if d[2]:
-        d[2] = format_money(d[2])
+        d[2] = _format_money(d[2])
 
 
-def format_purchase_order_query(d: list[Any]):
+def _format_purchase_order_query(d: list[Any]):
     if d[2]:
-        d[2] = format_money(d[2])
+        d[2] = _format_money(d[2])
     if d[3]:
-        d[3] = format_weight(d[3])
+        d[3] = _format_weight(d[3])
 
 
 def format_sales_order_query(d: list[Any]):
     if d[3]:
-        d[3] = format_money(d[3])
+        d[3] = _format_money(d[3])
 
 
-QUERY_FORMATTERS = {
-    "Item": format_item_query,
-    "Purchase Order": format_purchase_order_query,
+_QUERY_FORMATTERS = {
+    "Item": _format_item_query,
+    "Purchase Order": _format_purchase_order_query,
     "Sales Order": format_sales_order_query,
 }
 
@@ -65,7 +65,7 @@ def default_query(
     filters: dict[Any, Any],
 ):
     conditions = []
-    fields = get_fields(doctype, ["name"])
+    fields = _get_fields(doctype, ["name"])
 
     query: list[tuple[Any]] = frappe.db.sql(  # TODO: Security
         f"""
@@ -80,9 +80,9 @@ def default_query(
         {"txt": "%%%s%%" % txt},
         as_list=True,
     )
-    if doctype in QUERY_FORMATTERS:
+    if doctype in _QUERY_FORMATTERS:
         for d in query:
-            QUERY_FORMATTERS[doctype](d)
+            _QUERY_FORMATTERS[doctype](d)
     return query
 
 

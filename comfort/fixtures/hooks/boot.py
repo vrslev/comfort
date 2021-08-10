@@ -5,14 +5,16 @@ from typing import Any
 import frappe
 
 
-# TODO: Currency symbol not working
-def boot_session(bootinfo: object):
+def extend_boot_session_with_currency(bootinfo: object):
+    # TODO: Currency symbol not working
     bootinfo.sysdefaults.currency = frappe.get_cached_value(
         "Accounts Settings", "Accounts Settings", "default_currency"
     )
+
     bootinfo.sysdefaults.currency_precision = 0
+
     if bootinfo.sysdefaults.currency:
-        val: dict[str, Any] = frappe.get_cached_value(
+        currency_doc: dict[str, Any] = frappe.get_cached_value(
             "Currency",
             bootinfo.sysdefaults.currency,
             [
@@ -25,5 +27,5 @@ def boot_session(bootinfo: object):
             ],
             as_dict=True,
         )
-        val["doctype"] = ":Currency"
-        bootinfo.docs.append(val)
+        currency_doc["doctype"] = ":Currency"
+        bootinfo.docs.append(currency_doc)
