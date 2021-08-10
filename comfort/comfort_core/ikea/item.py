@@ -26,10 +26,11 @@ def fetch_new_items(
     values_from_db: str | list[str] = [],
 ) -> dict[str, list[Any]]:
 
-    try:
-        item_codes = json.loads(item_codes)
-    except json.decoder.JSONDecodeError:
-        item_codes = str(item_codes)
+    if not isinstance(item_codes, list):
+        try:
+            item_codes = json.loads(item_codes)
+        except json.decoder.JSONDecodeError:
+            item_codes = str(item_codes)
 
     force_update, download_images, values_from_db = (
         parse_json(force_update),
