@@ -25,7 +25,7 @@ comfort.ReturnController = frappe.ui.form.Controller.extend({
     // TODO: Not working
     this.frm.set_query("item_code", "items", () => {
       return {
-        query: "comfort.comfort.doctype.return.return.items_query",
+        query: "comfort.transactions.doctype.return.return.items_query",
         filters: {
           voucher_type: this.frm.doc.voucher_type,
           voucher_no: this.frm.doc.voucher_no,

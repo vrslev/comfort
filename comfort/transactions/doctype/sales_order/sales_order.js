@@ -5,7 +5,8 @@ frappe.ui.form.on("Sales Order", {
 
     frm.set_query("item_code", "items", () => {
       return {
-        query: "comfort.comfort.doctype.sales_order.sales_order.item_query",
+        query:
+          "comfort.transactions.doctype.sales_order.sales_order.item_query",
         filters: {
           from_actual_stock: frm.doc.from_actual_stock,
         },
@@ -224,7 +225,7 @@ async function apply_commission(frm) {
   }
   await frappe.call({
     method:
-      "comfort.comfort.doctype.sales_order.sales_order.calculate_commission",
+      "comfort.transactions.doctype.sales_order.sales_order.calculate_commission",
     args: args,
     callback: (r) => {
       frm.set_value("commission", r.message.commission);
