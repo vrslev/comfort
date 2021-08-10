@@ -87,4 +87,4 @@ def default_query(
 
 
 def get_standard_queries(doctypes: list[str]):
-    return {d: "comfort.comfort.queries.default_query" for d in doctypes}
+    return {d: "comfort.fixtures.hooks.queries.default_query" for d in doctypes}
