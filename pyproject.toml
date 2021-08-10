@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "comfort"
-version = "0.0.3"
+version = "0.1.0"
 description = "Lite-weight ERPNext alternative for specific business"
 authors = ["vrslev <mail@vrslev.com>"]
 license = "MIT"
