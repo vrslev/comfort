@@ -1,4 +1,0 @@
-[virtualenvs]
-create = false
-in-project = true
-path = "/Users/lev/benches/new/env"
