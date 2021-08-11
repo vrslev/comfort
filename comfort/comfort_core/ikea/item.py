@@ -97,7 +97,7 @@ def fetch_new_items(
 
     if download_images and parsed_items:
         frappe.enqueue(
-            "comfort.ikea.item.download_items_images",
+            "comfort.comfort_core.ikea.item.download_items_images",
             items=[
                 {"item_code": d.item_code, "image_url": d.image_url}
                 for d in parsed_items

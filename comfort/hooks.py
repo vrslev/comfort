@@ -7,7 +7,7 @@ standard_queries = get_standard_queries(
     ["Customer", "Item", "Purchase Order", "Sales Order"]
 )
 
-after_install = "comfort.finance.chart_of_accounts.create_accounts"
+after_install = "comfort.finance.chart_of_accounts.initialize_accounts"
 boot_session = "comfort.fixtures.hooks.boot.extend_boot_session_with_currency"
 override_doctype_class = {"DocType": "comfort.fixtures.hooks.overrides.DocType"}
 
