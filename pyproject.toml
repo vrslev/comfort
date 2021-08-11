@@ -16,6 +16,7 @@ toml = "^0.10.2"
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.4"
 pytest-cov = "^2.12.1"
+pytest-randomly = "^3.8.0"
 
 [tool.black]
 # https://black.readthedocs.io/en/stable/usage_and_configuration/the_basics.html#configuration-format
@@ -51,6 +52,7 @@ addopts = "--cov"
 [tool.coverage.report]
 skip_covered = true
 skip_empty = true
+show_missing = true
 
 [tool.coverage.run]
 source = ["comfort"]
