@@ -8,7 +8,6 @@ from comfort import stock
 from comfort.finance import (
     get_account,
     get_paid_amount,
-    make_gl_entries,
     make_gl_entry,
     make_reverse_gl_entry,
 )
@@ -275,9 +274,8 @@ class SalesOrderMethods(Document):
 
     def make_delivery_gl_entries(self):
         delivery_accounts = get_account(["inventory", "cost_of_goods_sold"])
-        make_gl_entries(
-            self, delivery_accounts[0], delivery_accounts[1], self.items_cost
-        )
+        make_gl_entry(self, delivery_accounts[0], 0, self.items_cost)
+        make_gl_entry(self, delivery_accounts[1], self.items_cost, 0)
 
 
 class SalesOrder(SalesOrderMethods):

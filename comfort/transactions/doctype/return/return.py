@@ -1,5 +1,5 @@
 import frappe
-from comfort.finance import get_account, get_paid_amount, make_gl_entries
+from comfort.finance import get_account, get_paid_amount, make_gl_entry
 from frappe import _
 from frappe.model.document import Document
 
@@ -13,6 +13,11 @@ child_item_doctype = "Sales Order Child Item"
 # TODO: Deal with items to sell
 # TODO: Queries improvement for SO (make it global)
 # TODO: Bin
+def make_gl_entries(self: object, account_from: str, account_to: str, amount: int):
+    make_gl_entry(self, account_from, 0, amount)
+    make_gl_entry(self, account_to, amount, 0)
+
+
 class Return(Document):
     @frappe.whitelist()
     def get_items(self):

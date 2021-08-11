@@ -1,16 +1,11 @@
 from __future__ import annotations
 
-from typing import Any, overload
+from typing import Any, List, TypeVar
 
 import frappe
 from frappe.utils.data import cint
 
 from .doctype.gl_entry.gl_entry import GLEntry
-
-
-def make_gl_entries(self: object, account_from: str, account_to: str, amount: int):
-    make_gl_entry(self, account_from, 0, amount)
-    make_gl_entry(self, account_to, amount, 0)
 
 
 def make_gl_entry(self: object, account: str, dr: int, cr: int):
@@ -76,17 +71,10 @@ def cancel_gl_entry(voucher_type: str, voucher_no: str):
     )
 
 
-@overload
-def get_account(field_names: str) -> str:
-    ...
+T = TypeVar("T", str, List[str])
 
 
-@overload
-def get_account(field_names: list[str]) -> list[str]:
-    ...
-
-
-def get_account(field_names: str | list[str]) -> str | list[str]:
+def get_account(field_names: T) -> T:
     return_str = False
     if isinstance(field_names, str):
         field_names = [field_names]
