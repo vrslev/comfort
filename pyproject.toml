@@ -46,17 +46,33 @@ upload_to_pypi = false
 
 [tool.pytest.ini_options]
 filterwarnings = "ignore:bleach-whitelist|the imp module"
-cache_dir = "tests/.cache"
 addopts = "--cov"
-
-[tool.coverage.report]
-skip_covered = true
-skip_empty = true
-show_missing = true
+cache_dir = "tests/.cache"
 
 [tool.coverage.run]
 source = ["comfort"]
+omit = [
+  # Metadata only doctypes
+  "comfort/comfort_core/doctype/ikea_cart_settings/ikea_cart_settings.py",
+  "comfort/entities/doctype/customer_group/customer_group.py",
+  "comfort/finance/doctype/gl_entry/gl_entry.py",
+  # Child Table doctypes
+  "comfort/stock/doctype/journal_entry_account/journal_entry_account.py",
+  "comfort/transactions/doctype/purchase_order_delivery_option/purchase_order_delivery_option.py",
+  "comfort/transactions/doctype/purchase_order_item_to_sell/purchase_order_item_to_sell.py",
+  "comfort/transactions/doctype/purchase_order_sales_order/purchase_order_sales_order.py",
+  "comfort/transactions/doctype/return_item/return_item.py",
+  "comfort/transactions/doctype/sales_order_child_item/sales_order_child_item.py",
+  "comfort/transactions/doctype/sales_order_item/sales_order_item.py",
+  "comfort/transactions/doctype/sales_order_service/sales_order_service.py",
+  # Dashboard doctypes
+  "*_dashboard.py"
+]
 data_file = "tests/.cache/.coverage"
+
+[tool.coverage.report]
+skip_covered = true
+show_missing = true
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
