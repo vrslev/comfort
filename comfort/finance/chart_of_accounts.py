@@ -6,96 +6,64 @@ import frappe
 from frappe import _
 from frappe.utils.nestedset import rebuild_tree
 
+ACCOUNTS: dict[str, dict[str, Any]] = {
+    "Assets": {
+        "Bank": {},
+        "Cash": {},
+        "Inventory": {},
+        "Prepaid Inventory": {},
+    },
+    "Expenses": {
+        "Cost of Goods Sold": {},
+        "Purchase Delivery": {},
+        "Sales Compensations": {},
+    },
+    "Income": {
+        "Purchase Compensations": {},
+        "Sales": {},
+        "Service": {"Delivery": {}, "Installation": {}},
+    },
+    "Liabilities": {},
+}
 
-def create_charts():
-    chart: dict[str, Any] = {
-        _("Assets"): {
-            _("Bank"): {},
-            _("Cash"): {},
-            _("Inventory"): {},
-            _("Prepaid Inventory"): {},
-            "root_type": "Asset",
-        },
-        _("Expenses"): {
-            _("Cost of Goods Sold"): {},
-            _("Purchase Delivery"): {},
-            _("Sales Compensations"): {},
-            "root_type": "Expense",
-        },
-        _("Income"): {
-            _("Purchase Compensations"): {},
-            _("Sales"): {},
-            _("Service"): {_("Delivery"): {}, _("Installation"): {}},
-            "root_type": "Income",
-        },
-        _("Liabilities"): {"root_type": "Liability", "is_group": 1},
-    }
 
-    def _import_accounts(
-        children: dict[Any, Any],
-        parent: str,
-        root_type: str,
-        root_account: bool = False,
-    ):
-        for account_name, child in children.items():
-            if root_account:
-                root_type = child.get("root_type")
+def _create_accounts_from_schema():
+    def execute(parent: str, children: dict[str, Any]):
+        for child, children_of_child in children.items():
+            frappe.get_doc(
+                {
+                    "doctype": "Account",
+                    "account_name": _(child),
+                    "parent_account": _(parent),
+                    "is_group": 1,
+                }
+            ).insert()
+            execute(child, children_of_child)
 
-            if account_name not in ["root_type", "is_group"]:
-                is_group = identify_is_group(child)
-
-                account = frappe.get_doc(
-                    {
-                        "doctype": "Account",
-                        "account_name": account_name,
-                        "parent_account": parent,
-                        "is_group": is_group,
-                        "root_type": root_type,
-                    }
-                )
-
-                if root_account:
-                    account.flags.ignore_mandatory = True
-
-                account.flags.ignore_permissions = True
-
-                account.insert()
-
-                _import_accounts(child, account.name, root_type)
-
-    # Rebuild NestedSet HSM tree for Account Doctype
-    # after all accounts are already inserted.
-    frappe.local.flags.ignore_on_update = True
-    _import_accounts(chart, None, None, root_account=True)
+    execute(None, ACCOUNTS)
     rebuild_tree("Account", "parent_account")
-    frappe.local.flags.ignore_on_update = False
 
 
-def identify_is_group(child: dict[Any, Any]):
-    if child.get("is_group"):
-        is_group = child.get("is_group")
-    elif len(set(child.keys()) - {"root_type", "is_group"}):
-        is_group = 1
-    else:
-        is_group = 0
-
-    return is_group
-
-
-def create_accounts():
-    frappe.local.flags.ignore_root_company_validation = True
-    create_charts()
-
+def _set_default_accounts():
     doc = frappe.get_single("Accounts Settings")
-    doc.default_bank_account = "Bank"
-    doc.default_cash_account = "Cash"
-    doc.default_prepaid_inventory_account = "Prepaid Inventory"
-    doc.default_inventory_account = "Inventory"
-    doc.default_cost_of_goods_sold_account = "Cost of Goods Sold"
-    doc.default_purchase_delivery_account = "Purchase Delivery"
-    doc.default_sales_account = "Sales"
-    doc.default_delivery_account = "Delivery"
-    doc.default_installation_account = "Installation"
-    doc.default_sales_compensations_account = "Sales Compensations"
-    doc.default_purchase_compensations_account = "Purchase Compensations"
+    doc.update(
+        {
+            "default_bank_account": "Bank",
+            "default_cash_account": "Cash",
+            "default_prepaid_inventory_account": "Prepaid Inventory",
+            "default_inventory_account": "Inventory",
+            "default_cost_of_goods_sold_account": "Cost of Goods Sold",
+            "default_purchase_delivery_account": "Purchase Delivery",
+            "default_sales_account": "Sales",
+            "default_delivery_account": "Delivery",
+            "default_installation_account": "Installation",
+            "default_sales_compensations_account": "Sales Compensations",
+            "default_purchase_compensations_account": "Purchase Compensations",
+        }
+    )
     doc.save()
+
+
+def initialize_accounts():
+    _create_accounts_from_schema()
+    _set_default_accounts()
