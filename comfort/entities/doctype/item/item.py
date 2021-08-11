@@ -5,6 +5,7 @@ import re
 from typing import Any
 
 import frappe
+from comfort.stock.doctype.bin.bin import Bin
 from frappe import _
 from frappe.model.document import Document
 
@@ -74,17 +75,10 @@ class ItemMethods:
 
     def delete_bin(self):
         if not self.child_items:
-            bin = frappe.get_doc("Bin", self.item_code)
-            if (
-                bin.reserved_actual
-                + bin.available_actual
-                + bin.reserved_purchased
-                + bin.available_purchased
-                + bin.projected
-            ) > 0:
-                frappe.throw(
-                    _("Can't delete item that have been used in transactions")
-                )  # TODO: Make custom ValidationError that calls `frappe.throw` for linters to not return `frappe.throw`
+            bin: Bin = frappe.get_doc("Bin", self.item_code)
+            if not bin.is_empty:  # TODO: Test this
+                # TODO: Make custom ValidationError that calls `frappe.throw` for linters to not return `frappe.throw`
+                frappe.throw(_("Can't delete item that have been used in transactions"))
             else:
                 bin.delete()
 
