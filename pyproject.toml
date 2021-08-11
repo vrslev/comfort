@@ -52,9 +52,13 @@ cache_dir = "tests/.cache"
 [tool.coverage.run]
 source = ["comfort"]
 omit = [
+  "comfort/finance/doctype/account/account.py", # Exclude for now: nothing to test there
+  # Dashboard doctypes
+  "*_dashboard.py",
   # Metadata only doctypes
   "comfort/comfort_core/doctype/ikea_cart_settings/ikea_cart_settings.py",
   "comfort/entities/doctype/customer_group/customer_group.py",
+  "comfort/finance/doctype/accounts_settings/accounts_settings.py",
   "comfort/finance/doctype/gl_entry/gl_entry.py",
   # Child Table doctypes
   "comfort/stock/doctype/journal_entry_account/journal_entry_account.py",
@@ -64,9 +68,7 @@ omit = [
   "comfort/transactions/doctype/return_item/return_item.py",
   "comfort/transactions/doctype/sales_order_child_item/sales_order_child_item.py",
   "comfort/transactions/doctype/sales_order_item/sales_order_item.py",
-  "comfort/transactions/doctype/sales_order_service/sales_order_service.py",
-  # Dashboard doctypes
-  "*_dashboard.py"
+  "comfort/transactions/doctype/sales_order_service/sales_order_service.py"
 ]
 data_file = "tests/.cache/.coverage"
 
