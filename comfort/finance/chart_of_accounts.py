@@ -26,6 +26,20 @@ ACCOUNTS: dict[str, dict[str, Any]] = {
     "Liabilities": {},
 }
 
+DEFAULT_ACCOUNT_SETTINGS = {
+    "default_bank_account": "Bank",
+    "default_cash_account": "Cash",
+    "default_prepaid_inventory_account": "Prepaid Inventory",
+    "default_inventory_account": "Inventory",
+    "default_cost_of_goods_sold_account": "Cost of Goods Sold",
+    "default_purchase_delivery_account": "Purchase Delivery",
+    "default_sales_account": "Sales",
+    "default_delivery_account": "Delivery",
+    "default_installation_account": "Installation",
+    "default_sales_compensations_account": "Sales Compensations",
+    "default_purchase_compensations_account": "Purchase Compensations",
+}
+
 
 def _create_accounts_from_schema():
     def execute(parent: str, children: dict[str, Any]):
@@ -46,21 +60,7 @@ def _create_accounts_from_schema():
 
 def _set_default_accounts():
     doc = frappe.get_single("Accounts Settings")
-    doc.update(
-        {
-            "default_bank_account": "Bank",
-            "default_cash_account": "Cash",
-            "default_prepaid_inventory_account": "Prepaid Inventory",
-            "default_inventory_account": "Inventory",
-            "default_cost_of_goods_sold_account": "Cost of Goods Sold",
-            "default_purchase_delivery_account": "Purchase Delivery",
-            "default_sales_account": "Sales",
-            "default_delivery_account": "Delivery",
-            "default_installation_account": "Installation",
-            "default_sales_compensations_account": "Sales Compensations",
-            "default_purchase_compensations_account": "Purchase Compensations",
-        }
-    )
+    doc.update(DEFAULT_ACCOUNT_SETTINGS)
     doc.save()
 
 
