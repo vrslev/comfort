@@ -3,17 +3,16 @@ from __future__ import annotations
 from typing import Any, List, TypeVar
 
 import frappe
+from frappe.model.document import Document
 from frappe.utils.data import cint
 
 from .doctype.gl_entry.gl_entry import GLEntry
 
 
-def make_gl_entry(self: object, account: str, dr: int, cr: int):
-    party = None
-    if hasattr(self, "party") and self.get("party"):
-        party = self.party
-    elif hasattr(self, "customer"):
-        party = self.customer
+def make_gl_entry(self: Document, account: str, dr: int, cr: int):
+    customer = None
+    if hasattr(self, "customer") and self.get("customer"):
+        customer = self.customer
 
     frappe.get_doc(
         {
@@ -23,7 +22,7 @@ def make_gl_entry(self: object, account: str, dr: int, cr: int):
             "credit_amount": cr,
             "voucher_type": self.doctype,
             "voucher_no": self.name,
-            "party": party,
+            "customer": customer,
         }
     ).submit()
 
