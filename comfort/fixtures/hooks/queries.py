@@ -14,7 +14,7 @@ def _get_fields(doctype: str, fields: list[Any] | None = None) -> list[Any]:
         fields = []
     meta: Meta = frappe.get_meta(doctype)
     search_fields: list[Any] = meta.get_search_fields()
-    fields.extend(search_fields)  # type: ignore
+    fields.extend(search_fields)
 
     if meta.title_field and not meta.title_field.strip() in fields:
         fields.insert(1, meta.title_field.strip())
@@ -87,4 +87,5 @@ def default_query(
 
 
 def get_standard_queries(doctypes: list[str]):
-    return {d: "comfort.fixtures.hooks.queries.default_query" for d in doctypes}
+    query_name = default_query.__module__ + "." + default_query.__name__
+    return {d: query_name for d in doctypes}
