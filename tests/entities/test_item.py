@@ -37,7 +37,7 @@ def test_validate_child_items(item: Item, child_items: list[Item]):
         item.validate_child_items()
 
 
-def test_validate_url(item: Item):
+def test_validate_url(item: Item):  # TODO: Parametrize
     item.validate_url()
 
     item.url = "https://example.com/f023"
