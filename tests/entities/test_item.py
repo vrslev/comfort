@@ -18,6 +18,13 @@ def item() -> Item:
     return frappe.get_doc(test_item)
 
 
+@pytest.fixture
+def item_no_children():
+    doc: Item = frappe.get_doc(test_item)
+    doc.child_items = []
+    return doc
+
+
 def test_validate_child_items(item: Item, child_items: list[Item]):
     item.validate_child_items()
 
@@ -59,11 +66,10 @@ def test_calculate_weight(item: Item, child_items: list[Item]):
     assert item.weight == 180.49
 
 
-def test_calculate_weight_not_executed_when_is_not_combination(item: Item):
-    item.child_items = []
-    item.weight = 10
-    item.calculate_weight()
-    assert item.weight == 10
+def test_calculate_weight_not_executed_when_is_not_combination(item_no_children: Item):
+    item_no_children.weight = 10
+    item_no_children.calculate_weight()
+    assert item_no_children.weight == 10
 
 
 def test_calculate_weight_in_parent_docs(item: Item, child_items: list[Item]):
@@ -98,29 +104,27 @@ def test_create_bin_created_for_items_in_combinations(
         assert frappe.db.exists("Bin", c.item_code)
 
 
-def test_create_bin_created_for_not_combination(item: Item):
-    item.child_items = []
-    item.insert()  # .create_bin() should be called in after_insert hook
-    assert frappe.db.exists("Bin", item.item_code)
+def test_create_bin_created_for_not_combination(item_no_children: Item):
+    item_no_children.insert()  # .create_bin() should be called in after_insert hook
+    assert frappe.db.exists("Bin", item_no_children.item_code)
 
 
-def test_delete_bin(item: Item):
-    item.child_items = []  # .delete_bin() calls only if no child items
-    item.insert()
-    item.delete_bin()
-    assert not frappe.db.exists("Bin", item.item_code)
+def test_delete_bin(item_no_children: Item):
+    # .delete_bin() is being called only if no child items
+    item_no_children.insert()
+    item_no_children.delete_bin()
+    assert not frappe.db.exists("Bin", item_no_children.item_code)
 
 
-def test_delete_bin_raises_if_bin_is_not_empty(item: Item):
-    item.child_items = []
-    item.insert()
-    bin = frappe.get_doc("Bin", item.item_code)
+def test_delete_bin_raises_if_bin_is_not_empty(item_no_children: Item):
+    item_no_children.insert()
+    bin = frappe.get_doc("Bin", item_no_children.item_code)
     bin.reserved_actual = 1
     bin.save()
     with pytest.raises(
         ValidationError, match="Can't delete item that have been used in transactions"
     ):
-        item.delete_bin()
+        item_no_children.delete_bin()
 
 
 test_item = {
