@@ -1,0 +1,126 @@
+name: Tests
+
+on:
+  pull_request:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  test:
+    name: Python Unit Tests
+    runs-on: ubuntu-18.04
+    timeout-minutes: 60
+    env:
+      FRAPPE_APP_NAME: comfort
+      FRAPPE_BRANCH: version-13
+
+    services:
+      mysql:
+        image: mariadb:10.3
+        env:
+          MYSQL_USER: root
+          MYSQL_ROOT_PASSWORD: 123
+        ports:
+          - 3306:3306
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+
+      - name: Cache Pip
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt', '**/setup.cfg') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+            ${{ runner.os }}-
+
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14
+
+      - name: Get Yarn Cache Path
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+
+      - name: Cache Yarn
+        uses: actions/cache@v2
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
+      - name: Install Dependencies
+        run: |
+          # Install patched wkhtmltopdf
+          wget -q -O /tmp/wkhtmltox.tar.xz \
+            https://github.com/frappe/wkhtmltopdf/raw/master/wkhtmltox-0.12.3_linux-generic-amd64.tar.xz
+          tar -xf /tmp/wkhtmltox.tar.xz -C /tmp
+          sudo mv /tmp/wkhtmltox/bin/wkhtmltopdf /usr/local/bin/wkhtmltopdf
+          sudo chmod o+x /usr/local/bin/wkhtmltopdf
+
+          sudo apt-get install libcups2-dev redis-server
+
+          pip install wheel -U frappe-bench
+          git clone --branch $FRAPPE_BRANCH --single-branch --depth 1 https://github.com/frappe/frappe
+
+      - name: Initialize Frappe-Bench
+        run: |
+          mysql --host 127.0.0.1 --port 3306 -u root -p123 \
+            -e "SET GLOBAL character_set_server = 'utf8mb4';
+                SET GLOBAL collation_server = 'utf8mb4_unicode_ci'"
+
+          bench init frappe-bench --skip-assets --no-backups --frappe-path frappe
+          cd frappe-bench
+
+          sed -i 's/watch:/# watch:/g' Procfile
+          sed -i 's/schedule:/# schedule:/g' Procfile
+          sed -i 's/socketio:/# socketio:/g' Procfile
+          sed -i 's/redis_socketio:/# redis_socketio:/g' Procfile
+
+      - name: Install App
+        env:
+          PERSONAL_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
+          REPOSITORY_OWNER: ${{ github.repository_owner }}
+        run: |
+          git config --global url."https://$REPOSITORY_OWNER:$PERSONAL_TOKEN@github".insteadOf ssh://github
+          git config --global url."https://$REPOSITORY_OWNER:$PERSONAL_TOKEN@github".insteadOf https://github
+
+          cd frappe-bench
+          GIT_TRACE=1 bench get-app --skip-assets $GITHUB_WORKSPACE
+          source env/bin/activate
+
+          cd apps/$FRAPPE_APP_NAME
+          pip install -U -e .[dev]
+
+      - name: Create Site
+        run: |
+          cd frappe-bench
+          bench new-site tests \
+            --mariadb-root-password 123 \
+            --admin-password admin \
+            --no-mariadb-socket \
+            --install-app $FRAPPE_APP_NAME
+
+          bench set-config developer_mode 1
+          bench clear-cache
+
+      - name: Run Tests
+        run: |
+          cd frappe-bench
+          bench start &
+
+          source env/bin/activate
+          cd apps/$FRAPPE_APP_NAME
+          pytest
+          exit
