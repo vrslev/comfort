@@ -51,3 +51,8 @@ repos:
     hooks:
       - id: prettier
         exclude: CHANGELOG.md
+
+  - repo: https://github.com/asottile/setup-cfg-fmt
+    rev: v1.17.0
+    hooks:
+      - id: setup-cfg-fmt
