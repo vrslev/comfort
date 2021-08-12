@@ -9,7 +9,7 @@ from comfort.comfort_core.ikea.cart_utils import IkeaCartUtils
 from comfort.finance import (
     get_account,
     get_paid_amount,
-    make_gl_entries,
+    make_gl_entry,
     make_reverse_gl_entry,
 )
 from frappe import _, as_json
@@ -167,20 +167,16 @@ class PurchaseOrderMethods(Document):
                 inventory_amt_paid = self.total_amount - already_paid_amount
 
             inventory_accounts: list[str] = get_account(["cash", "prepaid_inventory"])
-            make_gl_entries(
-                self, inventory_accounts[0], inventory_accounts[1], inventory_amt_paid
-            )
+            make_gl_entry(self, inventory_accounts[0], 0, inventory_amt_paid)
+            make_gl_entry(self, inventory_accounts[1], inventory_amt_paid, 0)
 
             if self.delivery_cost > 0:
                 delivery_accounts: list[str] = get_account(
                     ["cash", "purchase_delivery"]
                 )
-                make_gl_entries(
-                    self,
-                    delivery_accounts[0],
-                    delivery_accounts[1],
-                    delivery_amt_paid,  # type:ignore
-                )  # TODO: Refactor
+                # TODO: Refactor
+                make_gl_entry(self, delivery_accounts[0], 0, delivery_amt_paid)  # type: ignore
+                make_gl_entry(self, delivery_accounts[1], delivery_amt_paid, 0)  # type: ignore
 
     def update_status_in_sales_orders(self):
         for d in self.sales_orders:
@@ -188,11 +184,11 @@ class PurchaseOrderMethods(Document):
 
     def make_delivery_gl_entries(self):
         accounts = get_account(["prepaid_inventory", "inventory"])
-        make_gl_entries(
-            self,
-            accounts[0],
-            accounts[1],
-            self.items_to_sell_cost + self.sales_order_cost,
+        make_gl_entry(
+            self, accounts[0], 0, self.items_to_sell_cost + self.sales_order_cost
+        )
+        make_gl_entry(
+            self, accounts[1], self.items_to_sell_cost + self.sales_order_cost, 0
         )
 
 

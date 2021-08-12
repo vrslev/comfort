@@ -1,20 +1,3 @@
-[tool.poetry]
-name = "comfort"
-version = "0.1.0"
-description = "Lite-weight ERPNext alternative for specific business"
-authors = ["vrslev <mail@vrslev.com>"]
-license = "MIT"
-
-[tool.poetry.dependencies]
-python = "^3.7"
-ikea-api = "^0.5.1"
-ikea-api-extender = { git = "ssh://github.com/vrslev/ikea-api-extender.git" }
-vk-api = "^11.9.4"
-erpnext-telegram-integration = { git = "https://github.com/vrslev/erpnext_telegram.git" }
-toml = "^0.10.2"
-
-[tool.poetry.dev-dependencies]
-
 [tool.black]
 # https://black.readthedocs.io/en/stable/usage_and_configuration/the_basics.html#configuration-format
 target-version = ["py37"]
@@ -25,18 +8,14 @@ known_first_party = "frappe"
 
 [tool.pyright]
 # https://github.com/microsoft/pyright/blob/main/docs/configuration.md
-exclude = ["**/node_modules", "**/__pycache__"]
+exclude = ["node_modules", "__pycache__", ".ipynb_checkpoints", "tests/.cache"]
 typeCheckingMode = "strict"
 pythonVersion = "3.7"
-reportGeneralTypeIssues = false # unknown members and methods
+reportGeneralTypeIssues = false # mostly unknown members and methods
 reportUnknownMemberType = false
 reportUnknownVariableType = false
 reportMissingTypeStubs = false
 reportPrivateUsage = false
-
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
 
 [tool.semantic_release]
 branch = "main"
@@ -44,3 +23,44 @@ version_toml = "pyproject.toml:tool.poetry.version"
 build_command = "pip install -U pip poetry && poetry build"
 commit_subject = "сhore: Update version to {version}"
 upload_to_pypi = false
+
+[tool.pytest.ini_options]
+filterwarnings = "ignore:bleach-whitelist|the imp module"
+addopts = "--cov"
+cache_dir = "tests/.cache"
+
+[tool.coverage.run]
+source = ["comfort"]
+omit = [
+  # Exclude for now: nothing to test there:
+  "comfort/finance/doctype/account/account.py",
+  # Dashboard doctypes:
+  "*_dashboard.py",
+  # Metadata only doctypes:
+  "comfort/comfort_core/doctype/ikea_cart_settings/ikea_cart_settings.py",
+  "comfort/entities/doctype/customer_group/customer_group.py",
+  "comfort/finance/doctype/accounts_settings/accounts_settings.py",
+  "comfort/finance/doctype/gl_entry/gl_entry.py",
+  # Child Table doctypes:
+  "comfort/stock/doctype/journal_entry_account/journal_entry_account.py",
+  "comfort/transactions/doctype/purchase_order_delivery_option/purchase_order_delivery_option.py",
+  "comfort/transactions/doctype/purchase_order_item_to_sell/purchase_order_item_to_sell.py",
+  "comfort/transactions/doctype/purchase_order_sales_order/purchase_order_sales_order.py",
+  "comfort/transactions/doctype/return_item/return_item.py",
+  "comfort/transactions/doctype/sales_order_child_item/sales_order_child_item.py",
+  "comfort/transactions/doctype/sales_order_item/sales_order_item.py",
+  "comfort/transactions/doctype/sales_order_service/sales_order_service.py",
+  # Takes to long to test and probably won't fail:
+  "comfort/fixtures/hooks/boot.py",
+  # To simple to test
+  "comfort/fixtures/hooks/overrides.py",
+  "comfort/fixtures/hooks/queries.py"
+]
+data_file = "tests/.cache/.coverage"
+
+[tool.coverage.report]
+skip_covered = true
+show_missing = true
+
+[build-system]
+requires = ["setuptools", "wheel"]

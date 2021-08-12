@@ -1,7 +1,7 @@
 from frappe import _
 from frappe.model.document import Document
 
-fields = [
+BIN_FIELDS = [
     "reserved_actual",
     "available_actual",
     "reserved_purchased",
@@ -11,7 +11,19 @@ fields = [
 
 
 class Bin(Document):
-    def before_insert(self):
-        for d in fields:
-            if not hasattr(self, d):
-                setattr(self, d, 0)
+    item_code: str
+
+    def before_insert(self):  # pragma: no cover
+        self.fill_with_nulls()
+
+    def fill_with_nulls(self):
+        for f in BIN_FIELDS:
+            if getattr(self, f) is None:
+                setattr(self, f, 0)
+
+    @property
+    def is_empty(self):
+        count = 0
+        for f in BIN_FIELDS:
+            count += getattr(self, f)
+        return count == 0

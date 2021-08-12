@@ -55,7 +55,7 @@ from frappe import ValidationError, _
 from frappe.model.document import Document
 from frappe.utils.data import cint
 
-from .doctype.bin.bin import fields
+from .doctype.bin.bin import BIN_FIELDS
 
 __all__ = [
     "update_bin",
@@ -70,7 +70,7 @@ def update_bin(item_code: str, **kwargs: int):
     doc = frappe.get_doc("Bin", item_code)
 
     for d in kwargs:
-        if d not in fields:
+        if d not in BIN_FIELDS:
             raise ValidationError(_(f"No such argument in Bin: {d}"))  # type: ignore
 
     for attr, qty in kwargs.items():

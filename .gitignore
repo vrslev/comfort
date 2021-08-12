@@ -14,7 +14,13 @@ dist/
 *.egg
 
 # Jupyter Notebook
-.ipynb_checkpoints
+.ipynb_checkpoints/
+
+# Tests
+tests/.cache/
+
+# Poetry
+poetry.toml
 
 #### js ####
 node_modules

@@ -1,40 +1,33 @@
-import re
 from urllib.parse import parse_qs, urlparse
 
 import frappe
 from frappe import _
 from frappe.model.document import Document
 
+# TODO: Validate phone number
+
 
 class Customer(Document):
     vk_url: str
 
-    def validate(self):
-        self.validate_vk_url()
-        self.set_vk_id()
+    def validate(self):  # pragma: no cover
+        self.validate_vk_url_and_set_vk_id()
 
-    def validate_vk_url(self):
+    def validate_vk_url_and_set_vk_id(self):
         if not self.vk_url:
+            self.vk_id = None
             return
 
-        parsed = urlparse(self.vk_url)
         ok = False
+
+        parsed = urlparse(self.vk_url)
         if "vk.com" in parsed.netloc and "im" in parsed.path:
             query = parse_qs(parsed.query)
             if "sel" in query:
-                ok = True
+                vk_id = query["sel"][0]
+                if vk_id and int(vk_id):
+                    ok = True
+                    self.vk_id = vk_id
 
         if not ok:
             frappe.throw(_("Wrong VK URL"))
-
-    def set_vk_id(self):
-        if not self.vk_url:
-            return
-
-        if self.vk_url:
-            res = re.findall(r"sel=(\d+)", self.vk_url)
-            if len(res) > 0:
-                self.vk_id = res[0]
-
-        if not self.vk_id:
-            frappe.throw(_("Cannot extract VK ID from URL"))

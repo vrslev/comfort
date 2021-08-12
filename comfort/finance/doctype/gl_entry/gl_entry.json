@@ -7,7 +7,7 @@
   "engine": "InnoDB",
   "field_order": [
     "transaction_type",
-    "party",
+    "customer",
     "is_cancelled",
     "column_break_2",
     "posting_date",
@@ -29,12 +29,6 @@
       "fieldtype": "Select",
       "label": "Transaction Type",
       "options": "\nDelivery\nInvoice"
-    },
-    {
-      "fieldname": "party",
-      "fieldtype": "Link",
-      "label": "Party",
-      "options": "Customer"
     },
     {
       "default": "0",
@@ -120,12 +114,18 @@
       "fieldname": "remarks",
       "fieldtype": "Small Text",
       "label": "Remarks"
+    },
+    {
+      "fieldname": "customer",
+      "fieldtype": "Link",
+      "label": "Customer",
+      "options": "Customer"
     }
   ],
   "in_create": 1,
   "index_web_pages_for_search": 1,
   "links": [],
-  "modified": "2021-08-09 05:19:55.428101",
+  "modified": "2021-08-11 05:48:31.382647",
   "modified_by": "Administrator",
   "module": "Finance",
   "name": "GL Entry",

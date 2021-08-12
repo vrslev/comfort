@@ -5,7 +5,7 @@ import json
 from typing import Any, Coroutine
 
 import aiohttp
-from ikea_api.endpoints.item.item_iows import WrongItemCodeError  # TODO
+from ikea_api.errors import ItemFetchError
 from ikea_api_extender import get_items_immortally
 
 import frappe
@@ -26,17 +26,17 @@ def fetch_new_items(
     values_from_db: str | list[str] = [],
 ) -> dict[str, list[Any]]:
 
-    try:
-        item_codes = json.loads(item_codes)
-    except json.decoder.JSONDecodeError:
-        item_codes = str(item_codes)
+    if not isinstance(item_codes, list):
+        try:
+            item_codes = json.loads(item_codes)
+        except json.decoder.JSONDecodeError:
+            item_codes = str(item_codes)
 
     force_update, download_images, values_from_db = (
         parse_json(force_update),
         parse_json(download_images),
         parse_json(values_from_db),
     )
-    # values_from_db: List[str]
 
     if isinstance(item_codes, int):
         item_codes = str(item_codes)
@@ -66,8 +66,11 @@ def fetch_new_items(
     if len(items_to_fetch) > 0:
         try:
             response = get_items_immortally(items_to_fetch)
-        except WrongItemCodeError:
-            return frappe.throw(_("Wrong Item Code"))
+        except ItemFetchError as e:
+            if "Wrong Item Code" in e.args[0]:
+                return frappe.throw(_("Wrong Item Code"))
+            else:
+                raise
 
         parsed_items: list[Any] = response["items"]
         res.update(
@@ -94,7 +97,7 @@ def fetch_new_items(
 
     if download_images and parsed_items:
         frappe.enqueue(
-            "comfort.ikea.item.download_items_images",
+            "comfort.comfort_core.ikea.item.download_items_images",
             items=[
                 {"item_code": d.item_code, "image_url": d.image_url}
                 for d in parsed_items

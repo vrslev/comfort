@@ -70,7 +70,7 @@ def get_columns():
             "options": "voucher_type",
             "width": 180,
         },
-        {"label": "Party", "fieldname": "party", "width": 100},
+        {"label": "Customer", "fieldname": "customer", "width": 100},
     ]
     return columns
 
@@ -86,7 +86,7 @@ def get_gl_entries(filters):
 
     gl_entries = frappe.db.sql(
         """
-        SELECT name as gl_entry, posting_date, account, party, voucher_type,
+        SELECT name as gl_entry, posting_date, account, customer, voucher_type,
                voucher_no, debit_amount, credit_amount
         FROM `tabGL Entry`
         WHERE %(conditions)s
@@ -108,8 +108,8 @@ def get_conditions(filters):
     if filters.get("voucher_no"):
         conditions.append("voucher_no=%(voucher_no)s")
 
-    if filters.get("party"):
-        conditions.append("party = %(party)s")
+    if filters.get("customer"):
+        conditions.append("customer = %(customer)s")
 
     conditions.append("posting_date>=%(from_date)s")
     conditions.append("posting_date<=%(to_date)s")

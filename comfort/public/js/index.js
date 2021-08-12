@@ -9,7 +9,7 @@ comfort.fetch_items = (
   var promise = new Promise((resolve) => {
     let isResolved = false;
     frappe.call({
-      method: "comfort.ikea.item.fetch_new_items",
+      method: "comfort.comfort_core.ikea.item.fetch_new_items",
       args: {
         item_codes: item_codes,
         force_update: force_update,

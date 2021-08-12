@@ -23,10 +23,10 @@ frappe.query_reports["General Ledger"] = {
       options: "Account",
     },
     {
-      fieldname: "party",
-      label: __("Party"),
+      fieldname: "customer",
+      label: __("Customer"),
       fieldtype: "Link",
-      options: "Party",
+      options: "Customer",
     },
     {
       fieldname: "voucher_no",

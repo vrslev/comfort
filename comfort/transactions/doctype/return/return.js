@@ -23,22 +23,22 @@ comfort.ReturnController = frappe.ui.form.Controller.extend({
     // });
 
     // TODO: Not working
-    this.frm.set_query("item_code", "items", () => {
-      return {
-        query: "comfort.comfort.doctype.return.return.items_query",
-        filters: {
-          voucher_type: this.frm.doc.voucher_type,
-          voucher_no: this.frm.doc.voucher_no,
-          split_combinations: this.frm.doc.split_combinations,
-          sales_order_child_items: this.frm.doc.items
-            .filter((d) => d.reference_doctype == "Sales Order Child Item")
-            .map((d) => d.reference_name),
-          sales_order_items: this.frm.doc.items
-            .filter((d) => d.reference_doctype == "Sales Order Item")
-            .map((d) => d.reference_name),
-        },
-      };
-    });
+    // this.frm.set_query("item_code", "items", () => {
+    //   return {
+    //     query: "comfort.transactions.doctype.return.return.items_query",
+    //     filters: {
+    //       voucher_type: this.frm.doc.voucher_type,
+    //       voucher_no: this.frm.doc.voucher_no,
+    //       split_combinations: this.frm.doc.split_combinations,
+    //       sales_order_child_items: this.frm.doc.items
+    //         .filter((d) => d.reference_doctype == "Sales Order Child Item")
+    //         .map((d) => d.reference_name),
+    //       sales_order_items: this.frm.doc.items
+    //         .filter((d) => d.reference_doctype == "Sales Order Item")
+    //         .map((d) => d.reference_name),
+    //     },
+    //   };
+    // });
   },
 
   refresh() {
