@@ -1,3 +1,4 @@
+# TODO: Move to py39
 [tool.poetry] # TODO: Remove poetry stuff
 name = "comfort"
 version = "0.0.3"
