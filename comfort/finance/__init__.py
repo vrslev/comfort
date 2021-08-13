@@ -1,11 +1,12 @@
 from __future__ import annotations
 
-from typing import Any, List, TypeVar
+from typing import Any, TypeVar
 
 import frappe
 from frappe.model.document import Document
 from frappe.utils.data import cint
 
+from .doctype.accounts_settings.accounts_settings import AccountsSettings
 from .doctype.gl_entry.gl_entry import GLEntry
 
 
@@ -70,7 +71,7 @@ def cancel_gl_entry(voucher_type: str, voucher_no: str):
     )
 
 
-T = TypeVar("T", str, List[str])
+T = TypeVar("T", str, list[str])
 
 
 def get_account(field_names: T) -> T:
@@ -79,7 +80,7 @@ def get_account(field_names: T) -> T:
         field_names = [field_names]
         return_str = True
     settings_name = "Accounts Settings"
-    settings = frappe.get_cached_doc(settings_name, settings_name)
+    settings: AccountsSettings = frappe.get_cached_doc(settings_name, settings_name)
     accounts = []
     for d in field_names:
         account = f"default_{d}_account"
