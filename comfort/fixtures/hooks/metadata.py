@@ -1,18 +1,16 @@
+from configparser import ConfigParser
 from pathlib import Path
-
-import toml
 
 
 def load_metadata():
-    """Load required metadata from pyproject.toml"""
-    with open(
-        Path(__file__).parent.parent.parent.parent.joinpath("pyproject.toml")
-    ) as f:
-        content = toml.load(f)
-    poetry_metadata = content["tool"]["poetry"]
+    """Load required metadata from setup.cfg"""
+    path = Path(__file__).parent.parent.parent.parent.joinpath("setup.cfg")
+    config = ConfigParser()
+    config.read(path)
 
-    app_name: str = poetry_metadata["name"]
+    meta = config["metadata"]
+    app_name, app_description = meta["name"], meta["description"]
     app_title = app_name.capitalize()
-    app_publisher = poetry_metadata["authors"][0]
-    app_description = poetry_metadata["description"]
+    app_publisher = f"{meta['author']} <{meta['author_email']}>"
+
     return app_name, app_title, app_description, app_publisher
