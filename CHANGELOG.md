@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.2.0 (2021-08-13)
+### Feature
+* Move to Python 3.9 ([`ed6ccc3`](https://github.com/vrslev/comfort/commit/ed6ccc3c0bc4413d018ad33a80517f68416d73f8))
+
 ## v0.1.0 (2021-08-13)
 ### Feature
 * Override DocType doctype to not create unnecessary boilerplate ([`392dfa6`](https://github.com/vrslev/comfort/commit/392dfa63affa9f7c0c26b574741ea9c98e66f3d2))
