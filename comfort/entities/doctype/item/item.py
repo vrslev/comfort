@@ -5,6 +5,7 @@ import re
 from typing import Any
 
 import frappe
+from comfort import count_quantity
 from comfort.stock.doctype.bin.bin import Bin
 from frappe import _
 from frappe.model.document import Document
@@ -43,12 +44,7 @@ class ItemMethods:
             ["item_code", "weight"],
             {"item_code": ["in", [d.item_code for d in self.child_items]]},
         )
-        weight_map: Any = {}
-        for d in items:
-            if d.item_code not in weight_map:
-                weight_map[d.item_code] = 0
-            weight_map[d.item_code] += d.weight
-
+        weight_map = count_quantity(items, "item_code", "weight")
         self.weight = 0
         for d in self.child_items:
             self.weight += weight_map[d.item_code] * d.qty

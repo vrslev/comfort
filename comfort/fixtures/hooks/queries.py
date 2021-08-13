@@ -67,7 +67,7 @@ def default_query(
     conditions = []
     fields = _get_fields(doctype, ["name"])
 
-    query: list[tuple[Any]] = frappe.db.sql(  # TODO: Security
+    query: list[tuple[Any]] = frappe.db.sql(
         f"""
         SELECT {", ".join(fields)} FROM `tab{doctype}`
         WHERE {searchfield} LIKE %(txt)s

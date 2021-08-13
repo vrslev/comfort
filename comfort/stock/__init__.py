@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 """
 STOCK CYCLE
 
@@ -49,15 +47,19 @@ STOCK CYCLE
 # TODO: Sales Order added this way should appear in Purchase order
 
 
+from __future__ import annotations
+
 from typing import Any, ItemsView
 
 import frappe
+from comfort import count_quantity
 from frappe import ValidationError, _
 from frappe.model.document import Document
 from frappe.utils.data import cint
 
 from .doctype.bin.bin import BIN_FIELDS, Bin
 
+# TODO: Don't really need to do this since decided to move to Mixin system for transactions
 __all__ = [
     "update_bin",
     "purchase_order_purchased",
@@ -81,15 +83,12 @@ def update_bin(item_code: str, **kwargs: int):
     doc.save()
 
 
-def get_items_to_sell_for_bin(doc: Any) -> ItemsView[str, int]:
-    if not doc.sales_orders:
+def get_items_to_sell_for_bin(
+    doc: Document,
+) -> ItemsView[str, int]:  # TODO: Test this
+    if not doc.sales_orders:  # TODO: What?
         return []
-    items_map: dict[str, Any] = {}
-    for d in doc.items_to_sell:
-        if d.item_code not in items_map:
-            items_map[d.item_code] = 0
-        items_map[d.item_code] += d.qty
-    return items_map.items()
+    return count_quantity(doc.items_to_sell).items()  # type: ignore
 
 
 def get_sales_order_items_for_bin(doc: Document) -> ItemsView[str, int]:
@@ -97,7 +96,7 @@ def get_sales_order_items_for_bin(doc: Document) -> ItemsView[str, int]:
     if not doc.sales_orders:
         return []
     sales_order_names = [d.sales_order_name for d in doc.sales_orders]
-    so_items = frappe.db.sql(
+    so_items: list[dict[str, str | int]] = frappe.db.sql(
         """
         SELECT item_code, qty
         FROM `tabSales Order Item`
@@ -108,7 +107,7 @@ def get_sales_order_items_for_bin(doc: Document) -> ItemsView[str, int]:
         as_dict=True,
     )
 
-    packed_items = frappe.db.sql(
+    packed_items: list[dict[str, str | int]] = frappe.db.sql(
         """
         SELECT parent_item_code, item_code, qty
         FROM `tabSales Order Child Item`
@@ -124,13 +123,8 @@ def get_sales_order_items_for_bin(doc: Document) -> ItemsView[str, int]:
 
     items = packed_items + so_items
 
-    items_map: Any = {}
-    for d in items:
-        if d.item_code not in items_map:
-            items_map[d.item_code] = 0
-        items_map[d.item_code] += d.qty
-
-    return items_map.items()
+    # TODO: Test this
+    return count_quantity(items).items()
 
 
 def purchase_order_purchased(doc: Document):
@@ -158,13 +152,10 @@ def validate_items_available_for_sales_order_from_stock(
         ["item_code", field],
         {"item_code": ["in", [d.item_code for d in doc.items]]},
     )
-    item_availability_map: Any = {}
-    for d in item_availability:
-        if d.item_code not in item_availability_map:
-            item_availability_map[d.item_code] = 0
-        item_availability_map[d.item_code] += d[field]
 
+    item_availability_map = count_quantity(item_availability, value_key=field)
     not_available_items: list[tuple[str | int]] = []
+
     for item_code, reqd_qty in item_to_qty:
         available_qty = item_availability_map[item_code]
         lack_qty = reqd_qty - available_qty

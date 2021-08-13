@@ -4,7 +4,7 @@ import re
 from typing import Any
 
 import frappe
-from comfort import stock
+from comfort import count_quantity, stock
 from comfort.comfort_core.ikea.cart_utils import IkeaCartUtils
 from comfort.finance import (
     get_account,
@@ -17,13 +17,18 @@ from frappe.model.document import Document
 from frappe.utils import parse_json
 from frappe.utils.data import add_to_date, getdate, now_datetime, today
 
+from ..purchase_order_item_to_sell.purchase_order_item_to_sell import (
+    PurchaseOrderItemToSell,
+)
 from ..purchase_order_sales_order.purchase_order_sales_order import (
     PurchaseOrderSalesOrder,
 )
+from ..sales_order.sales_order import SalesOrder
 
 
 class PurchaseOrderMethods(Document):
     sales_orders: list[PurchaseOrderSalesOrder]
+    items_to_sell: list[PurchaseOrderItemToSell]
     items_to_sell_cost: int
     sales_order_cost: int
     delivery_cost: int
@@ -311,7 +316,6 @@ class PurchaseOrder(PurchaseOrderMethods):
     def create_new_sales_order_from_items_to_sell(
         self, items: dict[Any, Any], customer: str
     ):
-        # raise Exception
         if self.status != "Draft":  # TODO: Change back
             # if self.status != 'To Receive':
             return frappe.throw(
@@ -320,11 +324,7 @@ class PurchaseOrder(PurchaseOrderMethods):
                 ).format(self.status)
             )
 
-        item_qty_map: Any = {}
-        for d in self.items_to_sell:
-            if d.item_code not in item_qty_map:
-                item_qty_map[d.item_code] = 0
-            item_qty_map[d.item_code] += d.qty
+        item_qty_map = count_quantity(self.items_to_sell)
 
         for d in items:
             d = frappe._dict(d)  # type: ignore
@@ -335,7 +335,7 @@ class PurchaseOrder(PurchaseOrderMethods):
                     )
                 )  # TODO: Make prettier exception
 
-        doc = frappe.get_doc(
+        doc: SalesOrder = frappe.get_doc(
             {
                 "doctype": "Sales Order",
                 "customer": customer,

@@ -73,14 +73,13 @@ class Return(Document):
                 ["item_code", "rate"],
                 {"item_code": ["in", [d.item_code for d in child_items]]},
             )
-            rates_map = {}
-            for d in rates:
-                rates_map[d.item_code] = d.rate
+
+            rates_map = {d.item_code: d.rate for d in rates}
 
             parent_items = []
             for d in child_items:
                 parent_items.append(d.parent_item_code)
-                d.rate = rates_map.get(d.item_code) or 0
+                d.rate = rates_map.get(d.item_code, 0)
                 d.doctype = child_item_doctype
 
             items = [d for d in items if d.item_code not in parent_items]

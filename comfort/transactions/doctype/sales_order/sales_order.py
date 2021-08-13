@@ -4,7 +4,7 @@ from __future__ import annotations
 from typing import Any
 
 import frappe
-from comfort import stock
+from comfort import count_quantity, stock
 from comfort.finance import (
     get_account,
     get_paid_amount,
@@ -27,12 +27,8 @@ class SalesOrderMethods(Document):
     total_amount: int
 
     def merge_same_items(self):
-        items_map: dict[str, int] = {}
-        for idx, item in enumerate(self.items):
-            items_map.setdefault(item.item_code, []).append(idx)
-
         to_remove: list[Any] = []
-        for value in items_map.values():
+        for value in self.get_item_qty_map().values():  # TODO: Test this
             if len(value) > 1:
                 full_qty = 0
                 for d in value:  # TODO: Does this work?
@@ -120,20 +116,12 @@ class SalesOrderMethods(Document):
         self.pending_amount = self.total_amount - self.paid_amount
 
     def get_item_qty_map(self, split_combinations: bool = False):
-        item_qty_map: dict[str, Any] = {}
+        items = self.items
         if split_combinations:
             parents = [d.parent_item_code for d in self.child_items]
-            for d in self.items + self.child_items:
-                if d.item_code not in parents:
-                    if d.item_code not in item_qty_map:
-                        item_qty_map[d.item_code] = 0
-                    item_qty_map[d.item_code] += d.qty
-        else:
-            for d in self.items:
-                if d.item_code not in item_qty_map:
-                    item_qty_map[d.item_code] = 0
-                item_qty_map[d.item_code] += d.qty
-        return item_qty_map
+            items = [d for d in items if d.item_code not in parents] + self.child_items
+
+        return count_quantity(items)
 
     def set_child_items(self):
         self.child_items = []
