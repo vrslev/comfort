@@ -1,24 +1,4 @@
 # TODO: Move to py39
-[tool.poetry] # TODO: Remove poetry stuff
-name = "comfort"
-version = "0.0.3"
-description = "Lite-weight ERPNext alternative for specific business"
-authors = ["vrslev <mail@vrslev.com>"]
-license = "MIT"
-
-[tool.poetry.dependencies]
-python = "^3.7"
-ikea-api = "^0.5.1"
-ikea-api-extender = { git = "ssh://github.com/vrslev/ikea-api-extender.git" }
-vk-api = "^11.9.4"
-erpnext-telegram-integration = { git = "https://github.com/vrslev/erpnext_telegram.git" }
-toml = "^0.10.2"
-
-[tool.poetry.dev-dependencies]
-pytest = "^6.2.4"
-pytest-cov = "^2.12.1"
-pytest-randomly = "^3.8.0"
-
 [tool.black]
 # https://black.readthedocs.io/en/stable/usage_and_configuration/the_basics.html#configuration-format
 target-version = ["py37"]
@@ -40,8 +20,8 @@ reportPrivateUsage = false
 
 [tool.semantic_release]
 branch = "main"
-version_toml = "pyproject.toml:tool.poetry.version"
-build_command = "pip install -U pip poetry && poetry build"
+version_toml = "comfort/__init__.py:__version__"
+build_command = "pip install build && python -m build"
 commit_subject = "сhore: Update version to {version}"
 upload_to_pypi = false
 
