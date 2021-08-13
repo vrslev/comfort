@@ -23,7 +23,7 @@
 ### Fix
 * Get metadata from `setup.cfg` instead of `pyproject.toml` ([`0c4ad3c`](https://github.com/vrslev/comfort/commit/0c4ad3ce0fff3776d2c5410d8d7da3a4c56c3e7f))
 * Pymethods ([`4439b87`](https://github.com/vrslev/comfort/commit/4439b876125201b8254a4fea5b1decc6e43fd1b5))
-* Remove `export_doc` method in overriden DocType controller ([`4d87882`](https://github.com/vrslev/comfort/commit/4d87882602e00c3669bd22b6674a46ded8467c62))
+* Remove `export_doc` method in overridden DocType controller ([`4d87882`](https://github.com/vrslev/comfort/commit/4d87882602e00c3669bd22b6674a46ded8467c62))
 * Quick add items issue ([`486fe12`](https://github.com/vrslev/comfort/commit/486fe125882a64d832f149a7aee1cc5788b6bcdb))
 * Except right exception in item fetch connector ([`e539700`](https://github.com/vrslev/comfort/commit/e539700668176a7ee6c919373b8bff5e5f4fa234))
 * Queries API path ([`d0fad03`](https://github.com/vrslev/comfort/commit/d0fad038861c71c6482b29d2025c940e132177c5))
