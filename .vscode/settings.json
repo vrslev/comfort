@@ -1,5 +1,5 @@
 {
-  "python.pythonPath": "../../env/bin/python3.7",
+  "python.pythonPath": "../../env/bin/python3",
   "python.analysis.extraPaths": ["../frappe"],
   "python.analysis.indexing": true,
   "python.analysis.diagnosticMode": "workspace",

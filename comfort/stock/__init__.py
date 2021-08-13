@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """
 STOCK CYCLE
 
@@ -46,7 +48,6 @@ STOCK CYCLE
 # TODO: What if someone bought something while items not received yet?
 # TODO: Sales Order added this way should appear in Purchase order
 
-from __future__ import annotations
 
 from typing import Any, ItemsView
 
@@ -55,7 +56,7 @@ from frappe import ValidationError, _
 from frappe.model.document import Document
 from frappe.utils.data import cint
 
-from .doctype.bin.bin import BIN_FIELDS
+from .doctype.bin.bin import BIN_FIELDS, Bin
 
 __all__ = [
     "update_bin",
@@ -67,7 +68,7 @@ __all__ = [
 
 
 def update_bin(item_code: str, **kwargs: int):
-    doc = frappe.get_doc("Bin", item_code)
+    doc: Bin = frappe.get_doc("Bin", item_code)
 
     for d in kwargs:
         if d not in BIN_FIELDS:
