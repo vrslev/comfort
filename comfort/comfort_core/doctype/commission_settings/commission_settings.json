@@ -1,0 +1,40 @@
+{
+  "actions": [],
+  "creation": "2021-08-13 05:34:59.352986",
+  "doctype": "DocType",
+  "editable_grid": 1,
+  "engine": "InnoDB",
+  "field_order": ["ranges"],
+  "fields": [
+    {
+      "fieldname": "ranges",
+      "fieldtype": "Table",
+      "label": "Ranges",
+      "options": "Commission Range",
+      "reqd": 1
+    }
+  ],
+  "index_web_pages_for_search": 1,
+  "issingle": 1,
+  "links": [],
+  "modified": "2021-08-13 06:04:26.467690",
+  "modified_by": "Administrator",
+  "module": "Comfort Core",
+  "name": "Commission Settings",
+  "owner": "Administrator",
+  "permissions": [
+    {
+      "create": 1,
+      "delete": 1,
+      "email": 1,
+      "print": 1,
+      "read": 1,
+      "role": "System Manager",
+      "share": 1,
+      "write": 1
+    }
+  ],
+  "sort_field": "modified",
+  "sort_order": "DESC",
+  "track_changes": 1
+}
