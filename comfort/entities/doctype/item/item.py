@@ -13,12 +13,12 @@ from frappe.model.document import Document
 from ..child_item.child_item import ChildItem
 
 
-# TODO: Annotate doc getting like get_doc
 class ItemMethods:
     url: str
     child_items: list[ChildItem]
     item_code: str
     weight: float
+    rate: int
 
     def validate_child_items(self):
         if self.child_items and frappe.db.exists(
@@ -61,10 +61,6 @@ class ItemMethods:
 
     def create_bin(self):
         if not self.child_items:
-            # if self.child_items and len(self.child_items) > 0:
-            #     for d in self.child_items:
-            #         frappe.get_doc("Item", d.item_code).after_insert()
-            # elif not frappe.db.exists("Bin", self.item_code):
             bin = frappe.new_doc("Bin")
             bin.item_code = self.item_code
             bin.insert()
@@ -85,6 +81,9 @@ class Item(Document, ItemMethods):  # TODO: How to cover this with tests?
         self.validate_url()
         self.set_name()
         self.calculate_weight()
+
+    def on_change(self):
+        self.clear_cache()
 
     def on_update(self):
         self.calculate_weight_in_parent_docs()
