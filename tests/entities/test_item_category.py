@@ -8,7 +8,7 @@ from frappe import ValidationError
 
 
 @pytest.fixture
-def item_category() -> ItemCategory:
+def item_category() -> ItemCategory:  # TODO: Glue with item test
     return frappe.get_doc(
         {
             "name": "Столешницы",

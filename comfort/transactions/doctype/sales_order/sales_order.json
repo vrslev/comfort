@@ -7,8 +7,6 @@
   "engine": "InnoDB",
   "field_order": [
     "customer",
-    "from_actual_stock",
-    "from_not_received_items_to_sell",
     "column_break_2",
     "posting_date",
     "section_break_4",
@@ -53,18 +51,6 @@
       "print_hide": 1,
       "reqd": 1,
       "search_index": 1
-    },
-    {
-      "default": "0",
-      "fieldname": "from_actual_stock",
-      "fieldtype": "Check",
-      "label": "From Actual Stock"
-    },
-    {
-      "default": "0",
-      "fieldname": "from_not_received_items_to_sell",
-      "fieldtype": "Check",
-      "label": "From Not Received Items To Sell"
     },
     {
       "fieldname": "column_break_2",
@@ -285,7 +271,7 @@
   "index_web_pages_for_search": 1,
   "is_submittable": 1,
   "links": [],
-  "modified": "2021-08-09 05:16:52.658639",
+  "modified": "2021-08-14 00:18:54.275093",
   "modified_by": "Administrator",
   "module": "Transactions",
   "name": "Sales Order",

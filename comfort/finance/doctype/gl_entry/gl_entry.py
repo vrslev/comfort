@@ -1,5 +1,7 @@
 from frappe.model.document import Document
 
 
-class GLEntry(Document):  # TODO: Validate debit = -credit
-    pass
+class GLEntry(Document):
+    account: str
+    credit_amount: int
+    debit_amount: int

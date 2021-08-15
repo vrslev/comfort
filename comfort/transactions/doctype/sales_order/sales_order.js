@@ -217,21 +217,9 @@ function calculate_total_amount(frm) {
 }
 
 async function apply_commission(frm) {
-  var args = {
-    items_cost: frm.doc.items_cost,
-  };
-  if (frm.doc.edit_commission == 1) {
-    args.commission = frm.doc.commission;
-  }
-  await frappe.call({
-    method:
-      "comfort.transactions.doctype.sales_order.sales_order.calculate_commission",
-    args: args,
-    callback: (r) => {
-      frm.set_value("commission", r.message.commission);
-      frm.set_value("margin", r.message.margin);
-      calculate_total_amount(frm);
-    },
+  await frm.call({
+    doc: frm.doc,
+    method: "calculate_commission_and_margin",
   });
 }
 

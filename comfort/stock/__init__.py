@@ -49,7 +49,7 @@ STOCK CYCLE
 
 from __future__ import annotations
 
-from typing import Any, ItemsView
+from typing import ItemsView
 
 import frappe
 from comfort import count_quantity
@@ -64,8 +64,6 @@ __all__ = [
     "update_bin",
     "purchase_order_purchased",
     "purchase_order_completed",
-    "sales_order_from_stock_submitted",
-    "sales_order_delivered",
 ]
 
 
@@ -141,49 +139,3 @@ def purchase_order_completed(doc: Document):
 
     for item_code, qty in get_items_to_sell_for_bin(doc):
         update_bin(item_code, available_purchased=-qty, available_actual=qty)
-
-
-def validate_items_available_for_sales_order_from_stock(
-    doc: Document, item_to_qty: list[tuple[str]]
-):
-    field = "available_actual"
-    item_availability: Any = frappe.get_all(
-        "Bin",
-        ["item_code", field],
-        {"item_code": ["in", [d.item_code for d in doc.items]]},
-    )
-
-    item_availability_map = count_quantity(item_availability, value_key=field)
-    not_available_items: list[tuple[str | int]] = []
-
-    for item_code, reqd_qty in item_to_qty:
-        available_qty = item_availability_map[item_code]
-        lack_qty = reqd_qty - available_qty
-        if lack_qty > 0:
-            not_available_items.append((item_code, lack_qty))
-
-    if len(not_available_items) > 0:
-        raise frappe.throw(
-            _("Lack of quantity for items: {}").format(
-                ", ".join(
-                    [
-                        f'<a href="/app/item/{d[0]}" data-doctype="Item"'
-                        f' data-name="${d[0]}">{d[0]}</a> ({d[1]} шт)'
-                        for d in not_available_items
-                    ]
-                )
-            )
-        )
-
-
-def sales_order_from_stock_submitted(doc: Document):
-    if doc.from_actual_stock:
-        item_to_qty: tuple[str, int] = doc.get_item_qty_map(True).items()
-        validate_items_available_for_sales_order_from_stock(doc, item_to_qty)
-        for item_code, qty in item_to_qty:
-            update_bin(item_code, available_actual=-qty, reserved_actual=qty)  # type: ignore
-
-
-def sales_order_delivered(doc: Document):
-    for item_code, qty in doc.get_item_qty_map(True).items():
-        update_bin(item_code, reserved_actual=-qty)  # type: ignore
