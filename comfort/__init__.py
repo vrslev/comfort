@@ -5,16 +5,18 @@ __version__ = "0.2.0"
 
 
 def count_quantity(
-    data: Iterable[dict[Any, Any]], key_key: str = "item_code", value_key: str = "qty"
+    data: Iterable[Any], key_key: str = "item_code", value_key: str = "qty"
 ):
     c: Counter[str, int] = Counter()
     for item in data:
-        c[item[key_key]] += item[value_key]
+        c[getattr(item, key_key)] += getattr(item, value_key)
     return c
 
 
-def search_by_id(data: Iterable[dict[Any, Any]], id_key: str) -> dict[Any, Any]:
+def group_by_key(
+    data: Iterable[dict[Any, Any]], key: str = "item_code"
+) -> dict[Any, Any]:
     d = defaultdict(list)
     for item in data:
-        d[item[id_key]].append(item)
+        d[getattr(item, key)].append(item)
     return dict(d)  # type: ignore
