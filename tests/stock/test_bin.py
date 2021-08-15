@@ -1,11 +1,14 @@
 import random
+from typing import TYPE_CHECKING
 
 import pytest
 
 import frappe
 from comfort.entities.doctype.item.item import Item
 from comfort.stock.doctype.bin.bin import BIN_FIELDS, Bin
-from tests.entities.test_item import item_no_children  # type: ignore
+
+if not TYPE_CHECKING:
+    from tests.entities.test_item import item_no_children
 
 
 @pytest.fixture
