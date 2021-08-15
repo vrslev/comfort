@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any, TypeVar
 
 import frappe
+from frappe import _
 from frappe.model.document import Document
 from frappe.utils.data import cint
 
@@ -10,10 +11,12 @@ from .doctype.accounts_settings.accounts_settings import AccountsSettings
 from .doctype.gl_entry.gl_entry import GLEntry
 
 
-def make_gl_entry(self: Document, account: str, dr: int, cr: int):
+def make_gl_entry(
+    doc: Document, account: str, dr: int, cr: int
+):  # TODO: Transaction type
     customer = None
-    if hasattr(self, "customer") and self.get("customer"):
-        customer = self.customer
+    if hasattr(doc, "customer") and doc.get("customer"):
+        customer = doc.customer
 
     frappe.get_doc(
         {
@@ -21,8 +24,8 @@ def make_gl_entry(self: Document, account: str, dr: int, cr: int):
             "account": account,
             "debit_amount": dr,
             "credit_amount": cr,
-            "voucher_type": self.doctype,
-            "voucher_no": self.name,
+            "voucher_type": doc.doctype,
+            "voucher_no": doc.name,
             "customer": customer,
         }
     ).submit()
@@ -71,7 +74,7 @@ def cancel_gl_entry(voucher_type: str, voucher_no: str):
     )
 
 
-T = TypeVar("T", str, list[str])
+T = TypeVar("T", str, list[str], tuple[str])
 
 
 def get_account(field_names: T) -> T:
@@ -86,6 +89,9 @@ def get_account(field_names: T) -> T:
         account = f"default_{d}_account"
         if hasattr(settings, account):
             accounts.append(getattr(settings, account))
+        else:
+            err_msg: str = _('Account Settings has no field "{}"').format(account)
+            raise ValueError(err_msg)
 
     return accounts[0] if return_str else accounts
 
