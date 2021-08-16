@@ -15,9 +15,9 @@ def accounts():
 
 
 def get_accounts_from_schema():
-    accounts: list[dict[str, str]] = []
+    accounts: list[dict[str, str | None]] = []
 
-    def execute(parent: str, children: dict[str, Any]):
+    def execute(parent: str | None, children: dict[str, Any]):
         for child, children_of_child in children.items():
             account = {"name": child, "parent_account": parent}
             accounts.append(account)
@@ -34,8 +34,8 @@ def test_create_accounts_from_schema(accounts: None):
     ]
 
     not_matching_accounts: list[dict[str, str | None]] = [
-        i
-        for i in accounts_from_schema + created_accounts
-        if i not in accounts_from_schema or i not in created_accounts
+        acc
+        for acc in accounts_from_schema + created_accounts
+        if acc not in accounts_from_schema or acc not in created_accounts
     ]
     assert len(not_matching_accounts) == 0

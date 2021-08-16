@@ -1,5 +1,6 @@
 # TODO: How to deal with prices that expire???
 
+from __future__ import annotations
 
 import re
 from collections import Counter
@@ -15,10 +16,10 @@ from ..item_category_table.item_category_table import ItemCategoryTable
 
 
 class ItemMethods:
-    url: str
+    url: str | None
     child_items: list[ChildItem]
     item_code: str
-    item_name: str
+    item_name: str | None
     weight: float
     rate: int
     item_categories: list[ItemCategoryTable]
@@ -35,7 +36,7 @@ class ItemMethods:
                 raise ValidationError(_("Invalid URL"))
 
     def set_name(self):
-        if not self.item_name:
+        if self.item_name is None:
             self.item_name = self.item_code
 
     def calculate_weight(self):
@@ -56,8 +57,8 @@ class ItemMethods:
         parent_items: list[ChildItem] = frappe.get_all(
             "Child Item", "parent", {"item_code": self.item_code}
         )
-        parent_items = list({d.parent for d in parent_items})
-        for d in parent_items:
+        parent_item_names = list({d.parent for d in parent_items})
+        for d in parent_item_names:
             doc: Item = frappe.get_doc("Item", d)
             doc.calculate_weight()
             doc.db_update()

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import datetime
 from typing import Any
 
 from ikea_api.auth import get_authorized_token, get_guest_token
@@ -21,14 +22,13 @@ class IkeaCartUtils:
         settings: IkeaCartSettings = frappe.get_single("Ikea Cart Settings")
         self.zip_code: str = settings.zip_code
         self.username: str = settings.username
-        self.password: str = get_decrypted_password(
+        self.password: str | None = get_decrypted_password(
             "Ikea Cart Settings", "Ikea Cart Settings", raise_exception=False
         )
-        self.guest_token: str = settings.guest_token
-        self.authorized_token: str = settings.authorized_token
+        self.guest_token: str | None = settings.guest_token
+        self.authorized_token: str | None = settings.authorized_token
 
-    def get_token(self, authorize: bool = False) -> str:
-        from datetime import datetime
+    def get_token(self, authorize: bool = False):
 
         doc: IkeaCartSettings = frappe.get_single("Ikea Cart Settings")
         if not authorize:
@@ -47,10 +47,10 @@ class IkeaCartUtils:
                 doc.authorized_token_expiration_time
             )
             if (
-                not self.authorized_token
+                self.authorized_token is None
                 or authorized_token_expiration_time <= now_datetime()
             ):
-                if not self.username and not self.password:
+                if self.username is None or self.password is None:
                     raise ValidationError("Введите логин и пароль в настройках")
                 self.authorized_token = get_authorized_token(
                     self.username, self.password
@@ -61,7 +61,7 @@ class IkeaCartUtils:
                 frappe.db.commit()
             return self.authorized_token
 
-    def get_delivery_services(self, items: dict[str, int]) -> dict[str, Any]:
+    def get_delivery_services(self, items: dict[str, int]) -> dict[str, Any] | None:
         self.get_token()
         adding = self.add_items_to_cart(self.guest_token, items)
         order_capture = OrderCapture(self.guest_token, self.zip_code)

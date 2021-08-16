@@ -6,13 +6,12 @@ from datetime import datetime
 from typing import Any
 
 import frappe
-from comfort import ValidationError, count_quantity, stock
+from comfort import ValidationError, count_quantity, parse_json, stock
 from comfort.comfort_core.ikea.cart_utils import IkeaCartUtils
-from comfort.finance import get_account, get_paid_amount
+from comfort.finance import get_account, get_received_amount
 from comfort.finance.doctype.gl_entry.gl_entry import GLEntry
 from frappe import _, as_json
 from frappe.model.document import Document
-from frappe.utils import parse_json
 from frappe.utils.data import add_to_date, getdate, now_datetime, today
 
 from ..purchase_order_delivery_option.purchase_order_delivery_option import (
@@ -166,7 +165,7 @@ class PurchaseOrderMethods(Document):
         return templated_items
 
     def make_invoice_gl_entries(self):
-        already_paid_amount = get_paid_amount(self.doctype, self.name)
+        already_paid_amount = -get_received_amount(self)
 
         if self.total_amount != already_paid_amount:
             if self.delivery_cost > 0:
@@ -364,10 +363,10 @@ class PurchaseOrder(PurchaseOrderMethods):
 
 @frappe.whitelist()
 def get_sales_orders_containing_items(
-    items_in_options: str | list[str], sales_orders: str | list[str]
+    items_in_options: list[str], sales_orders: list[str]
 ) -> dict[str, list[Any]]:
-    items_in_options = parse_json(items_in_options)
-    sales_orders = parse_json(sales_orders)
+    items_in_options = parse_json(items_in_options) or items_in_options
+    sales_orders = parse_json(sales_orders) or items_in_options
     items_in_sales_orders_by_options = {}
     for option in items_in_options:
         items_in_sales_orders = {}
@@ -385,11 +384,13 @@ def get_sales_orders_containing_items(
 
 @frappe.whitelist()
 def get_unavailable_items_in_cart_by_orders(
-    unavailable_items: str | Any, sales_orders: str | list[str], items_to_sell: Any
+    unavailable_items: list[Any],
+    sales_orders: list[str],
+    items_to_sell: list[dict[str, Any]],
 ):
-    unavailable_items: list[Any] = parse_json(unavailable_items)
-    sales_orders = parse_json(sales_orders)
-    items_to_sell = parse_json(items_to_sell)
+    unavailable_items = parse_json(unavailable_items) or unavailable_items
+    sales_orders = parse_json(sales_orders) or sales_orders
+    items_to_sell = parse_json(items_to_sell) or items_to_sell
 
     unavailable_items_map: dict[str, Any] = {}
     for d in unavailable_items:

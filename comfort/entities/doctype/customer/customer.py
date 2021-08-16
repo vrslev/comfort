@@ -10,8 +10,8 @@ from frappe.model.document import Document
 
 
 class Customer(Document):
-    vk_url: str
-    vk_id: int | None
+    vk_url: str | None
+    vk_id: str | None
 
     def validate(self):  # pragma: no cover
         self.validate_vk_url_and_set_vk_id()

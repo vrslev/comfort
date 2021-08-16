@@ -3,7 +3,7 @@ from typing import Any
 import frappe
 
 
-def extend_boot_session_with_currency(bootinfo: object):
+def extend_boot_session_with_currency(bootinfo: Any):
     # TODO: Currency symbol not working
     bootinfo.sysdefaults.currency = frappe.get_cached_value(
         "Accounts Settings", "Accounts Settings", "default_currency"

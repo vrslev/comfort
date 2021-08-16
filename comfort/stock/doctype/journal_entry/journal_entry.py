@@ -1,5 +1,4 @@
 # type: ignore
-import frappe
 from comfort import ValidationError
 from comfort.finance import make_gl_entry, make_reverse_gl_entry
 from frappe import _

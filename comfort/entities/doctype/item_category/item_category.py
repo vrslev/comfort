@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import re
 
 from comfort import ValidationError
@@ -6,7 +8,7 @@ from frappe.model.document import Document
 
 
 class ItemCategory(Document):
-    url: str
+    url: str | None
 
     def validate(self):  # pragma: no cover
         self.validate_url()

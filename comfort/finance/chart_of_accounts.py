@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Any
 
 import frappe
@@ -41,7 +43,7 @@ DEFAULT_ACCOUNT_SETTINGS = {
 
 
 def _create_accounts_from_schema():
-    def execute(parent: str, children: dict[str, Any]):
+    def execute(parent: str | None, children: dict[str, Any]):
         for child, children_of_child in children.items():
             frappe.get_doc(
                 {

@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 import frappe
+from frappe.model.document import Document
 from frappe.utils import cint
 from frappe.utils.nestedset import NestedSet
 
@@ -34,5 +35,5 @@ def add_node():
 
     if cint(args.is_root):
         args.parent_account = None
-
-    frappe.get_doc(args).insert()
+    doc: Document = frappe.get_doc(args)
+    doc.insert()

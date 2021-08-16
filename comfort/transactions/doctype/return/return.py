@@ -2,7 +2,7 @@
 
 import frappe
 from comfort import ValidationError
-from comfort.finance import get_account, get_paid_amount, make_gl_entry
+from comfort.finance import get_account, get_received_amount, make_gl_entry
 from frappe import _
 from frappe.model.document import Document
 
@@ -228,7 +228,7 @@ class Return(Document):
             return
 
         def validate_paid_amt():
-            paid_amount = get_paid_amount(doc.doctype, doc.name)
+            paid_amount = get_received_amount(doc)
             if amount > paid_amount:
                 raise ValidationError(
                     _(f"Cannot return Amount greater than Paid Amount ({doc.name})")

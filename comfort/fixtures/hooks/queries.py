@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Callable
 
 import frappe
 from frappe.desk.reportview import get_filters_cond, get_match_cond
@@ -16,8 +16,9 @@ def _get_fields(doctype: str, fields: list[Any] | None = None) -> list[Any]:
     search_fields: list[Any] = meta.get_search_fields()
     fields.extend(search_fields)
 
-    if meta.title_field and not meta.title_field.strip() in fields:
-        fields.insert(1, meta.title_field.strip())
+    title_field: str | None = meta.get("title_field")  # type: ignore
+    if title_field and not title_field.strip() in fields:
+        fields.insert(1, title_field.strip())
 
     return unique(fields)
 
@@ -47,7 +48,7 @@ def format_sales_order_query(d: list[Any]):
         d[3] = _format_money(d[3])
 
 
-_QUERY_FORMATTERS = {
+_QUERY_FORMATTERS: dict[str, Callable[..., Any]] = {
     "Item": _format_item_query,
     "Purchase Order": _format_purchase_order_query,
     "Sales Order": format_sales_order_query,
