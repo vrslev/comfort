@@ -9,7 +9,7 @@ from ikea_api.errors import ItemFetchError
 from ikea_api_extender import get_items_immortally
 
 import frappe
-from comfort import ValidationError
+from comfort import ValidationError, parse_json
 from comfort.comfort_core.ikea.utils import (
     extract_item_codes,
     get_item_codes_from_ingka_pagelinks,
@@ -17,28 +17,25 @@ from comfort.comfort_core.ikea.utils import (
 from comfort.entities.doctype.item.item import Item
 from comfort.entities.doctype.item_category.item_category import ItemCategory
 from frappe import _
-from frappe.utils import parse_json
 
 
 @frappe.whitelist()
 def fetch_new_items(
-    item_codes: str | list[Any],
-    force_update: str | bool = False,
-    download_images: str | bool = True,
-    values_from_db: str | list[str] = [],
+    item_codes: list[Any] | int | str,
+    force_update: bool = False,
+    download_images: bool = True,
+    values_from_db: list[str] = [],
 ) -> dict[str, list[Any]]:
 
     if not isinstance(item_codes, list):
         try:
-            item_codes = json.loads(item_codes)
+            item_codes = json.loads(item_codes)  # type: ignore
         except json.decoder.JSONDecodeError:
             item_codes = str(item_codes)
 
-    force_update, download_images, values_from_db = (
-        parse_json(force_update),
-        parse_json(download_images),
-        parse_json(values_from_db),
-    )
+    force_update = parse_json(force_update) or force_update
+    download_images = parse_json(download_images) or download_images
+    values_from_db = parse_json(values_from_db) or values_from_db
 
     if isinstance(item_codes, int):
         item_codes = str(item_codes)
@@ -64,17 +61,17 @@ def fetch_new_items(
         "successful": item_codes,
     }
 
-    parsed_items = None
+    parsed_items: list[Any] = []
     if len(items_to_fetch) > 0:
         try:
-            response: list[Any] = get_items_immortally(items_to_fetch)
+            response: dict[str, Any] = get_items_immortally(items_to_fetch)
         except ItemFetchError as e:
             if "Wrong Item Code" in e.args[0]:
                 raise ValidationError(_("Wrong Item Code"))
             else:
                 raise
 
-        parsed_items: list[Any] = response["items"]
+        parsed_items = response["items"]
         res.update(
             {
                 "unsuccessful": response["unsuccessful"],
@@ -111,8 +108,8 @@ def fetch_new_items(
     return res
 
 
-def download_items_images(items: dict[str, Any]):
-    async def fetch(session: aiohttp.ClientSession, item: dict[str, Any]):
+def download_items_images(items: list[dict[str, Any]]):
+    async def fetch(session: aiohttp.ClientSession, item: dict[Any, Any]):
         if not item["image_url"]:
             return
 
@@ -136,7 +133,7 @@ def download_items_images(items: dict[str, Any]):
             update_modified=False,
         )
 
-    async def main(items: dict[str, Any]):
+    async def main(items: list[dict[str, Any]]):
         async with aiohttp.ClientSession() as session:
             tasks: list[Coroutine[Any, Any, None]] = []
             for d in items:
