@@ -5,7 +5,7 @@ import re
 from collections import Counter
 
 import frappe
-from comfort import count_quantity
+from comfort import ValidationError, count_quantity
 from comfort.stock.doctype.bin.bin import Bin
 from frappe import _
 from frappe.model.document import Document
@@ -27,12 +27,12 @@ class ItemMethods:
         if self.child_items and frappe.db.exists(
             "Child Item", {"parent": ["in", [d.item_code for d in self.child_items]]}
         ):
-            frappe.throw(_("Can't add child item that contains child items"))
+            raise ValidationError(_("Can't add child item that contains child items"))
 
     def validate_url(self):
         if self.url:
             if len(re.findall(r"ikea.com/\w+/\w+/p/-s?\d+", self.url)) == 0:
-                frappe.throw(_("Invalid URL"))
+                raise ValidationError(_("Invalid URL"))
 
     def set_name(self):
         if not self.item_name:
@@ -72,8 +72,9 @@ class ItemMethods:
         if not self.child_items:
             bin: Bin = frappe.get_doc("Bin", self.item_code)
             if not bin.is_empty:  # TODO: Test this
-                # TODO: Make custom ValidationError that calls `frappe.throw` for linters to not return `frappe.throw`
-                frappe.throw(_("Can't delete item that have been used in transactions"))
+                raise ValidationError(
+                    _("Can't delete item that have been used in transactions")
+                )
             else:
                 bin.delete()
 

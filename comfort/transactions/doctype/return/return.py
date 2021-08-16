@@ -1,6 +1,7 @@
 # type: ignore
 
 import frappe
+from comfort import ValidationError
 from comfort.finance import get_account, get_paid_amount, make_gl_entry
 from frappe import _
 from frappe.model.document import Document
@@ -118,14 +119,14 @@ class Return(Document):
 
     def validate(self):
         if self.return_money and (not self.get("amount") or self.amount == 0):
-            frappe.throw(_("Set Amount"))
+            raise ValidationError(_("Set Amount"))
 
         if self.return_items and (not self.get("items") or len(self.items) == 0):
-            frappe.throw(_("Set Items"))
+            raise ValidationError(_("Set Items"))
 
         for d in self.items:
             if not (d.reference_doctype or d.reference_name):
-                frappe.throw(
+                raise ValidationError(
                     _("No reference name or doctype for item: {0}").format(d.item_code)
                 )
 
@@ -176,13 +177,13 @@ class Return(Document):
                 self.create_new_paid_purchase_order()
 
             else:
-                return frappe.throw(
+                raise ValidationError(
                     _(
                         "Cannot return items without money when Purchase Order is not received"
                     )
                 )
         else:
-            return frappe.throw("")
+            raise ValidationError
 
         accounts = get_account(accounts)
 
@@ -229,7 +230,7 @@ class Return(Document):
         def validate_paid_amt():
             paid_amount = get_paid_amount(doc.doctype, doc.name)
             if amount > paid_amount:
-                frappe.throw(
+                raise ValidationError(
                     _(f"Cannot return Amount greater than Paid Amount ({doc.name})")
                 )
 
@@ -272,14 +273,14 @@ class Return(Document):
                 )
 
             else:
-                frappe.throw(
+                raise ValidationError(
                     _(
                         f"Cannot return items when Sales Order is not delivered: ({doc.name})"
                     )
                 )
 
         else:
-            frappe.throw("")
+            raise ValidationError
 
     def split_order(self, doc, items, amount, create_new_doc):
         doc.flags.ignore_validate_update_after_submit = True

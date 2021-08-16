@@ -6,7 +6,7 @@ from datetime import datetime
 from typing import Any
 
 import frappe
-from comfort import count_quantity, stock
+from comfort import ValidationError, count_quantity, stock
 from comfort.comfort_core.ikea.cart_utils import IkeaCartUtils
 from comfort.finance import get_account, get_paid_amount
 from comfort.finance.doctype.gl_entry.gl_entry import GLEntry
@@ -45,7 +45,7 @@ class PurchaseOrderMethods(Document):
 
     def validate_empty(self):
         if not (self.sales_orders or self.items_to_sell):
-            frappe.throw("Добавьте заказы или товары на продажу")
+            raise ValidationError("Добавьте заказы или товары на продажу")
 
     def delete_sales_order_dublicates(self):
         # TODO: Check if there any IkeaCarts that contains those Sales Orders
@@ -331,7 +331,7 @@ class PurchaseOrder(PurchaseOrderMethods):
     ):
         if self.status != "Draft":  # TODO: Change back
             # if self.status != 'To Receive':
-            return frappe.throw(
+            raise ValidationError(
                 _(
                     "Cannot create Sales Order from Purchase Order's items to sell with status {}"
                 ).format(self.status)
@@ -342,7 +342,7 @@ class PurchaseOrder(PurchaseOrderMethods):
         for d in items:
             d = frappe._dict(d)  # type: ignore
             if item_qty_map[d.item_code] < d.qty:
-                return frappe.throw(
+                raise ValidationError(
                     _("Cannot add more items than there is: {}").format(
                         f"{d.item_code}: {d.qty}"
                     )

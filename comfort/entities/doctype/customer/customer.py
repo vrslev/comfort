@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from urllib.parse import parse_qs, urlparse
 
-import frappe
+from comfort import ValidationError
 from frappe import _
 from frappe.model.document import Document
 
@@ -33,4 +33,4 @@ class Customer(Document):
                     self.vk_id = vk_id
 
         if not ok:
-            frappe.throw(_("Wrong VK URL"))
+            raise ValidationError(_("Wrong VK URL"))

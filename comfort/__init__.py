@@ -1,5 +1,9 @@
+from __future__ import annotations
+
 from collections import Counter, defaultdict
 from typing import Any, Iterable
+
+import frappe
 
 __version__ = "0.2.0"
 
@@ -20,3 +24,23 @@ def group_by_key(
     for item in data:
         d[getattr(item, key)].append(item)
     return dict(d)  # type: ignore
+
+
+class ValidationError(Exception):
+    def __init__(
+        self,
+        msg: Any = "",
+        exc: Exception = frappe.exceptions.ValidationError,
+        title: str | None = None,
+        is_minimizable: bool | None = None,
+        wide: str | None = None,
+        as_list: bool = False,
+    ):
+        frappe.throw(
+            msg,
+            exc=exc,
+            title=title,
+            is_minimizable=is_minimizable,
+            wide=wide,
+            as_list=as_list,
+        )

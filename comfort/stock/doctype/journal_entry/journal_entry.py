@@ -1,5 +1,6 @@
 # type: ignore
 import frappe
+from comfort import ValidationError
 from comfort.finance import make_gl_entry, make_reverse_gl_entry
 from frappe import _
 from frappe.model.document import Document
@@ -13,7 +14,7 @@ class JournalEntry(Document):
     def validate(self):
         self.set_total_debit_credit()
         if self.difference:
-            frappe.throw(
+            raise ValidationError(
                 _("Total Debit and Credit must be equal. The difference is {0}").format(
                     self.difference
                 )

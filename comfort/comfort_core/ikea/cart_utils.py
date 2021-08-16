@@ -8,6 +8,7 @@ from ikea_api.errors import IkeaApiError
 from ikea_api_parser import DeliveryOptions, PurchaseHistory, PurchaseInfo
 
 import frappe
+from comfort import ValidationError
 from comfort.comfort_core.doctype.ikea_cart_settings.ikea_cart_settings import (
     IkeaCartSettings,
 )
@@ -50,7 +51,7 @@ class IkeaCartUtils:
                 or authorized_token_expiration_time <= now_datetime()
             ):
                 if not self.username and not self.password:
-                    frappe.throw("Введите логин и пароль в настройках")
+                    raise ValidationError("Введите логин и пароль в настройках")
                 self.authorized_token = get_authorized_token(
                     self.username, self.password
                 )

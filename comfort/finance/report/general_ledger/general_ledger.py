@@ -1,6 +1,7 @@
 # type: ignore
 #
 import frappe
+from comfort import ValidationError
 from frappe import _, _dict
 from frappe.utils import flt
 
@@ -21,7 +22,7 @@ def execute(filters=None):
 
 def validate_filters(filters):
     if filters.from_date > filters.to_date:
-        frappe.throw("From Date Should be less than To Date")
+        raise ValidationError("From Date Should be less than To Date")
 
 
 def get_columns():

@@ -9,6 +9,7 @@ from ikea_api.errors import ItemFetchError
 from ikea_api_extender import get_items_immortally
 
 import frappe
+from comfort import ValidationError
 from comfort.comfort_core.ikea.utils import (
     extract_item_codes,
     get_item_codes_from_ingka_pagelinks,
@@ -69,7 +70,7 @@ def fetch_new_items(
             response: list[Any] = get_items_immortally(items_to_fetch)
         except ItemFetchError as e:
             if "Wrong Item Code" in e.args[0]:
-                return frappe.throw(_("Wrong Item Code"))
+                raise ValidationError(_("Wrong Item Code"))
             else:
                 raise
 

@@ -1,6 +1,6 @@
 import re
 
-import frappe
+from comfort import ValidationError
 from frappe import _
 from frappe.model.document import Document
 
@@ -14,4 +14,4 @@ class ItemCategory(Document):
     def validate_url(self):
         if self.url:
             if len(re.findall(r"ikea.com/\w+/\w+/cat/-\d+", self.url)) == 0:
-                frappe.throw(_("Invalid category URL"))
+                raise ValidationError(_("Invalid category URL"))
