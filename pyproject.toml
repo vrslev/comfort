@@ -8,14 +8,72 @@ known_first_party = "frappe"
 
 [tool.pyright]
 # https://github.com/microsoft/pyright/blob/main/docs/configuration.md
-exclude = ["node_modules", "__pycache__", ".ipynb_checkpoints", "tests/.cache"]
 typeCheckingMode = "strict"
-pythonVersion = "3.9"
-reportGeneralTypeIssues = false # mostly unknown members and methods
-reportUnknownMemberType = false
-reportUnknownVariableType = false
+
+# To debug, uncomment this lines:
+# useLibraryCodeForTypes = false
+# enableTypeIgnoreComments = false
+# reportUnusedCallResult = true
+
+# Disable those mostly because frappe is untyped:
+reportGeneralTypeIssues = false
 reportMissingTypeStubs = false
 reportPrivateUsage = false
+reportUnknownVariableType = false
+reportUnknownMemberType = false
+
+# Rules that are not in "strict" mode:
+reportUninitializedInstanceVariable = "warning"
+reportCallInDefaultInitializer = "warning"
+reportImplicitStringConcatenation = "warning"
+
+# strictListInference
+# strictDictionaryInference
+# strictParameterNoneValue
+# reportPropertyTypeMismatch
+# reportFunctionMemberAccess
+# reportMissingImports
+# reportMissingModuleSource
+# reportImportCycles
+# reportUnusedImport
+# reportUnusedClass
+# reportUnusedFunction
+# reportUnusedVariable
+# reportDuplicateImport
+# reportWildcardImportFromLibrary
+# reportOptionalSubscript
+# reportOptionalMemberAccess
+# reportOptionalCall
+# reportOptionalIterable
+# reportOptionalContextManager
+# reportOptionalOperand
+# reportTypedDictNotRequiredAccess
+# reportUntypedFunctionDecorator
+# reportUntypedClassDecorator
+# reportUntypedBaseClass
+# reportUntypedNamedTuple
+# reportConstantRedefinition
+# reportIncompatibleMethodOverride
+# reportIncompatibleVariableOverride
+# reportOverlappingOverload
+# reportInvalidStringEscapeSequence
+# reportUnknownParameterType
+# reportUnknownArgumentType
+# reportUnknownLambdaType
+# reportMissingTypeArgument
+# reportInvalidTypeVarUse
+# reportUnnecessaryIsInstance
+# reportUnnecessaryCast
+# reportUnnecessaryComparison
+# reportAssertAlwaysTrue
+# reportSelfClsParameterName
+# reportUndefinedVariable
+# reportUnboundVariable
+# reportInvalidStubStatement
+# reportIncompleteStub
+# reportUnsupportedDunderAll
+# reportUnusedCoroutine
+
 
 [tool.semantic_release]
 branch = "main"
