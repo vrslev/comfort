@@ -49,13 +49,13 @@ def get_columns():
         },
         {
             "label": "Debit (INR)",
-            "fieldname": "debit_amount",
+            "fieldname": "debit",
             "fieldtype": "Float",
             "width": 100,
         },
         {
             "label": "Credit (INR)",
-            "fieldname": "credit_amount",
+            "fieldname": "credit",
             "fieldtype": "Float",
             "width": 100,
         },
@@ -90,7 +90,7 @@ def get_gl_entries(filters):
     gl_entries = frappe.db.sql(
         """
         SELECT name as gl_entry, posting_date, account, customer, voucher_type,
-               voucher_no, debit_amount, credit_amount
+               voucher_no, debit, credit
         FROM `tabGL Entry`
         WHERE %(conditions)s
         ORDER BY voucher_no, account
@@ -137,16 +137,16 @@ def get_updated_entries(filters, gl_entries):
     closing = get_opening_total_closing("Closing (Opening + Total)")
 
     for gl_entry in gl_entries:
-        total.debit_amount += flt(gl_entry.debit_amount)
-        total.credit_amount += flt(gl_entry.credit_amount)
-        closing.debit_amount += flt(gl_entry.debit_amount)
-        closing.credit_amount += flt(gl_entry.credit_amount)
+        total.debit += flt(gl_entry.debit)
+        total.credit += flt(gl_entry.credit)
+        closing.debit += flt(gl_entry.debit)
+        closing.credit += flt(gl_entry.credit)
 
     return _dict(opening=opening, total=total, closing=closing)  # type: ignore
 
 
 def get_opening_total_closing(label):
-    return _dict(account=label, debit_amount=0.0, credit_amount=0.0, balance=0.0)  # type: ignore
+    return _dict(account=label, debit=0.0, credit=0.0, balance=0.0)  # type: ignore
 
 
 def add_balance_in_entries(data):
@@ -155,7 +155,7 @@ def add_balance_in_entries(data):
     for d in data:
         if not d.posting_date:
             balance = 0
-        balance += d.debit_amount - d.credit_amount
+        balance += d.debit - d.credit
         d.balance = balance
 
     return data

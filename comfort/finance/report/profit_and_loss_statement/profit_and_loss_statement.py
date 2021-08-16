@@ -54,7 +54,7 @@ def get_columns(period_key, period_label):
 
 
 def get_data(date, root_type, dr_cr, period_key):
-    accounts = get_accounts(root_type)
+    accounts = get_accounts_with_root_type(root_type)
     data = []
     if accounts:
         i = 0
@@ -107,7 +107,7 @@ def append(data, d, i, period_key):
     )
 
 
-def get_accounts(root_type):
+def get_accounts_with_root_type(root_type):
     return frappe.db.sql(
         """ SELECT
 				name, parent_account, lft, root_type, is_group
@@ -125,7 +125,7 @@ def get_accounts(root_type):
 def get_account_balance(account, date):
     return frappe.db.sql(
         """ SELECT
-					sum(debit_amount) - sum(credit_amount)
+					sum(debit) - sum(credit)
 				FROM
 					`tabGL Entry`
 				WHERE
