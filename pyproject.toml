@@ -40,7 +40,6 @@ omit = [
   "comfort/comfort_core/doctype/ikea_cart_settings/ikea_cart_settings.py",
   "comfort/entities/doctype/customer_group/customer_group.py",
   "comfort/finance/doctype/accounts_settings/accounts_settings.py",
-  "comfort/finance/doctype/gl_entry/gl_entry.py",
   # Child Table doctypes:
   "comfort/stock/doctype/journal_entry_account/journal_entry_account.py",
   "comfort/transactions/doctype/purchase_order_delivery_option/purchase_order_delivery_option.py",

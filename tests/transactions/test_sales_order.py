@@ -275,7 +275,7 @@ def test_set_document_status(
 def get_gl_entries(doc: SalesOrder) -> list[GLEntry]:
     return frappe.get_all(
         "GL Entry",
-        fields=["account", "debit_amount", "credit_amount"],
+        fields=["account", "debit", "credit"],
         filters={"voucher_type": doc.doctype, "voucher_no": doc.name},
     )
 
@@ -320,7 +320,7 @@ def test_make_categories_invoice_gl_entries(
     for entry in get_gl_entries(sales_order):
         for account_name in amounts:
             if get_account(account_name) == entry.account:
-                amounts[account_name] += entry.credit_amount
+                amounts[account_name] += entry.credit
 
     assert amounts["sales"] == exp_sales_amount
     assert amounts["delivery"] == exp_delivery_amount
@@ -339,7 +339,7 @@ def test_make_income_invoice_gl_entry(
     amount = 0
     for entry in get_gl_entries(sales_order):
         assert entry.account == get_account(expected_account)
-        amount += entry.debit_amount
+        amount += entry.debit
     assert amount == 5000
 
 
@@ -352,9 +352,9 @@ def test_make_delivery_gl_entries(sales_order: SalesOrder):
 
     for entry in get_gl_entries(sales_order):
         if get_account("inventory") == entry.account:
-            assert entry.credit_amount == items_cost
+            assert entry.credit == items_cost
         elif get_account("cost_of_goods_sold") == entry.account:
-            assert entry.debit_amount == items_cost
+            assert entry.debit == items_cost
 
 
 def test_make_invoice_gl_entries_raises_on_zero_paid_amount(sales_order: SalesOrder):
@@ -366,3 +366,8 @@ def test_make_invoice_gl_entries_raises_on_zero_total_amount(sales_order: SalesO
     sales_order.total_amount = 0
     with pytest.raises(ValidationError, match="Total Amount should be more that zero"):
         sales_order.make_invoice_gl_entries(100, True)
+
+
+#################################
+###      SalesOrderStock      ###
+#################################

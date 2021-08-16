@@ -1,3 +1,4 @@
+# type: ignore
 from __future__ import annotations
 
 import re
@@ -6,12 +7,8 @@ from typing import Any
 import frappe
 from comfort import count_quantity, stock
 from comfort.comfort_core.ikea.cart_utils import IkeaCartUtils
-from comfort.finance import (
-    get_account,
-    get_paid_amount,
-    make_gl_entry,
-    make_reverse_gl_entry,
-)
+from comfort.finance import get_account, get_paid_amount
+from comfort.finance.doctype.gl_entry.gl_entry import GLEntry
 from frappe import _, as_json
 from frappe.model.document import Document
 from frappe.utils import parse_json
@@ -172,14 +169,16 @@ class PurchaseOrderMethods(Document):
                 inventory_amt_paid = self.total_amount - already_paid_amount
 
             inventory_accounts: list[str] = get_account(["cash", "prepaid_inventory"])
-            make_gl_entry(self, inventory_accounts[0], 0, inventory_amt_paid)
-            make_gl_entry(self, inventory_accounts[1], inventory_amt_paid, 0)
+            GLEntry.new(self, "Invoice", inventory_accounts[0], 0, inventory_amt_paid)
+            GLEntry.new(self, "Invoice", inventory_accounts[1], inventory_amt_paid, 0)
 
             if self.delivery_cost > 0:
                 delivery_accounts: list[str] = get_account(
                     ["cash", "purchase_delivery"]
                 )
                 # TODO: Refactor
+                GLEntry.new(self, "Invoice", delivery_accounts[1], 0, delivery_amt_paid)  # type: ignore
+                GLEntry.new(self, "Invoice", delivery_accounts[1], delivery_amt_paid, 0)  # type: ignore
                 make_gl_entry(self, delivery_accounts[0], 0, delivery_amt_paid)  # type: ignore
                 make_gl_entry(self, delivery_accounts[1], delivery_amt_paid, 0)  # type: ignore
 
@@ -495,6 +494,7 @@ def get_purchase_info(purchase_id: int, use_lite_id: bool) -> dict[str, Any]:
     try:
         purchase_info = utils.get_purchase_info(purchase_id, use_lite_id=use_lite_id)
     except Exception as e:
+
         frappe.log_error(", ".join(e.args))
     return {
         "purchase_info_loaded": True if purchase_info else False,

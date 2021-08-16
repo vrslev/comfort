@@ -53,32 +53,15 @@ from typing import ItemsView
 
 import frappe
 from comfort import count_quantity
-from frappe import ValidationError, _
+from comfort.stock.doctype.bin.bin import Bin
+from frappe import _
 from frappe.model.document import Document
-from frappe.utils.data import cint
-
-from .doctype.bin.bin import BIN_FIELDS, Bin
 
 # TODO: Don't really need to do this since decided to move to Mixin system for transactions
 __all__ = [
-    "update_bin",
     "purchase_order_purchased",
     "purchase_order_completed",
 ]
-
-
-def update_bin(item_code: str, **kwargs: int):
-    doc: Bin = frappe.get_doc("Bin", item_code)
-
-    for d in kwargs:
-        if d not in BIN_FIELDS:
-            raise ValidationError(_(f"No such argument in Bin: {d}"))  # type: ignore
-
-    for attr, qty in kwargs.items():
-        new_qty = cint(getattr(doc, attr)) + cint(qty)  # type: ignore
-        setattr(doc, attr, new_qty)
-
-    doc.save()
 
 
 def get_items_to_sell_for_bin(
@@ -127,15 +110,16 @@ def get_sales_order_items_for_bin(doc: Document) -> ItemsView[str, int]:
 
 def purchase_order_purchased(doc: Document):
     for item_code, qty in get_sales_order_items_for_bin(doc):
-        update_bin(item_code, reserved_purchased=qty)
+        Bin.update_for(item_code, reserved_purchased=qty)
 
     for item_code, qty in get_items_to_sell_for_bin(doc):
-        update_bin(item_code, available_purchased=qty)
+        Bin.update_for(item_code, available_purchased=qty)
 
 
 def purchase_order_completed(doc: Document):
     for item_code, qty in get_sales_order_items_for_bin(doc):
-        update_bin(item_code, reserved_purchased=-qty, reserved_actual=qty)
+
+        Bin.update_for(item_code, reserved_purchased=-qty, reserved_actual=qty)
 
     for item_code, qty in get_items_to_sell_for_bin(doc):
-        update_bin(item_code, available_purchased=-qty, available_actual=qty)
+        Bin.update_for(item_code, available_purchased=-qty, available_actual=qty)

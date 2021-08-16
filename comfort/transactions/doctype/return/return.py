@@ -1,3 +1,5 @@
+# type: ignore
+
 import frappe
 from comfort.finance import get_account, get_paid_amount, make_gl_entry
 from frappe import _

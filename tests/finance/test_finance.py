@@ -8,9 +8,6 @@ if not TYPE_CHECKING:
     from tests.finance.test_chart_of_accounts import accounts
 
 
-# def test_make_gl_entry(): # TODO: Need to write tests for Sales Order first (for fixtures)
-
-
 def test_get_account(accounts: None):
     default_accounts = [list(t) for t in DEFAULT_ACCOUNT_SETTINGS.items()]
     for l in default_accounts:

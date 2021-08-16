@@ -4,17 +4,14 @@ from __future__ import annotations
 from typing import Any, Iterable
 
 import frappe
-from comfort import count_quantity, group_by_key, stock
+from comfort import count_quantity, group_by_key
 from comfort.comfort_core.doctype.commission_settings.commission_settings import (
     CommissionSettings,
 )
 from comfort.entities.doctype.item.item import Item
-from comfort.finance import (
-    get_account,
-    get_paid_amount,
-    make_gl_entry,
-    make_reverse_gl_entry,
-)
+from comfort.finance import get_account, get_paid_amount
+from comfort.finance.doctype.gl_entry.gl_entry import GLEntry
+from comfort.stock.doctype.bin.bin import Bin
 from frappe import _
 from frappe.model.document import Document
 
@@ -233,21 +230,27 @@ class SalesOrderFinance(SalesOrderStatuses):
                 continue
 
             elif amount > remaining_amount:
-                make_gl_entry(self, get_account(accounts_name), 0, remaining_amount)
+                GLEntry.new(
+                    self, "Invoice", get_account(accounts_name), 0, remaining_amount
+                )
                 remaining_amount = 0
                 break
 
             else:
-                make_gl_entry(self, get_account(accounts_name), 0, amount)
+                GLEntry.new(self, "Invoice", get_account(accounts_name), 0, amount)
                 remaining_amount -= amount
 
         if remaining_amount > 0:
-            make_gl_entry(self, get_account("sales"), 0, remaining_amount)
+            GLEntry.new(self, "Invoice", get_account("sales"), 0, remaining_amount)
             remaining_amount = 0
 
     def _make_income_invoice_gl_entry(self, paid_amount: int, paid_with_cash: bool):
-        make_gl_entry(
-            self, get_account("cash" if paid_with_cash else "bank"), paid_amount, 0
+        GLEntry.new(
+            self,
+            "Invoice",
+            get_account("cash" if paid_with_cash else "bank"),
+            paid_amount,
+            0,
         )
 
     def make_invoice_gl_entries(self, paid_amount: int, paid_with_cash: bool):
@@ -262,8 +265,8 @@ class SalesOrderFinance(SalesOrderStatuses):
 
     def make_delivery_gl_entries(self):
         accounts = get_account(("inventory", "cost_of_goods_sold"))
-        make_gl_entry(self, accounts[0], 0, self.items_cost)
-        make_gl_entry(self, accounts[1], self.items_cost, 0)
+        GLEntry.new(self, "Delivery", accounts[0], 0, self.items_cost)
+        GLEntry.new(self, "Delivery", accounts[1], self.items_cost, 0)
 
 
 class SalesOrderStock(SalesOrderFinance):
@@ -275,7 +278,7 @@ class SalesOrderStock(SalesOrderFinance):
 
         item_code_to_qty = count_quantity(items_combinations_splitted).items()
         for item_code, qty in item_code_to_qty:
-            stock.update_bin(item_code, reserved_actual=-qty)
+            Bin.update_for(item_code, reserved_actual=-qty)
 
 
 class SalesOrder(SalesOrderStock):
@@ -298,7 +301,7 @@ class SalesOrder(SalesOrderStock):
         # TODO: Update bin
         self.ignore_linked_doctypes = "GL Entry"
 
-        make_reverse_gl_entry(self.doctype, self.name)
+        GLEntry.make_reverse_entries(self)
 
         self._set_paid_and_pending_per_amount()
         self.set_statuses()

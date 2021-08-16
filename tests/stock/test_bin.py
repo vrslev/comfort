@@ -5,7 +5,7 @@ import pytest
 
 import frappe
 from comfort.entities.doctype.item.item import Item
-from comfort.stock.doctype.bin.bin import BIN_FIELDS, Bin
+from comfort.stock.doctype.bin.bin import Bin
 
 if not TYPE_CHECKING:
     from tests.entities.test_item import item_no_children
@@ -13,32 +13,48 @@ if not TYPE_CHECKING:
 
 @pytest.fixture
 def bin(item_no_children: Item) -> Bin:
-    item_no_children.insert()
-    if not frappe.db.exists("Bin", item_no_children.item_code):
-        doc = frappe.get_doc(
-            {
-                "item_code": item_no_children.item_code,
-                "doctype": "Bin",
-            }
-        )
-        doc.save()
-    else:
-        doc = frappe.get_doc("Bin", item_no_children.item_code)
-    return doc
+    item_no_children.db_insert()
+    return frappe.get_doc(
+        {
+            "item_code": item_no_children.item_code,
+            "doctype": "Bin",
+        }
+    )
 
 
 def test_fill_with_nulls(bin: Bin):
-    item_code = bin.item_code
-    bin.delete()
-    doc: Bin = frappe.get_doc({"doctype": "Bin", "item_code": item_code})
-    doc.fill_with_nulls()
+    bin.fill_with_nulls()
+    assert bin.reserved_actual == 0
+    assert bin.available_actual == 0
+    assert bin.reserved_purchased == 0
+    assert bin.available_purchased == 0
 
-    for f in BIN_FIELDS:
-        assert getattr(doc, f) == 0
+
+def test_projected_property(bin: Bin):
+    bin.reserved_actual = 1
+    bin.available_actual = 0
+    bin.reserved_purchased = 3
+    bin.available_purchased = 10
+    assert bin.projected == 6
 
 
 @pytest.mark.parametrize("value,expected", ((0, True), (10, False)))
-def test_is_empty(bin: Bin, value: int, expected: bool):
-    field = BIN_FIELDS[random.randrange(len(BIN_FIELDS))]  # nosec
+def test_is_empty_property(bin: Bin, value: int, expected: bool):
+    bin.fill_with_nulls()
+    bin_fields = [
+        "reserved_actual",
+        "available_actual",
+        "reserved_purchased",
+        "available_purchased",
+    ]
+    field = bin_fields[random.randrange(len(bin_fields))]  # nosec
+
     setattr(bin, field, value)
     assert bin.is_empty == expected
+
+
+def test_update_for(bin: Bin):
+    bin.db_insert()
+    bin.update_for(bin.item_code, reserved_actual=100)
+    bin.reload()
+    assert bin.reserved_actual == 100

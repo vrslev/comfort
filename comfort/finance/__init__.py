@@ -1,78 +1,12 @@
 from __future__ import annotations
 
-from typing import Any, TypeVar
+from typing import TypeVar
 
 import frappe
 from frappe import _
-from frappe.model.document import Document
 from frappe.utils.data import cint
 
 from .doctype.accounts_settings.accounts_settings import AccountsSettings
-from .doctype.gl_entry.gl_entry import GLEntry
-
-
-def make_gl_entry(
-    doc: Document, account: str, dr: int, cr: int
-):  # TODO: Transaction type
-    customer = None
-    if hasattr(doc, "customer") and doc.get("customer"):
-        customer = doc.customer
-
-    frappe.get_doc(
-        {
-            "doctype": "GL Entry",
-            "account": account,
-            "debit_amount": dr,
-            "credit_amount": cr,
-            "voucher_type": doc.doctype,
-            "voucher_no": doc.name,
-            "customer": customer,
-        }
-    ).submit()
-
-
-def make_reverse_gl_entry(
-    voucher_type: str | None = None, voucher_no: str | None = None
-):
-    gl_entries: list[Any] = frappe.get_all(
-        "GL Entry",
-        filters={"voucher_type": voucher_type, "voucher_no": voucher_no},
-        fields=["*"],
-    )
-
-    if gl_entries:
-        cancel_gl_entry(gl_entries[0].voucher_type, gl_entries[0].voucher_no)
-
-        for entry in gl_entries:
-            debit = entry.debit_amount
-            credit = entry.credit_amount
-            entry.name = None
-            entry.debit_amount = credit
-            entry.credit_amount = debit
-            entry.is_cancelled = 1
-            entry.remarks = "Cancelled GL Entry (" + entry.voucher_no + ")"
-
-            if entry.debit_amount or entry.credit_amount:
-                make_cancelled_gl_entry(entry)
-
-
-def make_cancelled_gl_entry(entry: GLEntry):
-    gl_entry = frappe.new_doc("GL Entry")
-    gl_entry.update(entry)
-    gl_entry.submit()
-
-
-def cancel_gl_entry(voucher_type: str, voucher_no: str):
-    frappe.db.sql(
-        """
-        UPDATE `tabGL Entry`
-        SET is_cancelled=1
-        WHERE voucher_type=%s
-        AND voucher_no=%s AND is_cancelled=0
-        """,
-        (voucher_type, voucher_no),
-    )
-
 
 T = TypeVar("T", str, list[str], tuple[str])
 
