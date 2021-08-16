@@ -1,20 +1,30 @@
 from __future__ import annotations
 
-from typing import TypeVar
+from typing import Any, Iterable, overload
 
 import frappe
 from frappe import _
+from frappe.model.document import Document
 
 from .doctype.accounts_settings.accounts_settings import AccountsSettings
 
-T = TypeVar("T", str, list[str], tuple[str])
+
+@overload
+def get_account(field_names: str) -> str:
+    ...
 
 
-def get_account(field_names: T):
+@overload
+def get_account(field_names: Iterable[str]) -> list[str]:
+    ...
+
+
+def get_account(field_names: str | Iterable[str]):
     return_str = False
     if isinstance(field_names, str):
         field_names = [field_names]
         return_str = True
+
     settings_name = "Accounts Settings"
     settings: AccountsSettings = frappe.get_cached_doc(settings_name, settings_name)
     accounts: list[str] = []
@@ -29,20 +39,18 @@ def get_account(field_names: T):
     return accounts[0] if return_str else accounts
 
 
-def get_paid_amount(dt: str, dn: str) -> int:
-    accounts = get_account(["cash", "bank"])
-    balance: list[object] = frappe.get_all(
+def get_received_amount(doc: Document) -> int:
+    """Get balance from all GL Entries associated with given Transaction"""
+    accounts = get_account(("cash", "bank"))
+    entries: list[Any] = frappe.get_all(
         "GL Entry",
-        "SUM(debit_amount - credit_amount) as balance",
-        {
-            "is_cancelled": 0,
+        fields="SUM(debit - credit) as balance",
+        filters={
             "account": ["in", accounts],
-            "voucher_type": dt,
-            "voucher_no": dn,
+            "voucher_type": doc.doctype,
+            "voucher_no": doc.name,
+            "is_cancelled": 0,
         },
+        limit_page_length=1,
     )
-    if balance and balance[0]:
-        balance = int(balance[0].balance)  # type: ignore
-        return balance if dt != "Purchase Order" else -balance
-    else:
-        return 0
+    return sum(entry.balance for entry in entries)
