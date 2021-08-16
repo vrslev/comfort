@@ -19,8 +19,5 @@ dist/
 # Tests
 tests/.cache/
 
-# Poetry
-poetry.toml
-
 #### js ####
 node_modules
