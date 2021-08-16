@@ -4,7 +4,7 @@ from __future__ import annotations
 from typing import Any, Generator, Iterable
 
 import frappe
-from comfort import count_quantity, group_by_key
+from comfort import ValidationError, count_quantity, group_by_key
 from comfort.comfort_core.doctype.commission_settings.commission_settings import (
     CommissionSettings,
 )
@@ -211,9 +211,9 @@ class SalesOrderFinance(SalesOrderMethods):
         """Automatically allocate Paid Amount to various funds and make GL Entries."""
 
         if paid_amount <= 0:
-            return frappe.throw(_("Paid Amount should be more that zero"))
+            raise ValidationError(_("Paid Amount should be more that zero"))
         elif self.total_amount <= 0:
-            return frappe.throw(_("Total Amount should be more that zero"))
+            raise ValidationError(_("Total Amount should be more that zero"))
 
         amounts = self._get_amounts_for_invoice_gl_entries()
         self._make_categories_invoice_gl_entries(paid_amount, **amounts)
@@ -326,7 +326,7 @@ class SalesOrderStatuses(SalesOrderStock):
             self.make_delivery_gl_entries()
             self.remove_all_items_from_bin()
         else:
-            frappe.throw(_("Not able to set Delivered"))
+            raise ValidationError(_("Not able to set Delivered"))
 
 
 class SalesOrder(SalesOrderStatuses):
@@ -401,7 +401,7 @@ class SalesOrder(SalesOrderStatuses):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def item_query(
+def sales_order_item_query(
     doctype: str,
     txt: str,
     searchfield: str,

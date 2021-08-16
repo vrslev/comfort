@@ -6,7 +6,7 @@ frappe.ui.form.on("Sales Order", {
     frm.set_query("item_code", "items", () => {
       return {
         query:
-          "comfort.transactions.doctype.sales_order.sales_order.item_query",
+          "comfort.transactions.doctype.sales_order.sales_order.sales_order_item_query",
         filters: {
           from_actual_stock: frm.doc.from_actual_stock,
         },
