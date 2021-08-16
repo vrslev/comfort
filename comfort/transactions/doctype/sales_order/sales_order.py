@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 # TODO: Allow change services on submit
-from typing import Any, Iterable
+from typing import Any, Generator, Iterable
 
 import frappe
 from comfort import count_quantity, group_by_key
@@ -45,6 +45,7 @@ class SalesOrderMethods(Document):
     status: str
 
     def merge_same_items(self):
+        """Merge items that have same Item Code."""
         items_grouped_by_item_code: Iterable[list[SalesOrderItem]] = group_by_key(
             self.items
         ).values()
@@ -60,15 +61,15 @@ class SalesOrderMethods(Document):
         self.items = final_items
 
     def delete_empty_items(self):
-        to_remove: list[Any] = []
-        for d in self.items:
-            if d.qty == 0:
-                to_remove.append(d)
-
-        for d in to_remove:
-            self.items.remove(d)
+        """Delete items that have zero quantity."""
+        to_remove: Generator[SalesOrderItem] = (
+            item for item in self.items if item.qty == 0
+        )
+        for item in to_remove:
+            self.items.remove(item)
 
     def _update_items_from_db(self):
+        """Load item properties from database and calculate Amount and Total Weight."""
         for item in self.items:
             doc: Item = frappe.get_cached_doc("Item", item.item_code)
             item.item_name = doc.item_name
@@ -79,22 +80,25 @@ class SalesOrderMethods(Document):
             item.total_weight = item.weight * item.qty
 
     def _calculate_item_totals(self):
+        """Calculate global Total Quantity, Weight and Items Cost."""
         self.total_quantity, self.total_weight, self.items_cost = 0, 0.0, 0
         for item in self.items:
             self.total_quantity += item.qty
             self.total_weight += item.total_weight
             self.items_cost += item.amount
 
-    def _calculate_service_amount(self):
+    def _calculate_service_amount(self):  # TODO: Property
         self.service_amount = sum(s.rate for s in self.services)
 
     def _calculate_commission(self):
+        """Calculate commission based rules set in Commission Settings if `edit_commission` is False."""
         if not self.edit_commission:
             self.commission = CommissionSettings.get_commission_percentage(
                 self.items_cost
             )
 
     def _calculate_margin(self):
+        """Calculate margin based on commission and rounding remainder of items_cost."""
         if self.items_cost <= 0:
             self.margin = 0.0
             return
@@ -110,6 +114,7 @@ class SalesOrderMethods(Document):
         )
 
     def _set_paid_and_pending_per_amount(self):
+        # TODO: Property
         self.paid_amount = get_paid_amount(self.doctype, self.name)
 
         if int(self.total_amount) == 0:
@@ -120,6 +125,7 @@ class SalesOrderMethods(Document):
         self.pending_amount = self.total_amount - self.paid_amount
 
     def calculate(self):  # pragma: no cover
+        """Calculate all things that are calculable."""
         self._update_items_from_db()
         self._calculate_item_totals()
         self._calculate_service_amount()
@@ -129,6 +135,8 @@ class SalesOrderMethods(Document):
         self._set_paid_and_pending_per_amount()
 
     def set_child_items(self):
+        """Generate Child Items from combinations in Items."""
+
         self.child_items = []
         if not self.items:
             return
@@ -196,15 +204,12 @@ class SalesOrderFinance(SalesOrderMethods):
             remaining_amount = 0
 
     def _make_income_invoice_gl_entry(self, paid_amount: int, paid_with_cash: bool):
-        GLEntry.new(
-            self,
-            "Invoice",
-            get_account("cash" if paid_with_cash else "bank"),
-            paid_amount,
-            0,
-        )
+        account = get_account("cash" if paid_with_cash else "bank")
+        GLEntry.new(self, "Invoice", account, paid_amount, 0)
 
     def make_invoice_gl_entries(self, paid_amount: int, paid_with_cash: bool):
+        """Automatically allocate Paid Amount to various funds and make GL Entries."""
+
         if paid_amount <= 0:
             return frappe.throw(_("Paid Amount should be more that zero"))
         elif self.total_amount <= 0:
@@ -215,6 +220,9 @@ class SalesOrderFinance(SalesOrderMethods):
         self._make_income_invoice_gl_entry(paid_amount, paid_with_cash)
 
     def make_delivery_gl_entries(self):
+        """Make GL Entries for event of delivery according to Accounting cycle.
+        Executed when order is completed.
+        """
         accounts = get_account(("inventory", "cost_of_goods_sold"))
         GLEntry.new(self, "Delivery", accounts[0], 0, self.items_cost)
         GLEntry.new(self, "Delivery", accounts[1], self.items_cost, 0)
@@ -228,6 +236,9 @@ class SalesOrderStock(SalesOrderFinance):
         return self.child_items + [d for d in self.items if d.item_code not in parents]
 
     def remove_all_items_from_bin(self):
+        """Reduce Reserved Actual quantity in Bins of items in Sales Order.
+        Executed when order is completed.
+        """
         items = self._get_items_with_splitted_combinations()
         for item_code, qty in count_quantity(items).items():
             Bin.update_for(item_code, reserved_actual=-qty)
@@ -235,7 +246,7 @@ class SalesOrderStock(SalesOrderFinance):
 
 class SalesOrderStatuses(SalesOrderStock):
     def _set_payment_status(self):
-        """Payment Status setter. Depends on `per_paid`.
+        """Set Payment Status. Depends on `per_paid`.
         If docstatus == 2 sets "".
         """
         if self.docstatus == 2:
@@ -252,7 +263,7 @@ class SalesOrderStatuses(SalesOrderStock):
         self.payment_status = status
 
     def _set_delivery_status(self):
-        """Delivery Status setter. Depends on status of linked Purchase Order.
+        """Set Delivery Status. Depends on status of linked Purchase Order.
         If docstatus == 2 sets "".
         """
         status = "To Purchase"
@@ -279,7 +290,7 @@ class SalesOrderStatuses(SalesOrderStock):
         self.delivery_status = status
 
     def _set_document_status(self):
-        """Document Status setter. Depends on `docstatus`, `payment_status` and `delivery_status`."""
+        """Set Document Status. Depends on `docstatus`, `payment_status` and `delivery_status`."""
         if self.docstatus == 0:
             status = "Draft"
         elif self.docstatus == 1:
@@ -293,12 +304,14 @@ class SalesOrderStatuses(SalesOrderStock):
         self.status = status
 
     def set_statuses(self):  # pragma: no cover
+        """Set statuses according to current Sales Order and linked Purchase Order states."""
         self._set_delivery_status()
         self._set_payment_status()
         self._set_document_status()
 
     @frappe.whitelist()
     def set_paid(self, paid_amount: int, cash: bool):
+        """Add new Payment."""
         self.make_invoice_gl_entries(paid_amount, cash)
         self._set_paid_and_pending_per_amount()
         self.set_statuses()
@@ -306,6 +319,7 @@ class SalesOrderStatuses(SalesOrderStock):
 
     @frappe.whitelist()
     def set_delivered(self):
+        """Mark Sales Order as delivered"""
         self.set_statuses()  # TODO: Is this really sets delivery status?
         self.db_update()  # TODO: Is it appropriate?
         if self.delivery_status == "Delivered":
@@ -352,6 +366,7 @@ class SalesOrder(SalesOrderStatuses):
 
     @frappe.whitelist()
     def split_combinations(self, combos_to_split: list[str], save: bool):
+        """Split all combinations in Items."""
         combos_to_split = list(set(combos_to_split))
 
         selected_child_items = [
