@@ -13,12 +13,12 @@ from comfort.entities.doctype.item.item import Item
 from comfort.finance import get_account, get_paid_amount
 from comfort.finance.doctype.gl_entry.gl_entry import GLEntry
 from comfort.stock.doctype.bin.bin import Bin
-from comfort.transactions.doctype.purchase_order_sales_order.purchase_order_sales_order import (
-    PurchaseOrderSalesOrder,
-)
 from frappe import _
 from frappe.model.document import Document
 
+from ..purchase_order_sales_order.purchase_order_sales_order import (
+    PurchaseOrderSalesOrder,
+)
 from ..sales_order_child_item.sales_order_child_item import SalesOrderChildItem
 from ..sales_order_item.sales_order_item import SalesOrderItem
 from ..sales_order_service.sales_order_service import SalesOrderService
@@ -146,72 +146,7 @@ class SalesOrderMethods(Document):
         self.extend("child_items", child_items)
 
 
-class SalesOrderStatuses(SalesOrderMethods):
-    def _set_payment_status(self):
-        """Payment Status setter. Depends on `per_paid`.
-        If docstatus == 2 sets "".
-        """
-        if self.docstatus == 2:
-            status = ""
-        elif self.per_paid > 100:
-            status = "Overpaid"
-        elif self.per_paid == 100:
-            status = "Paid"
-        elif self.per_paid > 0:
-            status = "Partially Paid"
-        else:
-            status = "Unpaid"
-
-        self.payment_status = status
-
-    def _set_delivery_status(self):
-        """Delivery Status setter. Depends on status of linked Purchase Order.
-        If docstatus == 2 sets "".
-        """
-        status = "To Purchase"
-        if self.delivery_status == "Delivered":
-            return
-        elif self.docstatus == 2:
-            status = ""
-        else:
-            po_name: list[PurchaseOrderSalesOrder] = frappe.get_all(
-                "Purchase Order Sales Order",
-                fields="parent",
-                filters={"sales_order_name": self.name, "docstatus": 1},
-                limit_page_length=1,
-            )
-            if po_name:
-                po_status: str = frappe.get_value(
-                    "Purchase Order", po_name[0].parent, "status"
-                )
-                if po_status == "To Receive":
-                    status = "Purchased"
-                elif po_status == "Completed":
-                    status = "To Deliver"
-
-        self.delivery_status = status
-
-    def _set_document_status(self):
-        """Document Status setter. Depends on `docstatus`, `payment_status` and `delivery_status`."""
-        if self.docstatus == 0:
-            status = "Draft"
-        elif self.docstatus == 1:
-            if self.payment_status == "Paid" and self.delivery_status == "Delivered":
-                status = "Completed"
-            else:
-                status = "In Progress"
-        else:
-            status = "Cancelled"
-
-        self.status = status
-
-    def set_statuses(self):  # pragma: no cover
-        self._set_delivery_status()
-        self._set_payment_status()
-        self._set_document_status()
-
-
-class SalesOrderFinance(SalesOrderStatuses):
+class SalesOrderFinance(SalesOrderMethods):
     def _get_amounts_for_invoice_gl_entries(self):
         sales_amount = self.total_amount - self.service_amount
 
@@ -286,18 +221,101 @@ class SalesOrderFinance(SalesOrderStatuses):
 
 
 class SalesOrderStock(SalesOrderFinance):
-    def remove_all_items_from_bin(self):
-        parents = [d.parent_item_code for d in self.child_items]
-        items_combinations_splitted: Iterable[
-            SalesOrderChildItem | SalesOrderItem
-        ] = self.child_items + [d for d in self.items if d.item_code not in parents]
+    def _get_items_with_splitted_combinations(
+        self,
+    ) -> list[SalesOrderChildItem | SalesOrderItem]:
+        parents = (d.parent_item_code for d in self.child_items)
+        return self.child_items + [d for d in self.items if d.item_code not in parents]
 
-        item_code_to_qty = count_quantity(items_combinations_splitted).items()
-        for item_code, qty in item_code_to_qty:
+    def remove_all_items_from_bin(self):
+        items = self._get_items_with_splitted_combinations()
+        for item_code, qty in count_quantity(items).items():
             Bin.update_for(item_code, reserved_actual=-qty)
 
 
-class SalesOrder(SalesOrderStock):
+class SalesOrderStatuses(SalesOrderStock):
+    def _set_payment_status(self):
+        """Payment Status setter. Depends on `per_paid`.
+        If docstatus == 2 sets "".
+        """
+        if self.docstatus == 2:
+            status = ""
+        elif self.per_paid > 100:
+            status = "Overpaid"
+        elif self.per_paid == 100:
+            status = "Paid"
+        elif self.per_paid > 0:
+            status = "Partially Paid"
+        else:
+            status = "Unpaid"
+
+        self.payment_status = status
+
+    def _set_delivery_status(self):
+        """Delivery Status setter. Depends on status of linked Purchase Order.
+        If docstatus == 2 sets "".
+        """
+        status = "To Purchase"
+        if self.delivery_status == "Delivered":
+            return
+        elif self.docstatus == 2:
+            status = ""
+        else:
+            po_name: list[PurchaseOrderSalesOrder] = frappe.get_all(
+                "Purchase Order Sales Order",
+                fields="parent",
+                filters={"sales_order_name": self.name, "docstatus": 1},
+                limit_page_length=1,
+            )
+            if po_name:
+                po_status: str = frappe.get_value(
+                    "Purchase Order", po_name[0].parent, "status"
+                )
+                if po_status == "To Receive":
+                    status = "Purchased"
+                elif po_status == "Completed":
+                    status = "To Deliver"
+
+        self.delivery_status = status
+
+    def _set_document_status(self):
+        """Document Status setter. Depends on `docstatus`, `payment_status` and `delivery_status`."""
+        if self.docstatus == 0:
+            status = "Draft"
+        elif self.docstatus == 1:
+            if self.payment_status == "Paid" and self.delivery_status == "Delivered":
+                status = "Completed"
+            else:
+                status = "In Progress"
+        else:
+            status = "Cancelled"
+
+        self.status = status
+
+    def set_statuses(self):  # pragma: no cover
+        self._set_delivery_status()
+        self._set_payment_status()
+        self._set_document_status()
+
+    @frappe.whitelist()
+    def set_paid(self, paid_amount: int, cash: bool):
+        self.make_invoice_gl_entries(paid_amount, cash)
+        self._set_paid_and_pending_per_amount()
+        self.set_statuses()
+        self.db_update()
+
+    @frappe.whitelist()
+    def set_delivered(self):
+        self.set_statuses()  # TODO: Is this really sets delivery status?
+        self.db_update()  # TODO: Is it appropriate?
+        if self.delivery_status == "Delivered":
+            self.make_delivery_gl_entries()
+            self.remove_all_items_from_bin()
+        else:
+            frappe.throw(_("Not able to set Delivered"))
+
+
+class SalesOrder(SalesOrderStatuses):
     def validate(self):
         # SalesOrderMethods
         self.merge_same_items()
@@ -331,23 +349,6 @@ class SalesOrder(SalesOrderStock):
     def calculate_commission_and_margin(self):
         self._calculate_commission()
         self._calculate_margin()
-
-    @frappe.whitelist()
-    def set_paid(self, paid_amount: int, cash: bool):
-        self.make_invoice_gl_entries(paid_amount, cash)
-        self._set_paid_and_pending_per_amount()
-        self.set_statuses()
-        self.db_update()
-
-    @frappe.whitelist()
-    def set_delivered(self):
-        self.set_statuses()  # TODO: Is this really sets delivery status?
-        self.db_update()  # TODO: Is it appropriate?
-        if self.delivery_status == "Delivered":
-            self.make_delivery_gl_entries()
-            self.remove_all_items_from_bin()
-        else:
-            frappe.throw(_("Not able to set Delivered"))
 
     @frappe.whitelist()
     def split_combinations(self, combos_to_split: list[str], save: bool):

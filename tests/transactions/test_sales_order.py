@@ -12,6 +12,7 @@ from comfort.entities.doctype.customer.customer import Customer
 from comfort.entities.doctype.item.item import Item
 from comfort.finance import get_account
 from comfort.finance.doctype.gl_entry.gl_entry import GLEntry
+from comfort.stock.doctype.bin.bin import Bin
 from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
 from frappe import ValidationError
 
@@ -212,62 +213,6 @@ def test_set_child_items(sales_order: SalesOrder, item: Item):
 
 
 #################################
-###    SalesOrderStatuses     ###
-#################################
-
-
-def test_set_payment_status(sales_order: SalesOrder):
-    sales_order.docstatus = 2
-    sales_order._set_payment_status()
-    assert sales_order.payment_status == ""
-
-
-@pytest.mark.parametrize(
-    "per_paid,expected_status",
-    (
-        (120, "Overpaid"),
-        (100, "Paid"),
-        (50, "Partially Paid"),
-        (0, "Unpaid"),
-        (-20, "Unpaid"),
-    ),
-)
-def test_set_payment_status(
-    sales_order: SalesOrder, per_paid: int, expected_status: str
-):
-    sales_order.per_paid = per_paid
-    sales_order._set_payment_status()
-    assert sales_order.payment_status == expected_status
-
-
-# def test_set_delivery_status(sales_order: SalesOrder): TODO: When Purchase Order
-#     sales_order._set_delivery_status
-
-
-@pytest.mark.parametrize(
-    "docstatus,payment_status,delivery_status,expected_status",
-    (
-        (0, None, None, "Draft"),
-        (1, "Paid", "Delivered", "Completed"),
-        (1, None, None, "In Progress"),
-        (2, None, None, "Cancelled"),
-    ),
-)
-def test_set_document_status(
-    sales_order: SalesOrder,
-    docstatus: int,
-    payment_status: str,
-    delivery_status: str,
-    expected_status: str,
-):
-    sales_order.docstatus = docstatus
-    sales_order.payment_status = payment_status
-    sales_order.delivery_status = delivery_status
-    sales_order._set_document_status()
-    assert sales_order.status == expected_status
-
-
-#################################
 ###     SalesOrderFinance     ###
 #################################
 
@@ -371,3 +316,84 @@ def test_make_invoice_gl_entries_raises_on_zero_total_amount(sales_order: SalesO
 #################################
 ###      SalesOrderStock      ###
 #################################
+
+
+def test_get_items_with_splitted_combinations(sales_order: SalesOrder):
+    sales_order.set_child_items()
+    items = sales_order._get_items_with_splitted_combinations()
+    parents = set()
+    for child in sales_order.child_items:
+        assert child in items
+        parents.add(child.parent_item_code)
+
+    for item in sales_order.items:
+        if item.item_code in parents:
+            assert item not in items
+        else:
+            assert item in items
+
+
+def test_remove_all_items_from_bin(sales_order: SalesOrder):
+    sales_order.set_child_items()
+    items = sales_order._get_items_with_splitted_combinations()
+    for item in items:
+        Bin.update_for(item.item_code, reserved_actual=item.qty)
+    sales_order.remove_all_items_from_bin()
+    for item in items:
+        assert frappe.get_value("Bin", item.item_code, "reserved_actual") == 0
+
+
+#################################
+###    SalesOrderStatuses     ###
+#################################
+
+
+def test_set_payment_status(sales_order: SalesOrder):
+    sales_order.docstatus = 2
+    sales_order._set_payment_status()
+    assert sales_order.payment_status == ""
+
+
+@pytest.mark.parametrize(
+    "per_paid,expected_status",
+    (
+        (120, "Overpaid"),
+        (100, "Paid"),
+        (50, "Partially Paid"),
+        (0, "Unpaid"),
+        (-20, "Unpaid"),
+    ),
+)
+def test_set_payment_status(
+    sales_order: SalesOrder, per_paid: int, expected_status: str
+):
+    sales_order.per_paid = per_paid
+    sales_order._set_payment_status()
+    assert sales_order.payment_status == expected_status
+
+
+# def test_set_delivery_status(sales_order: SalesOrder): TODO: When Purchase Order
+#     sales_order._set_delivery_status
+
+
+@pytest.mark.parametrize(
+    "docstatus,payment_status,delivery_status,expected_status",
+    (
+        (0, None, None, "Draft"),
+        (1, "Paid", "Delivered", "Completed"),
+        (1, None, None, "In Progress"),
+        (2, None, None, "Cancelled"),
+    ),
+)
+def test_set_document_status(
+    sales_order: SalesOrder,
+    docstatus: int,
+    payment_status: str,
+    delivery_status: str,
+    expected_status: str,
+):
+    sales_order.docstatus = docstatus
+    sales_order.payment_status = payment_status
+    sales_order.delivery_status = delivery_status
+    sales_order._set_document_status()
+    assert sales_order.status == expected_status
