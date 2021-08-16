@@ -38,6 +38,9 @@ class CommissionSettings(Document):
         self.validate_to_amounts_order()
         self.set_from_amounts()
 
+    def on_change(self):
+        self.clear_cache()
+
     @staticmethod
     def get_commission_percentage(amount: float | int) -> int:
         if amount < 0:
