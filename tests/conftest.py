@@ -4,6 +4,7 @@ import pytest
 from pymysql import OperationalError
 
 import frappe
+from frappe.database.mariadb.database import MariaDBDatabase
 
 TEST_SITE_NAME = "tests"
 
@@ -19,7 +20,7 @@ def db_instance():
 
 
 @pytest.fixture(autouse=True)
-def db_transaction(db_instance: frappe.MariaDBDatabase):
+def db_transaction(db_instance: MariaDBDatabase):
     """Rollback after db transaction"""
     try:
         db_instance.begin()
