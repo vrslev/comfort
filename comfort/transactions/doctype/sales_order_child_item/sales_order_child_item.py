@@ -2,4 +2,7 @@ from frappe.model.document import Document
 
 
 class SalesOrderChildItem(Document):
-    pass
+    parent_item_code: str
+    item_code: str
+    item_name: str
+    qty: int

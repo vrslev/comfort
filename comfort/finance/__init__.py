@@ -4,21 +4,20 @@ from typing import TypeVar
 
 import frappe
 from frappe import _
-from frappe.utils.data import cint
 
 from .doctype.accounts_settings.accounts_settings import AccountsSettings
 
 T = TypeVar("T", str, list[str], tuple[str])
 
 
-def get_account(field_names: T) -> T:
+def get_account(field_names: T):
     return_str = False
     if isinstance(field_names, str):
         field_names = [field_names]
         return_str = True
     settings_name = "Accounts Settings"
     settings: AccountsSettings = frappe.get_cached_doc(settings_name, settings_name)
-    accounts = []
+    accounts: list[str] = []
     for d in field_names:
         account = f"default_{d}_account"
         if hasattr(settings, account):
@@ -32,7 +31,7 @@ def get_account(field_names: T) -> T:
 
 def get_paid_amount(dt: str, dn: str) -> int:
     accounts = get_account(["cash", "bank"])
-    balance = frappe.get_list(
+    balance: list[object] = frappe.get_all(
         "GL Entry",
         "SUM(debit_amount - credit_amount) as balance",
         {
@@ -43,7 +42,7 @@ def get_paid_amount(dt: str, dn: str) -> int:
         },
     )
     if balance and balance[0]:
-        balance = cint(balance[0].balance)
+        balance = int(balance[0].balance)  # type: ignore
         return balance if dt != "Purchase Order" else -balance
     else:
         return 0

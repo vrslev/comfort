@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from urllib.parse import parse_qs, urlparse
 
 import frappe
@@ -9,6 +11,7 @@ from frappe.model.document import Document
 
 class Customer(Document):
     vk_url: str
+    vk_id: int | None
 
     def validate(self):  # pragma: no cover
         self.validate_vk_url_and_set_vk_id()

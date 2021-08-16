@@ -1,6 +1,7 @@
 from typing import Any
 
 import frappe
+from comfort.finance.doctype.accounts_settings.accounts_settings import AccountsSettings
 from frappe import _
 from frappe.utils.nestedset import rebuild_tree
 
@@ -57,7 +58,7 @@ def _create_accounts_from_schema():
 
 
 def _set_default_accounts():
-    doc = frappe.get_single("Accounts Settings")
+    doc: AccountsSettings = frappe.get_single("Accounts Settings")
     doc.update(DEFAULT_ACCOUNT_SETTINGS)
     doc.save()
 

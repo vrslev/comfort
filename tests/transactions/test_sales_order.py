@@ -22,11 +22,11 @@ if not TYPE_CHECKING:
 
 
 @pytest.fixture
-def sales_order(customer: Customer, child_items: list[Item], item: Item) -> SalesOrder:
+def sales_order(customer: Customer, child_items: list[Item], item: Item):
     customer.insert()
     item.insert()
 
-    doc = frappe.get_doc(
+    doc: SalesOrder = frappe.get_doc(
         {
             "name": "SO-2021-0001",
             "customer": "Pavel Durov",
@@ -69,7 +69,7 @@ def test_merge_same_items(sales_order: SalesOrder):  # TODO: test not messed up
     sales_order.extend("items", [item, second_item])
 
     sales_order.merge_same_items()
-    c = Counter()
+    c: Counter[str] = Counter()
     for item in sales_order.items:
         c[item.item_code] += 1
 
@@ -81,7 +81,7 @@ def test_delete_empty_items(sales_order: SalesOrder):
     sales_order.append("items", {"qty": 0})
     sales_order.delete_empty_items()
 
-    c = Counter()
+    c: Counter[str, int] = Counter()
     for item in sales_order.items:
         c[item.item_code] += item.qty
 

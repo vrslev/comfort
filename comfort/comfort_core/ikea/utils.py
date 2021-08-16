@@ -5,7 +5,7 @@ from ikea_api_extender import unshorten_ingka_pagelinks
 import frappe
 
 
-def extract_item_codes(message: str):
+def extract_item_codes(message: str) -> list[str]:
     item_codes_raw = re.findall(r"\d{3}[, .-]{0,2}\d{3}[, .-]{0,2}\d{2}", message)
     regex = re.compile(r"[^0-9]")
     try:
@@ -24,6 +24,6 @@ def format_item_code(item_code: str):
 
 @frappe.whitelist()
 def get_item_codes_from_ingka_pagelinks(text: str):
-    unshortened = unshorten_ingka_pagelinks(text)
+    unshortened: list[str] = unshorten_ingka_pagelinks(text)
     item_codes = extract_item_codes(unshortened)
     return item_codes

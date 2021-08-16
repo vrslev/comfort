@@ -19,7 +19,7 @@ def db_instance():
 
 
 @pytest.fixture(autouse=True)
-def db_transaction(db_instance: frappe.db):
+def db_transaction(db_instance: frappe.MariaDBDatabase):
     """Rollback after db transaction"""
     try:
         db_instance.begin()

@@ -13,8 +13,9 @@ from comfort.comfort_core.ikea.utils import (
     extract_item_codes,
     get_item_codes_from_ingka_pagelinks,
 )
+from comfort.entities.doctype.item.item import Item
+from comfort.entities.doctype.item_category.item_category import ItemCategory
 from frappe import _
-from frappe.model.document import Document
 from frappe.utils import parse_json
 
 
@@ -47,7 +48,7 @@ def fetch_new_items(
             item_codes = extract_item_codes(item_codes)
 
     items_to_fetch: list[str] = []
-    exist = [
+    exist: list[str] = [
         d.name
         for d in frappe.get_all("Item", "name", {"item_code": ["in", item_codes]})
     ]
@@ -55,7 +56,7 @@ def fetch_new_items(
         if d not in exist or force_update:
             items_to_fetch.append(d)
 
-    res = {
+    res: dict[str, Any] = {
         "fetched": [],
         "already_exist": exist,
         "unsuccessful": [],
@@ -65,7 +66,7 @@ def fetch_new_items(
     parsed_items = None
     if len(items_to_fetch) > 0:
         try:
-            response = get_items_immortally(items_to_fetch)
+            response: list[Any] = get_items_immortally(items_to_fetch)
         except ItemFetchError as e:
             if "Wrong Item Code" in e.args[0]:
                 return frappe.throw(_("Wrong Item Code"))
@@ -115,7 +116,7 @@ def download_items_images(items: dict[str, Any]):
             return
 
         async with session.get(item["image_url"]) as r:
-            content: str = await r.content.read()
+            content: Any = await r.content.read()
 
         fpath = f"files/items/{item['item_code']}"
         fname = f"{item['image_url'].rsplit('/', 1)[1]}"
@@ -143,7 +144,7 @@ def download_items_images(items: dict[str, Any]):
             results = await asyncio.gather(*tasks)
             return results
 
-    have_image = [
+    have_image: list[str] = [
         d.item_code
         for d in frappe.get_all(
             "Item",
@@ -178,7 +179,7 @@ def add_item(item: Any, force_update: bool):
     )
 
 
-def _make_item_category(name: str, url: str) -> Document | None:
+def _make_item_category(name: str, url: str) -> ItemCategory | None:
     if not frappe.db.exists("Item Category", name):
         return frappe.get_doc(
             {"doctype": "Item Category", "item_category_name": name, "url": url}
@@ -193,11 +194,11 @@ def _make_item(
     rate: int = 0,
     url: str | None = None,
     child_items: list[Any] = [],
-) -> Document:
+) -> Item:
     if frappe.db.exists("Item", item_code):
-        doc = frappe.get_doc("Item", item_code)
+        doc: Item = frappe.get_doc("Item", item_code)
         doc.item_name = item_name
-        categories = [d.item_category for d in doc.item_categories]
+        categories: list[str] = [d.item_category for d in doc.item_categories]
         if item_category not in categories:
             doc.append("item_categories", {"item_category": item_category})
         doc.url = url
@@ -215,7 +216,7 @@ def _make_item(
                 doc.extend("child_items", child_items)
         doc.save()
     else:
-        doc = frappe.get_doc(
+        doc: Item = frappe.get_doc(
             {
                 "doctype": "Item",
                 "item_code": item_code,

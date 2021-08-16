@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import re
+from datetime import datetime
 from typing import Any
 
 import frappe
@@ -9,6 +10,9 @@ from comfort import count_quantity, stock
 from comfort.comfort_core.ikea.cart_utils import IkeaCartUtils
 from comfort.finance import get_account, get_paid_amount
 from comfort.finance.doctype.gl_entry.gl_entry import GLEntry
+from comfort.transactions.doctype.purchase_order_delivery_option.purchase_order_delivery_option import (
+    PurchaseOrderDeliveryOption,
+)
 from frappe import _, as_json
 from frappe.model.document import Document
 from frappe.utils import parse_json
@@ -29,6 +33,15 @@ class PurchaseOrderMethods(Document):
     items_to_sell_cost: int
     sales_order_cost: int
     delivery_cost: int
+    total_weight: float
+    total_amount: int
+    status: str
+    delivery_options: list[PurchaseOrderDeliveryOption]
+    cannot_add_items: str | None
+    order_confirmation_no: int
+    schedule_date: datetime
+    posting_date: datetime
+    difference: int
 
     def validate_empty(self):
         if not (self.sales_orders or self.items_to_sell):
@@ -256,8 +269,8 @@ class PurchaseOrder(PurchaseOrderMethods):
         self.update_status_in_sales_orders()
 
     def on_cancel(self):
-        self.ignore_linked_doctypes = "GL Entry"
-        make_reverse_gl_entry(self.doctype, self.name)
+        self.ignore_linked_doctypes = "GL Entry"  # type: ignore
+        make_reverse_gl_entry(self.doctype, self.name)  # type: ignore
         self.update_status_in_sales_orders()
         # TODO: UPDATE BIN
 
@@ -267,7 +280,7 @@ class PurchaseOrder(PurchaseOrderMethods):
         purchase_id: int,
         purchase_info_loaded: bool,
         purchase_info: dict[str, Any],
-        delivery_cost: int | None = None,
+        delivery_cost: int = 0,
     ):
         self.order_confirmation_no = purchase_id
 
@@ -278,8 +291,9 @@ class PurchaseOrder(PurchaseOrderMethods):
             items_cost = purchase_info["items_cost"]
 
         else:
-            self.schedule_date = add_to_date(None, weeks=2)
-            self.posting_date = today()
+            self.schedule_date: datetime = add_to_date(None, weeks=2)
+            self.posting_date: datetime = today()
+            # TODO:
             self.delivery_cost = delivery_cost  # type: ignore
             items_cost = self.total_amount
 

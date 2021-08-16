@@ -1,3 +1,4 @@
+# type: ignore
 """
 STOCK CYCLE
 
@@ -49,13 +50,21 @@ STOCK CYCLE
 
 from __future__ import annotations
 
-from typing import ItemsView
+from typing import TYPE_CHECKING, ItemsView
+
+if TYPE_CHECKING:
+    from comfort.transactions.doctype.sales_order_item.sales_order_item import (
+        SalesOrderItem,
+    )
+    from comfort.transactions.doctype.sales_order_child_item.sales_order_child_item import (
+        SalesOrderChildItem,
+    )
+    from comfort.transactions.doctype.purchase_order.purchase_order import PurchaseOrder
 
 import frappe
 from comfort import count_quantity
 from comfort.stock.doctype.bin.bin import Bin
 from frappe import _
-from frappe.model.document import Document
 
 # TODO: Don't really need to do this since decided to move to Mixin system for transactions
 __all__ = [
@@ -65,19 +74,19 @@ __all__ = [
 
 
 def get_items_to_sell_for_bin(
-    doc: Document,
-) -> ItemsView[str, int]:  # TODO: Test this
+    doc: PurchaseOrder,
+) -> list[dict[str, int]]:  # TODO: Test this
     if not doc.sales_orders:  # TODO: What?
         return []
     return count_quantity(doc.items_to_sell).items()  # type: ignore
 
 
-def get_sales_order_items_for_bin(doc: Document) -> ItemsView[str, int]:
+def get_sales_order_items_for_bin(doc: PurchaseOrder) -> ItemsView[str, int]:
     # TODO: use templated items instead (one that generates for cart)
     if not doc.sales_orders:
         return []
-    sales_order_names = [d.sales_order_name for d in doc.sales_orders]
-    so_items: list[dict[str, str | int]] = frappe.db.sql(
+    sales_order_names: list[str] = [d.sales_order_name for d in doc.sales_orders]
+    so_items: list[SalesOrderItem] = frappe.db.sql(
         """
         SELECT item_code, qty
         FROM `tabSales Order Item`
@@ -88,7 +97,7 @@ def get_sales_order_items_for_bin(doc: Document) -> ItemsView[str, int]:
         as_dict=True,
     )
 
-    packed_items: list[dict[str, str | int]] = frappe.db.sql(
+    packed_items: list[SalesOrderChildItem] = frappe.db.sql(
         """
         SELECT parent_item_code, item_code, qty
         FROM `tabSales Order Child Item`
@@ -99,16 +108,16 @@ def get_sales_order_items_for_bin(doc: Document) -> ItemsView[str, int]:
         as_dict=True,
     )
 
-    parent_items = [d.parent_item_code for d in packed_items]
+    parent_items: list[str] = [d.parent_item_code for d in packed_items]
     so_items = [d for d in so_items if d.item_code not in parent_items]
 
-    items = packed_items + so_items
+    items: list[SalesOrderItem | SalesOrderChildItem] = packed_items + so_items
 
     # TODO: Test this
     return count_quantity(items).items()
 
 
-def purchase_order_purchased(doc: Document):
+def purchase_order_purchased(doc: PurchaseOrder):
     for item_code, qty in get_sales_order_items_for_bin(doc):
         Bin.update_for(item_code, reserved_purchased=qty)
 
@@ -116,10 +125,9 @@ def purchase_order_purchased(doc: Document):
         Bin.update_for(item_code, available_purchased=qty)
 
 
-def purchase_order_completed(doc: Document):
+def purchase_order_completed(doc: PurchaseOrder):
     for item_code, qty in get_sales_order_items_for_bin(doc):
-
         Bin.update_for(item_code, reserved_purchased=-qty, reserved_actual=qty)
 
     for item_code, qty in get_items_to_sell_for_bin(doc):
-        Bin.update_for(item_code, available_purchased=-qty, available_actual=qty)
+        Bin.update_for(item_code, available_purchased=-qty, available_actual=qty)  # type: ignore

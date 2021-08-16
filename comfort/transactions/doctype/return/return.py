@@ -133,7 +133,7 @@ class Return(Document):
         #     self.return_money = True
 
     def before_submit(self):
-        self.created_sales_orders = []
+        self._created_sales_orders = []
         is_po = self.voucher_type == "Purchase Order"
 
         if is_po:
@@ -338,7 +338,7 @@ class Return(Document):
             new_doc.make_invoice_gl_entries(amount)
             new_doc.save()
 
-            self.created_sales_orders.append(new_doc.name)
+            self._created_sales_orders.append(new_doc.name)
 
     def get_items_for_sales_return(self):
         items_map = {}
@@ -365,7 +365,7 @@ class Return(Document):
     def create_new_paid_purchase_order(self):
         if (
             not hasattr(self, "created_sales_orders")
-            or len(self.created_sales_orders) == 0
+            or len(self._created_sales_orders) == 0
         ):
             return
 
@@ -373,7 +373,7 @@ class Return(Document):
             {
                 "doctype": "Purchase Order",
                 "sales_orders": [
-                    {"sales_order_name": d} for d in self.created_sales_orders
+                    {"sales_order_name": d} for d in self._created_sales_orders
                 ],
             }
         ).insert()

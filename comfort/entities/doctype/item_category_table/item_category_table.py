@@ -2,4 +2,4 @@ from frappe.model.document import Document
 
 
 class ItemCategoryTable(Document):
-    pass
+    item_category: str

@@ -8,13 +8,16 @@ from ikea_api.errors import IkeaApiError
 from ikea_api_parser import DeliveryOptions, PurchaseHistory, PurchaseInfo
 
 import frappe
+from comfort.comfort_core.doctype.ikea_cart_settings.ikea_cart_settings import (
+    IkeaCartSettings,
+)
 from frappe.utils.data import add_to_date, get_datetime, now_datetime
 from frappe.utils.password import get_decrypted_password
 
 
 class IkeaCartUtils:
     def __init__(self):
-        settings = frappe.get_single("Ikea Cart Settings")
+        settings: IkeaCartSettings = frappe.get_single("Ikea Cart Settings")
         self.zip_code: str = settings.zip_code
         self.username: str = settings.username
         self.password: str = get_decrypted_password(
@@ -23,10 +26,10 @@ class IkeaCartUtils:
         self.guest_token: str = settings.guest_token
         self.authorized_token: str = settings.authorized_token
 
-    def get_token(self, authorize: bool = False):
+    def get_token(self, authorize: bool = False) -> str:
         from datetime import datetime
 
-        doc = frappe.get_single("Ikea Cart Settings")
+        doc: IkeaCartSettings = frappe.get_single("Ikea Cart Settings")
         if not authorize:
             guest_token_expiration_time: datetime = get_datetime(
                 doc.guest_token_expiration_time
@@ -73,7 +76,10 @@ class IkeaCartUtils:
     def add_items_to_cart(self, token: str, items: dict[str, int]) -> dict[str, Any]:
         cart = Cart(token)
         cart.clear()
-        res = {"cannot_add": [], "message": None}
+        res: dict[str, None | list[Any] | dict[str, Any]] = {
+            "cannot_add": [],
+            "message": None,
+        }
         while True:
             try:
                 res["message"] = cart.add_items(items)
@@ -85,7 +91,7 @@ class IkeaCartUtils:
                 res["cannot_add"] += e.args[0]
         return res
 
-    def add_items_to_cart_authorized(self, items: dict[str, int]):
+    def add_items_to_cart_authorized(self, items: dict[str, int]) -> dict[Any, Any]:
         token = self.get_token(authorize=True)
         self.add_items_to_cart(token, items)
         return Cart(token).show()
@@ -98,7 +104,7 @@ class IkeaCartUtils:
 
     def get_purchase_info(
         self, purchase_id: str | int, use_lite_id: bool = False
-    ) -> dict[Any]:
+    ) -> dict[str, Any]:
         token = self.get_token(authorize=True)
         purchases = Purchases(token)
         email = self.username if use_lite_id else None

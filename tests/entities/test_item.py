@@ -1,7 +1,10 @@
+from typing import Any
+
 import pytest
 
 import frappe
 from comfort.entities.doctype.item.item import Item
+from comfort.stock.doctype.bin.bin import Bin
 from frappe import ValidationError
 
 
@@ -116,7 +119,7 @@ def test_delete_bin(item_no_children: Item):
 
 def test_delete_bin_raises_if_bin_is_not_empty(item_no_children: Item):
     item_no_children.insert()
-    bin = frappe.get_doc("Bin", item_no_children.item_code)
+    bin: Bin = frappe.get_doc("Bin", item_no_children.item_code)
     bin.reserved_actual = 1
     bin.save()
     with pytest.raises(
@@ -170,7 +173,7 @@ test_item = {
     ],
 }
 
-test_child_items = [
+test_child_items: list[dict[str, Any]] = [
     {
         "item_code": "10014030",
         "item_name": "ПАКС Каркас гардероба, 50x58x236 см, белый",

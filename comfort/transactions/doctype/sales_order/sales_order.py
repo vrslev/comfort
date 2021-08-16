@@ -8,10 +8,14 @@ from comfort import count_quantity, group_by_key
 from comfort.comfort_core.doctype.commission_settings.commission_settings import (
     CommissionSettings,
 )
+from comfort.entities.doctype.child_item.child_item import ChildItem
 from comfort.entities.doctype.item.item import Item
 from comfort.finance import get_account, get_paid_amount
 from comfort.finance.doctype.gl_entry.gl_entry import GLEntry
 from comfort.stock.doctype.bin.bin import Bin
+from comfort.transactions.doctype.purchase_order_sales_order.purchase_order_sales_order import (
+    PurchaseOrderSalesOrder,
+)
 from frappe import _
 from frappe.model.document import Document
 
@@ -27,6 +31,18 @@ class SalesOrderMethods(Document):
     items_cost: int
     commission: int
     total_amount: int
+    total_quantity: int
+    total_weight: float
+    service_amount: int
+    edit_commission: bool
+    margin: int
+    discount: int
+    paid_amount: int
+    per_paid: int
+    pending_amount: int
+    payment_status: str
+    delivery_status: str
+    status: str
 
     def merge_same_items(self):
         items_grouped_by_item_code: Iterable[list[SalesOrderItem]] = group_by_key(
@@ -117,7 +133,7 @@ class SalesOrderMethods(Document):
         if not self.items:
             return
 
-        child_items: list[Any] = frappe.get_all(
+        child_items: list[ChildItem] = frappe.get_all(
             "Child Item",
             fields=("parent as parent_item_code", "item_code", "item_name", "qty"),
             filters={"parent": ("in", (d.item_code for d in self.items))},
@@ -158,14 +174,14 @@ class SalesOrderStatuses(SalesOrderMethods):
         elif self.docstatus == 2:
             status = ""
         else:
-            po_name: list[Any] = frappe.get_all(
+            po_name: list[PurchaseOrderSalesOrder] = frappe.get_all(
                 "Purchase Order Sales Order",
                 fields="parent",
                 filters={"sales_order_name": self.name, "docstatus": 1},
                 limit_page_length=1,
             )
             if po_name:
-                po_status = frappe.get_value(
+                po_status: str = frappe.get_value(
                     "Purchase Order", po_name[0].parent, "status"
                 )
                 if po_status == "To Receive":
@@ -299,15 +315,15 @@ class SalesOrder(SalesOrderStock):
     def on_cancel(self):
         # TODO: Cancel payment and delivery
         # TODO: Update bin
-        self.ignore_linked_doctypes = "GL Entry"
+        self.ignore_linked_doctypes = "GL Entry"  # type: ignore
 
         GLEntry.make_reverse_entries(self)
 
         self._set_paid_and_pending_per_amount()
         self.set_statuses()
 
-    def before_update_after_submit(self):
-        if self.from_not_received_items_to_sell:
+    def before_update_after_submit(self):  # TODO
+        if self.from_not_received_items_to_sell:  # type: ignore
             self.flags.ignore_validate_update_after_submit = True
         self.validate()
 
@@ -356,7 +372,7 @@ class SalesOrder(SalesOrderStock):
             )
 
         for d in combos_to_split:
-            child = frappe.get_doc(
+            child: SalesOrderItem = frappe.get_doc(
                 "Sales Order Item", {"parent": self.name, "item_code": d}
             )
             if child.docstatus == 1:
@@ -382,7 +398,7 @@ def item_query(
     field = "from_actual_stock"
     if filters.get(field) is not None:
         if filters[field]:
-            available_items = [
+            available_items: list[str] = [
                 d.item_code
                 for d in frappe.get_all(
                     "Bin", "item_code", {"available_actual": [">", 0]}
