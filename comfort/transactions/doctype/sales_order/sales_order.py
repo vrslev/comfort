@@ -10,7 +10,7 @@ from comfort.comfort_core.doctype.commission_settings.commission_settings import
 )
 from comfort.entities.doctype.child_item.child_item import ChildItem
 from comfort.entities.doctype.item.item import Item
-from comfort.finance import get_account, get_paid_amount
+from comfort.finance import get_account, get_received_amount
 from comfort.finance.doctype.gl_entry.gl_entry import GLEntry
 from comfort.stock.doctype.bin.bin import Bin
 from frappe import _
@@ -38,7 +38,7 @@ class SalesOrderMethods(Document):
     margin: int
     discount: int
     paid_amount: int
-    per_paid: int
+    per_paid: float
     pending_amount: int
     payment_status: str
     delivery_status: str
@@ -62,7 +62,7 @@ class SalesOrderMethods(Document):
 
     def delete_empty_items(self):
         """Delete items that have zero quantity."""
-        to_remove: Generator[SalesOrderItem] = (
+        to_remove: Generator[SalesOrderItem, None, None] = (
             item for item in self.items if item.qty == 0
         )
         for item in to_remove:
@@ -100,12 +100,12 @@ class SalesOrderMethods(Document):
     def _calculate_margin(self):
         """Calculate margin based on commission and rounding remainder of items_cost."""
         if self.items_cost <= 0:
-            self.margin = 0.0
+            self.margin = 0
             return
 
         base_margin = self.items_cost * self.commission / 100
         items_cost_rounding_remainder = round(self.items_cost, -1) - self.items_cost
-        rounded_margin = round(base_margin, -1) + items_cost_rounding_remainder
+        rounded_margin = int(round(base_margin, -1) + items_cost_rounding_remainder)
         self.margin = rounded_margin
 
     def _calculate_total_amount(self):
@@ -114,11 +114,10 @@ class SalesOrderMethods(Document):
         )
 
     def _set_paid_and_pending_per_amount(self):
-        # TODO: Property
-        self.paid_amount = get_paid_amount(self.doctype, self.name)
+        self.paid_amount = get_received_amount(self)
 
         if int(self.total_amount) == 0:
-            self.per_paid = 100
+            self.per_paid = 100  # TODO: Property
         else:
             self.per_paid = self.paid_amount / self.total_amount * 100
 
@@ -223,6 +222,11 @@ class SalesOrderFinance(SalesOrderMethods):
         """Make GL Entries for event of delivery according to Accounting cycle.
         Executed when order is completed.
         """
+
+        if not self.delivery_status == "Delivered":
+            raise ValidationError(
+                _('Cannot make GL Entries when status is not "Delivered"')
+            )
         accounts = get_account(("inventory", "cost_of_goods_sold"))
         GLEntry.new(self, "Delivery", accounts[0], 0, self.items_cost)
         GLEntry.new(self, "Delivery", accounts[1], self.items_cost, 0)
@@ -232,10 +236,12 @@ class SalesOrderStock(SalesOrderFinance):
     def _get_items_with_splitted_combinations(
         self,
     ) -> list[SalesOrderChildItem | SalesOrderItem]:
-        parents = (d.parent_item_code for d in self.child_items)
-        return self.child_items + [d for d in self.items if d.item_code not in parents]
+        parents = (child.parent_item_code for child in self.child_items)
+        return self.child_items + [
+            item for item in self.items if item.item_code not in parents
+        ]
 
-    def remove_all_items_from_bin(self):
+    def remove_items_from_reserved_actual(self):
         """Reduce Reserved Actual quantity in Bins of items in Sales Order.
         Executed when order is completed.
         """
@@ -308,6 +314,7 @@ class SalesOrderStatuses(SalesOrderStock):
         self._set_delivery_status()
         self._set_payment_status()
         self._set_document_status()
+        self.db_update()
 
     @frappe.whitelist()
     def set_paid(self, paid_amount: int, cash: bool):
@@ -315,18 +322,22 @@ class SalesOrderStatuses(SalesOrderStock):
         self.make_invoice_gl_entries(paid_amount, cash)
         self._set_paid_and_pending_per_amount()
         self.set_statuses()
-        self.db_update()
 
     @frappe.whitelist()
     def set_delivered(self):
         """Mark Sales Order as delivered"""
-        self.set_statuses()  # TODO: Is this really sets delivery status?
-        self.db_update()  # TODO: Is it appropriate?
+
         if self.delivery_status == "Delivered":
-            self.make_delivery_gl_entries()
-            self.remove_all_items_from_bin()
-        else:
+            raise ValidationError(
+                _('Delivery Status of this Sales Order is already "Delivered"')
+            )
+
+        self.set_statuses()
+        if not self.delivery_status == "Delivered":
             raise ValidationError(_("Not able to set Delivered"))
+
+        self.make_delivery_gl_entries()
+        self.remove_items_from_reserved_actual()
 
 
 class SalesOrder(SalesOrderStatuses):
@@ -405,8 +416,8 @@ def sales_order_item_query(
     doctype: str,
     txt: str,
     searchfield: str,
-    start: str,
-    page_len: str,
+    start: int,
+    page_len: int,
     filters: dict[Any, Any],
 ):
     from comfort.fixtures.hooks.queries import default_query
@@ -414,12 +425,12 @@ def sales_order_item_query(
     field = "from_actual_stock"
     if filters.get(field) is not None:
         if filters[field]:
-            available_items: list[str] = [
+            available_items: Generator[str, None, None] = (
                 d.item_code
                 for d in frappe.get_all(
                     "Bin", "item_code", {"available_actual": [">", 0]}
                 )
-            ]
+            )
             filters["item_code"] = ["in", available_items]
         del filters[field]
     return default_query(doctype, txt, searchfield, start, page_len, filters)

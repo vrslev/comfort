@@ -1,5 +1,5 @@
 from collections import Counter
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import pytest
 
@@ -82,7 +82,7 @@ def test_delete_empty_items(sales_order: SalesOrder):
     sales_order.append("items", {"qty": 0})
     sales_order.delete_empty_items()
 
-    c: Counter[str, int] = Counter()
+    c: Counter[str] = Counter()
     for item in sales_order.items:
         c[item.item_code] += item.qty
 
@@ -239,10 +239,10 @@ def test_get_amounts_for_invoice_gl_entries(sales_order: SalesOrder):
     "paid_amount,exp_sales_amount,exp_delivery_amount,exp_installation_amount",
     (
         (500, 500, 0, 0),
-        # (5000, 5000, 0, 0),
-        # (5200, 5000, 200, 0),
-        # (5400, 5000, 300, 100),
-        # (5800, 5000, 300, 500),
+        (5000, 5000, 0, 0),
+        (5200, 5000, 200, 0),
+        (5400, 5000, 300, 100),
+        (5800, 5000, 300, 500),
     ),
 )
 def test_make_categories_invoice_gl_entries(
@@ -288,20 +288,6 @@ def test_make_income_invoice_gl_entry(
     assert amount == 5000
 
 
-def test_make_delivery_gl_entries(sales_order: SalesOrder):
-    items_cost = 5000
-
-    sales_order.items_cost = items_cost
-    sales_order.db_insert()
-    sales_order.make_delivery_gl_entries()
-
-    for entry in get_gl_entries(sales_order):
-        if get_account("inventory") == entry.account:
-            assert entry.credit == items_cost
-        elif get_account("cost_of_goods_sold") == entry.account:
-            assert entry.debit == items_cost
-
-
 def test_make_invoice_gl_entries_raises_on_zero_paid_amount(sales_order: SalesOrder):
     with pytest.raises(ValidationError, match="Paid Amount should be more that zero"):
         sales_order.make_invoice_gl_entries(0, True)
@@ -313,6 +299,32 @@ def test_make_invoice_gl_entries_raises_on_zero_total_amount(sales_order: SalesO
         sales_order.make_invoice_gl_entries(100, True)
 
 
+def test_make_delivery_gl_entries(sales_order: SalesOrder):
+    items_cost = 5000
+
+    sales_order.items_cost = items_cost
+    sales_order.delivery_status = "Delivered"
+    sales_order.db_insert()
+    sales_order.make_delivery_gl_entries()
+
+    for entry in get_gl_entries(sales_order):
+        if get_account("inventory") == entry.account:
+            assert entry.credit == items_cost
+        elif get_account("cost_of_goods_sold") == entry.account:
+            assert entry.debit == items_cost
+
+
+def test_make_delivery_gl_entries_raises_on_wrong_delivery_status(
+    sales_order: SalesOrder,
+):
+    sales_order.delivery_status == "To Deliver"
+    sales_order.db_insert()
+    with pytest.raises(
+        ValidationError, match='Cannot make GL Entries when status is not "Delivered"'
+    ):
+        sales_order.make_delivery_gl_entries()
+
+
 #################################
 ###      SalesOrderStock      ###
 #################################
@@ -321,7 +333,7 @@ def test_make_invoice_gl_entries_raises_on_zero_total_amount(sales_order: SalesO
 def test_get_items_with_splitted_combinations(sales_order: SalesOrder):
     sales_order.set_child_items()
     items = sales_order._get_items_with_splitted_combinations()
-    parents = set()
+    parents: set[Any] = set()
     for child in sales_order.child_items:
         assert child in items
         parents.add(child.parent_item_code)
@@ -333,12 +345,12 @@ def test_get_items_with_splitted_combinations(sales_order: SalesOrder):
             assert item in items
 
 
-def test_remove_all_items_from_bin(sales_order: SalesOrder):
+def test_remove_items_from_reserved_actual(sales_order: SalesOrder):
     sales_order.set_child_items()
     items = sales_order._get_items_with_splitted_combinations()
     for item in items:
         Bin.update_for(item.item_code, reserved_actual=item.qty)
-    sales_order.remove_all_items_from_bin()
+    sales_order.remove_items_from_reserved_actual()
     for item in items:
         assert frappe.get_value("Bin", item.item_code, "reserved_actual") == 0
 
@@ -348,7 +360,7 @@ def test_remove_all_items_from_bin(sales_order: SalesOrder):
 #################################
 
 
-def test_set_payment_status(sales_order: SalesOrder):
+def test_set_payment_status_with_cancelled_status(sales_order: SalesOrder):
     sales_order.docstatus = 2
     sales_order._set_payment_status()
     assert sales_order.payment_status == ""
@@ -397,3 +409,6 @@ def test_set_document_status(
     sales_order.delivery_status = delivery_status
     sales_order._set_document_status()
     assert sales_order.status == expected_status
+
+
+# def test_set_paid(): ...
