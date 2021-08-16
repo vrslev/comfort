@@ -6,14 +6,12 @@ from collections import Counter
 
 import frappe
 from comfort import count_quantity
-from comfort.entities.doctype.item_category_table.item_category_table import (
-    ItemCategoryTable,
-)
 from comfort.stock.doctype.bin.bin import Bin
 from frappe import _
 from frappe.model.document import Document
 
 from ..child_item.child_item import ChildItem
+from ..item_category_table.item_category_table import ItemCategoryTable
 
 
 class ItemMethods:
