@@ -61,7 +61,7 @@
   "in_create": 1,
   "index_web_pages_for_search": 1,
   "links": [],
-  "modified": "2021-08-09 05:20:43.076733",
+  "modified": "2021-08-17 02:11:10.221969",
   "modified_by": "Administrator",
   "module": "Stock",
   "name": "Bin",
@@ -81,6 +81,5 @@
     }
   ],
   "sort_field": "modified",
-  "sort_order": "DESC",
-  "track_changes": 1
+  "sort_order": "DESC"
 }
