@@ -159,7 +159,7 @@ class SalesOrderFinance(SalesOrderMethods):
 
         delivery_amount, installation_amount = 0, 0
         for s in self.services:
-            if "Delivery" in s.type:  # TODO: Test this with translation
+            if "Delivery" in s.type:
                 delivery_amount += s.rate
             elif "Installation" in s.type:
                 installation_amount += s.rate

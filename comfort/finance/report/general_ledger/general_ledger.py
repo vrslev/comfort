@@ -5,9 +5,6 @@ from comfort import ValidationError
 from frappe import _dict
 from frappe.utils import flt
 
-# TODO:
-# pyright: reportUnknownArgumentType=false, reportUnknownParameterType=false
-
 
 def execute(filters=None):
     columns, data = [], []

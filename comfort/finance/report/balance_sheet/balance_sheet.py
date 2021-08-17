@@ -4,9 +4,6 @@ from typing import Any
 
 import frappe
 
-# TODO:
-# pyright: reportUnknownArgumentType=false, reportUnknownParameterType=false
-
 
 def execute(filters: dict[str, Any] = None):
     columns, data = [], []

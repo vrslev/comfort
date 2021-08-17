@@ -1,5 +1,5 @@
 frappe.provide("comfort");
-// TODO: Items cannot be added dialog
+
 comfort.IkeaCartController = frappe.ui.form.Controller.extend({
   setup() {
     this.setup_sales_order_query();
@@ -583,6 +583,7 @@ function show_unavailable_items_dialog(grid_row) {
 }
 
 function show_items_cannot_be_added_dialog() {
+  // TODO: Items cannot be added dialog
   var cannot_add_items = JSON.parse(cur_frm.doc.cannot_add_items);
   cannot_add_items = cannot_add_items.map((d) => {
     return {

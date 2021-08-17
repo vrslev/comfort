@@ -8,6 +8,7 @@ from comfort.stock.doctype.bin.bin import Bin
 from frappe import ValidationError
 
 
+# TODO: Refactor to make it more "UNIT"
 # TODO: Two test cases: with item and combination
 @pytest.fixture
 def child_items() -> list[Item]:

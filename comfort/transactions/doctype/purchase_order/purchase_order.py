@@ -189,11 +189,10 @@ class PurchaseOrderMethods(Document):
                 delivery_accounts: list[str] = get_account(
                     ["cash", "purchase_delivery"]
                 )
-                # TODO: Refactor
-                GLEntry.new(self, "Invoice", delivery_accounts[1], 0, delivery_amt_paid)  # type: ignore
-                GLEntry.new(self, "Invoice", delivery_accounts[1], delivery_amt_paid, 0)  # type: ignore
-                make_gl_entry(self, delivery_accounts[0], 0, delivery_amt_paid)  # type: ignore
-                make_gl_entry(self, delivery_accounts[1], delivery_amt_paid, 0)  # type: ignore
+                GLEntry.new(self, "Invoice", delivery_accounts[1], 0, delivery_amt_paid)
+                GLEntry.new(self, "Invoice", delivery_accounts[1], delivery_amt_paid, 0)
+                make_gl_entry(self, delivery_accounts[0], 0, delivery_amt_paid)
+                make_gl_entry(self, delivery_accounts[1], delivery_amt_paid, 0)
 
     def update_status_in_sales_orders(self):
         for d in self.sales_orders:
@@ -209,7 +208,6 @@ class PurchaseOrderMethods(Document):
         )
 
 
-# TODO: Statuses don't change properly, especially in SO
 class PurchaseOrder(PurchaseOrderMethods):
     def autoname(self):
         months = {
@@ -241,8 +239,8 @@ class PurchaseOrder(PurchaseOrderMethods):
             latest_cart_name_no_ = re.findall(r"-(\d+)", latest_cart_name)
             if len(latest_cart_name_no_) > 0:
                 latest_cart_name_no = latest_cart_name_no_[0]
-            cart_no = int(latest_cart_name_no) + 1  # type: ignore
-        else:  # TODO: Refactor
+            cart_no = int(latest_cart_name_no) + 1
+        else:
             cart_no = 1
 
         self.name = f"{this_month}-{cart_no}"
@@ -269,8 +267,8 @@ class PurchaseOrder(PurchaseOrderMethods):
         self.update_status_in_sales_orders()
 
     def on_cancel(self):
-        self.ignore_linked_doctypes = "GL Entry"  # type: ignore
-        make_reverse_gl_entry(self.doctype, self.name)  # type: ignore
+        self.ignore_linked_doctypes = "GL Entry"
+        make_reverse_gl_entry(self.doctype, self.name)
         self.update_status_in_sales_orders()
         # TODO: UPDATE BIN
 
@@ -293,8 +291,7 @@ class PurchaseOrder(PurchaseOrderMethods):
         else:
             self.schedule_date: datetime = add_to_date(None, weeks=2)
             self.posting_date: datetime = today()
-            # TODO:
-            self.delivery_cost = delivery_cost  # type: ignore
+            self.delivery_cost = delivery_cost
             items_cost = self.total_amount
 
         if len(self.sales_orders) > 0:
@@ -305,7 +302,6 @@ class PurchaseOrder(PurchaseOrderMethods):
                 sales_order.submit()
 
         if self.total_amount != items_cost:
-            # TODO: Ideally—edit all items in Sales Orders instead of applying this mock discount
             self.difference = self.total_amount - items_cost
 
         self.calculate_totals()
@@ -329,7 +325,7 @@ class PurchaseOrder(PurchaseOrderMethods):
     def create_new_sales_order_from_items_to_sell(
         self, items: dict[Any, Any], customer: str
     ):
-        if self.status != "Draft":  # TODO: Change back
+        if self.status != "Draft":
             # if self.status != 'To Receive':
             raise ValidationError(
                 _(
@@ -340,7 +336,7 @@ class PurchaseOrder(PurchaseOrderMethods):
         item_qty_map = count_quantity(self.items_to_sell)
 
         for d in items:
-            d = frappe._dict(d)  # type: ignore
+            d = frappe._dict(d)
             if item_qty_map[d.item_code] < d.qty:
                 raise ValidationError(
                     _("Cannot add more items than there is: {}").format(
@@ -359,7 +355,7 @@ class PurchaseOrder(PurchaseOrderMethods):
         )
         doc.submit()
 
-        # TODO: Continue working. Add order to Purchase Order
+        # Continue working. Add order to Purchase Order
 
 
 @frappe.whitelist()

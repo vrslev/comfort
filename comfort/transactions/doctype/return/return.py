@@ -11,11 +11,9 @@ from ..sales_order.sales_order import calculate_commission
 
 item_doctype = "Sales Order Item"
 child_item_doctype = "Sales Order Child Item"
-# TODO:
-# pyright: reportUnknownArgumentType=false, reportUnknownParameterType=false
-# TODO: Deal with items to sell
-# TODO: Queries improvement for SO (make it global)
-# TODO: Bin
+# Deal with items to sell
+# Queries improvement for SO (make it global)
+# Bin
 
 
 def make_gl_entries(self: object, account_from: str, account_to: str, amount: int):
@@ -263,7 +261,7 @@ class Return(Document):
                         doc.service_amount,
                     )
 
-                # TODO: Continue after creating Services table
+                # Continue after creating Services table
                 # installation_accounts = get_default_accounts(["cash", "installation"])
                 # make_gl_entries(
                 #     doc, installation_accounts[0], installation_accounts[1], amount

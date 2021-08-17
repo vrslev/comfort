@@ -42,10 +42,10 @@ STOCK CYCLE
 
 
 ? Cancelled
-"""
 
-# TODO: What if someone bought something while items not received yet?
-# TODO: Sales Order added this way should appear in Purchase order
+ What if someone bought something while items not received yet?
+ Sales Order added this way should appear in Purchase order
+"""
 
 
 from __future__ import annotations
@@ -65,23 +65,14 @@ import frappe
 from comfort import count_quantity
 from comfort.stock.doctype.bin.bin import Bin
 
-# TODO: Don't really need to do this since decided to move to Mixin system for transactions
-__all__ = [
-    "purchase_order_purchased",
-    "purchase_order_completed",
-]
 
-
-def get_items_to_sell_for_bin(
-    doc: PurchaseOrder,
-) -> list[dict[str, int]]:  # TODO: Test this
-    if not doc.sales_orders:  # TODO: What?
+def get_items_to_sell_for_bin(doc: PurchaseOrder):
+    if not doc.sales_orders:  # What?
         return []
-    return count_quantity(doc.items_to_sell).items()  # type: ignore
+    return count_quantity(doc.items_to_sell).items()
 
 
 def get_sales_order_items_for_bin(doc: PurchaseOrder) -> ItemsView[str, int]:
-    # TODO: use templated items instead (one that generates for cart)
     if not doc.sales_orders:
         return []
     sales_order_names: list[str] = [d.sales_order_name for d in doc.sales_orders]
@@ -129,4 +120,4 @@ def purchase_order_completed(doc: PurchaseOrder):
         Bin.update_for(item_code, reserved_purchased=-qty, reserved_actual=qty)
 
     for item_code, qty in get_items_to_sell_for_bin(doc):
-        Bin.update_for(item_code, available_purchased=-qty, available_actual=qty)  # type: ignore
+        Bin.update_for(item_code, available_purchased=-qty, available_actual=qty)

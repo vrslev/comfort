@@ -1,5 +1,3 @@
-# TODO: How to deal with prices that expire???
-
 from __future__ import annotations
 
 import re
@@ -72,7 +70,7 @@ class ItemMethods:
     def delete_bin(self):
         if not self.child_items:
             bin_: Bin = frappe.get_doc("Bin", self.item_code)
-            if not bin_.is_empty:  # TODO: Test this
+            if not bin_.is_empty:
                 raise ValidationError(
                     _("Can't delete item that have been used in transactions")
                 )
@@ -80,7 +78,7 @@ class ItemMethods:
                 bin_.delete()
 
 
-class Item(Document, ItemMethods):  # TODO: How to cover this with tests?
+class Item(Document, ItemMethods):
     def validate(self):
         self.validate_child_items()
         self.validate_url()
@@ -96,5 +94,5 @@ class Item(Document, ItemMethods):  # TODO: How to cover this with tests?
     def after_insert(self):
         self.create_bin()
 
-    def on_trash(self):  # pragma: no cover
+    def on_trash(self):
         self.delete_bin()

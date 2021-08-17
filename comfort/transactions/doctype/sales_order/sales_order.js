@@ -1,4 +1,4 @@
-// TODO: Add `add_multiple` to easily add items when From Actual Stock is checked
+// DO: Add `add_multiple` to easily add items when From Actual Stock is checked
 frappe.ui.form.on("Sales Order", {
   setup(frm) {
     frm.page.sidebar.hide();
@@ -166,8 +166,6 @@ frappe.ui.form.on("Sales Order", {
       for (var d of ["commission", "discount"]) {
         frm.set_df_property(d, "allow_on_submit", 1);
       }
-
-      // TODO: If `from_not_received_items_to_sell` is set, add Confirm button to toggle it
     }
   },
 

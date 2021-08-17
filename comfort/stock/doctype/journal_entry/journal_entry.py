@@ -5,9 +5,6 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt
 
-# TODO:
-# pyright: reportUnknownArgumentType=false
-
 
 class JournalEntry(Document):
     def validate(self):

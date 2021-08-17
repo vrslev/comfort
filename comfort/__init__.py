@@ -8,7 +8,7 @@ import frappe
 
 __version__ = "0.2.0"
 
-# TODO: Test all utils
+# TODO: Add tests to all utils
 
 
 def count_quantity(

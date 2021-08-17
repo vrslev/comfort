@@ -2,10 +2,6 @@
 
 import frappe
 
-# TODO:
-# pyright: reportUnknownArgumentType=false, reportUnknownParameterType=false
-# TODO: Now there's no column called `root_type``
-
 
 def execute(filters=None):
     columns, data = [], []

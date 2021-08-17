@@ -4,7 +4,7 @@ import frappe
 
 
 def extend_boot_session_with_currency(bootinfo: Any):
-    # TODO: Currency symbol not working
+    # TODO: #15 Make fixture for Currency because Currency symbol not working on fresh install
     bootinfo.sysdefaults.currency = frappe.get_cached_value(
         "Accounts Settings", "Accounts Settings", "default_currency"
     )
