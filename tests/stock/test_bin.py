@@ -30,7 +30,7 @@ def test_fill_with_nulls(bin: Bin):
     assert bin.available_purchased == 0
 
 
-def test_projected_property(bin: Bin):
+def test_calculate_projected(bin: Bin):
     bin.reserved_actual = 1
     bin.available_actual = 0
     bin.reserved_purchased = 3
