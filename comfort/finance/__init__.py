@@ -10,12 +10,12 @@ from .doctype.accounts_settings.accounts_settings import AccountsSettings
 
 
 @overload
-def get_account(field_names: str) -> str:  # pragma: no cover
+def get_account(field_names: str) -> str:
     ...
 
 
 @overload
-def get_account(field_names: Iterable[str]) -> list[str]:  # pragma: no cover
+def get_account(field_names: Iterable[str]) -> list[str]:
     ...
 
 
