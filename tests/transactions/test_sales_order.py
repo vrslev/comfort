@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from collections import Counter
 from typing import TYPE_CHECKING, Any
 
@@ -193,7 +195,26 @@ def test_calculate_total_amount(sales_order: SalesOrder):
     assert sales_order.total_amount == exp_total_amount
 
 
-# TODO: def test_set_paid_and_pending_per_amount(sales_order: SalesOrder): ...
+@pytest.mark.parametrize(
+    "total_amount,paid_amount,exp_per_paid,exp_pending_amount",
+    ((0, 0, 100.0, 0), (500, 250, 50.0, 250)),
+)
+def test_set_paid_and_pending_per_amount(
+    sales_order: SalesOrder,
+    total_amount: int,
+    paid_amount: int,
+    exp_per_paid: float,
+    exp_pending_amount: int,
+):
+    sales_order.db_insert()
+    GLEntry.new(sales_order, "Invoice", get_account("cash"), paid_amount, 0)
+
+    sales_order.total_amount = total_amount
+    sales_order._set_paid_and_pending_per_amount()
+
+    assert sales_order.paid_amount == paid_amount
+    assert sales_order.per_paid == exp_per_paid
+    assert sales_order.pending_amount == exp_pending_amount
 
 
 def test_set_child_items_not_set_if_no_items(sales_order: SalesOrder):
@@ -243,6 +264,7 @@ def test_get_amounts_for_invoice_gl_entries(sales_order: SalesOrder):
         (5200, 5000, 200, 0),
         (5400, 5000, 300, 100),
         (5800, 5000, 300, 500),
+        (5900, 5100, 300, 500),
     ),
 )
 def test_make_categories_invoice_gl_entries(
@@ -270,6 +292,15 @@ def test_make_categories_invoice_gl_entries(
     assert amounts["sales"] == exp_sales_amount
     assert amounts["delivery"] == exp_delivery_amount
     assert amounts["installation"] == exp_installation_amount
+
+
+def test_make_categories_invoice_gl_entries_skips_on_zero_fund_amount(
+    sales_order: SalesOrder,
+):
+    sales_order.db_insert()
+    sales_order._make_categories_invoice_gl_entries(500, 0, 300, 200)
+    accounts = [entry.account for entry in get_gl_entries(sales_order)]
+    assert get_account("sales") not in accounts
 
 
 @pytest.mark.parametrize(
