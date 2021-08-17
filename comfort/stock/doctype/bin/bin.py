@@ -8,6 +8,7 @@ class Bin(Document):
     available_actual: int
     reserved_purchased: int
     available_purchased: int
+    projected: int
 
     def before_insert(self):  # pragma: no cover
         self.fill_with_nulls()
@@ -21,9 +22,11 @@ class Bin(Document):
         self.reserved_purchased = set_null_if_none(self.reserved_purchased)
         self.available_purchased = set_null_if_none(self.available_purchased)
 
-    @property
-    def projected(self):
-        return (
+    def validate(self):
+        self.calculate_projected()
+
+    def calculate_projected(self):
+        self.projected = (
             self.available_actual
             + self.available_purchased
             - self.reserved_actual

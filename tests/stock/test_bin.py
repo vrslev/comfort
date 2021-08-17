@@ -35,6 +35,7 @@ def test_projected_property(bin: Bin):
     bin.available_actual = 0
     bin.reserved_purchased = 3
     bin.available_purchased = 10
+    bin.calculate_projected()
     assert bin.projected == 6
 
 
