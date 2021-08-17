@@ -81,14 +81,14 @@ def test_calculate_weight_in_parent_docs(item: Item, child_items: list[Item]):
     child_items[0].calculate_weight_in_parent_docs()
     child_items[0].save()
 
-    child_item_qty: int = frappe.db.get_value(
+    child_item_qty: int = frappe.get_value(
         "Child Item",
         {"parent": item.item_code, "item_code": child_items[0].item_code},
         "qty",
     )
     expected_weight = item.weight + child_item_qty * 10
 
-    new_weight: float = frappe.db.get_value("Item", item.item_code, "weight")
+    new_weight: float = frappe.get_value("Item", item.item_code, "weight")
     assert expected_weight == new_weight
 
 
