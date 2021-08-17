@@ -1,8 +1,12 @@
 {
-  "python.pythonPath": "../../env/bin/python3",
+  "python.analysis.diagnosticMode": "workspace",
   "python.analysis.extraPaths": ["../frappe"],
   "python.analysis.indexing": true,
-  "python.analysis.diagnosticMode": "workspace",
+  "python.formatting.provider": "black",
+  "python.pythonPath": "../../env/bin/python3",
+  "python.linting.flake8Enabled": true,
+  "python.linting.banditEnabled": true,
+  "python.linting.banditArgs": ["-c", ".bandit.yaml"],
   "eslint.options": {
     "configFile": ".eslintrc.yaml",
     "ignorePath": ".eslintignore"
