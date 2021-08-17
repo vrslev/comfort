@@ -21,7 +21,7 @@ class Customer(Document):
             self.vk_id = None
             return
 
-        ok = False
+        is_validated = False
 
         parsed = urlparse(self.vk_url)
         if "vk.com" in parsed.netloc and "im" in parsed.path:
@@ -29,8 +29,8 @@ class Customer(Document):
             if "sel" in query:
                 vk_id = query["sel"][0]
                 if vk_id and int(vk_id):
-                    ok = True
+                    is_validated = True
                     self.vk_id = vk_id
 
-        if not ok:
+        if not is_validated:
             raise ValidationError(_("Wrong VK URL"))

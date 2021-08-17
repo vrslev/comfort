@@ -57,9 +57,9 @@ def sales_order(customer: Customer, child_items: list[Item], item: Item):
     return doc
 
 
-#################################
-###     SalesOrderMethods     ###
-#################################
+#############################
+#     SalesOrderMethods     #
+#############################
 
 
 def test_merge_same_items(sales_order: SalesOrder):  # TODO: test not messed up
@@ -83,8 +83,8 @@ def test_delete_empty_items(sales_order: SalesOrder):
     sales_order.delete_empty_items()
 
     c: Counter[str] = Counter()
-    for item in sales_order.items:
-        c[item.item_code] += item.qty
+    for i in sales_order.items:
+        c[i.item_code] += i.qty
 
     for qty in c.values():
         assert qty > 0
@@ -93,23 +93,23 @@ def test_delete_empty_items(sales_order: SalesOrder):
 def test_update_items_from_db(sales_order: SalesOrder):
     sales_order._update_items_from_db()
 
-    for item in sales_order.items:
-        doc: Item = frappe.get_doc("Item", item.item_code)
-        assert item.item_name == doc.item_name
-        assert item.rate == doc.rate
-        assert item.weight == doc.weight
-        assert item.amount == doc.rate * item.qty
-        assert item.total_weight == doc.weight * item.qty
+    for i in sales_order.items:
+        doc: Item = frappe.get_doc("Item", i.item_code)
+        assert i.item_name == doc.item_name
+        assert i.rate == doc.rate
+        assert i.weight == doc.weight
+        assert i.amount == doc.rate * i.qty
+        assert i.total_weight == doc.weight * i.qty
 
 
 def test_calculate_item_totals(sales_order: SalesOrder):
     sales_order._update_items_from_db()
 
     exp_total_quantity, exp_total_weight, exp_items_cost = 0, 0.0, 0
-    for item in sales_order.items:
-        exp_total_quantity += item.qty
-        exp_total_weight += item.total_weight
-        exp_items_cost += item.amount
+    for i in sales_order.items:
+        exp_total_quantity += i.qty
+        exp_total_weight += i.total_weight
+        exp_items_cost += i.amount
 
     sales_order._calculate_item_totals()
 
@@ -212,9 +212,9 @@ def test_set_child_items(sales_order: SalesOrder, item: Item):
         assert p in item_code_qty_pairs
 
 
-#################################
-###     SalesOrderFinance     ###
-#################################
+#############################
+#     SalesOrderFinance     #
+#############################
 
 
 def get_gl_entries(doc: SalesOrder) -> list[GLEntry]:
@@ -317,7 +317,7 @@ def test_make_delivery_gl_entries(sales_order: SalesOrder):
 def test_make_delivery_gl_entries_raises_on_wrong_delivery_status(
     sales_order: SalesOrder,
 ):
-    sales_order.delivery_status == "To Deliver"
+    sales_order.delivery_status = "To Deliver"
     sales_order.db_insert()
     with pytest.raises(
         ValidationError, match='Cannot make GL Entries when status is not "Delivered"'
@@ -325,9 +325,9 @@ def test_make_delivery_gl_entries_raises_on_wrong_delivery_status(
         sales_order.make_delivery_gl_entries()
 
 
-#################################
-###      SalesOrderStock      ###
-#################################
+#############################
+#      SalesOrderStock      #
+#############################
 
 
 def test_get_items_with_splitted_combinations(sales_order: SalesOrder):
@@ -338,26 +338,26 @@ def test_get_items_with_splitted_combinations(sales_order: SalesOrder):
         assert child in items
         parents.add(child.parent_item_code)
 
-    for item in sales_order.items:
-        if item.item_code in parents:
-            assert item not in items
+    for i in sales_order.items:
+        if i.item_code in parents:
+            assert i not in items
         else:
-            assert item in items
+            assert i in items
 
 
 def test_remove_items_from_reserved_actual(sales_order: SalesOrder):
     sales_order.set_child_items()
     items = sales_order._get_items_with_splitted_combinations()
-    for item in items:
-        Bin.update_for(item.item_code, reserved_actual=item.qty)
+    for i in items:
+        Bin.update_for(i.item_code, reserved_actual=i.qty)
     sales_order.remove_items_from_reserved_actual()
-    for item in items:
-        assert frappe.get_value("Bin", item.item_code, "reserved_actual") == 0
+    for i in items:
+        assert frappe.get_value("Bin", i.item_code, "reserved_actual") == 0
 
 
-#################################
-###    SalesOrderStatuses     ###
-#################################
+#############################
+#    SalesOrderStatuses     #
+#############################
 
 
 def test_set_payment_status_with_cancelled_status(sales_order: SalesOrder):

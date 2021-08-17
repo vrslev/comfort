@@ -59,7 +59,7 @@ def get_data(date, root_type, dr_cr, period_key):
     if accounts:
         i = 0
         for d in accounts:
-            if d.parent_account == None or d.parent_account == data[-1]["account"]:
+            if d.parent_account is None or d.parent_account == data[-1]["account"]:
                 append(data, d, i, period_key)
                 i += 1
             else:
@@ -110,13 +110,13 @@ def append(data, d, i, period_key):
 def get_accounts_with_root_type(root_type):
     return frappe.db.sql(
         """ SELECT
-				name, parent_account, lft, root_type, is_group
-			FROM
-				tabAccount
-			WHERE
-				root_type=%s
-			ORDER BY
-				lft""",
+                name, parent_account, lft, root_type, is_group
+            FROM
+                tabAccount
+            WHERE
+                root_type=%s
+            ORDER BY
+                lft""",
         (root_type),
         as_dict=1,
     )
@@ -125,11 +125,11 @@ def get_accounts_with_root_type(root_type):
 def get_account_balance(account, date):
     return frappe.db.sql(
         """ SELECT
-					sum(debit) - sum(credit)
-				FROM
-					`tabGL Entry`
-				WHERE
-					is_cancelled=0 and account=%s and posting_date>=%s and posting_date<=%s""",
+                    sum(debit) - sum(credit)
+                FROM
+                    `tabGL Entry`
+                WHERE
+                    is_cancelled=0 and account=%s and posting_date>=%s and posting_date<=%s""",
         (account, date[0], date[1]),
     )[0][0]
 

@@ -119,9 +119,9 @@ def test_delete_bin(item_no_children: Item):
 
 def test_delete_bin_raises_if_bin_is_not_empty(item_no_children: Item):
     item_no_children.insert()
-    bin: Bin = frappe.get_doc("Bin", item_no_children.item_code)
-    bin.reserved_actual = 1
-    bin.save()
+    bin_: Bin = frappe.get_doc("Bin", item_no_children.item_code)
+    bin_.reserved_actual = 1
+    bin_.save()
     with pytest.raises(
         ValidationError, match="Can't delete item that have been used in transactions"
     ):

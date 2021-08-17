@@ -17,18 +17,19 @@ if not TYPE_CHECKING:
 def test_get_account(accounts: None):
     default_accounts = (list(t) for t in DEFAULT_ACCOUNT_SETTINGS.items())
 
-    for l in default_accounts:
-        l[0] = re.findall(r"default_(.*)_account", l[0])[0]
-        assert get_account(l[0]) == l[1]  # from string
-    assert get_account(l[0] for l in default_accounts) == [  # from list
-        l[1] for l in default_accounts
+    for acc in default_accounts:
+        acc[0] = re.findall(r"default_(.*)_account", acc[0])[0]
+        assert get_account(acc[0]) == acc[1]  # from string
+    assert get_account(acc[0] for acc in default_accounts) == [  # from list
+        acc[1] for acc in default_accounts
     ]
 
 
 def test_get_account_raises_on_wrong_name(accounts: None):
     account_name = "toys"
     with pytest.raises(
-        ValueError, match=f'Account Settings has no field "{account_name}"'
+        ValueError,
+        match=f'Account Settings has no field "default_{account_name}_account"',
     ):
         get_account(account_name)
 

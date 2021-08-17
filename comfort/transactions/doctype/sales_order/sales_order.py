@@ -211,7 +211,7 @@ class SalesOrderFinance(SalesOrderMethods):
 
         if paid_amount <= 0:
             raise ValidationError(_("Paid Amount should be more that zero"))
-        elif self.total_amount <= 0:
+        if self.total_amount <= 0:
             raise ValidationError(_("Total Amount should be more that zero"))
 
         amounts = self._get_amounts_for_invoice_gl_entries()
@@ -275,7 +275,8 @@ class SalesOrderStatuses(SalesOrderStock):
         status = "To Purchase"
         if self.delivery_status == "Delivered":
             return
-        elif self.docstatus == 2:
+
+        if self.docstatus == 2:
             status = ""
         else:
             po_name: list[PurchaseOrderSalesOrder] = frappe.get_all(

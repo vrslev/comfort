@@ -9,7 +9,7 @@ def get_py_js_files():
     path = frappe.get_app_path(app_name)
     py: list[str] = []
     js: list[str] = []
-    for root, dirs, files in os.walk(path):  # type: ignore
+    for root, _, files in os.walk(path):
         for f in files:
             if f.endswith(".py"):
                 py.append(os.path.join(root, f))

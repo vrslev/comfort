@@ -16,6 +16,8 @@ child_item_doctype = "Sales Order Child Item"
 # TODO: Deal with items to sell
 # TODO: Queries improvement for SO (make it global)
 # TODO: Bin
+
+
 def make_gl_entries(self: object, account_from: str, account_to: str, amount: int):
     make_gl_entry(self, account_from, 0, amount)
     make_gl_entry(self, account_to, amount, 0)

@@ -19,7 +19,7 @@ class CommissionSettings(Document):
         for c in self.ranges[:-1]:
             if c.to_amount == 0:
                 raise ValidationError(_("To Amount shouldn't be zero except last row"))
-            elif c.percentage == 0:
+            if c.percentage == 0:
                 raise ValidationError(_("Percentage shouldn't be zero"))
 
     def validate_to_amounts_order(self):

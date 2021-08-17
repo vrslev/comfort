@@ -1,4 +1,5 @@
 # type: ignore
+# flake8: noqa
 from __future__ import annotations
 
 import re
@@ -82,7 +83,7 @@ class PurchaseOrderMethods(Document):
                 "docstatus": ["!=", 2],
             },
             fields=[
-                f"SUM(qty * rate) AS sales_order_cost",
+                "SUM(qty * rate) AS sales_order_cost",
                 "SUM(total_weight) AS total_weight",
             ],
         )[0]

@@ -2,7 +2,7 @@
 #
 import frappe
 from comfort import ValidationError
-from frappe import _, _dict
+from frappe import _dict
 from frappe.utils import flt
 
 # TODO:

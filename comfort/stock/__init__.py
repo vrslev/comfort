@@ -64,7 +64,6 @@ if TYPE_CHECKING:
 import frappe
 from comfort import count_quantity
 from comfort.stock.doctype.bin.bin import Bin
-from frappe import _
 
 # TODO: Don't really need to do this since decided to move to Mixin system for transactions
 __all__ = [

@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 import frappe
+from frappe.desk.treeview import make_tree_args
 from frappe.model.document import Document
 from frappe.utils import cint
 from frappe.utils.nestedset import NestedSet
@@ -29,8 +30,6 @@ def get_children(doctype: str, parent: str | None = None, is_root: bool = False)
 
 @frappe.whitelist()
 def add_node():
-    from frappe.desk.treeview import make_tree_args
-
     args = make_tree_args(**frappe.form_dict)
 
     if cint(args.is_root):

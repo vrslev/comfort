@@ -8,6 +8,8 @@ import frappe
 
 __version__ = "0.2.0"
 
+# TODO: Test all utils
+
 
 def count_quantity(
     data: Iterable[Any], key_key: str = "item_code", value_key: str = "qty"

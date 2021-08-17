@@ -24,7 +24,7 @@ def fetch_new_items(
     item_codes: list[Any] | int | str,
     force_update: bool = False,
     download_images: bool = True,
-    values_from_db: list[str] = [],
+    values_from_db: list[str] | None = None,
 ) -> dict[str, list[Any]]:
 
     if not isinstance(item_codes, list):
@@ -68,8 +68,7 @@ def fetch_new_items(
         except ItemFetchError as e:
             if "Wrong Item Code" in e.args[0]:
                 raise ValidationError(_("Wrong Item Code"))
-            else:
-                raise
+            raise
 
         parsed_items = response["items"]
         res.update(
@@ -191,7 +190,7 @@ def _make_item(
     item_category: str | None = None,
     rate: int = 0,
     url: str | None = None,
-    child_items: list[Any] = [],
+    child_items: list[Any] | None = None,
 ) -> Item:
     if frappe.db.exists("Item", item_code):
         doc: Item = frappe.get_doc("Item", item_code)

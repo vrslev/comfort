@@ -65,19 +65,19 @@ class ItemMethods:
 
     def create_bin(self):
         if not self.child_items:
-            bin: Bin = frappe.new_doc("Bin")
-            bin.item_code = self.item_code
-            bin.insert()
+            bin_: Bin = frappe.new_doc("Bin")
+            bin_.item_code = self.item_code
+            bin_.insert()
 
     def delete_bin(self):
         if not self.child_items:
-            bin: Bin = frappe.get_doc("Bin", self.item_code)
-            if not bin.is_empty:  # TODO: Test this
+            bin_: Bin = frappe.get_doc("Bin", self.item_code)
+            if not bin_.is_empty:  # TODO: Test this
                 raise ValidationError(
                     _("Can't delete item that have been used in transactions")
                 )
             else:
-                bin.delete()
+                bin_.delete()
 
 
 class Item(Document, ItemMethods):  # TODO: How to cover this with tests?
