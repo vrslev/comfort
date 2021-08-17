@@ -105,6 +105,7 @@ omit = [
   "comfort/transactions/doctype/purchase_order_item_to_sell/purchase_order_item_to_sell.py",
   "comfort/transactions/doctype/purchase_order_sales_order/purchase_order_sales_order.py",
   "comfort/transactions/doctype/return_item/return_item.py",
+  "comfort/transactions/doctype/sales_order/sales_order_list.py",
   "comfort/transactions/doctype/sales_order_child_item/sales_order_child_item.py",
   "comfort/transactions/doctype/sales_order_item/sales_order_item.py",
   "comfort/transactions/doctype/sales_order_service/sales_order_service.py",
