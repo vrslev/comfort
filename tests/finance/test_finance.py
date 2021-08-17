@@ -9,8 +9,9 @@ from comfort.finance.doctype.gl_entry.gl_entry import GLEntry
 from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
 
 if not TYPE_CHECKING:
+    from tests.entities.test_customer import customer
+    from tests.entities.test_item import child_items, item
     from tests.finance.test_chart_of_accounts import accounts
-    from tests.finance.test_gl_entry import gl_entry
     from tests.transactions.test_sales_order import sales_order
 
 
@@ -34,8 +35,7 @@ def test_get_account_raises_on_wrong_name(accounts: None):
         get_account(account_name)
 
 
-def test_get_received_amount(
-    accounts: None, gl_entry: GLEntry, sales_order: SalesOrder
-):
+def test_get_received_amount(accounts: None, sales_order: SalesOrder):
     sales_order.db_insert()
-    get_received_amount(sales_order)
+    GLEntry.new(sales_order, "Invoice", get_account("cash"), 300, 0)
+    assert get_received_amount(sales_order) == 300

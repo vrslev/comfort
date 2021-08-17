@@ -10,12 +10,12 @@ from .doctype.accounts_settings.accounts_settings import AccountsSettings
 
 
 @overload
-def get_account(field_names: str) -> str:
+def get_account(field_names: str) -> str:  # pragma: no cover
     ...
 
 
 @overload
-def get_account(field_names: Iterable[str]) -> list[str]:
+def get_account(field_names: Iterable[str]) -> list[str]:  # pragma: no cover
     ...
 
 
@@ -40,7 +40,7 @@ def get_account(field_names: str | Iterable[str]):
 
 
 def get_received_amount(doc: Document) -> int:
-    """Get balance from all GL Entries associated with given Transaction"""
+    """Get balance from all GL Entries associated with given Transaction and default Cash or Bank accounts"""
     accounts = get_account(("cash", "bank"))
     entries: list[Any] = frappe.get_all(
         "GL Entry",
@@ -53,4 +53,4 @@ def get_received_amount(doc: Document) -> int:
         },
         limit_page_length=1,
     )
-    return sum(entry.balance for entry in entries)
+    return sum(entry.balance or 0 for entry in entries)
