@@ -72,7 +72,7 @@ comfort.IkeaCartController = frappe.ui.form.Controller.extend({
     if (!this.frm.is_new() && this.frm.doc.status == "To Receive") {
       this.frm.page.set_primary_action("Received", () => {
         this.frm.call({
-          method: "set_completed",
+          method: "create_receipt",
           doc: this.frm.doc,
           callback: () => {
             frappe.show_alert({
@@ -293,7 +293,7 @@ comfort.IkeaCartController = frappe.ui.form.Controller.extend({
                   ({ delivery_cost }) => {
                     args.delivery_cost = delivery_cost;
                     cur_frm.call({
-                      method: "before_submit_events",
+                      method: "add_purchase_info_and_submit",
                       doc: cur_frm.doc,
                       args: args,
                       freeze: 1,
@@ -306,7 +306,7 @@ comfort.IkeaCartController = frappe.ui.form.Controller.extend({
                 );
               } else {
                 cur_frm.call({
-                  method: "before_submit_events",
+                  method: "add_purchase_info_and_submit",
                   doc: cur_frm.doc,
                   args: args,
                   freeze: 1,

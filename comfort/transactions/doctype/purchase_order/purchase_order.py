@@ -1,16 +1,22 @@
-# type: ignore
-# flake8: noqa
 from __future__ import annotations
 
 import re
 from datetime import datetime
-from typing import Any
+from typing import Any, ValuesView
 
 import frappe
-from comfort import ValidationError, count_quantity, parse_json, stock
+from comfort import ValidationError, count_quantity, group_by_key, parse_json
 from comfort.comfort_core.ikea.cart_utils import IkeaCartUtils
-from comfort.finance import get_account, get_received_amount
-from comfort.finance.doctype.gl_entry.gl_entry import GLEntry
+from comfort.entities.doctype.child_item.child_item import ChildItem
+from comfort.finance.doctype.payment.payment import Payment
+from comfort.stock.doctype.receipt.receipt import Receipt
+from comfort.stock.doctype.stock_entry.stock_entry import StockEntry
+from comfort.transactions.doctype.sales_order_child_item.sales_order_child_item import (
+    SalesOrderChildItem,
+)
+from comfort.transactions.doctype.sales_order_item.sales_order_item import (
+    SalesOrderItem,
+)
 from frappe import _, as_json
 from frappe.model.document import Document
 from frappe.utils.data import add_to_date, getdate, now_datetime, today
@@ -24,7 +30,8 @@ from ..purchase_order_item_to_sell.purchase_order_item_to_sell import (
 from ..purchase_order_sales_order.purchase_order_sales_order import (
     PurchaseOrderSalesOrder,
 )
-from ..sales_order.sales_order import SalesOrder
+
+# TODO: Check if there any IkeaCarts that contains those Sales Orders
 
 
 class PurchaseOrderMethods(Document):
@@ -43,30 +50,28 @@ class PurchaseOrderMethods(Document):
     posting_date: datetime
     difference: int
 
-    def validate_empty(self):
+    def validate_not_empty(self):
         if not (self.sales_orders or self.items_to_sell):
             raise ValidationError("Добавьте заказы или товары на продажу")
 
     def delete_sales_order_dublicates(self):
-        # TODO: Check if there any IkeaCarts that contains those Sales Orders
-        sales_order_names = list({s.sales_order_name for s in self.sales_orders})
-        sales_orders_no_dublicates = []
+        sales_orders_grouped_by_name: ValuesView[
+            list[PurchaseOrderSalesOrder]
+        ] = group_by_key(self.sales_orders, "sales_order_name").values()
 
-        for s in self.sales_orders:
-            if s.sales_order_name in sales_order_names:
-                sales_orders_no_dublicates.append(s)
-                sales_order_names.remove(s.sales_order_name)
+        final_orders: list[PurchaseOrderSalesOrder] = []
+        for orders in sales_orders_grouped_by_name:
+            final_orders.append(orders[0])
 
-        self.sales_orders = sales_orders_no_dublicates
+        self.sales_orders = final_orders
 
-    def set_customer_and_total_in_sales_orders(self):
+    def update_customer_and_total_in_sales_orders_from_db(self):
         for d in self.sales_orders:
-            d.customer, total, status = frappe.get_value(
+            d.customer, d.total = frappe.get_value(
                 "Sales Order",
                 d.sales_order_name,
-                ("customer", "total_amount", "docstatus"),
+                ("customer", "total_amount"),
             )
-            d.total = total if status != 2 else 0
 
     def calculate_totals(self):
         (
@@ -75,33 +80,31 @@ class PurchaseOrderMethods(Document):
             self.sales_order_cost,
             self.items_to_sell_cost,
         ) = (0, 0, 0, 0)
+        if not self.delivery_cost:
+            self.delivery_cost = 0
 
-        so_items = frappe.get_all(
+        sums: dict[str, Any] = frappe.get_value(
             "Sales Order Item",
             filters={
                 "parent": ["in", [d.sales_order_name for d in self.sales_orders]],
-                "docstatus": ["!=", 2],
             },
-            fields=[
-                "SUM(qty * rate) AS sales_order_cost",
-                "SUM(total_weight) AS total_weight",
+            fieldname=[
+                "SUM(amount) AS sales_order_cost",
+                "SUM(total_weight) AS sales_order_weight",
             ],
-        )[0]
-
-        self.sales_order_cost = (
-            so_items.sales_order_cost if so_items.sales_order_cost else 0
+            as_dict=True,
         )
-        self.total_weight = so_items.total_weight if so_items.total_weight else 0
 
-        for d in self.items_to_sell:
-            self.items_to_sell_cost += d.rate * d.qty
-            self.total_weight += d.weight * d.qty
+        self.sales_order_cost = sums.sales_order_cost
+        self.total_weight = sums.sales_order_weight
 
-        self.total_amount = self.sales_order_cost + self.items_to_sell_cost
-        if self.delivery_cost:
-            self.total_amount += self.delivery_cost
-        else:
-            self.delivery_cost = 0
+        for item in self.items_to_sell:
+            self.items_to_sell_cost += item.rate * item.qty
+            self.total_weight += item.weight * item.qty
+
+        self.total_amount = (
+            self.sales_order_cost + self.items_to_sell_cost + self.delivery_cost
+        )
 
     def get_delivery_services(self):
         try:
@@ -112,97 +115,88 @@ class PurchaseOrderMethods(Document):
             self.update(
                 {
                     "delivery_options": delivery_services["options"],
-                    "cannot_add_items": as_json(delivery_services["cannot_add"])
-                    if delivery_services["cannot_add"]
-                    else None,
+                    "cannot_add_items": as_json(delivery_services["cannot_add"]),
                 }
             )
         except Exception as e:
-            frappe.msgprint("\n".join([str(d) for d in e.args]), _("Error"))
+            frappe.msgprint("\n".join([str(arg) for arg in e.args]), title=_("Error"))
 
-    def get_templated_items_for_api(self, split_combinations: bool = False):
-        all_items = []
-        all_items += self.items_to_sell  # TODO: Check if there's product bundle
+    def _get_items_to_sell(
+        self, split_combinations: bool
+    ) -> list[PurchaseOrderItemToSell | ChildItem]:
+        items = []
+        items_to_sell = self.items_to_sell.copy()
 
-        if self.sales_orders and len(self.sales_orders) > 0:
-            sales_order_names = [d.sales_order_name for d in self.sales_orders]
-            so_items = frappe.db.sql(
-                """
-                SELECT name, item_code, qty
-                FROM `tabSales Order Item`
-                WHERE parent IN %(sales_orders)s
-                AND qty > 0
-            """,
-                {"sales_orders": sales_order_names},
-                as_dict=True,
+        if split_combinations:
+            child_items: list[ChildItem] = frappe.get_all(
+                "Child Item",
+                fields=["parent", "item_code", "qty"],
+                filters={
+                    "parent": ("in", (item.item_code for item in self.items_to_sell))
+                },
             )
+            items += child_items
+            parents = (child.parent for child in child_items)
+            items_to_sell = [item for item in self.items_to_sell if item not in parents]
 
-            if split_combinations:
-                packed_items: list[dict[Any, Any]] = frappe.db.sql(
-                    """
-                    SELECT parent_item_code, item_code, qty
-                    FROM `tabSales Order Child Item`
-                    WHERE parent IN %(sales_orders)s
-                    AND qty > 0
-                """,
-                    {"sales_orders": sales_order_names},
-                    as_dict=True,
-                )
-                all_items: Any
-                all_items += packed_items
+        items += items_to_sell
+        return items
 
-                parent_items = [d.parent_item_code for d in packed_items]
-                so_items = [d for d in so_items if d.item_code not in parent_items]
+    def _get_items_in_sales_orders(self, split_combinations: bool):
+        items: list[SalesOrderItem | SalesOrderChildItem] = []
 
-            all_items += so_items
+        sales_order_names = (d.sales_order_name for d in self.sales_orders)
+        so_items: list[SalesOrderItem] = frappe.get_all(
+            "Sales Order Item",
+            fields=["item_code", "qty"],
+            filters={"parent": ("in", sales_order_names)},
+        )
 
-        templated_items: Any = {}
-        for d in all_items:
-            d.item_code = str(d.item_code)
-            if d.item_code not in templated_items:
-                templated_items[d.item_code] = 0
-            templated_items[d.item_code] += int(d.qty)
+        if split_combinations:
+            child_items: list[SalesOrderChildItem] = frappe.get_all(
+                "Sales Order Child Item",
+                fields=["parent_item_code", "item_code", "qty"],
+                filters={"parent": ("in", sales_order_names)},
+            )
+            items += child_items
 
-        return templated_items
+            parents = (child.parent_item_code for child in child_items)
+            so_items = [item for item in so_items if item.item_code not in parents]
 
-    def make_invoice_gl_entries(self):
-        already_paid_amount = -get_received_amount(self)
+        items += so_items
+        return items
 
-        if self.total_amount != already_paid_amount:
-            if self.delivery_cost > 0:
-                amt_to_pay = self.total_amount - already_paid_amount
-                amt_without_delivery = self.sales_order_cost + self.items_to_sell_cost
-                delivery_amt_paid = 0
-                if amt_to_pay > amt_without_delivery:
-                    delivery_amt_paid = amt_to_pay - amt_without_delivery
-                    inventory_amt_paid: int = amt_without_delivery
-                else:
-                    inventory_amt_paid = amt_to_pay
-            else:
-                inventory_amt_paid = self.total_amount - already_paid_amount
+    def get_templated_items_for_api(self, split_combinations: bool):
+        items: list[
+            PurchaseOrderItemToSell | SalesOrderItem | SalesOrderChildItem | ChildItem
+        ] = self._get_items_to_sell(split_combinations)
 
-            inventory_accounts: list[str] = get_account(["cash", "prepaid_inventory"])
-            GLEntry.new(self, inventory_accounts[0], 0, inventory_amt_paid)
-            GLEntry.new(self, inventory_accounts[1], inventory_amt_paid, 0)
+        if self.sales_orders:
+            items += self._get_items_in_sales_orders(split_combinations)
 
-            if self.delivery_cost > 0:
-                delivery_accounts: list[str] = get_account(
-                    ["cash", "purchase_delivery"]
-                )
-                GLEntry.new(self, delivery_accounts[1], 0, delivery_amt_paid)
-                GLEntry.new(self, delivery_accounts[1], delivery_amt_paid, 0)
+        return count_quantity(items)
 
     def update_status_in_sales_orders(self):
-        for d in self.sales_orders:
-            frappe.get_doc("Sales Order", d.sales_order_name).set_statuses()
+        for s in self.sales_orders:
+            frappe.get_doc("Sales Order", s.sales_order_name).set_statuses()
 
-    def make_delivery_gl_entries(self):
-        accounts = get_account(["prepaid_inventory", "inventory"])
-        make_gl_entry(
-            self, accounts[0], 0, self.items_to_sell_cost + self.sales_order_cost
+    def create_stock_entries_for_purchased(self):
+        StockEntry.create_for(
+            self.doctype,
+            self.name,
+            "Reserved Purchased",
+            self._get_items_in_sales_orders(True),
         )
-        make_gl_entry(
-            self, accounts[1], self.items_to_sell_cost + self.sales_order_cost, 0
+        StockEntry.create_for(
+            self.doctype,
+            self.name,
+            "Available Purchased",
+            self._get_items_to_sell(True),
+        )
+
+    def create_payment(self):
+        Payment.create_for(
+            self.doctype, self.name, self.total_amount, paid_with_cash=True
         )
 
 
@@ -232,149 +226,78 @@ class PurchaseOrder(PurchaseOrderMethods):
             values=(this_month,),
         )
 
+        cart_no = None
         if carts_in_this_month:
             latest_cart_name: str = carts_in_this_month[0][0]
             latest_cart_name_no_ = re.findall(r"-(\d+)", latest_cart_name)
             if len(latest_cart_name_no_) > 0:
                 latest_cart_name_no = latest_cart_name_no_[0]
-            cart_no = int(latest_cart_name_no) + 1
-        else:
+                cart_no = int(latest_cart_name_no) + 1
+
+        if not cart_no:
             cart_no = 1
 
         self.name = f"{this_month}-{cart_no}"
 
+    def validate(self):
+        self.validate_not_empty()
+        self.delete_sales_order_dublicates()
+        self.update_customer_and_total_in_sales_orders_from_db()
+        self.calculate_totals()
+
     def before_insert(self):
         self.status = "Draft"
 
-    def validate(self):
-        self.validate_empty()
-        self.delete_sales_order_dublicates()
-        self.set_customer_and_total_in_sales_orders()
-        self.calculate_totals()
-
-    def before_save(self):
-        if self.docstatus == 0:
-            self.get_delivery_services()
+    # def before_save(self):
+    #     if self.docstatus == 0:
+    #         self.get_delivery_services()
 
     def before_submit(self):
         self.delivery_options = []
         self.cannot_add_items = None
+        self.status = "To Receive"
+
+        for s in self.sales_orders:
+            frappe.get_doc("Sales Order", s.sales_order_name).submit()
 
     def on_submit(self):
-        stock.purchase_order_purchased(self)
+        self.create_payment()
+        self.create_stock_entries_for_purchased()
         self.update_status_in_sales_orders()
 
     def on_cancel(self):
-        self.ignore_linked_doctypes = "GL Entry"
-        make_reverse_gl_entry(self.doctype, self.name)
         self.update_status_in_sales_orders()
-        # TODO: UPDATE BIN
 
     @frappe.whitelist()
-    def before_submit_events(
+    def add_purchase_info_and_submit(
         self,
         purchase_id: int,
         purchase_info_loaded: bool,
         purchase_info: dict[str, Any],
         delivery_cost: int = 0,
     ):
-        self.order_confirmation_no = purchase_id
-
         if purchase_info_loaded:
             self.schedule_date = getdate(purchase_info["delivery_date"])
             self.posting_date = getdate(purchase_info["purchase_date"])
             self.delivery_cost = purchase_info["delivery_cost"]
-            items_cost = purchase_info["items_cost"]
-
         else:
             self.schedule_date: datetime = add_to_date(None, weeks=2)
             self.posting_date: datetime = today()
             self.delivery_cost = delivery_cost
-            items_cost = self.total_amount
 
-        if len(self.sales_orders) > 0:
-            for ikea_cart_so in self.sales_orders:
-                sales_order = frappe.get_doc(
-                    "Sales Order", ikea_cart_so.sales_order_name
-                )
-                sales_order.submit()
-
-        if self.total_amount != items_cost:
-            self.difference = self.total_amount - items_cost
-
-        self.calculate_totals()
-        self.make_invoice_gl_entries()
-        self.status = "To Receive"
+        self.order_confirmation_no = purchase_id
         self.submit()
 
     @frappe.whitelist()
     def checkout(self):
         items = self.get_templated_items_for_api(False)
-        u = IkeaCartUtils()
-        return [u.add_items_to_cart_authorized(items)]
+        return [IkeaCartUtils().add_items_to_cart_authorized(items)]
 
     @frappe.whitelist()
-    def set_completed(self):
-        self.make_delivery_gl_entries()
-        stock.purchase_order_completed(self)
-        self.db_set("status", "Completed")
-
-    @frappe.whitelist()
-    def create_new_sales_order_from_items_to_sell(
-        self, items: dict[Any, Any], customer: str
-    ):
-        if self.status != "Draft":
-            # if self.status != 'To Receive':
-            raise ValidationError(
-                _(
-                    "Cannot create Sales Order from Purchase Order's items to sell with status {}"
-                ).format(self.status)
-            )
-
-        item_qty_map = count_quantity(self.items_to_sell)
-
-        for d in items:
-            d = frappe._dict(d)
-            if item_qty_map[d.item_code] < d.qty:
-                raise ValidationError(
-                    _("Cannot add more items than there is: {}").format(
-                        f"{d.item_code}: {d.qty}"
-                    )
-                )  # TODO: Make prettier exception
-
-        doc: SalesOrder = frappe.get_doc(
-            {
-                "doctype": "Sales Order",
-                "customer": customer,
-                "items": items,
-                "from_not_received_items_to_sell": True,  # Not change
-                "edit_commission": True,
-            }
-        )
-        doc.submit()
-
-        # Continue working. Add order to Purchase Order
-
-
-@frappe.whitelist()
-def get_sales_orders_containing_items(
-    items_in_options: list[str], sales_orders: list[str]
-) -> dict[str, list[Any]]:
-    items_in_options = parse_json(items_in_options) or items_in_options
-    sales_orders = parse_json(sales_orders) or items_in_options
-    items_in_sales_orders_by_options = {}
-    for option in items_in_options:
-        items_in_sales_orders = {}
-        for item in items_in_options[option]:
-            sales_orders_with_item = frappe.db.get_list(
-                "Sales Order",
-                filters={"name": ["in", sales_orders], "item_code": ["in", [item]]},
-                fields=["name"],
-                as_list=True,
-            )
-            items_in_sales_orders[item] = [s[0] for s in sales_orders_with_item]
-        items_in_sales_orders_by_options[option] = items_in_sales_orders
-    return items_in_sales_orders_by_options
+    def create_receipt(self):
+        Receipt.create_for(self.doctype, self.name)
+        self.status = "Completed"
+        self.db_update()
 
 
 @frappe.whitelist()
@@ -456,7 +379,12 @@ def get_unavailable_items_in_cart_by_orders(
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_sales_order_query(
-    doctype: str, txt: str, searchfield: str, start: str, page_len: str, filters: str
+    doctype: str,
+    txt: str,
+    searchfield: str,
+    start: str,
+    page_len: str,
+    filters: dict[str, Any],
 ) -> dict[str, Any]:
     ignore_orders: list[str] = frappe.db.sql(
         "SELECT sales_order_name from `tabPurchase Order Sales Order`"
@@ -504,7 +432,6 @@ def get_purchase_info(purchase_id: int, use_lite_id: bool) -> dict[str, Any]:
     try:
         purchase_info = utils.get_purchase_info(purchase_id, use_lite_id=use_lite_id)
     except Exception as e:
-
         frappe.log_error(", ".join(e.args))
     return {
         "purchase_info_loaded": True if purchase_info else False,
