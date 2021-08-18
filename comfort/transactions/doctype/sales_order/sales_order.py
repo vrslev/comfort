@@ -10,15 +10,12 @@ from comfort.comfort_core.doctype.commission_settings.commission_settings import
 )
 from comfort.entities.doctype.child_item.child_item import ChildItem
 from comfort.entities.doctype.item.item import Item
-from comfort.finance import get_account, get_received_amount
-from comfort.finance.doctype.gl_entry.gl_entry import GLEntry
-from comfort.stock.doctype.bin.bin import Bin
+from comfort.finance import get_received_amount
+from comfort.finance.doctype.payment.payment import Payment
+from comfort.stock.doctype.receipt.receipt import Receipt
 from frappe import _
 from frappe.model.document import Document
 
-from ..purchase_order_sales_order.purchase_order_sales_order import (
-    PurchaseOrderSalesOrder,
-)
 from ..sales_order_child_item.sales_order_child_item import SalesOrderChildItem
 from ..sales_order_item.sales_order_item import SalesOrderItem
 from ..sales_order_service.sales_order_service import SalesOrderService
@@ -68,7 +65,7 @@ class SalesOrderMethods(Document):
         for item in to_remove:
             self.items.remove(item)
 
-    def _update_items_from_db(self):
+    def update_items_from_db(self):
         """Load item properties from database and calculate Amount and Total Weight."""
         for item in self.items:
             doc: Item = frappe.get_cached_doc("Item", item.item_code)
@@ -78,6 +75,25 @@ class SalesOrderMethods(Document):
 
             item.amount = item.rate * item.qty
             item.total_weight = item.weight * item.qty
+
+    def set_child_items(self):
+        """Generate Child Items from combinations in Items."""
+
+        self.child_items = []
+        if not self.items:
+            return
+
+        child_items: list[ChildItem] = frappe.get_all(
+            "Child Item",
+            fields=("parent as parent_item_code", "item_code", "item_name", "qty"),
+            filters={"parent": ("in", (d.item_code for d in self.items))},
+        )
+
+        item_codes_to_qty = count_quantity(self.items)
+        for d in child_items:
+            d.qty = d.qty * item_codes_to_qty[d.parent_item_code]
+
+        self.extend("child_items", child_items)
 
     def _calculate_item_totals(self):
         """Calculate global Total Quantity, Weight and Items Cost."""
@@ -113,150 +129,31 @@ class SalesOrderMethods(Document):
             self.items_cost + self.margin + self.service_amount - self.discount
         )
 
+    def calculate(self):  # pragma: no cover
+        """Calculate all things that are calculable."""
+        self._calculate_item_totals()
+        self._calculate_service_amount()
+        self._calculate_commission()
+        self._calculate_margin()
+        self._calculate_total_amount()
+
+
+class SalesOrderStatuses(SalesOrderMethods):
     def _set_paid_and_pending_per_amount(self):
         self.paid_amount = get_received_amount(self)
 
-        if int(self.total_amount) == 0:
+        if self.total_amount == 0:
             self.per_paid = 100
         else:
             self.per_paid = self.paid_amount / self.total_amount * 100
 
         self.pending_amount = self.total_amount - self.paid_amount
 
-    def calculate(self):  # pragma: no cover
-        """Calculate all things that are calculable."""
-        self._update_items_from_db()
-        self._calculate_item_totals()
-        self._calculate_service_amount()
-        self._calculate_commission()
-        self._calculate_margin()
-        self._calculate_total_amount()
-        self._set_paid_and_pending_per_amount()
-
-    def set_child_items(self):
-        """Generate Child Items from combinations in Items."""
-
-        self.child_items = []
-        if not self.items:
-            return
-
-        child_items: list[ChildItem] = frappe.get_all(
-            "Child Item",
-            fields=("parent as parent_item_code", "item_code", "item_name", "qty"),
-            filters={"parent": ("in", (d.item_code for d in self.items))},
-        )
-
-        item_codes_to_qty = count_quantity(self.items)
-        for d in child_items:
-            d.qty = d.qty * item_codes_to_qty[d.parent_item_code]
-
-        self.extend("child_items", child_items)
-
-
-class SalesOrderFinance(SalesOrderMethods):
-    def _get_amounts_for_invoice_gl_entries(self):
-        sales_amount = self.total_amount - self.service_amount
-
-        delivery_amount, installation_amount = 0, 0
-        for s in self.services:
-            if "Delivery" in s.type:
-                delivery_amount += s.rate
-            elif "Installation" in s.type:
-                installation_amount += s.rate
-
-        return {
-            "sales_amount": sales_amount,
-            "delivery_amount": delivery_amount,
-            "installation_amount": installation_amount,
-        }
-
-    def _make_categories_invoice_gl_entries(
-        self,
-        paid_amount: int,
-        sales_amount: int,
-        delivery_amount: int,
-        installation_amount: int,
-    ):
-        remaining_amount = paid_amount
-
-        for accounts_name, amount in (
-            ("sales", sales_amount),
-            ("delivery", delivery_amount),
-            ("installation", installation_amount),
-        ):
-            if amount == 0:
-                continue
-
-            elif amount > remaining_amount:
-                GLEntry.new(self, get_account(accounts_name), 0, remaining_amount)
-                remaining_amount = 0
-                break
-
-            else:
-                GLEntry.new(self, get_account(accounts_name), 0, amount)
-                remaining_amount -= amount
-
-        if remaining_amount > 0:
-            GLEntry.new(self, get_account("sales"), 0, remaining_amount)
-            remaining_amount = 0
-
-    def _make_income_invoice_gl_entry(self, paid_amount: int, paid_with_cash: bool):
-        account = get_account("cash" if paid_with_cash else "bank")
-        GLEntry.new(self, account, paid_amount, 0)
-
-    def make_invoice_gl_entries(self, paid_amount: int, paid_with_cash: bool):
-        """Automatically allocate Paid Amount to various funds and make GL Entries."""
-
-        if paid_amount <= 0:
-            raise ValidationError(_("Paid Amount should be more that zero"))
-        if self.total_amount <= 0:
-            raise ValidationError(_("Total Amount should be more that zero"))
-
-        amounts = self._get_amounts_for_invoice_gl_entries()  # pragma: no cover
-        self._make_categories_invoice_gl_entries(
-            paid_amount, **amounts
-        )  # pragma: no cover
-        self._make_income_invoice_gl_entry(
-            paid_amount, paid_with_cash
-        )  # pragma: no cover
-
-    def make_delivery_gl_entries(self):
-        """Make GL Entries for event of delivery according to Accounting cycle.
-        Executed when order is completed.
-        """
-
-        if not self.delivery_status == "Delivered":
-            raise ValidationError(
-                _('Cannot make GL Entries when status is not "Delivered"')
-            )
-        accounts = get_account(("inventory", "cost_of_goods_sold"))
-        GLEntry.new(self, accounts[0], 0, self.items_cost)
-        GLEntry.new(self, accounts[1], self.items_cost, 0)
-
-
-class SalesOrderStock(SalesOrderFinance):
-    def _get_items_with_splitted_combinations(
-        self,
-    ) -> list[SalesOrderChildItem | SalesOrderItem]:
-        parents = (child.parent_item_code for child in self.child_items)
-        return self.child_items + [
-            item for item in self.items if item.item_code not in parents
-        ]
-
-    def remove_items_from_reserved_actual(self):
-        """Reduce Reserved Actual quantity in Bins of items in Sales Order.
-        Executed when order is completed.
-        """
-        items = self._get_items_with_splitted_combinations()
-        for item_code, qty in count_quantity(items).items():
-            Bin.update_for(item_code, reserved_actual=-qty)
-
-
-class SalesOrderStatuses(SalesOrderStock):
     def _set_payment_status(self):
         """Set Payment Status. Depends on `per_paid`.
         If docstatus == 2 sets "".
         """
+
         if self.docstatus == 2:
             status = ""
         elif self.per_paid > 100:
@@ -271,30 +168,39 @@ class SalesOrderStatuses(SalesOrderStock):
         self.payment_status = status
 
     def _set_delivery_status(self):
-        """Set Delivery Status. Depends on status of linked Purchase Order.
-        If docstatus == 2 sets "".
-        """
-        status = "To Purchase"
-        if self.delivery_status == "Delivered":
-            return
+        """Set Delivery Status.
 
-        if self.docstatus == 2:
-            status = ""
+        If Receipt exists: "Delivered".
+        Else if Purchase Order exists:
+            if Receipt for Purchase order exists: "To Deliver"
+            if not: "Purchased"
+        Else: "To Purchase"
+        """
+
+        if frappe.db.exists(
+            "Receipt",
+            {"voucher_type": self.doctype, "voucher_no": self.name, "docstatus": 1},
+        ):
+            status = "Delivered"
         else:
-            po_name: list[PurchaseOrderSalesOrder] = frappe.get_all(
+            if purchase_order_name := frappe.get_value(
                 "Purchase Order Sales Order",
                 fields="parent",
                 filters={"sales_order_name": self.name, "docstatus": 1},
-                limit_page_length=1,
-            )
-            if po_name:
-                po_status: str = frappe.get_value(
-                    "Purchase Order", po_name[0].parent, "status"
-                )
-                if po_status == "To Receive":
-                    status = "Purchased"
-                elif po_status == "Completed":
+            ):
+                if frappe.db.exists(
+                    "Receipt",
+                    {
+                        "voucher_type": "Purchase Order",
+                        "voucher_no": purchase_order_name,
+                        "docstatus": 1,
+                    },
+                ):
                     status = "To Deliver"
+                else:
+                    status = "Purchased"
+            else:
+                status = "To Purchase"
 
         self.delivery_status = status
 
@@ -312,80 +218,56 @@ class SalesOrderStatuses(SalesOrderStock):
 
         self.status = status
 
-    def set_statuses(self):  # pragma: no cover
+    def set_statuses(self):
         """Set statuses according to current Sales Order and linked Purchase Order states."""
-        self._set_delivery_status()
-        self._set_payment_status()
-        self._set_document_status()
-        self.db_update()
-
-    @frappe.whitelist()
-    def set_paid(self, paid_amount: int, cash: bool):  # pragma: no cover
-        """Add new Payment."""
-        self.make_invoice_gl_entries(paid_amount, cash)
         self._set_paid_and_pending_per_amount()
-        self.set_statuses()
+        self._set_payment_status()
 
-    def _set_validate_and_set_status_before_set_delivered(self):
-        if self.delivery_status == "Delivered":
-            raise ValidationError(
-                _('Delivery Status of this Sales Order is already "Delivered"')
-            )
-
-        self.set_statuses()
-        if not self.delivery_status == "Delivered":
-            raise ValidationError(_("Not able to set Delivered"))
-
-    @frappe.whitelist()
-    def set_delivered(self):  # pragma: no cover
-        """Mark Sales Order as delivered"""
-        self._set_validate_and_set_status_before_set_delivered()
-        self.make_delivery_gl_entries()
-        self.remove_items_from_reserved_actual()
+        self._set_delivery_status()
+        self._set_document_status()
 
 
 class SalesOrder(SalesOrderStatuses):
-    def validate(self):  # pragma: no cover
-        # SalesOrderMethods
-        self.merge_same_items()
+    def validate(self):
         self.delete_empty_items()
-        self.calculate()
+        self.merge_same_items()
+        self.update_items_from_db()
         self.set_child_items()
 
-        # SalesOrderStatuses
+        self.calculate()
         self.set_statuses()
 
     def before_submit(self):
         self.edit_commission = True
 
-    def on_cancel(self):
-        # TODO: Cancel payment and delivery
-        # TODO: Update bin
-        self.ignore_linked_doctypes = "GL Entry"  # type: ignore
-
-        GLEntry.cancel_entries_for(self)
-        if self.delivery_status == "To Purchase":
-            ...  # do nothing
-        elif self.delivery_status == "Purchased":
-            ...  # reserved_purchased -> available_purchased
-        elif self.delivery_status == "To Deliver":
-            ...  # remove from reserved_actual
-        elif self.delivery_status == "Delivered":
-            ...  # add to available_actual
-        # Actually, better would be to use some kind of Stock Entry for this
-
-        self._set_paid_and_pending_per_amount()
+    def before_cancel(self):
         self.set_statuses()
 
-    def before_update_after_submit(self):  # TODO
-        if self.from_not_received_items_to_sell:  # type: ignore
-            self.flags.ignore_validate_update_after_submit = True
-        self.validate()
+    def before_update_after_submit(self):
+        self.calculate()
+        self.set_statuses()
 
     @frappe.whitelist()
-    def calculate_commission_and_margin(self):  # pragma: no cover
+    def calculate_commission_and_margin(self):
         self._calculate_commission()
         self._calculate_margin()
+
+    @frappe.whitelist()
+    def add_payment(self, paid_amount: int, cash: bool):
+        Payment.create_for(self.doctype, self.name, paid_amount, cash)
+        self.set_statuses()
+        self.db_update()
+
+    @frappe.whitelist()
+    def add_receipt(self):
+        if self.delivery_status == "Delivered":
+            raise ValidationError(
+                _('Delivery Status of this Sales Order is already "Delivered"')
+            )
+
+        Receipt.create_for(self.doctype, self.name)
+        self.set_statuses()
+        self.db_update()
 
     @frappe.whitelist()
     def split_combinations(self, combos_to_split: list[str], save: bool):

@@ -53,7 +53,7 @@ frappe.ui.form.on("Sales Order", {
             (values) => {
               frm.call({
                 doc: frm.doc,
-                method: "set_paid",
+                method: "add_payment",
                 args: {
                   paid_amount: values.paid_amount,
                   cash: values.account == "Cash",
@@ -74,7 +74,7 @@ frappe.ui.form.on("Sales Order", {
         .add_custom_button(__("Delivered"), () => {
           frm.call({
             doc: frm.doc,
-            method: "set_delivered",
+            method: "add_receipt",
             callback: () => {
               frm.reload_doc();
             },
