@@ -1,0 +1,101 @@
+{
+  "actions": [],
+  "creation": "2021-08-17 22:14:50.838363",
+  "doctype": "DocType",
+  "editable_grid": 1,
+  "engine": "InnoDB",
+  "field_order": [
+    "stock_type",
+    "voucher_section",
+    "voucher_type",
+    "column_break_2",
+    "voucher_no",
+    "items_section",
+    "items",
+    "section_break_7",
+    "amended_from"
+  ],
+  "fields": [
+    {
+      "fieldname": "voucher_type",
+      "fieldtype": "Select",
+      "in_list_view": 1,
+      "label": "Voucher Type",
+      "options": "\nSales Order\nPurchase Order\nReceipt"
+    },
+    {
+      "fieldname": "voucher_no",
+      "fieldtype": "Dynamic Link",
+      "in_list_view": 1,
+      "label": "Voucher No",
+      "options": "voucher_type"
+    },
+    {
+      "fieldname": "stock_type",
+      "fieldtype": "Select",
+      "in_list_view": 1,
+      "label": "Stock Type",
+      "options": "Reserved Actual\nAvailable Actual\nReserved Purchased\nAvailable Purchased",
+      "reqd": 1
+    },
+    {
+      "fieldname": "items",
+      "fieldtype": "Table",
+      "label": "Items",
+      "options": "Stock Entry Item",
+      "reqd": 1
+    },
+    {
+      "fieldname": "amended_from",
+      "fieldtype": "Link",
+      "label": "Amended From",
+      "no_copy": 1,
+      "options": "Stock Entry",
+      "print_hide": 1,
+      "read_only": 1
+    },
+    {
+      "fieldname": "column_break_2",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "section_break_7",
+      "fieldtype": "Section Break"
+    },
+    {
+      "fieldname": "voucher_section",
+      "fieldtype": "Section Break",
+      "label": "Voucher"
+    },
+    {
+      "fieldname": "items_section",
+      "fieldtype": "Section Break",
+      "label": "Items"
+    }
+  ],
+  "in_create": 1,
+  "index_web_pages_for_search": 1,
+  "is_submittable": 1,
+  "links": [],
+  "modified": "2021-08-18 07:52:14.345180",
+  "modified_by": "Administrator",
+  "module": "Stock",
+  "name": "Stock Entry",
+  "owner": "Administrator",
+  "permissions": [
+    {
+      "create": 1,
+      "delete": 1,
+      "email": 1,
+      "export": 1,
+      "print": 1,
+      "read": 1,
+      "report": 1,
+      "role": "System Manager",
+      "share": 1,
+      "write": 1
+    }
+  ],
+  "sort_field": "modified",
+  "sort_order": "DESC"
+}
