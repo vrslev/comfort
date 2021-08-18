@@ -2,13 +2,14 @@ from __future__ import annotations
 
 import json
 from collections import Counter, defaultdict
-from typing import Any, Iterable, TypeVar
+from typing import Any, Iterable, Literal, TypeVar
 
 import frappe
 
 __version__ = "0.2.0"
 
 # TODO: Add tests to all utils
+OrderTypes = Literal["Sales Order", "Purchase Order"]
 
 
 def count_quantity(
