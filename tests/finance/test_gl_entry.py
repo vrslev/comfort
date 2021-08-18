@@ -51,31 +51,21 @@ def test_gl_entry_new(sales_order: SalesOrder):
     assert entry.docstatus == 1
 
 
-def test_make_reverse_entries_new_entry(sales_order: SalesOrder, gl_entry: GLEntry):
+def test_cancel_entries_for(sales_order: SalesOrder, gl_entry: GLEntry):
     sales_order.db_insert()
     gl_entry.insert()
-    GLEntry.make_reverse_entries(sales_order)
+    gl_entry.submit()
+
+    GLEntry.cancel_entries_for(sales_order)
 
     gl_entries: list[GLEntry] = frappe.get_all(
         "GL Entry",
         filters={"voucher_type": sales_order.doctype, "voucher_no": sales_order.name},
-        fields=["remarks", "debit", "credit"],
+        fields=["docstatus", "debit", "credit"],
     )
-    remarks: list[str] = []
     balance = 0
     for entry in gl_entries:
-        remarks.append(entry.remarks)
+        assert entry.docstatus == 2
         balance += entry.debit - entry.credit
 
-    assert balance == 0
-    assert f"On cancellation of {gl_entry.voucher_no}" in remarks
-
-
-def test_make_reverse_entries_old_entry_is_cancelled(
-    sales_order: SalesOrder, gl_entry: GLEntry
-):
-    sales_order.db_insert()
-    gl_entry.insert()
-    GLEntry.make_reverse_entries(sales_order)
-
-    assert gl_entry.get_db_value("is_cancelled") == 1
+    assert balance == gl_entry.debit - gl_entry.credit

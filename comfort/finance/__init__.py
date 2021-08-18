@@ -42,15 +42,14 @@ def get_account(field_names: str | Iterable[str]):
 def get_received_amount(doc: Document) -> int:
     """Get balance from all GL Entries associated with given Transaction and default Cash or Bank accounts"""
     accounts = get_account(("cash", "bank"))
-    entries: list[Any] = frappe.get_all(
+    balances: list[Any] = frappe.get_all(
         "GL Entry",
         fields="SUM(debit - credit) as balance",
         filters={
             "account": ["in", accounts],
             "voucher_type": doc.doctype,
             "voucher_no": doc.name,
-            "is_cancelled": 0,
+            "docstatus": ["!=", 2],
         },
-        limit_page_length=1,
     )
-    return sum(entry.balance or 0 for entry in entries)
+    return sum(b.balance or 0 for b in balances)

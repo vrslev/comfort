@@ -1,7 +1,6 @@
 from typing import Literal
 
 import frappe
-from frappe import _
 from frappe.model.document import Document
 
 _TransactionType = Literal["Invoice", "Delivery"]
@@ -34,7 +33,7 @@ class GLEntry(Document):
         ).submit()
 
     @staticmethod
-    def make_reverse_entries(doc: Document):
+    def cancel_entries_for(doc: Document):
         gl_entries: list[GLEntry] = frappe.get_all(
             "GL Entry",
             filters={
@@ -42,21 +41,7 @@ class GLEntry(Document):
                 "voucher_no": doc.name,
                 "is_cancelled": 0,
             },
-            fields=["*"],
+            fields=["name"],
         )
-
-        for entry in gl_entries:
-            frappe.db.set_value("GL Entry", entry.name, "is_cancelled", True)
-            frappe.get_doc(
-                {
-                    "doctype": "GL Entry",
-                    "type": entry.type,
-                    "account": entry.account,
-                    "debit": entry.credit,
-                    "credit": entry.debit,
-                    "voucher_type": entry.voucher_type,
-                    "voucher_no": entry.voucher_no,
-                    "is_cancelled": 1,
-                    "remarks": f"{_('On cancellation of')} {entry.voucher_no}",
-                }
-            ).submit()
+        for entry_ in gl_entries:
+            frappe.get_doc("GL Entry", entry_.name).cancel()
