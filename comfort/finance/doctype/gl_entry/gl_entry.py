@@ -10,28 +10,28 @@ class GLEntry(Document):
     voucher_no: str
 
     @staticmethod
-    def new(doc: Document, account: str, debit: int, credit: int):
-        frappe.get_doc(
+    def create_for(
+        doctype: str, name: str, account: str, debit: int, credit: int
+    ):  # pragma: no cover
+        doc: GLEntry = frappe.get_doc(
             {
                 "doctype": "GL Entry",
                 "account": account,
                 "debit": debit,
                 "credit": credit,
-                "voucher_type": doc.doctype,
-                "voucher_no": doc.name,
+                "voucher_type": doctype,
+                "voucher_no": name,
             }
-        ).submit()
+        )
+        doc.insert()
+        doc.submit()
+        return doc
 
     @staticmethod
-    def cancel_entries_for(doc: Document):
+    def cancel_for(doctype: str, name: str):
         gl_entries: list[GLEntry] = frappe.get_all(
             "GL Entry",
-            filters={
-                "voucher_type": doc.doctype,
-                "voucher_no": doc.name,
-                "docstatus": ("!=", 2),
-            },
-            fields=["name"],
+            {"voucher_type": doctype, "voucher_no": name, "docstatus": ("!=", 2)},
         )
-        for entry_ in gl_entries:
-            frappe.get_doc("GL Entry", entry_.name).cancel()
+        for entry in gl_entries:
+            frappe.get_doc("GL Entry", entry.name).cancel()

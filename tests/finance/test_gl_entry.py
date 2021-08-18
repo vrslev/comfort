@@ -3,18 +3,19 @@ from typing import TYPE_CHECKING
 import pytest
 
 import frappe
-from comfort.finance import get_account
 from comfort.finance.doctype.gl_entry.gl_entry import GLEntry
-from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
+from comfort.finance.doctype.payment.payment import Payment
 
 if not TYPE_CHECKING:
     from tests.entities.test_customer import customer
     from tests.entities.test_item import child_items, item
+    from tests.finance.test_payment import payment
     from tests.transactions.test_sales_order import sales_order
 
 
 @pytest.fixture
-def gl_entry() -> GLEntry:
+def gl_entry(payment: Payment) -> GLEntry:
+    payment.db_insert()
     return frappe.get_doc(
         {
             "name": "GLE-2021-00001",
@@ -22,42 +23,25 @@ def gl_entry() -> GLEntry:
             "account": "Delivery",
             "debit": 0,
             "credit": 300,
-            "voucher_type": "Sales Order",
-            "voucher_no": "SO-2021-0001",
+            "voucher_type": "Payment",
+            "voucher_no": "ebd35a9cc9",
             "doctype": "GL Entry",
         }
     )
 
 
-def test_gl_entry_new(sales_order: SalesOrder):
-    account = get_account("delivery")
-    debit, credit = 0, 300
-    sales_order.db_insert()
-    GLEntry.new(sales_order, account, debit, credit)
-    entry: GLEntry = frappe.get_all(
-        "GL Entry",
-        filters={"voucher_type": sales_order.doctype, "voucher_no": sales_order.name},
-        fields=["account", "debit", "credit", "is_cancelled", "docstatus"],
-        limit_page_length=1,
-    )[0]
-
-    assert entry.account == account
-    assert entry.debit == debit
-    assert entry.credit == credit
-    assert entry.is_cancelled == 0
-    assert entry.docstatus == 1
-
-
-def test_cancel_entries_for(sales_order: SalesOrder, gl_entry: GLEntry):
-    sales_order.db_insert()
+def test_cancel_entries_for(payment: Payment, gl_entry: GLEntry):
     gl_entry.insert()
     gl_entry.submit()
 
-    GLEntry.cancel_entries_for(sales_order)
+    GLEntry.cancel_for(payment.doctype, payment.name)
 
     gl_entries: list[GLEntry] = frappe.get_all(
         "GL Entry",
-        filters={"voucher_type": sales_order.doctype, "voucher_no": sales_order.name},
+        filters={
+            "voucher_type": gl_entry.voucher_type,
+            "voucher_no": gl_entry.voucher_no,
+        },
         fields=["docstatus", "debit", "credit"],
     )
     balance = 0
