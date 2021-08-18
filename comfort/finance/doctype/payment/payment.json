@@ -1,0 +1,104 @@
+{
+  "actions": [],
+  "creation": "2021-08-17 22:54:46.533174",
+  "doctype": "DocType",
+  "editable_grid": 1,
+  "engine": "InnoDB",
+  "field_order": [
+    "voucher_section",
+    "voucher_type",
+    "column_break_3",
+    "voucher_no",
+    "amount_section",
+    "amount",
+    "section_break_7",
+    "amended_from",
+    "paid_with_cash"
+  ],
+  "fields": [
+    {
+      "fieldname": "voucher_type",
+      "fieldtype": "Select",
+      "in_list_view": 1,
+      "label": "Voucher Type",
+      "options": "\nSales Order\nPurchase Order",
+      "reqd": 1
+    },
+    {
+      "fieldname": "voucher_no",
+      "fieldtype": "Dynamic Link",
+      "in_list_view": 1,
+      "label": "Voucher No",
+      "options": "voucher_type",
+      "reqd": 1
+    },
+    {
+      "fieldname": "amended_from",
+      "fieldtype": "Link",
+      "label": "Amended From",
+      "no_copy": 1,
+      "options": "Payment",
+      "print_hide": 1,
+      "read_only": 1
+    },
+    {
+      "fieldname": "voucher_section",
+      "fieldtype": "Section Break",
+      "label": "Voucher"
+    },
+    {
+      "fieldname": "column_break_3",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "section_break_7",
+      "fieldtype": "Section Break"
+    },
+    {
+      "fieldname": "amount_section",
+      "fieldtype": "Section Break",
+      "label": "Amount"
+    },
+    {
+      "fieldname": "amount",
+      "fieldtype": "Currency",
+      "label": "Amount",
+      "precision": "0",
+      "reqd": 1
+    },
+    {
+      "default": "0",
+      "fieldname": "paid_with_cash",
+      "fieldtype": "Check",
+      "hidden": 1,
+      "label": "Paid With Cash",
+      "read_only": 1
+    }
+  ],
+  "in_create": 1,
+  "index_web_pages_for_search": 1,
+  "is_submittable": 1,
+  "links": [],
+  "modified": "2021-08-18 06:12:03.584155",
+  "modified_by": "Administrator",
+  "module": "Finance",
+  "name": "Payment",
+  "owner": "Administrator",
+  "permissions": [
+    {
+      "create": 1,
+      "delete": 1,
+      "email": 1,
+      "export": 1,
+      "print": 1,
+      "read": 1,
+      "report": 1,
+      "role": "System Manager",
+      "share": 1,
+      "write": 1
+    }
+  ],
+  "sort_field": "modified",
+  "sort_order": "DESC",
+  "track_changes": 1
+}
