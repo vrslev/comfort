@@ -182,17 +182,15 @@ class PurchaseOrderMethods(Document):
                 inventory_amt_paid = self.total_amount - already_paid_amount
 
             inventory_accounts: list[str] = get_account(["cash", "prepaid_inventory"])
-            GLEntry.new(self, "Invoice", inventory_accounts[0], 0, inventory_amt_paid)
-            GLEntry.new(self, "Invoice", inventory_accounts[1], inventory_amt_paid, 0)
+            GLEntry.new(self, inventory_accounts[0], 0, inventory_amt_paid)
+            GLEntry.new(self, inventory_accounts[1], inventory_amt_paid, 0)
 
             if self.delivery_cost > 0:
                 delivery_accounts: list[str] = get_account(
                     ["cash", "purchase_delivery"]
                 )
-                GLEntry.new(self, "Invoice", delivery_accounts[1], 0, delivery_amt_paid)
-                GLEntry.new(self, "Invoice", delivery_accounts[1], delivery_amt_paid, 0)
-                make_gl_entry(self, delivery_accounts[0], 0, delivery_amt_paid)
-                make_gl_entry(self, delivery_accounts[1], delivery_amt_paid, 0)
+                GLEntry.new(self, delivery_accounts[1], 0, delivery_amt_paid)
+                GLEntry.new(self, delivery_accounts[1], delivery_amt_paid, 0)
 
     def update_status_in_sales_orders(self):
         for d in self.sales_orders:

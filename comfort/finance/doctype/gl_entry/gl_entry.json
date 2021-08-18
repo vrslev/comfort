@@ -6,28 +6,17 @@
   "editable_grid": 1,
   "engine": "InnoDB",
   "field_order": [
-    "type",
-    "is_cancelled",
+    "voucher_section",
+    "voucher_type",
     "column_break_4",
+    "voucher_no",
     "account_section",
     "account",
     "column_break_7",
     "debit",
-    "credit",
-    "voucher_section",
-    "voucher_type",
-    "column_break_12",
-    "voucher_no",
-    "section_break_14",
-    "remarks"
+    "credit"
   ],
   "fields": [
-    {
-      "default": "0",
-      "fieldname": "is_cancelled",
-      "fieldtype": "Check",
-      "label": "Is Cancelled"
-    },
     {
       "fieldname": "account_section",
       "fieldtype": "Section Break",
@@ -66,15 +55,6 @@
       "search_index": 1
     },
     {
-      "fieldname": "section_break_14",
-      "fieldtype": "Section Break"
-    },
-    {
-      "fieldname": "remarks",
-      "fieldtype": "Small Text",
-      "label": "Remarks"
-    },
-    {
       "fieldname": "column_break_4",
       "fieldtype": "Column Break"
     },
@@ -93,22 +73,12 @@
       "fieldtype": "Currency",
       "label": "Credit",
       "precision": "0"
-    },
-    {
-      "fieldname": "column_break_12",
-      "fieldtype": "Column Break"
-    },
-    {
-      "fieldname": "type",
-      "fieldtype": "Select",
-      "label": "Type",
-      "options": "\nDelivery\nInvoice"
     }
   ],
   "in_create": 1,
   "index_web_pages_for_search": 1,
   "links": [],
-  "modified": "2021-08-17 00:57:57.621596",
+  "modified": "2021-08-17 22:41:41.761409",
   "modified_by": "Administrator",
   "module": "Finance",
   "name": "GL Entry",

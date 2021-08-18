@@ -37,5 +37,5 @@ def test_get_account_raises_on_wrong_name(accounts: None):
 
 def test_get_received_amount(accounts: None, sales_order: SalesOrder):
     sales_order.db_insert()
-    GLEntry.new(sales_order, "Invoice", get_account("cash"), 300, 0)
+    GLEntry.new(sales_order, get_account("cash"), 300, 0)
     assert get_received_amount(sales_order) == 300

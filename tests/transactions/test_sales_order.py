@@ -207,7 +207,7 @@ def test_set_paid_and_pending_per_amount(
     exp_pending_amount: int,
 ):
     sales_order.db_insert()
-    GLEntry.new(sales_order, "Invoice", get_account("cash"), paid_amount, 0)
+    GLEntry.new(sales_order, get_account("cash"), paid_amount, 0)
 
     sales_order.total_amount = total_amount
     sales_order._set_paid_and_pending_per_amount()

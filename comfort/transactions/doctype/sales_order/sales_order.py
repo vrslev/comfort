@@ -188,23 +188,21 @@ class SalesOrderFinance(SalesOrderMethods):
                 continue
 
             elif amount > remaining_amount:
-                GLEntry.new(
-                    self, "Invoice", get_account(accounts_name), 0, remaining_amount
-                )
+                GLEntry.new(self, get_account(accounts_name), 0, remaining_amount)
                 remaining_amount = 0
                 break
 
             else:
-                GLEntry.new(self, "Invoice", get_account(accounts_name), 0, amount)
+                GLEntry.new(self, get_account(accounts_name), 0, amount)
                 remaining_amount -= amount
 
         if remaining_amount > 0:
-            GLEntry.new(self, "Invoice", get_account("sales"), 0, remaining_amount)
+            GLEntry.new(self, get_account("sales"), 0, remaining_amount)
             remaining_amount = 0
 
     def _make_income_invoice_gl_entry(self, paid_amount: int, paid_with_cash: bool):
         account = get_account("cash" if paid_with_cash else "bank")
-        GLEntry.new(self, "Invoice", account, paid_amount, 0)
+        GLEntry.new(self, account, paid_amount, 0)
 
     def make_invoice_gl_entries(self, paid_amount: int, paid_with_cash: bool):
         """Automatically allocate Paid Amount to various funds and make GL Entries."""
@@ -232,8 +230,8 @@ class SalesOrderFinance(SalesOrderMethods):
                 _('Cannot make GL Entries when status is not "Delivered"')
             )
         accounts = get_account(("inventory", "cost_of_goods_sold"))
-        GLEntry.new(self, "Delivery", accounts[0], 0, self.items_cost)
-        GLEntry.new(self, "Delivery", accounts[1], self.items_cost, 0)
+        GLEntry.new(self, accounts[0], 0, self.items_cost)
+        GLEntry.new(self, accounts[1], self.items_cost, 0)
 
 
 class SalesOrderStock(SalesOrderFinance):

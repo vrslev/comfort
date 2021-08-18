@@ -19,8 +19,6 @@ def gl_entry() -> GLEntry:
         {
             "name": "GLE-2021-00001",
             "owner": "Administrator",
-            "type": "Invoice",
-            "is_cancelled": 0,
             "account": "Delivery",
             "debit": 0,
             "credit": 300,
@@ -32,18 +30,17 @@ def gl_entry() -> GLEntry:
 
 
 def test_gl_entry_new(sales_order: SalesOrder):
-    type_, account = "Invoice", get_account("delivery")
+    account = get_account("delivery")
     debit, credit = 0, 300
     sales_order.db_insert()
-    GLEntry.new(sales_order, type_, account, debit, credit)
+    GLEntry.new(sales_order, account, debit, credit)
     entry: GLEntry = frappe.get_all(
         "GL Entry",
         filters={"voucher_type": sales_order.doctype, "voucher_no": sales_order.name},
-        fields=["type", "account", "debit", "credit", "is_cancelled", "docstatus"],
+        fields=["account", "debit", "credit", "is_cancelled", "docstatus"],
         limit_page_length=1,
     )[0]
 
-    assert entry.type == type_
     assert entry.account == account
     assert entry.debit == debit
     assert entry.credit == credit
