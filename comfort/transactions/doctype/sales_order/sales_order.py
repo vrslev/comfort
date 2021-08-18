@@ -328,10 +328,7 @@ class SalesOrderStatuses(SalesOrderStock):
         self._set_paid_and_pending_per_amount()
         self.set_statuses()
 
-    @frappe.whitelist()
-    def set_delivered(self):
-        """Mark Sales Order as delivered"""
-
+    def _set_validate_and_set_status_before_set_delivered(self):
         if self.delivery_status == "Delivered":
             raise ValidationError(
                 _('Delivery Status of this Sales Order is already "Delivered"')
@@ -341,6 +338,10 @@ class SalesOrderStatuses(SalesOrderStock):
         if not self.delivery_status == "Delivered":
             raise ValidationError(_("Not able to set Delivered"))
 
+    @frappe.whitelist()
+    def set_delivered(self):  # pragma: no cover
+        """Mark Sales Order as delivered"""
+        self._set_validate_and_set_status_before_set_delivered()
         self.make_delivery_gl_entries()
         self.remove_items_from_reserved_actual()
 
@@ -358,14 +359,22 @@ class SalesOrder(SalesOrderStatuses):
 
     def before_submit(self):
         self.edit_commission = True
-        # stock.sales_order_from_stock_submitted(self)
 
     def on_cancel(self):
         # TODO: Cancel payment and delivery
         # TODO: Update bin
         self.ignore_linked_doctypes = "GL Entry"  # type: ignore
 
-        GLEntry.make_reverse_entries(self)
+        GLEntry.cancel_entries_for(self)
+        if self.delivery_status == "To Purchase":
+            ...  # do nothing
+        elif self.delivery_status == "Purchased":
+            ...  # reserved_purchased -> available_purchased
+        elif self.delivery_status == "To Deliver":
+            ...  # remove from reserved_actual
+        elif self.delivery_status == "Delivered":
+            ...  # add to available_actual
+        # Actually, better would be to use some kind of Stock Entry for this
 
         self._set_paid_and_pending_per_amount()
         self.set_statuses()

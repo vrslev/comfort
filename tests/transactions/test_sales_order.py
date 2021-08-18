@@ -442,4 +442,4 @@ def test_set_document_status(
     assert sales_order.status == expected_status
 
 
-# def test_set_paid(): ...
+# def _set_validate_and_set_status_before_set_delivered(): ... # TODO: When Purchase Order
