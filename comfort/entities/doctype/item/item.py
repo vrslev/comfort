@@ -13,13 +13,14 @@ from ..item_category_table.item_category_table import ItemCategoryTable
 
 
 class ItemMethods:
-    url: str | None
-    child_items: list[ChildItem]
+    image: str
     item_code: str
-    item_name: str | None
-    weight: float
-    rate: int
+    item_name: str
     item_categories: list[ItemCategoryTable]
+    url: str | None
+    rate: int
+    weight: float
+    child_items: list[ChildItem]
 
     def validate_child_items(self):
         if self.child_items and frappe.db.exists(
@@ -33,7 +34,7 @@ class ItemMethods:
                 raise ValidationError(_("Invalid URL"))
 
     def set_name(self):
-        if self.item_name is None:
+        if not self.item_name:
             self.item_name = self.item_code
 
     def calculate_weight(self):

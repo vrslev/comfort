@@ -1,7 +1,7 @@
-from __future__ import annotations
+# from __future__ import annotations
 
 # TODO: Allow change services on submit
-from typing import Any, Generator, Iterable
+from typing import Any, Generator, Iterable, Literal
 
 import frappe
 from comfort import ValidationError, count_quantity, group_by_key
@@ -22,24 +22,25 @@ from ..sales_order_service.sales_order_service import SalesOrderService
 
 
 class SalesOrderMethods(Document):
+    customer: str
     items: list[SalesOrderItem]
-    child_items: list[SalesOrderChildItem]
     services: list[SalesOrderService]
-    items_cost: int
     commission: int
-    total_amount: int
-    total_quantity: int
-    total_weight: float
-    service_amount: int
     edit_commission: bool
-    margin: int
     discount: int
+    total_amount: int
     paid_amount: int
-    per_paid: float
     pending_amount: int
-    payment_status: str
-    delivery_status: str
-    status: str
+    total_quantity: int
+    items_cost: int
+    service_amount: int
+    total_weight: float
+    margin: int
+    child_items: list[SalesOrderChildItem]
+    status: Literal["Draft", "In Progress", "Completed", "Cancelled"]
+    payment_status: Literal["", "Unpaid", "Partially Paid", "Paid", "Overpaid"]
+    per_paid: float
+    delivery_status: Literal["To Purchase", "Purchased", "To Deliver", "Delivered"]
 
     def merge_same_items(self):
         """Merge items that have same Item Code."""
@@ -85,13 +86,13 @@ class SalesOrderMethods(Document):
 
         child_items: list[ChildItem] = frappe.get_all(
             "Child Item",
-            fields=("parent as parent_item_code", "item_code", "item_name", "qty"),
+            fields=("parent", "item_code", "item_name", "qty"),
             filters={"parent": ("in", (d.item_code for d in self.items))},
         )
 
         item_codes_to_qty = count_quantity(self.items)
         for d in child_items:
-            d.qty = d.qty * item_codes_to_qty[d.parent_item_code]
+            d.qty = d.qty * item_codes_to_qty[d.parent]
 
         self.extend("child_items", child_items)
 
@@ -165,7 +166,7 @@ class SalesOrderStatuses(SalesOrderMethods):
         else:
             status = "Unpaid"
 
-        self.payment_status = status
+        self.payment_status = status  # type: ignore
 
     def _set_delivery_status(self):
         """Set Delivery Status.
@@ -183,6 +184,7 @@ class SalesOrderStatuses(SalesOrderMethods):
         ):
             status = "Delivered"
         else:
+            purchase_order_name: str
             if purchase_order_name := frappe.get_value(
                 "Purchase Order Sales Order",
                 fields="parent",
@@ -202,7 +204,7 @@ class SalesOrderStatuses(SalesOrderMethods):
             else:
                 status = "To Purchase"
 
-        self.delivery_status = status
+        self.delivery_status = status  # type: ignore
 
     def _set_document_status(self):
         """Set Document Status. Depends on `docstatus`, `payment_status` and `delivery_status`."""
@@ -216,7 +218,7 @@ class SalesOrderStatuses(SalesOrderMethods):
         else:
             status = "Cancelled"
 
-        self.status = status
+        self.status = status  # type: ignore
 
     def set_statuses(self):
         """Set statuses according to current Sales Order and linked Purchase Order states."""

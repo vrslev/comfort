@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from typing import Literal
 from urllib.parse import parse_qs, urlparse
 
 from comfort import ValidationError
@@ -10,8 +11,12 @@ from frappe.model.document import Document
 
 
 class Customer(Document):
-    vk_url: str | None
+    image: str
+    gender: Literal["Male", "Female"]
+    customer_group: str
     vk_id: str | None
+    vk_url: str | None
+    phone: str
 
     def validate(self):  # pragma: no cover
         self.validate_vk_url_and_set_vk_id()

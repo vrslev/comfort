@@ -3,4 +3,5 @@ from frappe.model.document import Document
 
 class PurchaseOrderSalesOrder(Document):
     sales_order_name: str
-    parent: str
+    customer: str
+    total: int

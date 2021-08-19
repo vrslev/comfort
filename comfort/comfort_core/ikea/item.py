@@ -176,11 +176,12 @@ def add_item(item: Any, force_update: bool):
     )
 
 
-def _make_item_category(name: str, url: str) -> ItemCategory | None:
+def _make_item_category(name: str, url: str):
     if not frappe.db.exists("Item Category", name):
-        return frappe.get_doc(
+        doc: ItemCategory = frappe.get_doc(
             {"doctype": "Item Category", "item_category_name": name, "url": url}
-        ).insert()
+        )
+        return doc.insert()
 
 
 def _make_item(

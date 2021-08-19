@@ -12,6 +12,10 @@ from frappe.utils.nestedset import NestedSet
 class Account(NestedSet):
     nsm_parent_field = "parent_account"
 
+    account_name: str
+    is_group: bool
+    parent_account: str
+
 
 @frappe.whitelist()
 def get_children(doctype: str, parent: str | None = None, is_root: bool = False):

@@ -2,4 +2,4 @@ from frappe.model.document import Document
 
 
 class CustomerGroup(Document):
-    pass
+    customer_group_name: str
