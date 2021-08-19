@@ -22,7 +22,7 @@ reportMissingTypeStubs = false
 reportPrivateUsage = false
 reportUnknownVariableType = false
 reportUnknownMemberType = false
-reportOverlappingOverload = false
+
 
 # Rules that are not in "strict" mode:
 reportUninitializedInstanceVariable = "warning"
@@ -49,6 +49,7 @@ reportImplicitStringConcatenation = "warning"
 # reportOptionalIterable
 # reportOptionalContextManager
 # reportOptionalOperand
+# reportOverlappingOverload
 # reportTypedDictNotRequiredAccess
 # reportUntypedFunctionDecorator
 # reportUntypedClassDecorator
@@ -85,33 +86,12 @@ upload_to_pypi = false
 
 [tool.pytest.ini_options]
 filterwarnings = "ignore:bleach-whitelist has been renamed bleach-allowlist|the imp module is deprecated in favour of importlib:DeprecationWarning"
-addopts = "--cov"
 cache_dir = "tests/.cache"
 
 [tool.coverage.run]
 source = ["comfort"]
 omit = [
-  # Exclude for now: nothing to test there:
-  "comfort/finance/doctype/account/account.py",
-  # Dashboard doctypes:
-  "*_dashboard.py",
-  # Metadata only doctypes:
-  "comfort/comfort_core/doctype/ikea_cart_settings/ikea_cart_settings.py",
-  "comfort/entities/doctype/customer_group/customer_group.py",
-  "comfort/finance/doctype/accounts_settings/accounts_settings.py",
-  # Child Table doctypes:
-  "comfort/stock/doctype/journal_entry_account/journal_entry_account.py",
-  "comfort/transactions/doctype/purchase_order_delivery_option/purchase_order_delivery_option.py",
-  "comfort/transactions/doctype/purchase_order_item_to_sell/purchase_order_item_to_sell.py",
-  "comfort/transactions/doctype/purchase_order_sales_order/purchase_order_sales_order.py",
-  "comfort/transactions/doctype/return_item/return_item.py",
-  "comfort/transactions/doctype/sales_order/sales_order_list.py",
-  "comfort/transactions/doctype/sales_order_child_item/sales_order_child_item.py",
-  "comfort/transactions/doctype/sales_order_item/sales_order_item.py",
-  "comfort/transactions/doctype/sales_order_service/sales_order_service.py",
-  # Takes to long to test and probably won't fail:
   "comfort/fixtures/hooks/boot.py",
-  # To simple to test
   "comfort/fixtures/hooks/overrides.py",
   "comfort/fixtures/hooks/queries.py"
 ]
