@@ -23,7 +23,7 @@
       "driver": "MariaDB",
       "name": "DB",
       "socketPath": "/tmp/mysql.sock",
-      "database": "_c099a42a5555825c",
+      "database": "_04d13fd0aa6f0197",
       "username": "root",
       "password": "123"
     }
