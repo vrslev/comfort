@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Any
-
 import frappe
 from comfort import OrderTypes, ValidationError
 from comfort.finance import get_account
@@ -30,6 +28,9 @@ class Payment(Document):
             self.doctype, self.name, get_account(account_field), debit, credit
         )
 
+    def _resolve_cash_or_bank(self):
+        return "cash" if self.paid_with_cash else "bank"
+
     def _get_amounts_for_sales_gl_entries(self) -> dict[str, int]:
         self._voucher = frappe.get_doc(self.voucher_type, self.voucher_no)
 
@@ -55,7 +56,6 @@ class Payment(Document):
         installation_amount: int,
     ):
         remaining_amount = self.amount
-
         for accounts_name, amount in (
             ("sales", sales_amount),
             ("delivery", delivery_amount),
@@ -77,45 +77,47 @@ class Payment(Document):
             self._new_gl_entry("sales", 0, remaining_amount)
 
     def _create_income_sales_gl_entry(self):
-        account_field = "cash" if self.paid_with_cash else "bank"
+        account_field = self._resolve_cash_or_bank()
         self._new_gl_entry(account_field, self.amount, 0)
 
-    def create_sales_gl_entries(self):
+    def create_sales_gl_entries(self):  # pragma: no cover
         amounts = self._get_amounts_for_sales_gl_entries()
         self._create_categories_sales_gl_entries(**amounts)
         self._create_income_sales_gl_entry()
 
     def create_purchase_gl_entries(self):
-        cash_or_bank = "cash" if self.paid_with_cash else "bank"
-        sums: Any = frappe.get_value(
+        cash_or_bank = self._resolve_cash_or_bank()
+        prepaid_inventory, purchase_delivery = frappe.get_value(
             self.voucher_type,
             self.voucher_no,
-            fields=[
+            fieldname=[
                 "sales_order_cost + items_to_sell_cost as prepaid_inventory",
                 "delivery_cost as purchase_delivery",
             ],
         )
+        prepaid_inventory: int
+        purchase_delivery: int
 
-        self._new_gl_entry(cash_or_bank, 0, sums.prepaid_inventory)
-        self._new_gl_entry("prepaid_inventory", sums.prepaid_inventory, 0)
+        self._new_gl_entry(cash_or_bank, 0, prepaid_inventory)
+        self._new_gl_entry("prepaid_inventory", prepaid_inventory, 0)
 
-        if sums.purchase_delivery > 0:
-            self._new_gl_entry(cash_or_bank, 0, sums.purchase_delivery)
-            self._new_gl_entry("purchase_delivery", sums.purchase_delivery, 0)
+        if purchase_delivery > 0:
+            self._new_gl_entry(cash_or_bank, 0, purchase_delivery)
+            self._new_gl_entry("purchase_delivery", purchase_delivery, 0)
 
-    def create_gl_entries(self):
+    def create_gl_entries(self):  # pragma: no cover
         if self.voucher_type == "Sales Order":
             self.create_sales_gl_entries()
         elif self.voucher_type == "Purchase Order":
             self.create_purchase_gl_entries()
 
-    def before_submit(self):
+    def before_submit(self):  # pragma: no cover
         self.create_gl_entries()
 
-    def cancel_gl_entries(self):
+    def cancel_gl_entries(self):  # pragma: no cover
         GLEntry.cancel_for(self.doctype, self.name)
 
-    def before_cancel(self):
+    def before_cancel(self):  # pragma: no cover
         self.cancel_gl_entries()
 
     @staticmethod
