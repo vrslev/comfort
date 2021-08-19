@@ -6,11 +6,13 @@ from typing import Any
 import frappe
 from comfort import OrderTypes, count_quantity
 from comfort.entities.doctype.child_item.child_item import ChildItem
-from comfort.finance import get_account
-from comfort.finance.doctype.gl_entry.gl_entry import GLEntry
+from comfort.finance import cancel_gl_entries_for, create_gl_entry, get_account
+from comfort.stock import cancel_stock_entries_for, create_stock_entry
+from comfort.transactions.doctype.purchase_order.purchase_order import PurchaseOrder
 from comfort.transactions.doctype.purchase_order_item_to_sell.purchase_order_item_to_sell import (
     PurchaseOrderItemToSell,
 )
+from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
 from comfort.transactions.doctype.sales_order_child_item.sales_order_child_item import (
     SalesOrderChildItem,
 )
@@ -19,28 +21,28 @@ from comfort.transactions.doctype.sales_order_item.sales_order_item import (
 )
 from frappe.model.document import Document
 
-from ..stock_entry.stock_entry import StockEntry, StockTypes
+from ..stock_entry.stock_entry import StockTypes
 
 
 class Receipt(Document):
     voucher_type: OrderTypes
     voucher_no: str
 
-    __voucher: Document
+    __voucher: SalesOrder | PurchaseOrder
 
     @property
-    def _voucher(self) -> Document:
+    def _voucher(self) -> SalesOrder | PurchaseOrder:
         if not hasattr(self, "__voucher"):
             self.__voucher = frappe.get_doc(self.voucher_type, self.voucher_no)
         return self.__voucher
 
     def _new_gl_entry(self, account_field: str, debit: int, credit: int):
-        GLEntry.create_for(
+        create_gl_entry(
             self.doctype, self.name, get_account(account_field), debit, credit
         )
 
     def _new_stock_entry(self, stock_type: StockTypes, items: list[Any]):
-        StockEntry.create_for(self.doctype, self.name, stock_type, items)
+        create_stock_entry(self.doctype, self.name, stock_type, items)
 
     def before_submit(self):  # pragma: no cover
         if self.voucher_type == "Sales Order":
@@ -52,20 +54,13 @@ class Receipt(Document):
 
     def before_cancel(self):  # pragma: no cover
         # TODO: Need to transfer items to available if Sales Order is cancelled
-        GLEntry.cancel_for(self.doctype, self.name)
-        StockEntry.cancel_for(self.doctype, self.name)
-
-    @staticmethod
-    def create_for(doctype: OrderTypes | None, name: str | None):  # pragma: no cover
-        doc: Receipt = frappe.get_doc(
-            {"doctype": "Receipt", "voucher_type": doctype, "voucher_no": name}
-        )
-        doc.insert()
-        doc.submit()
+        cancel_gl_entries_for(self.doctype, self.name)
+        cancel_stock_entries_for(self.doctype, self.name)
 
     # Sales Order
 
     def create_sales_gl_entries(self):
+        self._voucher: SalesOrder
         items_cost: int = self._voucher.items_cost
         self._new_gl_entry("inventory", 0, items_cost)
         self._new_gl_entry("cost_of_goods_sold", items_cost, 0)
@@ -73,6 +68,7 @@ class Receipt(Document):
     def _get_sales_order_items_with_splitted_combinations(
         self,
     ) -> list[SalesOrderChildItem | SalesOrderItem]:
+        self._voucher: SalesOrder
         parents: list[str] = (
             child.parent_item_code for child in self._voucher.child_items
         )
@@ -113,6 +109,7 @@ class Receipt(Document):
         return reverse_items
 
     def _create_purchase_stock_entries_for_sales_orders(self):
+        self._voucher: PurchaseOrder
         items_obj: list[
             SalesOrderItem | SalesOrderChildItem
         ] = self._voucher._get_items_in_sales_orders(split_combinations=True)
@@ -126,6 +123,7 @@ class Receipt(Document):
         self._new_stock_entry("Reserved Actual", items)
 
     def _create_purchase_stock_entries_for_items_to_sell(self):
+        self._voucher: PurchaseOrder
         items_obj: list[
             PurchaseOrderItemToSell | ChildItem
         ] = self._voucher._get_items_to_sell(split_combinations=True)

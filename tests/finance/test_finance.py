@@ -2,9 +2,8 @@ import re
 
 import pytest
 
-from comfort.finance import get_account, get_received_amount
+from comfort.finance import create_payment, get_account, get_received_amount
 from comfort.finance.chart_of_accounts import DEFAULT_ACCOUNT_SETTINGS
-from comfort.finance.doctype.payment.payment import Payment
 from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
 
 
@@ -30,5 +29,6 @@ def test_get_account_raises_on_wrong_name(accounts: None):
 
 def test_get_received_amount(accounts: None, sales_order: SalesOrder):
     sales_order.db_insert()
-    Payment.create_for(sales_order.doctype, sales_order.name, 300, True)
+
+    create_payment(sales_order.doctype, sales_order.name, 300, True)
     assert get_received_amount(sales_order) == 300

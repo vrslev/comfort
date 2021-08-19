@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from typing import Any, Iterable, overload
+from typing import Any, Iterable, Literal, overload
 
 import frappe
+from comfort import OrderTypes
 from frappe import _
 from frappe.model.document import Document
 
@@ -58,3 +59,48 @@ def get_received_amount(doc: Document) -> int:
         },
     )
     return sum(b.balance or 0 for b in balances)
+
+
+def create_gl_entry(
+    doctype: Literal["Payment", "Receipt"],
+    name: str,
+    account: str,
+    debit: int,
+    credit: int,
+):
+    doc: Document = frappe.get_doc(
+        {
+            "doctype": "GL Entry",
+            "account": account,
+            "debit": debit,
+            "credit": credit,
+            "voucher_type": doctype,
+            "voucher_no": name,
+        }
+    )
+    doc.insert()
+    doc.submit()
+
+
+def cancel_gl_entries_for(doctype: str, name: str):
+    gl_entries: list[Any] = frappe.get_all(
+        "GL Entry",
+        {"voucher_type": doctype, "voucher_no": name, "docstatus": ("!=", 2)},
+    )
+    for entry in gl_entries:
+        doc: Document = frappe.get_doc("GL Entry", entry.name)
+        doc.cancel()
+
+
+def create_payment(doctype: OrderTypes, name: str, amount: int, paid_with_cash: bool):
+    doc: Document = frappe.get_doc(
+        {
+            "doctype": "Payment",
+            "voucher_type": doctype,
+            "voucher_no": name,
+            "amount": amount,
+            "paid_with_cash": paid_with_cash,
+        }
+    )
+    doc.insert()
+    doc.submit()

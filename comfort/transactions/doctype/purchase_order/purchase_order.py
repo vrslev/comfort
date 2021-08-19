@@ -8,9 +8,8 @@ import frappe
 from comfort import ValidationError, count_quantity, group_by_key, parse_json
 from comfort.comfort_core.ikea.cart_utils import IkeaCartUtils
 from comfort.entities.doctype.child_item.child_item import ChildItem
-from comfort.finance.doctype.payment.payment import Payment
-from comfort.stock.doctype.receipt.receipt import Receipt
-from comfort.stock.doctype.stock_entry.stock_entry import StockEntry
+from comfort.finance import create_payment
+from comfort.stock import create_receipt, create_stock_entry
 from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
 from comfort.transactions.doctype.sales_order_child_item.sales_order_child_item import (
     SalesOrderChildItem,
@@ -184,13 +183,13 @@ class PurchaseOrderMethods(Document):
             doc.set_statuses()
 
     def create_stock_entries_for_purchased(self):
-        StockEntry.create_for(
+        create_stock_entry(
             self.doctype,
             self.name,
             "Reserved Purchased",
             self._get_items_in_sales_orders(True),
         )
-        StockEntry.create_for(
+        create_stock_entry(
             self.doctype,
             self.name,
             "Available Purchased",
@@ -198,9 +197,7 @@ class PurchaseOrderMethods(Document):
         )
 
     def create_payment(self):
-        Payment.create_for(
-            self.doctype, self.name, self.total_amount, paid_with_cash=True
-        )
+        create_payment(self.doctype, self.name, self.total_amount, paid_with_cash=True)
 
 
 class PurchaseOrder(PurchaseOrderMethods):
@@ -299,7 +296,7 @@ class PurchaseOrder(PurchaseOrderMethods):
 
     @frappe.whitelist()
     def create_receipt(self):
-        Receipt.create_for(self.doctype, self.name)
+        create_receipt(self.doctype, self.name)
         self.status = "Completed"  # type: ignore
         self.db_update()
 

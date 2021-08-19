@@ -2,11 +2,10 @@ from __future__ import annotations
 
 import frappe
 from comfort import OrderTypes, ValidationError
-from comfort.finance import get_account
+from comfort.finance import cancel_gl_entries_for, create_gl_entry, get_account
+from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
 from frappe import _
 from frappe.model.document import Document
-
-from ..gl_entry.gl_entry import GLEntry
 
 
 class Payment(Document):
@@ -15,9 +14,7 @@ class Payment(Document):
     amount: int
     paid_with_cash: bool
 
-    _voucher: Document
-
-    def validate(self):
+    def validate(self):  # pragma: no cover
         self.validate_amount_more_than_zero()
 
     def validate_amount_more_than_zero(self):
@@ -25,7 +22,7 @@ class Payment(Document):
             raise ValidationError(_("Amount should be more that zero"))
 
     def _new_gl_entry(self, account_field: str, debit: int, credit: int):
-        GLEntry.create_for(
+        create_gl_entry(
             self.doctype, self.name, get_account(account_field), debit, credit
         )
 
@@ -33,12 +30,12 @@ class Payment(Document):
         return "cash" if self.paid_with_cash else "bank"
 
     def _get_amounts_for_sales_gl_entries(self) -> dict[str, int]:
-        self._voucher = frappe.get_doc(self.voucher_type, self.voucher_no)
+        doc: SalesOrder = frappe.get_doc(self.voucher_type, self.voucher_no)
 
-        sales_amount: int = self._voucher.total_amount - self._voucher.service_amount
+        sales_amount: int = doc.total_amount - doc.service_amount
         delivery_amount, installation_amount = 0, 0
 
-        for s in self._voucher.services:
+        for s in doc.services:
             if "Delivery" in s.type:
                 delivery_amount += s.rate
             elif "Installation" in s.type:
@@ -116,24 +113,7 @@ class Payment(Document):
         self.create_gl_entries()
 
     def cancel_gl_entries(self):  # pragma: no cover
-        GLEntry.cancel_for(self.doctype, self.name)
+        cancel_gl_entries_for(self.doctype, self.name)
 
     def before_cancel(self):  # pragma: no cover
         self.cancel_gl_entries()
-
-    @staticmethod
-    def create_for(
-        doctype: str, name: str, amount: int, paid_with_cash: bool
-    ):  # pragma: no cover
-
-        doc: Payment = frappe.get_doc(
-            {
-                "doctype": "Payment",
-                "voucher_type": doctype,
-                "voucher_no": name,
-                "amount": amount,
-                "paid_with_cash": paid_with_cash,
-            }
-        )
-        doc.insert()
-        doc.submit()
