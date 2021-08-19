@@ -9,13 +9,13 @@ from comfort.finance.doctype.payment.payment import Payment
 if not TYPE_CHECKING:
     from tests.entities.test_customer import customer
     from tests.entities.test_item import child_items, item
-    from tests.finance.test_payment import payment
+    from tests.finance.test_payment import payment_sales
     from tests.transactions.test_sales_order import sales_order
 
 
 @pytest.fixture
-def gl_entry(payment: Payment) -> GLEntry:
-    payment.db_insert()
+def gl_entry(payment_sales: Payment) -> GLEntry:
+    payment_sales.db_insert()
     return frappe.get_doc(
         {
             "name": "GLE-2021-00001",
@@ -30,11 +30,11 @@ def gl_entry(payment: Payment) -> GLEntry:
     )
 
 
-def test_cancel_entries_for(payment: Payment, gl_entry: GLEntry):
+def test_cancel_for(payment_sales: Payment, gl_entry: GLEntry):
     gl_entry.insert()
     gl_entry.submit()
 
-    GLEntry.cancel_for(payment.doctype, payment.name)
+    GLEntry.cancel_for(payment_sales.doctype, payment_sales.name)
 
     gl_entries: list[GLEntry] = frappe.get_all(
         "GL Entry",
