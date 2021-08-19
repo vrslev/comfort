@@ -10,9 +10,11 @@ from comfort.comfort_core.doctype.commission_settings.commission_settings import
     CommissionSettings,
 )
 from comfort.entities.doctype.item.item import Item
-from comfort.finance.doctype.payment.payment import Payment
+from comfort.finance import create_payment
+from comfort.stock.doctype.receipt.receipt import Receipt
 from comfort.transactions.doctype.purchase_order.purchase_order import PurchaseOrder
 from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
+from frappe import ValidationError
 
 #############################
 #     SalesOrderMethods     #
@@ -183,7 +185,7 @@ def test_set_paid_and_pending_per_amount(
     exp_pending_amount: int,
 ):
     sales_order.db_insert()
-    Payment.create_for(sales_order.doctype, sales_order.name, paid_amount, True)
+    create_payment(sales_order.doctype, sales_order.name, paid_amount, True)
 
     sales_order.total_amount = total_amount
     sales_order._set_paid_and_pending_per_amount()
@@ -228,8 +230,49 @@ def test_set_payment_status(
     assert sales_order.payment_status == expected_status
 
 
-def test_set_delivery_status(sales_order: SalesOrder, purchase_order: PurchaseOrder):
-    sales_order._set_delivery_status
+def test_set_delivery_status_to_purchase(sales_order: SalesOrder):
+    sales_order._set_delivery_status()
+    assert sales_order.delivery_status == "To Purchase"
+
+
+def test_set_delivery_status_purchased(
+    sales_order: SalesOrder, purchase_order: PurchaseOrder
+):
+    for order in purchase_order.sales_orders:
+        order.docstatus = 1
+    purchase_order.docstatus = 1
+    purchase_order.db_update_all()
+
+    sales_order._set_delivery_status()
+    assert sales_order.delivery_status == "Purchased"
+
+
+def test_set_delivery_status_to_deliver(
+    sales_order: SalesOrder, purchase_order: PurchaseOrder, receipt_purchase: Receipt
+):
+    for order in purchase_order.sales_orders:
+        order.docstatus = 1
+    purchase_order.docstatus = 1
+    purchase_order.db_update_all()
+
+    receipt_purchase.docstatus = 1
+    receipt_purchase.db_insert()
+
+    sales_order._set_delivery_status()
+    assert sales_order.delivery_status == "To Deliver"
+
+
+def test_set_delivery_status_delivered(sales_order: SalesOrder, receipt_sales: Receipt):
+    receipt_sales.docstatus = 1
+    receipt_sales.db_insert()
+    sales_order._set_delivery_status()
+    assert sales_order.delivery_status == "Delivered"
+
+
+def test_set_delivery_status_with_cancelled_status(sales_order: SalesOrder):
+    sales_order.docstatus = 2
+    sales_order._set_delivery_status()
+    assert sales_order.delivery_status == ""
 
 
 @pytest.mark.parametrize(
@@ -255,4 +298,10 @@ def test_set_document_status(
     assert sales_order.status == expected_status
 
 
-# def _validate_and_set_status_before_add_receipt(): ... # TODO: When Purchase Order
+def test_add_receipt_raises_on_delivered(sales_order: SalesOrder):
+    sales_order.delivery_status = "Delivered"
+    with pytest.raises(
+        ValidationError,
+        match='Delivery Status of this Sales Order is already "Delivered"',
+    ):
+        sales_order.add_receipt()

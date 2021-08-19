@@ -1,4 +1,4 @@
-# from __future__ import annotations
+from __future__ import annotations
 
 # TODO: Allow change services on submit
 from typing import Any, Generator, Iterable, Literal
@@ -10,9 +10,8 @@ from comfort.comfort_core.doctype.commission_settings.commission_settings import
 )
 from comfort.entities.doctype.child_item.child_item import ChildItem
 from comfort.entities.doctype.item.item import Item
-from comfort.finance import get_received_amount
-from comfort.finance.doctype.payment.payment import Payment
-from comfort.stock.doctype.receipt.receipt import Receipt
+from comfort.finance import create_payment, get_received_amount
+from comfort.stock import create_receipt
 from frappe import _
 from frappe.model.document import Document
 
@@ -151,10 +150,6 @@ class SalesOrderStatuses(SalesOrderMethods):
         self.pending_amount = self.total_amount - self.paid_amount
 
     def _set_payment_status(self):
-        """Set Payment Status. Depends on `per_paid`.
-        If docstatus == 2 sets "".
-        """
-
         if self.docstatus == 2:
             status = ""
         elif self.per_paid > 100:
@@ -169,25 +164,18 @@ class SalesOrderStatuses(SalesOrderMethods):
         self.payment_status = status  # type: ignore
 
     def _set_delivery_status(self):
-        """Set Delivery Status.
-
-        If Receipt exists: "Delivered".
-        Else if Purchase Order exists:
-            if Receipt for Purchase order exists: "To Deliver"
-            if not: "Purchased"
-        Else: "To Purchase"
-        """
-
-        if frappe.db.exists(
+        if self.docstatus == 2:
+            status = ""
+        elif frappe.db.exists(
             "Receipt",
             {"voucher_type": self.doctype, "voucher_no": self.name, "docstatus": 1},
         ):
             status = "Delivered"
         else:
-            purchase_order_name: str
+            purchase_order_name: str | None
             if purchase_order_name := frappe.get_value(
                 "Purchase Order Sales Order",
-                fields="parent",
+                fieldname="parent",
                 filters={"sales_order_name": self.name, "docstatus": 1},
             ):
                 if frappe.db.exists(
@@ -220,17 +208,16 @@ class SalesOrderStatuses(SalesOrderMethods):
 
         self.status = status  # type: ignore
 
-    def set_statuses(self):
+    def set_statuses(self):  # pragma: no cover
         """Set statuses according to current Sales Order and linked Purchase Order states."""
         self._set_paid_and_pending_per_amount()
         self._set_payment_status()
-
         self._set_delivery_status()
         self._set_document_status()
 
 
 class SalesOrder(SalesOrderStatuses):
-    def validate(self):
+    def validate(self):  # pragma: no cover
         self.delete_empty_items()
         self.merge_same_items()
         self.update_items_from_db()
@@ -239,24 +226,24 @@ class SalesOrder(SalesOrderStatuses):
         self.calculate()
         self.set_statuses()
 
-    def before_submit(self):
+    def before_submit(self):  # pragma: no cover
         self.edit_commission = True
 
-    def before_cancel(self):
+    def before_cancel(self):  # pragma: no cover
         self.set_statuses()
 
-    def before_update_after_submit(self):
+    def before_update_after_submit(self):  # pragma: no cover
         self.calculate()
         self.set_statuses()
 
     @frappe.whitelist()
-    def calculate_commission_and_margin(self):
+    def calculate_commission_and_margin(self):  # pragma: no cover
         self._calculate_commission()
         self._calculate_margin()
 
     @frappe.whitelist()
-    def add_payment(self, paid_amount: int, cash: bool):
-        Payment.create_for(self.doctype, self.name, paid_amount, cash)
+    def add_payment(self, paid_amount: int, cash: bool):  # pragma: no cover
+        create_payment(self.doctype, self.name, paid_amount, cash)
         self.set_statuses()
         self.db_update()
 
@@ -267,7 +254,7 @@ class SalesOrder(SalesOrderStatuses):
                 _('Delivery Status of this Sales Order is already "Delivered"')
             )
 
-        Receipt.create_for(self.doctype, self.name)
+        create_receipt(self.doctype, self.name)
         self.set_statuses()
         self.db_update()
 
