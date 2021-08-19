@@ -2,24 +2,8 @@ from __future__ import annotations
 
 import pytest
 
-import frappe
 from comfort.entities.doctype.customer.customer import Customer
 from frappe import ValidationError
-
-
-@pytest.fixture
-def customer() -> Customer:
-    return frappe.get_doc(
-        {
-            "name": "Pavel Durov",
-            "gender": "Male",
-            "vk_id": "1",
-            "vk_url": "https://vk.com/im?sel=1",
-            "phone": "89115553535",
-            "doctype": "Customer",
-        }
-    )
-
 
 acceptable_vk_urls = (
     "https://vk.com/im?sel=1",

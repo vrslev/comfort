@@ -1,8 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
-
-import pytest
+from typing import Any
 
 import frappe
 from comfort.entities.doctype.item.item import Item
@@ -11,38 +9,6 @@ from comfort.stock.doctype.receipt.receipt import Receipt
 from comfort.stock.doctype.stock_entry.stock_entry import StockEntry
 from comfort.transactions.doctype.purchase_order.purchase_order import PurchaseOrder
 from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
-
-if not TYPE_CHECKING:
-    from tests.entities.test_customer import customer
-    from tests.entities.test_item import child_items, item, item_no_children
-    from tests.transactions.test_purchase_order import purchase_order
-    from tests.transactions.test_sales_order import sales_order
-
-
-@pytest.fixture
-def receipt_sales(sales_order: SalesOrder) -> Receipt:
-    sales_order.db_insert()
-    sales_order.db_update_all()
-    return frappe.get_doc(
-        {
-            "doctype": "Receipt",
-            "voucher_type": sales_order.doctype,
-            "voucher_no": sales_order.name,
-        }
-    )
-
-
-@pytest.fixture
-def receipt_purchase(purchase_order: PurchaseOrder) -> Receipt:
-    purchase_order.db_insert()
-    purchase_order.db_update_all()
-    return frappe.get_doc(
-        {
-            "doctype": "Receipt",
-            "voucher_type": purchase_order.doctype,
-            "voucher_no": purchase_order.name,
-        }
-    )
 
 
 def test_voucher_property(receipt_sales: Receipt):

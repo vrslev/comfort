@@ -1,5 +1,3 @@
-from typing import TYPE_CHECKING
-
 import pytest
 
 import frappe
@@ -9,44 +7,6 @@ from comfort.finance.doctype.payment.payment import Payment
 from comfort.transactions.doctype.purchase_order.purchase_order import PurchaseOrder
 from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
 from frappe import ValidationError
-
-if not TYPE_CHECKING:
-    from tests.entities.test_customer import customer
-    from tests.entities.test_item import child_items, item
-    from tests.transactions.test_purchase_order import purchase_order
-    from tests.transactions.test_sales_order import sales_order
-
-
-@pytest.fixture
-def payment_sales(sales_order: SalesOrder) -> Payment:
-    sales_order.db_insert()
-    return frappe.get_doc(
-        {
-            "name": "ebd35a9cc9",
-            "docstatus": 0,
-            "voucher_type": "Sales Order",
-            "voucher_no": "SO-2021-0001",
-            "amount": 5000,
-            "paid_with_cash": False,
-            "doctype": "Payment",
-        }
-    )
-
-
-@pytest.fixture
-def payment_purchase(purchase_order: PurchaseOrder) -> Payment:
-    purchase_order.db_insert()
-    return frappe.get_doc(
-        {
-            "name": "ebd35a9cc9",
-            "docstatus": 0,
-            "voucher_type": "Purchase Order",
-            "voucher_no": "Август-1",
-            "amount": 5000,
-            "paid_with_cash": False,
-            "doctype": "Payment",
-        }
-    )
 
 
 def test_validate_amount_more_than_zero_raises_on_zero_amount(payment_sales: Payment):

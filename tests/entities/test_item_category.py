@@ -2,21 +2,10 @@ from __future__ import annotations
 
 import pytest
 
-import frappe
 from comfort.entities.doctype.item_category.item_category import ItemCategory
 from frappe import ValidationError
 
-
-@pytest.fixture
-def item_category() -> ItemCategory:  # TODO: Glue with item test
-    return frappe.get_doc(
-        {
-            "name": "Столешницы",
-            "item_category_name": "Столешницы",
-            "url": "https://www.ikea.com/ru/ru/cat/-11844",
-            "doctype": "Item Category",
-        }
-    )
+# TODO: Glue with item test
 
 
 @pytest.mark.parametrize(

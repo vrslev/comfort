@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from collections import Counter
-from typing import TYPE_CHECKING
 
 import pytest
 
@@ -10,51 +9,10 @@ from comfort import count_quantity
 from comfort.comfort_core.doctype.commission_settings.commission_settings import (
     CommissionSettings,
 )
-from comfort.entities.doctype.customer.customer import Customer
 from comfort.entities.doctype.item.item import Item
 from comfort.finance.doctype.payment.payment import Payment
+from comfort.transactions.doctype.purchase_order.purchase_order import PurchaseOrder
 from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
-
-if not TYPE_CHECKING:
-    from tests.comfort_core.test_commission_settings import commission_settings
-    from tests.entities.test_customer import customer
-    from tests.entities.test_item import child_items, item
-
-
-@pytest.fixture
-def sales_order(customer: Customer, child_items: list[Item], item: Item):
-    customer.insert()
-    item.insert()
-
-    doc: SalesOrder = frappe.get_doc(
-        {
-            "name": "SO-2021-0001",
-            "customer": "Pavel Durov",
-            "edit_commission": 0,
-            "discount": 0,
-            "paid_amount": 0,
-            "doctype": "Sales Order",
-            "services": [
-                {
-                    "type": "Delivery to Entrance",
-                    "rate": 300,
-                },
-                {
-                    "type": "Installation",
-                    "rate": 500,
-                },
-            ],
-        }
-    )
-    doc.extend(
-        "items",
-        [
-            {"item_code": item.item_code, "qty": 1},
-            {"item_code": child_items[0].item_code, "qty": 2},
-        ],
-    )
-    return doc
-
 
 #############################
 #     SalesOrderMethods     #
@@ -235,6 +193,17 @@ def test_set_paid_and_pending_per_amount(
     assert sales_order.pending_amount == exp_pending_amount
 
 
+def test_set_paid_and_pending_per_amount_with_zero_total_amount(
+    sales_order: SalesOrder,
+):
+    sales_order.total_amount = 0
+    sales_order._set_paid_and_pending_per_amount()
+
+    assert sales_order.paid_amount == 0
+    assert sales_order.per_paid == 100
+    assert sales_order.pending_amount == 0
+
+
 def test_set_payment_status_with_cancelled_status(sales_order: SalesOrder):
     sales_order.docstatus = 2
     sales_order._set_payment_status()
@@ -259,8 +228,8 @@ def test_set_payment_status(
     assert sales_order.payment_status == expected_status
 
 
-# def test_set_delivery_status(sales_order: SalesOrder): TODO: When Purchase Order
-#     sales_order._set_delivery_status
+def test_set_delivery_status(sales_order: SalesOrder, purchase_order: PurchaseOrder):
+    sales_order._set_delivery_status
 
 
 @pytest.mark.parametrize(

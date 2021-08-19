@@ -1,34 +1,9 @@
 import pytest
 
-import frappe
 from comfort.comfort_core.doctype.commission_settings.commission_settings import (
     CommissionSettings,
 )
 from frappe import ValidationError
-
-
-@pytest.fixture
-def commission_settings() -> CommissionSettings:
-    return frappe.get_doc(
-        {
-            "name": "Commission Settings",
-            "doctype": "Commission Settings",
-            "ranges": [
-                {
-                    "percentage": 20,
-                    "to_amount": 100,
-                },
-                {
-                    "percentage": 15,
-                    "to_amount": 200,
-                },
-                {
-                    "percentage": 10,
-                    "to_amount": 0,
-                },
-            ],
-        }
-    )
 
 
 def test_validate_last_to_amount_is_zero_raises_on_not_zero(

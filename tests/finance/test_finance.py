@@ -1,5 +1,4 @@
 import re
-from typing import TYPE_CHECKING
 
 import pytest
 
@@ -7,12 +6,6 @@ from comfort.finance import get_account, get_received_amount
 from comfort.finance.chart_of_accounts import DEFAULT_ACCOUNT_SETTINGS
 from comfort.finance.doctype.payment.payment import Payment
 from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
-
-if not TYPE_CHECKING:
-    from tests.entities.test_customer import customer
-    from tests.entities.test_item import child_items, item
-    from tests.finance.test_chart_of_accounts import accounts
-    from tests.transactions.test_sales_order import sales_order
 
 
 def test_get_account(accounts: None):

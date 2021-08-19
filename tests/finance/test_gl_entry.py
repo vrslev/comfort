@@ -1,33 +1,6 @@
-from typing import TYPE_CHECKING
-
-import pytest
-
 import frappe
 from comfort.finance.doctype.gl_entry.gl_entry import GLEntry
 from comfort.finance.doctype.payment.payment import Payment
-
-if not TYPE_CHECKING:
-    from tests.entities.test_customer import customer
-    from tests.entities.test_item import child_items, item
-    from tests.finance.test_payment import payment_sales
-    from tests.transactions.test_sales_order import sales_order
-
-
-@pytest.fixture
-def gl_entry(payment_sales: Payment) -> GLEntry:
-    payment_sales.db_insert()
-    return frappe.get_doc(
-        {
-            "name": "GLE-2021-00001",
-            "owner": "Administrator",
-            "account": "Delivery",
-            "debit": 0,
-            "credit": 300,
-            "voucher_type": "Payment",
-            "voucher_no": "ebd35a9cc9",
-            "doctype": "GL Entry",
-        }
-    )
 
 
 def test_cancel_for(payment_sales: Payment, gl_entry: GLEntry):

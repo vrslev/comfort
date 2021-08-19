@@ -1,29 +1,11 @@
-from typing import Any
-
 import pytest
 
 import frappe
 from comfort.entities.doctype.item.item import Item
 from frappe import ValidationError
 
-
 # TODO: Refactor to make it more "UNIT"
 # TODO: Two test cases: with item and combination
-@pytest.fixture
-def child_items() -> list[Item]:
-    return [frappe.get_doc(i).insert() for i in test_child_items]
-
-
-@pytest.fixture
-def item() -> Item:
-    return frappe.get_doc(test_item)
-
-
-@pytest.fixture
-def item_no_children():
-    doc: Item = frappe.get_doc(test_item)
-    doc.child_items = []
-    return doc
 
 
 def test_validate_child_items(item: Item, child_items: list[Item]):
@@ -90,109 +72,3 @@ def test_calculate_weight_in_parent_docs(item: Item, child_items: list[Item]):
 
     new_weight: float = frappe.get_value("Item", item.item_code, "weight")
     assert expected_weight == new_weight
-
-
-test_item = {
-    "item_code": "29128569",
-    "item_name": "ПАКС Гардероб, 175x58x236 см, белый",
-    "url": "https://www.ikea.com/ru/ru/p/-s29128569",
-    "rate": 17950,
-    "doctype": "Item",
-    "child_items": [
-        {
-            "item_code": "10014030",
-            "item_name": "ПАКС Каркас гардероба, 50x58x236 см, белый",
-            "qty": 2,
-        },
-        {
-            "item_code": "10366598",
-            "item_name": "КОМПЛИМЕНТ Штанга платяная, 75 см, белый",
-            "qty": 1,
-        },
-        {
-            "item_code": "20277974",
-            "item_name": "КОМПЛИМЕНТ Полка, 75x58 см, белый",
-            "qty": 2,
-        },
-        {
-            "item_code": "40277973",
-            "item_name": "КОМПЛИМЕНТ Полка, 50x58 см, белый",
-            "qty": 6,
-        },
-        {
-            "item_code": "40366634",
-            "item_name": "КОМПЛИМЕНТ Ящик, 75x58 см, белый",
-            "qty": 3,
-        },
-        {
-            "item_code": "50121575",
-            "item_name": "ПАКС Каркас гардероба, 75x58x236 см, белый",
-            "qty": 1,
-        },
-        {
-            "item_code": "50366596",
-            "item_name": "КОМПЛИМЕНТ Штанга платяная, 50 см, белый",
-            "qty": 1,
-        },
-    ],
-}
-
-test_child_items: list[dict[str, Any]] = [
-    {
-        "item_code": "10014030",
-        "item_name": "ПАКС Каркас гардероба, 50x58x236 см, белый",
-        "url": "https://www.ikea.com/ru/ru/p/-10014030",
-        "rate": 3100,
-        "weight": 41.3,
-        "doctype": "Item",
-        "child_items": [],
-    },
-    {
-        "item_code": "10366598",
-        "item_name": "КОМПЛИМЕНТ Штанга платяная, 75 см, белый",
-        "url": "https://www.ikea.com/ru/ru/p/-10366598",
-        "rate": 250,
-        "weight": 0.43,
-        "doctype": "Item",
-    },
-    {
-        "item_code": "20277974",
-        "item_name": "КОМПЛИМЕНТ Полка, 75x58 см, белый",
-        "url": "https://www.ikea.com/ru/ru/p/-20277974",
-        "rate": 400,
-        "weight": 4.66,
-        "doctype": "Item",
-    },
-    {
-        "item_code": "40277973",
-        "item_name": "КОМПЛИМЕНТ Полка, 50x58 см, белый",
-        "url": "https://www.ikea.com/ru/ru/p/-40277973",
-        "rate": 300,
-        "weight": 2.98,
-        "doctype": "Item",
-    },
-    {
-        "item_code": "40366634",
-        "item_name": "КОМПЛИМЕНТ Ящик, 75x58 см, белый",
-        "url": "https://www.ikea.com/ru/ru/p/-40366634",
-        "rate": 1700,
-        "weight": 7.72,
-        "doctype": "Item",
-    },
-    {
-        "item_code": "50121575",
-        "item_name": "ПАКС Каркас гардероба, 75x58x236 см, белый",
-        "url": "https://www.ikea.com/ru/ru/p/-50121575",
-        "rate": 3600,
-        "weight": 46.8,
-        "doctype": "Item",
-    },
-    {
-        "item_code": "50366596",
-        "item_name": "КОМПЛИМЕНТ Штанга платяная, 50 см, белый",
-        "url": "https://www.ikea.com/ru/ru/p/-50366596",
-        "rate": 200,
-        "weight": 0.3,
-        "doctype": "Item",
-    },
-]
