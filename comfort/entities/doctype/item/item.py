@@ -5,7 +5,6 @@ from collections import Counter
 
 import frappe
 from comfort import ValidationError, count_quantity
-from comfort.stock.doctype.bin.bin import Bin
 from frappe import _
 from frappe.model.document import Document
 
@@ -61,22 +60,6 @@ class ItemMethods:
             doc.calculate_weight()
             doc.db_update()
 
-    def create_bin(self):
-        if not self.child_items:
-            bin_: Bin = frappe.new_doc("Bin")
-            bin_.item_code = self.item_code
-            bin_.insert()
-
-    def delete_bin(self):
-        if not self.child_items:
-            bin_: Bin = frappe.get_doc("Bin", self.item_code)
-            if not bin_.is_empty:
-                raise ValidationError(
-                    _("Can't delete item that have been used in transactions")
-                )
-            else:
-                bin_.delete()
-
 
 class Item(Document, ItemMethods):
     def validate(self):
@@ -90,9 +73,3 @@ class Item(Document, ItemMethods):
 
     def on_update(self):
         self.calculate_weight_in_parent_docs()
-
-    def after_insert(self):
-        self.create_bin()
-
-    def on_trash(self):
-        self.delete_bin()

@@ -4,7 +4,6 @@ import pytest
 
 import frappe
 from comfort.entities.doctype.item.item import Item
-from comfort.stock.doctype.bin.bin import Bin
 from frappe import ValidationError
 
 
@@ -91,42 +90,6 @@ def test_calculate_weight_in_parent_docs(item: Item, child_items: list[Item]):
 
     new_weight: float = frappe.get_value("Item", item.item_code, "weight")
     assert expected_weight == new_weight
-
-
-def test_create_bin_not_created_for_combination(item: Item):
-    item.create_bin()
-    assert not frappe.db.exists("Bin", item.item_code)
-
-
-def test_create_bin_created_for_items_in_combinations(
-    item: Item, child_items: list[Item]
-):
-    item.insert()
-    for c in item.child_items:
-        assert frappe.db.exists("Bin", c.item_code)
-
-
-def test_create_bin_created_for_not_combination(item_no_children: Item):
-    item_no_children.insert()  # .create_bin() should be called in after_insert hook
-    assert frappe.db.exists("Bin", item_no_children.item_code)
-
-
-def test_delete_bin(item_no_children: Item):
-    # .delete_bin() is being called only if no child items
-    item_no_children.insert()
-    item_no_children.delete_bin()
-    assert not frappe.db.exists("Bin", item_no_children.item_code)
-
-
-def test_delete_bin_raises_if_bin_is_not_empty(item_no_children: Item):
-    item_no_children.insert()
-    bin_: Bin = frappe.get_doc("Bin", item_no_children.item_code)
-    bin_.reserved_actual = 1
-    bin_.save()
-    with pytest.raises(
-        ValidationError, match="Can't delete item that have been used in transactions"
-    ):
-        item_no_children.delete_bin()
 
 
 test_item = {
