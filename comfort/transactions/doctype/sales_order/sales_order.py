@@ -85,13 +85,13 @@ class SalesOrderMethods(Document):
 
         child_items: list[ChildItem] = frappe.get_all(
             "Child Item",
-            fields=("parent", "item_code", "item_name", "qty"),
+            fields=("parent as parent_item_code", "item_code", "item_name", "qty"),
             filters={"parent": ("in", (d.item_code for d in self.items))},
         )
 
         item_codes_to_qty = count_quantity(self.items)
         for d in child_items:
-            d.qty = d.qty * item_codes_to_qty[d.parent]
+            d.qty = d.qty * item_codes_to_qty[d.parent_item_code]  # type: ignore
 
         self.extend("child_items", child_items)
 
@@ -136,6 +136,14 @@ class SalesOrderMethods(Document):
         self._calculate_commission()
         self._calculate_margin()
         self._calculate_total_amount()
+
+    def _get_items_with_splitted_combinations(
+        self,
+    ) -> list[SalesOrderChildItem | SalesOrderItem]:
+        parents = [child.parent_item_code for child in self.child_items]
+        return self.child_items + [
+            item for item in self.items if item.item_code not in parents
+        ]
 
 
 class SalesOrderStatuses(SalesOrderMethods):
@@ -254,43 +262,43 @@ class SalesOrder(SalesOrderStatuses):
                 _('Delivery Status of this Sales Order is already "Delivered"')
             )
 
-        create_receipt(self.doctype, self.name)
-        self.set_statuses()
-        self.db_update()
+        create_receipt(self.doctype, self.name)  # pragma: no cover
+        self.set_statuses()  # pragma: no cover
+        self.db_update()  # pragma: no cover
 
     @frappe.whitelist()
-    def split_combinations(self, combos_to_split: list[str], save: bool):
-        """Split all combinations in Items."""
-        combos_to_split = list(set(combos_to_split))
+    def split_combinations(self, combos_docnames: list[str]):
+        combos_docnames = list(set(combos_docnames))
 
-        selected_child_items = [
-            d for d in self.child_items if d.parent_item_code in combos_to_split
-        ]
+        items_to_remove: list[SalesOrderItem] = []
+        removed_combos: list[dict[str, str | int]] = []
+        for item in self.items:
+            if item.name in combos_docnames:
+                items_to_remove.append(item)
+                removed_combos.append(
+                    frappe._dict(item_code=item.item_code, qty=item.qty)
+                )
 
-        to_remove: list[SalesOrderItem] = []
-        for d in self.items:
-            if d.item_code in combos_to_split:
-                to_remove.append(d)
+        for item in items_to_remove:
+            self.items.remove(item)
+        parent_item_codes_to_qty = count_quantity(removed_combos)
 
-        for d in to_remove:
-            self.items.remove(d)
+        child_items: list[ChildItem] = frappe.get_all(
+            "Child Item",
+            fields=["parent", "item_code", "qty"],
+            filters={"parent": ("in", parent_item_codes_to_qty.keys())},
+        )
 
-        for d in selected_child_items:
-            self.append(
-                "items",
-                {"item_code": d.item_code, "item_name": d.item_name, "qty": d.qty},
-            )
+        for parent_item_code, items in group_by_key(child_items, key="parent").items():
+            parent_item_code: str
+            items: list[ChildItem]
+            parent_qty = parent_item_codes_to_qty[parent_item_code]
+            for item in items:
+                self.append(
+                    "items", {"item_code": item.item_code, "qty": item.qty * parent_qty}
+                )
 
-        for d in combos_to_split:
-            child: SalesOrderItem = frappe.get_doc(
-                "Sales Order Item", {"parent": self.name, "item_code": d}
-            )
-            if child.docstatus == 1:
-                child.cancel()
-            child.delete()
-
-        if save:
-            self.save()
+        self.save()
 
 
 @frappe.whitelist()  # pragma: no cover

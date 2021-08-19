@@ -118,15 +118,12 @@ frappe.ui.form.on("Sales Order", {
             let selected =
               dialog.fields_dict.combinations.grid.get_selected_children();
             selected = selected.filter((d) => d.__checked);
-            selected = selected.map((d) => d.item_code);
+            selected = selected.map((d) => d.name);
             frm.call({
               doc: frm.doc,
               method: "split_combinations",
               freeze: 1,
-              args: {
-                combos_to_split: selected,
-                save: true,
-              },
+              args: { combos_item_names: selected },
             });
             dialog.hide();
           },

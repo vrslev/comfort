@@ -60,7 +60,6 @@ class Receipt(Document):
     # Sales Order
 
     def create_sales_gl_entries(self):
-        self._voucher: SalesOrder
         items_cost: int = self._voucher.items_cost
         self._new_gl_entry("inventory", 0, items_cost)
         self._new_gl_entry("cost_of_goods_sold", items_cost, 0)
@@ -68,7 +67,6 @@ class Receipt(Document):
     def _get_sales_order_items_with_splitted_combinations(
         self,
     ) -> list[SalesOrderChildItem | SalesOrderItem]:
-        self._voucher: SalesOrder
         parents: list[str] = (
             child.parent_item_code for child in self._voucher.child_items
         )
@@ -77,11 +75,12 @@ class Receipt(Document):
         ]
 
     def create_sales_stock_entries(self):
+        items_obj: list[
+            SalesOrderItem | SalesOrderChildItem
+        ] = self._voucher._get_items_with_splitted_combinations()
         items = [
             {"item_code": item_code, "qty": -qty}
-            for item_code, qty in count_quantity(
-                self._get_sales_order_items_with_splitted_combinations()
-            ).items()
+            for item_code, qty in count_quantity(items_obj).items()
         ]
         self._new_stock_entry("Reserved Actual", items)
 
@@ -109,7 +108,6 @@ class Receipt(Document):
         return reverse_items
 
     def _create_purchase_stock_entries_for_sales_orders(self):
-        self._voucher: PurchaseOrder
         items_obj: list[
             SalesOrderItem | SalesOrderChildItem
         ] = self._voucher._get_items_in_sales_orders(split_combinations=True)
@@ -123,7 +121,6 @@ class Receipt(Document):
         self._new_stock_entry("Reserved Actual", items)
 
     def _create_purchase_stock_entries_for_items_to_sell(self):
-        self._voucher: PurchaseOrder
         items_obj: list[
             PurchaseOrderItemToSell | ChildItem
         ] = self._voucher._get_items_to_sell(split_combinations=True)

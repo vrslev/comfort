@@ -273,9 +273,15 @@ def receipt_purchase(purchase_order: PurchaseOrder) -> Receipt:
 
 
 @pytest.fixture
-def sales_order(customer: Customer, child_items: list[Item], item: Item):
+def sales_order(
+    customer: Customer,
+    child_items: list[Item],
+    item: Item,
+    commission_settings: CommissionSettings,
+):
     customer.insert()
     item.insert()
+    commission_settings.insert()
 
     doc: SalesOrder = frappe.get_doc(
         {

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections import Counter
+from copy import deepcopy
 
 import pytest
 
@@ -9,6 +10,7 @@ from comfort import count_quantity
 from comfort.comfort_core.doctype.commission_settings.commission_settings import (
     CommissionSettings,
 )
+from comfort.entities.doctype.child_item.child_item import ChildItem
 from comfort.entities.doctype.item.item import Item
 from comfort.finance import create_payment
 from comfort.stock.doctype.receipt.receipt import Receipt
@@ -100,11 +102,7 @@ def test_calculate_service_amount(sales_order: SalesOrder):
     assert service_amount == sales_order.service_amount
 
 
-def test_calculate_commission_no_edit_commission(
-    sales_order: SalesOrder, commission_settings: CommissionSettings
-):
-    commission_settings.insert()
-
+def test_calculate_commission_no_edit_commission(sales_order: SalesOrder):
     sales_order.items_cost = 5309
     sales_order._calculate_commission()
 
@@ -113,11 +111,7 @@ def test_calculate_commission_no_edit_commission(
     )
 
 
-def test_calculate_commission_with_edit_commission(
-    sales_order: SalesOrder, commission_settings: CommissionSettings
-):
-    commission_settings.insert()
-
+def test_calculate_commission_with_edit_commission(sales_order: SalesOrder):
     sales_order.edit_commission = True
     sales_order.commission = 100
     sales_order.items_cost = 21094
@@ -298,6 +292,26 @@ def test_set_document_status(
     assert sales_order.status == expected_status
 
 
+def test_get_sales_order_items_with_splitted_combinations(sales_order: SalesOrder):
+    sales_order.set_child_items()
+    items = sales_order._get_items_with_splitted_combinations()
+    parents: set[str] = set()
+    for child in sales_order.child_items:
+        assert child in items
+        parents.add(child.parent_item_code)
+
+    for i in sales_order.items:
+        if i.item_code in parents:
+            assert i not in items
+        else:
+            assert i in items
+
+
+#############################
+#        SalesOrder         #
+#############################
+
+
 def test_add_receipt_raises_on_delivered(sales_order: SalesOrder):
     sales_order.delivery_status = "Delivered"
     with pytest.raises(
@@ -305,3 +319,28 @@ def test_add_receipt_raises_on_delivered(sales_order: SalesOrder):
         match='Delivery Status of this Sales Order is already "Delivered"',
     ):
         sales_order.add_receipt()
+
+
+def test_split_combinations(sales_order: SalesOrder):
+    sales_order.db_insert()
+    sales_order.db_update_all()
+    sales_order.items = sales_order.items[:1]
+    sales_order.items[0].qty = 3
+    splitted_combination = deepcopy(sales_order.items[0])
+
+    sales_order.split_combinations([splitted_combination.name])
+
+    assert splitted_combination not in sales_order.items
+
+    child_items: list[ChildItem] = frappe.get_all(
+        "Child Item",
+        fields=["item_code", "qty"],
+        filters={"parent": splitted_combination.item_code},
+    )
+    exp_item_codes_to_qty = count_quantity(child_items)
+    for i in exp_item_codes_to_qty:
+        exp_item_codes_to_qty[i] *= 3
+    exp_item_codes_to_qty = exp_item_codes_to_qty.items()
+
+    for i in count_quantity(sales_order.items).items():
+        assert i in exp_item_codes_to_qty

@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Any
-
 import frappe
 from comfort.entities.doctype.item.item import Item
 from comfort.finance import get_account
@@ -88,27 +86,6 @@ def test_create_sales_gl_entries(receipt_sales: Receipt, sales_order: SalesOrder
     )
     for entry in entries:
         assert dict(entry) in exp_entries
-
-
-def test_get_sales_order_items_with_splitted_combinations(
-    receipt_sales: Receipt, sales_order: SalesOrder
-):
-    sales_order.set_child_items()
-    sales_order.db_update_all()
-    items = [
-        d.as_dict()
-        for d in receipt_sales._get_sales_order_items_with_splitted_combinations()
-    ]
-    parents: set[Any] = set()
-    for child in receipt_sales._voucher.child_items:
-        assert child.as_dict() in items
-        parents.add(child.parent_item_code)
-
-    for i in receipt_sales._voucher.items:
-        if i.item_code in parents:
-            assert i.as_dict() not in items
-        else:
-            assert i.as_dict() in items
 
 
 def test_create_sales_stock_entries(receipt_sales: Receipt, sales_order: SalesOrder):
