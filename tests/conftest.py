@@ -198,6 +198,7 @@ def accounts():
 
 
 @pytest.fixture
+@pytest.mark.usefixtures("accounts")
 def gl_entry(payment_sales: Payment) -> GLEntry:
     payment_sales.db_insert()
     return frappe.get_doc(
