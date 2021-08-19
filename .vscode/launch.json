@@ -2,14 +2,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Launch Chrome",
-      "request": "launch",
-      "type": "pwa-chrome",
-      "url": "http://localhost:8001",
-      "webRoot": "${workspaceFolder}"
-    },
-    {
-      "name": "Bench Web",
+      "name": "Frappe Web",
       "type": "python",
       "request": "launch",
       "program": "${workspaceFolder}/../frappe/frappe/utils/bench_helper.py",
@@ -26,6 +19,13 @@
       "env": {
         "DEV_SERVER": "1"
       }
+    },
+    {
+      "name": "Launch Chrome",
+      "request": "launch",
+      "type": "pwa-chrome",
+      "url": "http://localhost:8001",
+      "webRoot": "${workspaceFolder}"
     }
   ]
 }
