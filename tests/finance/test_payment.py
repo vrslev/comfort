@@ -81,7 +81,6 @@ def test_resolve_cash_or_bank(
     payment_sales: Payment, paid_with_cash: bool, expected_account: str
 ):
     payment_sales.paid_with_cash = paid_with_cash
-    payment_sales._resolve_cash_or_bank()
     assert payment_sales._resolve_cash_or_bank() == expected_account
 
 

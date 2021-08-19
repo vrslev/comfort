@@ -151,7 +151,7 @@ def test_create_sales_stock_entries(receipt_sales: Receipt, sales_order: SalesOr
     receipt_sales.db_insert()
     receipt_sales.create_sales_stock_entries()
 
-    entry_name = frappe.get_value(
+    entry_name: str = frappe.get_value(
         "Stock Entry",
         filters={
             "voucher_type": receipt_sales.doctype,
@@ -205,7 +205,7 @@ def test_create_purchase_stock_entries_for_sales_orders(receipt_purchase: Receip
     receipt_purchase.db_insert()
     receipt_purchase._create_purchase_stock_entries_for_sales_orders()
 
-    entry_names = frappe.get_all(
+    entry_names: list[str] = frappe.get_all(
         "Stock Entry",
         filters={
             "voucher_type": receipt_purchase.doctype,
@@ -234,7 +234,7 @@ def test_create_purchase_stock_entries_for_sales_orders_not_executed_if_no_items
     receipt_purchase.db_insert()
     receipt_purchase._create_purchase_stock_entries_for_sales_orders()
 
-    first_entry_name = frappe.get_value(
+    first_entry_name: str | None = frappe.get_value(
         "Stock Entry",
         {"voucher_type": receipt_purchase.doctype, "voucher_no": receipt_purchase.name},
     )
@@ -245,7 +245,7 @@ def test_create_purchase_stock_entries_for_items_to_sell(receipt_purchase: Recei
     receipt_purchase.db_insert()
     receipt_purchase._create_purchase_stock_entries_for_items_to_sell()
 
-    entry_names = frappe.get_all(
+    entry_names: list[str] = frappe.get_all(
         "Stock Entry",
         filters={
             "voucher_type": receipt_purchase.doctype,
@@ -274,7 +274,7 @@ def test_create_purchase_stock_entries_for_items_to_sell_not_executed_if_no_item
     receipt_purchase.db_insert()
     receipt_purchase._create_purchase_stock_entries_for_items_to_sell()
 
-    first_entry_name = frappe.get_value(
+    first_entry_name: str | None = frappe.get_value(
         "Stock Entry",
         {"voucher_type": receipt_purchase.doctype, "voucher_no": receipt_purchase.name},
     )

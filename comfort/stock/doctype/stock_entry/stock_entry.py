@@ -1,29 +1,26 @@
 from __future__ import annotations
 
-from typing import Literal
+from typing import Any, Literal
 
 import frappe
 from frappe.model.document import Document
 
 from ..stock_entry_item.stock_entry_item import StockEntryItem
 
-_StockType = Literal[
+StockTypes = Literal[
     "Reserved Actual", "Available Actual", "Reserved Purchased", "Available Purchased"
 ]
 
 
 class StockEntry(Document):
-    stock_type: _StockType
-    voucher_type: str | None
-    voucher_no: str | None
+    stock_type: StockTypes
+    voucher_type: Literal["Sales Order", "Purchase Order", "Receipt"]
+    voucher_no: str
     items: list[StockEntryItem]
 
     @staticmethod
     def create_for(  # pragma: no cover
-        doctype: str | None,
-        name: str | None,
-        stock_type: _StockType,
-        items: list[StockEntryItem],
+        doctype: str, name: str, stock_type: StockTypes, items: list[Any]
     ):
         doc: StockEntry = frappe.get_doc(
             {
@@ -36,7 +33,6 @@ class StockEntry(Document):
         )
         doc.insert()
         doc.submit()
-        return doc
 
     @staticmethod
     def cancel_for(doctype: str, name: str):
@@ -45,7 +41,8 @@ class StockEntry(Document):
             {"voucher_type": doctype, "voucher_no": name, "docstatus": ("!=", 2)},
         )
         for entry in entries:
-            frappe.get_doc("Stock Entry", entry.name).cancel()
+            doc: StockEntry = frappe.get_doc("Stock Entry", entry.name)
+            doc.cancel()
 
     @staticmethod
     def cancel_for_(doctype: str, name: str):

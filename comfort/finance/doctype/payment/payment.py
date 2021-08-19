@@ -14,6 +14,7 @@ class Payment(Document):
     voucher_no: str
     amount: int
     paid_with_cash: bool
+
     _voucher: Document
 
     def validate(self):
@@ -34,7 +35,7 @@ class Payment(Document):
     def _get_amounts_for_sales_gl_entries(self) -> dict[str, int]:
         self._voucher = frappe.get_doc(self.voucher_type, self.voucher_no)
 
-        sales_amount = self._voucher.total_amount - self._voucher.service_amount
+        sales_amount: int = self._voucher.total_amount - self._voucher.service_amount
         delivery_amount, installation_amount = 0, 0
 
         for s in self._voucher.services:
@@ -136,4 +137,3 @@ class Payment(Document):
         )
         doc.insert()
         doc.submit()
-        return doc

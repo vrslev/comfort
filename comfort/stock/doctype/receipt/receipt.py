@@ -19,13 +19,13 @@ from comfort.transactions.doctype.sales_order_item.sales_order_item import (
 )
 from frappe.model.document import Document
 
-from ..stock_entry.stock_entry import StockEntry, _StockType
-from ..stock_entry_item.stock_entry_item import StockEntryItem
+from ..stock_entry.stock_entry import StockEntry, StockTypes
 
 
 class Receipt(Document):
     voucher_type: OrderTypes
     voucher_no: str
+
     __voucher: Document
 
     @property
@@ -39,7 +39,7 @@ class Receipt(Document):
             self.doctype, self.name, get_account(account_field), debit, credit
         )
 
-    def _new_stock_entry(self, stock_type: _StockType, items: list[StockEntryItem]):
+    def _new_stock_entry(self, stock_type: StockTypes, items: list[Any]):
         StockEntry.create_for(self.doctype, self.name, stock_type, items)
 
     def before_submit(self):  # pragma: no cover
@@ -56,13 +56,12 @@ class Receipt(Document):
         StockEntry.cancel_for(self.doctype, self.name)
 
     @staticmethod
-    def create_for(doctype: OrderTypes, name: str):  # pragma: no cover
+    def create_for(doctype: OrderTypes | None, name: str | None):  # pragma: no cover
         doc: Receipt = frappe.get_doc(
             {"doctype": "Receipt", "voucher_type": doctype, "voucher_no": name}
         )
         doc.insert()
         doc.submit()
-        return doc
 
     # Sales Order
 
@@ -74,7 +73,9 @@ class Receipt(Document):
     def _get_sales_order_items_with_splitted_combinations(
         self,
     ) -> list[SalesOrderChildItem | SalesOrderItem]:
-        parents = (child.parent_item_code for child in self._voucher.child_items)
+        parents: list[str] = (
+            child.parent_item_code for child in self._voucher.child_items
+        )
         return self._voucher.child_items + [
             item for item in self._voucher.items if item.item_code not in parents
         ]
@@ -91,7 +92,7 @@ class Receipt(Document):
     # Purchase Order
 
     def create_purchase_gl_entries(self):
-        items_amount = frappe.get_value(
+        items_amount: int = frappe.get_value(
             self.voucher_type,
             self.voucher_no,
             "items_to_sell_cost + sales_order_cost as items_amount",

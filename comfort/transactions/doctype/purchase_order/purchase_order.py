@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 from datetime import datetime
-from typing import Any, ValuesView
+from typing import Any, Literal, ValuesView
 
 import frappe
 from comfort import ValidationError, count_quantity, group_by_key, parse_json
@@ -11,6 +11,7 @@ from comfort.entities.doctype.child_item.child_item import ChildItem
 from comfort.finance.doctype.payment.payment import Payment
 from comfort.stock.doctype.receipt.receipt import Receipt
 from comfort.stock.doctype.stock_entry.stock_entry import StockEntry
+from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
 from comfort.transactions.doctype.sales_order_child_item.sales_order_child_item import (
     SalesOrderChildItem,
 )
@@ -35,20 +36,19 @@ from ..purchase_order_sales_order.purchase_order_sales_order import (
 
 
 class PurchaseOrderMethods(Document):
-    sales_orders: list[PurchaseOrderSalesOrder]
-    items_to_sell: list[PurchaseOrderItemToSell]
-    items_to_sell_cost: int
+    delivery_options: list[PurchaseOrderDeliveryOption]
+    cannot_add_items: str | None
+    posting_date: datetime
+    order_confirmation_no: str
+    schedule_date: datetime
+    total_amount: int
     sales_order_cost: int
     delivery_cost: int
     total_weight: float
-    total_amount: int
-    status: str
-    delivery_options: list[PurchaseOrderDeliveryOption]
-    cannot_add_items: str | None
-    order_confirmation_no: int
-    schedule_date: datetime
-    posting_date: datetime
-    difference: int
+    items_to_sell_cost: int
+    sales_orders: list[PurchaseOrderSalesOrder]
+    items_to_sell: list[PurchaseOrderItemToSell]
+    status: Literal["Draft", "To Receive", "Completed", "Cancelled"]
 
     def validate_not_empty(self):
         if not (self.sales_orders or self.items_to_sell):
@@ -83,7 +83,7 @@ class PurchaseOrderMethods(Document):
         if not self.delivery_cost:
             self.delivery_cost = 0
 
-        sums: dict[str, Any] = frappe.get_value(
+        sales_order_cost, sales_order_weight = frappe.get_value(
             "Sales Order Item",
             filters={
                 "parent": ["in", [d.sales_order_name for d in self.sales_orders]],
@@ -94,9 +94,11 @@ class PurchaseOrderMethods(Document):
             ],
             as_dict=True,
         )
+        sales_order_cost: int
+        sales_order_weight: int
 
-        self.sales_order_cost = sums.sales_order_cost
-        self.total_weight = sums.sales_order_weight
+        self.sales_order_cost = sales_order_cost
+        self.total_weight = sales_order_weight
 
         for item in self.items_to_sell:
             self.items_to_sell_cost += item.rate * item.qty
@@ -121,10 +123,8 @@ class PurchaseOrderMethods(Document):
         except Exception as e:
             frappe.msgprint("\n".join([str(arg) for arg in e.args]), title=_("Error"))
 
-    def _get_items_to_sell(
-        self, split_combinations: bool
-    ) -> list[PurchaseOrderItemToSell | ChildItem]:
-        items = []
+    def _get_items_to_sell(self, split_combinations: bool):
+        items: list[PurchaseOrderItemToSell | ChildItem] = []
         items_to_sell = self.items_to_sell.copy()
 
         if split_combinations:
@@ -137,7 +137,9 @@ class PurchaseOrderMethods(Document):
             )
             items += child_items
             parents = (child.parent for child in child_items)
-            items_to_sell = [item for item in self.items_to_sell if item not in parents]
+            items_to_sell = [
+                item for item in self.items_to_sell if item.item_code not in parents
+            ]
 
         items += items_to_sell
         return items
@@ -178,7 +180,8 @@ class PurchaseOrderMethods(Document):
 
     def update_status_in_sales_orders(self):
         for s in self.sales_orders:
-            frappe.get_doc("Sales Order", s.sales_order_name).set_statuses()
+            doc: SalesOrder = frappe.get_doc("Sales Order", s.sales_order_name)
+            doc.set_statuses()
 
     def create_stock_entries_for_purchased(self):
         StockEntry.create_for(
@@ -217,7 +220,7 @@ class PurchaseOrder(PurchaseOrderMethods):
             12: "Декабрь",
         }
         this_month = months[now_datetime().month].title()
-        carts_in_this_month = frappe.db.sql(
+        carts_in_this_month: tuple[tuple[Any]] = frappe.db.sql(
             """
             SELECT name from `tabPurchase Order`
             WHERE name LIKE CONCAT(%s, '-%%')
@@ -258,7 +261,8 @@ class PurchaseOrder(PurchaseOrderMethods):
         self.status = "To Receive"
 
         for s in self.sales_orders:
-            frappe.get_doc("Sales Order", s.sales_order_name).submit()
+            doc: SalesOrder = frappe.get_doc("Sales Order", s.sales_order_name)
+            doc.submit()
 
     def on_submit(self):
         self.create_payment()
@@ -271,7 +275,7 @@ class PurchaseOrder(PurchaseOrderMethods):
     @frappe.whitelist()
     def add_purchase_info_and_submit(
         self,
-        purchase_id: int,
+        purchase_id: str,
         purchase_info_loaded: bool,
         purchase_info: dict[str, Any],
         delivery_cost: int = 0,
@@ -296,7 +300,7 @@ class PurchaseOrder(PurchaseOrderMethods):
     @frappe.whitelist()
     def create_receipt(self):
         Receipt.create_for(self.doctype, self.name)
-        self.status = "Completed"
+        self.status = "Completed"  # type: ignore
         self.db_update()
 
 
@@ -331,13 +335,13 @@ def get_unavailable_items_in_cart_by_orders(
             order_by="modified desc",
         )
 
-    item_names = frappe.get_all(
+    item_names: dict[str, str] = frappe.get_all(
         "Item",
         ["item_code", "item_name"],
         {"item_code": ["in", [d["item_code"] for d in items_to_sell]]},
     )
 
-    item_names_map = {}
+    item_names_map: dict[str, str] = {}
     for d in item_names:
         item_names_map[d["item_code"]] = d["item_name"]
 
@@ -400,7 +404,7 @@ def get_sales_order_query(
     if searchfield:
         searchfields = " or ".join([field + " LIKE %(txt)s" for field in searchfields])
 
-    res = frappe.db.sql(  # nosec
+    res: list[tuple[Any, ...]] = frappe.db.sql(  # nosec
         """
         SELECT name, customer, total_amount from `tabSales Order`
         WHERE {ignore_orders_cond}
