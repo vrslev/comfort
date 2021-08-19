@@ -5,7 +5,7 @@ from datetime import datetime
 from typing import Any, Literal, ValuesView
 
 import frappe
-from comfort import ValidationError, count_quantity, group_by_key, parse_json
+from comfort import ValidationError, count_quantity, group_by_key, maybe_json
 from comfort.comfort_core.ikea.cart_utils import IkeaCartUtils
 from comfort.entities.doctype.child_item.child_item import ChildItem
 from comfort.finance import create_payment
@@ -307,9 +307,9 @@ def get_unavailable_items_in_cart_by_orders(
     sales_orders: list[str],
     items_to_sell: list[dict[str, Any]],
 ):
-    unavailable_items = parse_json(unavailable_items) or unavailable_items
-    sales_orders = parse_json(sales_orders) or sales_orders
-    items_to_sell = parse_json(items_to_sell) or items_to_sell
+    unavailable_items = maybe_json(unavailable_items)
+    sales_orders = maybe_json(sales_orders)
+    items_to_sell = maybe_json(items_to_sell)
 
     unavailable_items_map: dict[str, Any] = {}
     for d in unavailable_items:

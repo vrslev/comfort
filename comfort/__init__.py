@@ -11,26 +11,38 @@ __version__ = "0.2.0"
 # TODO: Add tests to all utils
 OrderTypes = Literal["Sales Order", "Purchase Order"]
 
+T = TypeVar("T")
+
 
 def count_quantity(
     data: Iterable[Any], key_key: str = "item_code", value_key: str = "qty"
 ):
+    """Count something (most often quantity) in list of objects."""
     c: Counter[str] = Counter()
     for item in data:
         c[getattr(item, key_key)] += getattr(item, value_key)
     return c
 
 
-def group_by_key(
-    data: Iterable[dict[Any, Any] | Any], key: str = "item_code"
-) -> dict[Any, Any]:
-    d: dict[str, list[Any]] = defaultdict(list[Any])
+def group_by_key(data: Iterable[T], key: str = "item_code") -> dict[Any, list[T]]:
+    """Group iterable of objects by key."""
+    d: defaultdict[Any, list[T]] = defaultdict(list)
     for item in data:
         d[getattr(item, key)].append(item)
     return dict(d)
 
 
+def maybe_json(value: T) -> T:
+    """Normalize payload from frontend without messing type hints."""
+    try:
+        return json.loads(value)  # type: ignore
+    except (json.JSONDecodeError, TypeError):
+        return value
+
+
 class ValidationError(Exception):
+    """Linter-friendly wrapper around `frappe.throw`."""
+
     def __init__(
         self,
         msg: Any = "",
@@ -48,13 +60,3 @@ class ValidationError(Exception):
             wide=wide,
             as_list=as_list,
         )
-
-
-T = TypeVar("T")
-
-
-def parse_json(value: T) -> T | None:
-    try:
-        return json.loads(value)  # type: ignore
-    except json.JSONDecodeError:
-        return

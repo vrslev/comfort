@@ -9,7 +9,7 @@ from ikea_api.errors import ItemFetchError
 from ikea_api_extender import get_items_immortally
 
 import frappe
-from comfort import ValidationError, parse_json
+from comfort import ValidationError, maybe_json
 from comfort.comfort_core.ikea.utils import (
     extract_item_codes,
     get_item_codes_from_ingka_pagelinks,
@@ -33,9 +33,9 @@ def fetch_new_items(
         except json.decoder.JSONDecodeError:
             item_codes = str(item_codes)
 
-    force_update = parse_json(force_update) or force_update
-    download_images = parse_json(download_images) or download_images
-    values_from_db = parse_json(values_from_db) or values_from_db
+    force_update = maybe_json(force_update)
+    download_images = maybe_json(download_images)
+    values_from_db = maybe_json(values_from_db)
 
     if isinstance(item_codes, int):
         item_codes = str(item_codes)
