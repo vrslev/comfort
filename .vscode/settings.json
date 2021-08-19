@@ -11,7 +11,7 @@
     "configFile": ".eslintrc.yaml",
     "ignorePath": ".eslintignore"
   },
-  "git.ignoredRepositories": ["../frappe"],
+  "git.ignoredRepositories": ["../frappe", "~"],
   "sqltools.connections": [
     {
       "mysqlOptions": {
