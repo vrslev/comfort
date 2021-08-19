@@ -1,53 +1,35 @@
 from __future__ import annotations
 
-from typing import Any, Iterable, Literal, overload
+from typing import Any, Literal
 
 import frappe
-from comfort import OrderTypes
+from comfort import OrderTypes, ValidationError
 from frappe import _
 from frappe.model.document import Document
 
-from .doctype.accounts_settings.accounts_settings import AccountsSettings
 
-
-@overload
-def get_account(field_names: str) -> str:
-    ...
-
-
-@overload
-def get_account(field_names: Iterable[str]) -> list[str]:
-    ...
-
-
-def get_account(field_names: str | Iterable[str]):
-    return_str = False
-    if isinstance(field_names, str):
-        field_names = [field_names]
-        return_str = True
-
-    settings_name = "Accounts Settings"
-    settings: AccountsSettings = frappe.get_cached_doc(settings_name, settings_name)
-    accounts: list[str] = []
-    for d in field_names:
-        account = f"default_{d}_account"
-        if hasattr(settings, account):
-            accounts.append(getattr(settings, account))
-        else:
-            err_msg: str = _('Account Settings has no field "{}"').format(account)
-            raise ValueError(err_msg)
-
-    return accounts[0] if return_str else accounts
+def get_account(field_name: str) -> str:
+    settings_docname = "Accounts Settings"
+    actual_field_name = f"default_{field_name}_account"
+    account: str | None = frappe.get_cached_value(
+        settings_docname, settings_docname, actual_field_name
+    )
+    if account is None:
+        raise ValidationError(
+            _('Account Settings has no field "{}"').format(actual_field_name)
+        )
+    return account
 
 
 def get_received_amount(doc: Document) -> int:
-    """Get balance from all GL Entries associated with given Transaction and default Cash or Bank accounts"""
-    accounts = get_account(("cash", "bank"))
+    """Get balance from all GL Entries associated with given Transaction and default Cash or Bank accounts."""
+    accounts = get_account("cash"), get_account("bank")
 
     payments: list[Any] = frappe.get_all(
         "Payment", {"voucher_type": doc.doctype, "voucher_no": doc.name}
     )
     payment_names = (p.name for p in payments)
+
     balances: list[Any] = frappe.get_all(
         "GL Entry",
         fields="SUM(debit - credit) as balance",
