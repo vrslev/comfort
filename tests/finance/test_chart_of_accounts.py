@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import Any
 
+import pytest
+
 import frappe
 from comfort.finance.chart_of_accounts import ACCOUNTS
 
@@ -19,7 +21,8 @@ def get_accounts_from_schema():
     return accounts
 
 
-def test_create_accounts_from_schema(accounts: None):
+@pytest.mark.usefixtures("accounts")
+def test_create_accounts_from_schema():
     accounts_from_schema = get_accounts_from_schema()
     created_accounts: list[dict[str, str | None]] = [
         dict(a) for a in frappe.get_all("Account", ["name", "parent_account"])
