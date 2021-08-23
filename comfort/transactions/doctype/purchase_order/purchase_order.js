@@ -473,8 +473,8 @@ function create_unavailable_items_table(response) {
     data.push({
       item_code: item.item_code,
       item_name: item.item_name,
-      sales_order: item.sales_order,
-      customer: orders_to_customers[item.sales_order],
+      parent: item.parent,
+      customer: orders_to_customers[item.parent],
       required_qty: item.required_qty,
       available_qty: item.available_qty,
     });
@@ -491,11 +491,11 @@ function create_unavailable_items_table(response) {
       read_only: 1,
     },
     {
-      fieldname: "sales_order",
+      fieldname: "parent",
       fieldtype: "Link",
-      label: "Sales Order",
+      label: "Parent",
       in_list_view: 1,
-      options: "Sales Order",
+      options: "Parent",
       read_only: 1,
       formatter: (value, df, options, doc) => {
         if (value && doc.customer) {
@@ -511,7 +511,7 @@ function create_unavailable_items_table(response) {
     {
       fieldname: "required_qty",
       fieldtype: "Int",
-      label: "Требуется",
+      label: "Required",
       in_list_view: 1,
       read_only: 1,
       columns: 1,
@@ -519,7 +519,7 @@ function create_unavailable_items_table(response) {
     {
       fieldname: "available_qty",
       fieldtype: "Int",
-      label: "Доступно",
+      label: "Available",
       in_list_view: 1,
       read_only: 1,
       columns: 1,
@@ -538,20 +538,12 @@ function create_unavailable_items_table(response) {
 }
 
 function show_unavailable_items_dialog(grid_row) {
-  frappe.call({
+  cur_frm.call({
+    doc: cur_frm.doc,
     method:
       "comfort.transactions.doctype.purchase_order.purchase_order.get_unavailable_items_in_cart_by_orders",
     args: {
-      unavailable_items: grid_row.doc.unavailable_items_json,
-      sales_order_names: cur_frm.doc.sales_orders.map((v) => {
-        return v.sales_order_name;
-      }),
-      items_to_sell: cur_frm.doc.items_to_sell.map((v) => {
-        return {
-          item_code: v.item_code,
-          qty: v.qty,
-        };
-      }),
+      unavailable_items: grid_row.doc.unavailable_items,
     },
     callback: (r) => {
       if (!Array.isArray(r.message)) {

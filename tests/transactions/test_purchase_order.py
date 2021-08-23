@@ -1,19 +1,16 @@
 from __future__ import annotations
 
 import json
-from typing import Any
+from typing import Any, Callable
 
+import ikea_api_wrapped
 import pytest
 
 import frappe
 from comfort import count_quantity, group_by_key
-from comfort.comfort_core.doctype.ikea_settings.ikea_settings import get_guest_api
 from comfort.entities.doctype.child_item.child_item import ChildItem
 from comfort.stock.doctype.stock_entry.stock_entry import StockEntry
-from comfort.transactions.doctype.purchase_order.purchase_order import (
-    PurchaseOrder,
-    get_unavailable_items_in_cart_by_orders,
-)
+from comfort.transactions.doctype.purchase_order.purchase_order import PurchaseOrder
 from comfort.transactions.doctype.sales_order_child_item.sales_order_child_item import (
     SalesOrderChildItem,
 )
@@ -267,7 +264,6 @@ def test_get_templated_items_for_api(
 
 @pytest.mark.usefixtures("ikea_settings")
 def test_get_delivery_services(purchase_order: PurchaseOrder):
-    get_guest_api()
     purchase_order.get_delivery_services()
     assert purchase_order.cannot_add_items == json.dumps(
         mock_delivery_services["cannot_add"]
@@ -275,6 +271,17 @@ def test_get_delivery_services(purchase_order: PurchaseOrder):
     assert len(purchase_order.delivery_options) == len(
         mock_delivery_services["delivery_options"]
     )
+
+
+@pytest.mark.usefixtures("ikea_settings")
+def test_get_delivery_services_no_response(
+    purchase_order: PurchaseOrder, monkeypatch: pytest.MonkeyPatch
+):
+    mock_func: Callable[[Any, Any, Any], None] = lambda api, items, zip_code: None
+    monkeypatch.setattr(ikea_api_wrapped, "get_delivery_services", mock_func)
+    purchase_order.get_delivery_services()
+    assert not purchase_order.cannot_add_items
+    assert not purchase_order.delivery_options
 
 
 def test_create_stock_entries_for_purchased(purchase_order: PurchaseOrder):
@@ -405,34 +412,32 @@ def test_add_purchase_info_and_submit_info_not_loaded(purchase_order: PurchaseOr
     assert purchase_order.docstatus == 1
 
 
-unavailable_items = [
-    {
-        "item_code": "50366596",
-        "is_combination": False,
-        "required_qty": 1,
-        "available_qty": 0,
-    },
-    {
-        "item_code": "10366598",
-        "is_combination": False,
-        "required_qty": 1,
-        "available_qty": 0,
-    },
-    {
-        "item_code": "29128569",
-        "is_combination": True,
-        "required_qty": 1,
-        "available_qty": 0,
-    },
-]
+def test_get_unavailable_items_in_cart_by_orders(
+    purchase_order: PurchaseOrder,
+):  # TODO: Test business logic
+    unavailable_items = [
+        {"item_code": "50366596", "available_qty": 0},
+        {"item_code": "10366598", "available_qty": 0},
+        {"item_code": "29128569", "available_qty": 0},
+    ]
 
-
-def test_get_unavailable_items_in_cart_by_orders(purchase_order: PurchaseOrder):
-    get_unavailable_items_in_cart_by_orders(
+    res = purchase_order.get_unavailable_items_in_cart_by_orders(
         unavailable_items,
-        [s.sales_order_name for s in purchase_order.sales_orders],
-        [
-            {"item_code": i.item_code, "qty": i.qty}
-            for i in purchase_order.items_to_sell
-        ],
     )
+
+    acceptable_parents = [s.sales_order_name for s in purchase_order.sales_orders]
+    acceptable_parents.append(purchase_order.name)
+
+    grouped_items = group_by_key(frappe._dict(i) for i in res)
+
+    for items in grouped_items.values():
+        for idx, item in enumerate(items):
+            assert item.item_name == frappe.get_value(
+                "Item", item.item_code, "item_name"
+            )
+            assert item.parent in acceptable_parents
+
+            if idx == 0:
+                assert item.available_qty is not None
+            else:
+                assert item.available_qty is None

@@ -34,7 +34,7 @@ from ..purchase_order_sales_order.purchase_order_sales_order import (
     PurchaseOrderSalesOrder,
 )
 
-# TODO: Validate this Purchase Order is the only one that contains current Sales Orders
+# TODO: Validate that this Purchase Order is the only one that contains current Sales Orders
 
 
 class PurchaseOrderMethods(Document):
@@ -141,9 +141,11 @@ class PurchaseOrderMethods(Document):
             fields=["parent", "item_code", "qty"],
             filters={"parent": ("in", (item.item_code for item in self.items_to_sell))},
         )
-        parents = (child.parent for child in child_items)
+        parents = [child.parent for child in child_items]
         items_to_sell = [
-            item for item in self.items_to_sell.copy() if item.item_code not in parents
+            item
+            for item in self.items_to_sell.copy()  # TODO: Is copy required?
+            if item.item_code not in parents
         ]
 
         return items_to_sell + child_items
@@ -169,7 +171,7 @@ class PurchaseOrderMethods(Document):
             )
             items += child_items
 
-            parents = (child.parent_item_code for child in child_items)
+            parents = [child.parent_item_code for child in child_items]
             so_items = [item for item in so_items if item.item_code not in parents]
 
         items += so_items
@@ -195,7 +197,6 @@ class PurchaseOrderMethods(Document):
         options: list[DeliveryOptionDict] = response["delivery_options"]
         self.cannot_add_items = json.dumps(response["cannot_add"])
         for option in options:
-            # raise Exception(option)
             self.append(
                 "delivery_options",
                 {
@@ -326,82 +327,44 @@ class PurchaseOrder(PurchaseOrderMethods):
         self.status = "Completed"  # type: ignore
         self.db_update()
 
+    @frappe.whitelist()
+    def get_unavailable_items_in_cart_by_orders(
+        self, unavailable_items: list[dict[str, str | int]]
+    ):
+        all_items: list[
+            PurchaseOrderItemToSell | ChildItem | SalesOrderItem | SalesOrderChildItem
+        ] = []
+        for order in self.sales_orders:
+            doc: SalesOrder = frappe.get_doc("Sales Order", order.sales_order_name)
+            all_items += doc._get_items_with_splitted_combinations()
+        items_to_sell = self._get_items_to_sell(split_combinations=True)
+        for item in items_to_sell:
+            item.parent = self.name
+        all_items += items_to_sell
 
-@frappe.whitelist()
-def get_unavailable_items_in_cart_by_orders(
-    unavailable_items: list[dict[str, Any]],
-    sales_order_names: list[str],
-    items_to_sell: list[dict[str, Any]],
-):
-    unavailable_items = maybe_json(unavailable_items)
-    sales_order_names = maybe_json(sales_order_names)
-    items_to_sell = maybe_json(items_to_sell)
-
-    unavailable_item_code_to_qtys: dict[str, Any] = {}
-    for item in unavailable_items:
-        key = item["item_code"]
-        cur_item = unavailable_item_code_to_qtys[key]
-        if key in unavailable_item_code_to_qtys:
-            cur_item["required_qty"] += item["required_qty"]
-            cur_item["available_qty"] += item["available_qty"]
-        else:
-            cur_item = item
-
-    so_items = []
-    for d in ("Sales Order Item", "Sales Order Child Item"):
-        so_items += frappe.get_all(
-            d,
-            ["item_code", "item_name", "qty", "parent"],
-            {
-                "parent": ("in", sales_order_names),
-                "item_code": ("in", list(unavailable_item_code_to_qtys.keys())),
-            },
-            order_by="modified desc",
+        counter = count_quantity(
+            (frappe._dict(i) for i in maybe_json(unavailable_items)),
+            value_key="available_qty",
         )
+        grouped_items = group_by_key(i for i in all_items if i.item_code in counter)
 
-    item_names: dict[str, str] = frappe.get_all(
-        "Item",
-        ["item_code", "item_name"],
-        {"item_code": ["in", [d["item_code"] for d in items_to_sell]]},
-    )
-
-    item_names_map: dict[str, str] = {}
-    for d in item_names:
-        item_names_map[d["item_code"]] = d["item_name"]
-
-    for d in items_to_sell:
-        d["parent"] = ""
-        d["item_name"] = item_names_map[d["item_code"]]
-
-    res: list[dict[str, Any]] = []
-    unallocated_items: dict[Any, Any] = unavailable_item_code_to_qtys
-    for d in so_items + items_to_sell:
-        if not d["item_code"] in unallocated_items:
-            continue
-        unavailable_item = unallocated_items[d["item_code"]]
-        unavailable_item["required_qty"] -= d["qty"]
-        available_qty = 0
-        if unavailable_item["available_qty"] > 0:
-            available_qty = unavailable_item["available_qty"]
-            if d["qty"] > available_qty:
-                unavailable_item["available_qty"] = 0
-            else:
-                unavailable_item["available_qty"] -= d["qty"]
-        if unavailable_item["required_qty"] == 0:
-            del unallocated_items[d["item_code"]]
-        else:
-            unallocated_items[d["item_code"]] = unavailable_item
-        res.append(
-            {
-                "item_code": d["item_code"],
-                "item_name": d["item_name"],
-                "required_qty": d["qty"],
-                "available_qty": available_qty,
-                "sales_order": d["parent"],
-            }
-        )
-
-    return sorted(res, key=lambda d: d["sales_order"])
+        res: list[dict[str, str | int | None]] = []
+        for items in grouped_items.values():
+            for idx, item in enumerate(items):
+                if item.item_name is None:
+                    item.item_name = frappe.get_cached_value(
+                        "Item", item.item_code, "item_name"
+                    )
+                res.append(
+                    {
+                        "item_code": item.item_code,
+                        "item_name": item.item_name,
+                        "required_qty": item.qty,
+                        "available_qty": counter[item.item_code] if idx == 0 else None,
+                        "parent": item.parent,
+                    }
+                )
+        return res
 
 
 @frappe.whitelist()
