@@ -234,7 +234,7 @@ class SalesOrder(SalesOrderStatuses):
         self.calculate()
         self.set_statuses()
 
-    def before_submit(self):  # pragma: no cover
+    def before_submit(self):
         self.edit_commission = True
 
     def before_cancel(self):  # pragma: no cover
