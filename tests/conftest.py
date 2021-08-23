@@ -1,3 +1,4 @@
+from datetime import date
 from typing import Any
 from unittest.mock import MagicMock
 
@@ -8,6 +9,9 @@ import frappe
 from comfort.comfort_core.doctype.commission_settings.commission_settings import (
     CommissionSettings,
 )
+from comfort.comfort_core.doctype.ikea_settings.ikea_settings import IkeaSettings
+
+# from comfort.comfort_core.ikea import IkeaCartUtils
 from comfort.entities.doctype.customer.customer import Customer
 from comfort.entities.doctype.item.item import Item
 from comfort.entities.doctype.item_category.item_category import ItemCategory
@@ -184,7 +188,6 @@ def item_category() -> ItemCategory:
     return frappe.get_doc(
         {
             "name": "Столешницы",
-            "item_category_name": "Столешницы",
             "url": "https://www.ikea.com/ru/ru/cat/-11844",
             "doctype": "Item Category",
         }
@@ -314,11 +317,126 @@ def sales_order(
     return doc
 
 
+mock_delivery_services = {
+    "delivery_options": [
+        {
+            "type": "Доставка",
+            "date": date(2021, 8, 25),
+            "price": 3299,
+            "service_provider": None,
+            "unavailable_items_json": '[{"item_code": "50366596", "is_combination": false, "required_qty": 1, "available_qty": 0}, {"item_code": "10366598", "is_combination": false, "required_qty": 1, "available_qty": 0}, {"item_code": "29128569", "is_combination": true, "required_qty": 1, "available_qty": 0}]',
+            "doctype": "Purchase Order Delivery Option",
+        },
+        {
+            "type": "Доставка без подъёма",
+            "date": date(2021, 8, 25),
+            "price": 2799,
+            "service_provider": None,
+            "unavailable_items_json": '[{"item_code": "50366596", "is_combination": false, "required_qty": 1, "available_qty": 0}, {"item_code": "10366598", "is_combination": false, "required_qty": 1, "available_qty": 0}, {"item_code": "29128569", "is_combination": true, "required_qty": 1, "available_qty": 0}]',
+            "doctype": "Purchase Order Delivery Option",
+        },
+        {
+            "type": "Пункт самовывоза",
+            "date": date(2021, 8, 25),
+            "price": 1998,
+            "service_provider": "Деловые линии",
+            "unavailable_items_json": '[{"item_code": "50366596", "is_combination": false, "required_qty": 1, "available_qty": 0}, {"item_code": "10366598", "is_combination": false, "required_qty": 1, "available_qty": 0}, {"item_code": "29128569", "is_combination": true, "required_qty": 1, "available_qty": 0}]',
+            "doctype": "Purchase Order Delivery Option",
+        },
+        {
+            "type": "Магазин",
+            "date": date(2021, 8, 21),
+            "price": 999999,
+            "service_provider": None,
+            "unavailable_items_json": '[{"item_code": "50366596", "is_combination": false, "required_qty": 1, "available_qty": 0}, {"item_code": "10366598", "is_combination": false, "required_qty": 1, "available_qty": 0}, {"item_code": "29128569", "is_combination": true, "required_qty": 1, "available_qty": 0}]',
+            "doctype": "Purchase Order Delivery Option",
+        },
+        {
+            "type": "Магазин",
+            "date": date(2021, 8, 21),
+            "price": 1998,
+            "service_provider": None,
+            "unavailable_items_json": '[{"item_code": "50366596", "is_combination": false, "required_qty": 1, "available_qty": 0}, {"item_code": "10366598", "is_combination": false, "required_qty": 1, "available_qty": 0}, {"item_code": "29128569", "is_combination": true, "required_qty": 1, "available_qty": 0}]',
+            "doctype": "Purchase Order Delivery Option",
+        },
+        {
+            "type": "Магазин",
+            "date": date(2021, 8, 21),
+            "price": 1998,
+            "service_provider": None,
+            "unavailable_items_json": '[{"item_code": "50366596", "is_combination": false, "required_qty": 1, "available_qty": 0}, {"item_code": "10366598", "is_combination": false, "required_qty": 1, "available_qty": 0}, {"item_code": "29128569", "is_combination": true, "required_qty": 1, "available_qty": 0}]',
+            "doctype": "Purchase Order Delivery Option",
+        },
+        {
+            "type": "Магазин",
+            "date": date(2021, 8, 21),
+            "price": 1998,
+            "service_provider": None,
+            "unavailable_items_json": '[{"item_code": "50366596", "is_combination": false, "required_qty": 1, "available_qty": 0}, {"item_code": "10366598", "is_combination": false, "required_qty": 1, "available_qty": 0}, {"item_code": "29128569", "is_combination": true, "required_qty": 1, "available_qty": 0}]',
+            "doctype": "Purchase Order Delivery Option",
+        },
+    ],
+    "cannot_add_items": ["50366596"],
+}
+
+mock_purchase_history = [
+    {
+        "id": "11111111",
+        "datetime": "2021-04-19T10:12:00Z",
+        "datetime_formatted": "19 апреля 2021, 13:12",
+        "status": "IN_PROGRESS",
+        "store": "Интернет-магазин",
+        "cost": 8326.0,
+    },
+    {
+        "id": "111111110",
+        "datetime": "2021-04-14T18:16:25Z",
+        "datetime_formatted": "14 апреля 2021, 21:16",
+        "status": "COMPLETED",
+        "store": "Интернет-магазин",
+        "cost": 0,
+    },
+]
+
+mock_purchase_info = {
+    "purchase_date": "2021-04-19",
+    "delivery_date": "2021-04-24",
+    "delivery_cost": 399.0,
+    "items_cost": 7927.0,
+}
+
+
+def patch_ikeacartutils(monkeypatch: pytest.MonkeyPatch):  # TODO
+    return
+    # monkeypatch.setattr(
+    #     IkeaCartUtils,
+    #     "get_delivery_services",
+    #     lambda self, templated_items: mock_delivery_services,  # type: ignore
+    # )
+
+    # monkeypatch.setattr(
+    #     IkeaCartUtils,
+    #     "get_purchase_history",
+    #     lambda self: mock_purchase_history,  # type: ignore
+    # )
+
+    # monkeypatch.setattr(
+    #     IkeaCartUtils,
+    #     "get_purchase_info",
+    #     lambda self, purchase_id, use_lite_id: mock_purchase_info,  # type: ignore
+    # )
+
+
 @pytest.fixture
-def purchase_order(sales_order: SalesOrder) -> PurchaseOrder:
+def purchase_order(
+    sales_order: SalesOrder, monkeypatch: pytest.MonkeyPatch
+) -> PurchaseOrder:
+
     sales_order.set_child_items()
     sales_order.db_insert()
     sales_order.db_update_all()
+
+    patch_ikeacartutils(monkeypatch)
 
     return frappe.get_doc(
         {
@@ -366,3 +484,11 @@ def commission_settings() -> CommissionSettings:
             ],
         }
     )
+
+
+@pytest.fixture
+def ikea_settings():
+    doc: IkeaSettings = frappe.get_single("Ikea Settings")
+    doc.zip_code = "101000"
+    doc.save()
+    return doc

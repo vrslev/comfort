@@ -112,9 +112,9 @@ def test_create_purchase_gl_entries(
     receipt_purchase: Receipt, purchase_order: PurchaseOrder
 ):
     purchase_order.items_to_sell_cost = 1530
-    purchase_order.sales_order_cost = 20000
+    purchase_order.sales_orders_cost = 20000
     purchase_order.db_update()
-    items_cost = purchase_order.items_to_sell_cost + purchase_order.sales_order_cost
+    items_cost = purchase_order.items_to_sell_cost + purchase_order.sales_orders_cost
 
     receipt_purchase.db_insert()
     receipt_purchase.create_purchase_gl_entries()

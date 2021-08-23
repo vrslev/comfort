@@ -543,7 +543,7 @@ function show_unavailable_items_dialog(grid_row) {
       "comfort.transactions.doctype.purchase_order.purchase_order.get_unavailable_items_in_cart_by_orders",
     args: {
       unavailable_items: grid_row.doc.unavailable_items_json,
-      sales_orders: cur_frm.doc.sales_orders.map((v) => {
+      sales_order_names: cur_frm.doc.sales_orders.map((v) => {
         return v.sales_order_name;
       }),
       items_to_sell: cur_frm.doc.items_to_sell.map((v) => {
