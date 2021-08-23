@@ -24,7 +24,7 @@ def count_quantity(
     return c
 
 
-def counters_are_same(first: Counter[str], second: Counter[str]):  # TODO: Test
+def counters_are_same(first: Counter[str], second: Counter[str]):
     return len(set(first.items()).symmetric_difference(set(second.items()))) == 0
 
 
