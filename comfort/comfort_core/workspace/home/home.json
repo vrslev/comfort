@@ -88,8 +88,8 @@
     {
       "hidden": 0,
       "is_query_report": 0,
-      "label": "Ikea Cart Settings",
-      "link_to": "Ikea Cart Settings",
+      "label": "Ikea Settings",
+      "link_to": "Ikea Settings",
       "link_type": "DocType",
       "onboard": 0,
       "type": "Link"
