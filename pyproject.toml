@@ -79,7 +79,7 @@ reportImplicitStringConcatenation = "warning"
 
 [tool.semantic_release]
 branch = "main"
-version_toml = "comfort/__init__.py:__version__"
+version_variable = "comfort/__init__.py:__version__"
 build_command = "pip install build && python -m build"
 commit_subject = "сhore: Update version to {version}"
 upload_to_pypi = false
