@@ -34,7 +34,7 @@ from ..purchase_order_sales_order.purchase_order_sales_order import (
     PurchaseOrderSalesOrder,
 )
 
-# TODO: Check if there any IkeaCarts that contains those Sales Orders
+# TODO: Validate this Purchase Order is the only one that contains current Sales Orders
 
 
 class PurchaseOrderMethods(Document):
@@ -79,7 +79,7 @@ class PurchaseOrderMethods(Document):
                 "Item", item.item_code, ("item_name", "rate", "weight")
             )
             item.item_name, item.rate, item.weight = item_values
-            item.amount = item.qty * item.rate  # TODO: Cover
+            item.amount = item.qty * item.rate
 
     def _calculate_items_to_sell_cost(self):
         self.items_to_sell_cost = sum(item.amount for item in self.items_to_sell)

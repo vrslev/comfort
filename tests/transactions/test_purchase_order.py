@@ -76,6 +76,7 @@ def test_update_items_to_sell_from_db(purchase_order: PurchaseOrder):
         assert i.item_name == item_name
         assert i.rate == rate
         assert i.weight == weight
+        assert i.amount == rate * i.qty
 
 
 def test_calculate_items_to_sell_cost(purchase_order: PurchaseOrder):
