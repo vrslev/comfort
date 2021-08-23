@@ -8,7 +8,7 @@ from frappe.model.document import Document
 
 
 class ItemCategory(Document):
-    item_category_name: str
+    category_name: str
     url: str | None
 
     def validate(self):  # pragma: no cover
