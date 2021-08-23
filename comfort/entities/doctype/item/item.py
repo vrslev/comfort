@@ -34,7 +34,7 @@ class ItemMethods:
 
     def validate_url(self):
         if self.url:
-            if len(re.findall(r"ikea.com/\w+/\w+/p/-s?\d+", self.url)) == 0:
+            if len(re.findall(r"ikea.com/ru/ru/p/[^/]+s?\d+", self.url)) == 0:
                 raise ValidationError(_("Invalid URL"))
 
     def set_name(self):

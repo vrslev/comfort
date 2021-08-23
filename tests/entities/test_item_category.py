@@ -5,8 +5,6 @@ import pytest
 from comfort.entities.doctype.item_category.item_category import ItemCategory
 from frappe import ValidationError
 
-# TODO: Glue with item test
-
 
 @pytest.mark.parametrize(
     "url",

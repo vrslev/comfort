@@ -32,7 +32,7 @@ def get_pymethods(files: list[str]):
     return all_matches
 
 
-def test_dotted_py_methods_in_code():  # TODO: Use builin frappe's whitelist stuff
+def test_dotted_py_methods_in_code():
     py_files, js_files = get_py_js_files()
     methods_in_py, methods_in_js = get_pymethods(py_files), get_pymethods(js_files)
 

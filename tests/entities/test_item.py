@@ -4,13 +4,15 @@ import frappe
 from comfort.entities.doctype.item.item import Item
 from frappe import ValidationError
 
-# TODO: Refactor to make it more "UNIT"
-# TODO: Two test cases: with item and combination
 
-
-def test_validate_child_items(item: Item, child_items: list[Item]):
+@pytest.mark.usefixtures("child_items")
+def test_validate_child_items(item: Item):
     item.validate_child_items()
 
+
+def test_validate_child_items_raises_on_nested_child(
+    item: Item, child_items: list[Item]
+):
     frappe.get_doc(
         {
             "doctype": "Child Item",
@@ -20,17 +22,41 @@ def test_validate_child_items(item: Item, child_items: list[Item]):
             "parenttype": "Item",
             "parent": child_items[1].item_code,  # this causes ValidationError
         }
-    ).insert()
+    ).db_insert()
+
     with pytest.raises(
         ValidationError, match="Can't add child item that contains child items"
     ):
         item.validate_child_items()
 
 
-def test_validate_url(item: Item):  # TODO: Parametrize
+@pytest.mark.parametrize(
+    "url",
+    (
+        "https://www.ikea.com/ru/ru/p/-s29128569",
+        "https://www.ikea.com/ru/ru/p/-29128569",
+        "https://www.ikea.com/ru/ru/p/pax-paks-garderob-belyy-s29128569/",
+        "https://www.ikea.com/ru/ru/p/pax-paks-garderob-belyy-29128569/",
+        None,
+    ),
+)
+def test_validate_url_valid(item: Item, url: str):
+    item.url = url
     item.validate_url()
 
-    item.url = "https://example.com/f023"
+
+@pytest.mark.parametrize(
+    "url",
+    (
+        "https://www.ikea.com/us/en/p/-s29128569",
+        "https://www.ikea.com/ru/ru/p/",
+        "ikea.com",
+        "https://ikea.com/cat/-11844",
+        "https://example.com/f023",
+    ),
+)
+def test_validate_url_raises_on_invalid(item: Item, url: str):
+    item.url = url
     with pytest.raises(ValidationError, match="Invalid URL"):
         item.validate_url()
 
@@ -44,7 +70,8 @@ def test_set_name(item: Item):
     assert item.item_name == item.item_code
 
 
-def test_calculate_weight(item: Item, child_items: list[Item]):
+@pytest.mark.usefixtures("child_items")
+def test_calculate_weight(item: Item):
     item.calculate_weight()
     assert item.weight == 180.49
 
