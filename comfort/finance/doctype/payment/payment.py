@@ -89,7 +89,7 @@ class Payment(Document):
             self.voucher_type,
             self.voucher_no,
             fieldname=[
-                "sales_order_cost + items_to_sell_cost as prepaid_inventory",
+                "sales_orders_cost + items_to_sell_cost as prepaid_inventory",
                 "delivery_cost as purchase_delivery",
             ],
         )
