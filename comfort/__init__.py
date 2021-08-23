@@ -24,6 +24,10 @@ def count_quantity(
     return c
 
 
+def counters_are_same(first: Counter[str], second: Counter[str]):  # TODO: Test
+    return len(set(first.items()).symmetric_difference(set(second.items()))) == 0
+
+
 def group_by_key(data: Iterable[T], key: str = "item_code") -> dict[Any, list[T]]:
     """Group iterable of objects by key."""
     d: defaultdict[Any, list[T]] = defaultdict(list)

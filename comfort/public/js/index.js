@@ -1,28 +1,12 @@
 frappe.provide("comfort");
 
-comfort.fetch_items = (
-  item_codes,
-  force_update = false,
-  download_images = true,
-  values_from_db
-) => {
+comfort.fetch_items = (item_codes) => {
   var promise = new Promise((resolve) => {
     let isResolved = false;
     frappe.call({
-      method: "comfort.comfort_core.ikea.item.fetch_new_items",
-      args: {
-        item_codes: item_codes,
-        force_update: force_update,
-        download_images: download_images,
-        values_from_db: values_from_db,
-      },
+      method: "comfort.comfort_core.get_items",
+      args: { item_codes: item_codes },
       callback: (r) => {
-        if (r.message.unsuccessful.length > 0) {
-          frappe.msgprint(
-            "Эти товары не удалось загрузить: " +
-              r.message.unsuccessful.join(", ")
-          );
-        }
         frappe.dom.unfreeze();
         isResolved = true;
         resolve(r.message);

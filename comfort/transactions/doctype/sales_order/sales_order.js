@@ -354,40 +354,35 @@ function recalculate(frm) {
   calculate_total_weight(frm);
 }
 
-async function quick_add_items(text) {
-  comfort
-    .fetch_items(text, false, true, ["item_name", "rate", "weight"])
-    .then((r) => {
-      for (var d of r.values) {
-        let doc = cur_frm.add_child("items", {
-          item_code: d.item_code,
-          qty: 1,
-          item_name: d.item_name,
-          rate: d.rate,
-          weight: d.weight,
-        });
-        let cdt = doc.doctype;
-        let cdn = doc.name;
+function quick_add_items(text) {
+  comfort.fetch_items(text).then((values) => {
+    for (var item of values) {
+      let doc = cur_frm.add_child("items", {
+        item_code: item.item_code,
+        item_name: item.item_name,
+        qty: 1,
+        rate: item.rate,
+        weight: item.weight,
+      });
+      calculate_item_amount(cur_frm, doc.doctype, doc.name);
+      calculate_item_total_weight(cur_frm, doc.doctype, doc.name);
+    }
 
-        calculate_item_amount(cur_frm, cdt, cdn);
-        calculate_item_total_weight(cur_frm, cdt, cdn);
+    let grid = cur_frm.fields_dict.items.grid;
+
+    // loose focus from current row
+    grid.add_new_row(null, null, true);
+    grid.grid_rows[grid.grid_rows.length - 1].toggle_editable_row();
+
+    let grid_rows = grid.grid_rows;
+    for (var i = grid_rows.length; i--; ) {
+      let doc = grid_rows[i].doc;
+      if (!(doc.item_name && doc.item_code)) {
+        grid_rows[i].remove();
       }
+    }
 
-      let grid = cur_frm.fields_dict.items.grid;
-
-      // loose focus from current row
-      grid.add_new_row(null, null, true);
-      grid.grid_rows[grid.grid_rows.length - 1].toggle_editable_row();
-
-      let grid_rows = grid.grid_rows;
-      for (var i = grid_rows.length; i--; ) {
-        let doc = grid_rows[i].doc;
-        if (!(doc.item_name && doc.item_code)) {
-          grid_rows[i].remove();
-        }
-      }
-
-      recalculate(cur_frm);
-      refresh_field("items");
-    });
+    recalculate(cur_frm);
+    refresh_field("items");
+  });
 }
