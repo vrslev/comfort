@@ -33,6 +33,7 @@ def add_items_to_cart(items: dict[str, int], authorize: bool):  # pragma: no cov
     return ikea_api_wrapped.add_items_to_cart(api, items)
 
 
+@frappe.whitelist()
 def get_purchase_history():  # pragma: no cover
     return ikea_api_wrapped.get_purchase_history(get_authorized_api())
 

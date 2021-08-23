@@ -368,8 +368,8 @@ class PurchaseOrder(PurchaseOrderMethods):
 
 
 @frappe.whitelist()
-@frappe.validate_and_sanitize_search_inputs
-def get_sales_order_query(
+@frappe.validate_and_sanitize_search_inputs  # pragma: no cover
+def sales_order_query(
     doctype: str,
     txt: str,
     searchfield: str,
@@ -377,21 +377,21 @@ def get_sales_order_query(
     page_len: str,
     filters: dict[str, Any],
 ) -> dict[str, Any]:
-    ignore_orders: list[str] = frappe.db.sql(
-        "SELECT sales_order_name from `tabPurchase Order Sales Order`"
-    )
-    ignore_orders = [d[0] for d in ignore_orders]
-    ignore_orders += filters["not in"]
+    ignore_orders: list[str] = [
+        s.sales_order_name
+        for s in frappe.get_all("Purchase Order Sales Order", "sales_order_name")
+    ] + filters["not in"]
+
     ignore_orders_cond = ""
     if len(ignore_orders) > 0:
-        ignore_orders = "(" + ",".join(["'" + d + "'" for d in ignore_orders]) + ")"
+        ignore_orders = "(" + ",".join(f"'{d}'" for d in ignore_orders) + ")"
         ignore_orders_cond = f"name NOT IN {ignore_orders} AND"
 
-    searchfields: Any = frappe.get_meta("Sales Order").get_search_fields()
+    searchfields: list[Any] = frappe.get_meta("Sales Order").get_search_fields()
     if searchfield:
-        searchfields = " or ".join([field + " LIKE %(txt)s" for field in searchfields])
+        searchfields = " or ".join(field + " LIKE %(txt)s" for field in searchfields)
 
-    res: list[tuple[Any, ...]] = frappe.db.sql(  # nosec
+    orders: list[tuple[Any, ...]] = frappe.db.sql(  # nosec
         """
         SELECT name, customer, total_amount from `tabSales Order`
         WHERE {ignore_orders_cond}
@@ -399,29 +399,20 @@ def get_sales_order_query(
         AND ({scond})
         ORDER BY modified DESC
         LIMIT %(start)s, %(page_len)s
-        """.format(  # nosec
+        """.format(
             scond=searchfields, ignore_orders_cond=ignore_orders_cond
         ),
         {"txt": "%%%s%%" % txt, "start": start, "page_len": page_len},
         as_list=True,
     )
 
-    for d in res:
-        d[2] = frappe.format(d[2], "Currency")
-    return res
+    for order in orders:
+        order[2] = frappe.format(order[2], "Currency")
+    return orders
 
 
 @frappe.whitelist()
-def get_purchase_history():  # pragma: no cover
-    from comfort.comfort_core.ikea import get_purchase_history
-
-    return get_purchase_history()
-
-
-@frappe.whitelist()
-def get_purchase_info(  # pragma: no cover
-    purchase_id: int, use_lite_id: bool
-) -> dict[str, bool | dict[str, Any]]:
+def get_purchase_info(purchase_id: int, use_lite_id: bool):  # TODO: Test this
     from comfort.comfort_core.ikea import get_purchase_info
 
     purchase_info = get_purchase_info(purchase_id, use_lite_id)

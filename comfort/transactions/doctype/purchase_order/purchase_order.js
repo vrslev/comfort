@@ -15,7 +15,7 @@ comfort.IkeaCartController = frappe.ui.form.Controller.extend({
       });
       return {
         query:
-          "comfort.transactions.doctype.purchase_order.purchase_order.get_sales_order_query",
+          "comfort.transactions.doctype.purchase_order.purchase_order.sales_order_query",
         filters: {
           "not in": cur_sales_orders,
         },
@@ -325,8 +325,7 @@ comfort.IkeaCartController = frappe.ui.form.Controller.extend({
     frappe.validated = false;
 
     frappe.call({
-      method:
-        "comfort.transactions.doctype.purchase_order.purchase_order.get_purchase_history",
+      method: "comfort.comfort_core.ikea.get_purchase_history",
       freeze: true,
       callback: (r) => {
         if (r.message) {
@@ -540,8 +539,7 @@ function create_unavailable_items_table(response) {
 function show_unavailable_items_dialog(grid_row) {
   cur_frm.call({
     doc: cur_frm.doc,
-    method:
-      "comfort.transactions.doctype.purchase_order.purchase_order.get_unavailable_items_in_cart_by_orders",
+    method: "get_unavailable_items_in_cart_by_orders",
     args: {
       unavailable_items: grid_row.doc.unavailable_items,
     },
