@@ -7,6 +7,7 @@ import pytest
 
 import frappe
 from comfort import count_quantity, group_by_key
+from comfort.comfort_core.doctype.ikea_settings.ikea_settings import get_guest_api
 from comfort.entities.doctype.child_item.child_item import ChildItem
 from comfort.stock.doctype.stock_entry.stock_entry import StockEntry
 from comfort.transactions.doctype.purchase_order.purchase_order import (
@@ -265,9 +266,10 @@ def test_get_templated_items_for_api(
 
 @pytest.mark.usefixtures("ikea_settings")
 def test_get_delivery_services(purchase_order: PurchaseOrder):
+    get_guest_api()
     purchase_order.get_delivery_services()
     assert purchase_order.cannot_add_items == json.dumps(
-        mock_delivery_services["cannot_add_items"]
+        mock_delivery_services["cannot_add"]
     )
     assert len(purchase_order.delivery_options) == len(
         mock_delivery_services["delivery_options"]
@@ -433,6 +435,3 @@ def test_get_unavailable_items_in_cart_by_orders(purchase_order: PurchaseOrder):
             for i in purchase_order.items_to_sell
         ],
     )
-
-
-# TODO: Cover first Ikea Settings

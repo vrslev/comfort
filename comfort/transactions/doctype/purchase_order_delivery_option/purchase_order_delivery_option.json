@@ -8,7 +8,7 @@
     "service_provider",
     "date",
     "price",
-    "unavailable_items_json"
+    "unavailable_items"
   ],
   "fields": [
     {
@@ -42,17 +42,17 @@
       "read_only": 1
     },
     {
-      "fieldname": "unavailable_items_json",
+      "fieldname": "unavailable_items",
       "fieldtype": "Long Text",
       "hidden": 1,
-      "label": "Unavailable Items Json",
+      "label": "Unavailable Items",
       "read_only": 1
     }
   ],
   "hide_toolbar": 1,
   "istable": 1,
   "links": [],
-  "modified": "2021-08-19 00:59:32.298842",
+  "modified": "2021-08-23 06:42:45.507765",
   "modified_by": "Administrator",
   "module": "Transactions",
   "name": "Purchase Order Delivery Option",

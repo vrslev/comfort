@@ -15,7 +15,9 @@ from tests.conftest import mock_token
 
 
 def is_same_date(first: datetime, second: datetime):
-    return first.replace(microsecond=0) == second.replace(microsecond=0)
+    return first.replace(minute=0, second=0, microsecond=0) == second.replace(
+        minute=0, second=0, microsecond=0
+    )
 
 
 _testdata = ("token", "expiration"), (

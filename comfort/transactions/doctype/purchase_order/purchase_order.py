@@ -5,6 +5,8 @@ import re
 from datetime import datetime
 from typing import Any, Literal, ValuesView
 
+from ikea_api_wrapped.parsers.order_capture import DeliveryOptionDict
+
 import frappe
 from comfort import ValidationError, count_quantity, group_by_key, maybe_json
 from comfort.comfort_core.ikea import add_items_to_cart, get_delivery_services
@@ -186,13 +188,24 @@ class PurchaseOrderMethods(Document):
 
     def get_delivery_services(self):
         templated_items = self._get_templated_items_for_api(split_combinations=True)
-        delivery_services: dict[Any, Any] = get_delivery_services(templated_items)
-        self.update(
-            {
-                "delivery_options": delivery_services["delivery_options"],
-                "cannot_add_items": json.dumps(delivery_services["cannot_add_items"]),
-            }
-        )
+        response = get_delivery_services(templated_items)
+        if not response:
+            return
+
+        options: list[DeliveryOptionDict] = response["delivery_options"]
+        self.cannot_add_items = json.dumps(response["cannot_add"])
+        for option in options:
+            # raise Exception(option)
+            self.append(
+                "delivery_options",
+                {
+                    "type": option["delivery_type"],
+                    "service_provider": option["service_provider"],
+                    "date": option["delivery_date"],
+                    "price": option["price"],
+                    "unavailable_items": json.dumps(option["unavailable_items"]),
+                },
+            )
 
     def submit_sales_orders_and_update_statuses(self):  # pragma: no cover
         for s in self.sales_orders:
