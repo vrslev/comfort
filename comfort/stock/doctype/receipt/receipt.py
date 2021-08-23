@@ -64,16 +64,6 @@ class Receipt(Document):
         self._new_gl_entry("inventory", 0, items_cost)
         self._new_gl_entry("cost_of_goods_sold", items_cost, 0)
 
-    def _get_sales_order_items_with_splitted_combinations(
-        self,
-    ) -> list[SalesOrderChildItem | SalesOrderItem]:
-        parents: list[str] = (
-            child.parent_item_code for child in self._voucher.child_items
-        )
-        return self._voucher.child_items + [
-            item for item in self._voucher.items if item.item_code not in parents
-        ]
-
     def create_sales_stock_entries(self):
         items_obj: list[
             SalesOrderItem | SalesOrderChildItem
@@ -90,7 +80,7 @@ class Receipt(Document):
         items_amount: int = frappe.get_value(
             self.voucher_type,
             self.voucher_no,
-            "items_to_sell_cost + sales_order_cost as items_amount",
+            "items_to_sell_cost + sales_orders_cost as items_amount",
         )
         self._new_gl_entry("prepaid_inventory", 0, items_amount)
         self._new_gl_entry("inventory", items_amount, 0)

@@ -130,7 +130,7 @@ def test_create_income_sales_gl_entry(payment_sales: Payment):
 
 @pytest.mark.parametrize(
     (
-        "sales_order_cost",
+        "sales_orders_cost",
         "items_to_sell_cost",
         "delivery_cost",
         "exp_prepaid_inventory",
@@ -144,13 +144,13 @@ def test_create_income_sales_gl_entry(payment_sales: Payment):
 def test_create_purchase_gl_entries(
     payment_purchase: Payment,
     purchase_order: PurchaseOrder,
-    sales_order_cost: int,
+    sales_orders_cost: int,
     items_to_sell_cost: int,
     delivery_cost: int,
     exp_prepaid_inventory: int,
     exp_purchase_delivery: int,
 ):
-    purchase_order.sales_order_cost = sales_order_cost
+    purchase_order.sales_orders_cost = sales_orders_cost
     purchase_order.items_to_sell_cost = items_to_sell_cost
     purchase_order.delivery_cost = delivery_cost
     purchase_order.db_update()
