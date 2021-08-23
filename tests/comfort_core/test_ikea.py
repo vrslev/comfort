@@ -1,4 +1,3 @@
-import pytest
 from ikea_api_wrapped.parsers.item import ParsedItem
 
 import frappe
@@ -13,65 +12,6 @@ from comfort.comfort_core.ikea import (
 )
 from comfort.entities.doctype.item.item import Item
 from comfort.entities.doctype.item_category.item_category import ItemCategory
-
-
-@pytest.fixture
-def parsed_item() -> ParsedItem:
-    return {
-        "is_combination": True,
-        "item_code": "29128569",
-        "name": "ПАКС, Гардероб, 175x58x236 см, белый",
-        "image_url": "https://www.ikea.com/ru/ru/images/products/paks-garderob-belyj__0383288_PE557277_S5.JPG",
-        "weight": 0.0,
-        "child_items": [
-            {
-                "item_code": "10014030",
-                "item_name": "ПАКС, Каркас гардероба, 175x58x236 см, белый",
-                "weight": 41.3,
-                "qty": 2,
-            },
-            {
-                "item_code": "10366598",
-                "item_name": "КОМПЛИМЕНТ, Штанга платяная, 175x58x236 см, белый",
-                "weight": 0.43,
-                "qty": 1,
-            },
-            {
-                "item_code": "20277974",
-                "item_name": "КОМПЛИМЕНТ, Полка, 175x58x236 см, белый",
-                "weight": 4.66,
-                "qty": 2,
-            },
-            {
-                "item_code": "40277973",
-                "item_name": "КОМПЛИМЕНТ, Полка, 175x58x236 см, белый",
-                "weight": 2.98,
-                "qty": 6,
-            },
-            {
-                "item_code": "40366634",
-                "item_name": "КОМПЛИМЕНТ, Ящик, 175x58x236 см, белый",
-                "weight": 7.72,
-                "qty": 3,
-            },
-            {
-                "item_code": "50121575",
-                "item_name": "ПАКС, Каркас гардероба, 175x58x236 см, белый",
-                "weight": 46.8,
-                "qty": 1,
-            },
-            {
-                "item_code": "50366596",
-                "item_name": "КОМПЛИМЕНТ, Штанга платяная, 175x58x236 см, белый",
-                "weight": 0.3,
-                "qty": 1,
-            },
-        ],
-        "price": 17950,
-        "url": "https://www.ikea.com/ru/ru/p/-s29128569",
-        "category_name": "Открытые гардеробы",
-        "category_url": "https://www.ikea.com/ru/ru/cat/-43634",
-    }
 
 
 def test_make_item_category_not_exists(parsed_item: ParsedItem):

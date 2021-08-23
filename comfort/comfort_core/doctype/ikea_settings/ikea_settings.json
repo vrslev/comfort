@@ -10,9 +10,9 @@
     "column_break_3",
     "zip_code",
     "guest_token",
-    "guest_token_expiration_time",
+    "guest_token_expiration",
     "authorized_token",
-    "authorized_token_expiration_time"
+    "authorized_token_expiration"
   ],
   "fields": [
     {
@@ -42,13 +42,6 @@
       "read_only": 1
     },
     {
-      "fieldname": "guest_token_expiration_time",
-      "fieldtype": "Datetime",
-      "hidden": 1,
-      "label": "Guest Token Expiration Time",
-      "read_only": 1
-    },
-    {
       "fieldname": "authorized_token",
       "fieldtype": "Text",
       "hidden": 1,
@@ -56,16 +49,23 @@
       "read_only": 1
     },
     {
-      "fieldname": "authorized_token_expiration_time",
+      "fieldname": "guest_token_expiration",
       "fieldtype": "Datetime",
       "hidden": 1,
-      "label": "Authorized Token Expiration Time",
+      "label": "Guest Token Expiration",
+      "read_only": 1
+    },
+    {
+      "fieldname": "authorized_token_expiration",
+      "fieldtype": "Datetime",
+      "hidden": 1,
+      "label": "Authorized Token Expiration",
       "read_only": 1
     }
   ],
   "issingle": 1,
   "links": [],
-  "modified": "2021-08-09 05:21:08.647463",
+  "modified": "2021-08-23 05:38:51.127022",
   "modified_by": "Administrator",
   "module": "Comfort Core",
   "name": "Ikea Settings",

@@ -2,8 +2,10 @@ from datetime import date
 from typing import Any, Callable
 from unittest.mock import MagicMock
 
+import ikea_api.auth
 import ikea_api_wrapped
 import pytest
+from ikea_api_wrapped.parsers.item import ParsedItem
 from pymysql import OperationalError
 
 import frappe
@@ -11,8 +13,6 @@ from comfort.comfort_core.doctype.commission_settings.commission_settings import
     CommissionSettings,
 )
 from comfort.comfort_core.doctype.ikea_settings.ikea_settings import IkeaSettings
-
-# from comfort.comfort_core.ikea import IkeaCartUtils
 from comfort.entities.doctype.customer.customer import Customer
 from comfort.entities.doctype.item.item import Item
 from comfort.entities.doctype.item_category.item_category import ItemCategory
@@ -475,9 +475,88 @@ def commission_settings() -> CommissionSettings:
     )
 
 
+mock_token = (
+    "eyJhbGciOiJSUzIre8NiIsInR5cCI6IkpXVCIsImtpZCI6ImVxSFFLR3duR3"
+    + "hfV3dJZkx0RGpaeDA5MTUzS2xSam5fVE1nVUlMYlJ5RncifQ.eyJpc3MiOiJ"
+    + "odHRwczovL2FwaS5pbmdrYS5pa2VhLmNvbS9ndWVzdCIsInN1YiI6ImRiOWU"
+    + "yMzg3LTU3ZDAtNGZiYS1iNzhjLTdiZmYwOWEyMGJlNCIsInJldGFpbFVuaXQ"
+    + "iOiJydSIsImlhdCI6MTYyOTcyOTE2MiwiZXhwIjoxNjMyMzIxMTYyfQ.UAkv"
+    + "ZmlX9sj8Hgve1kkq7tcf73-aDshLusxnAsW-1-9izS14cPGehzX47-MyResL"
+    + "jwlr7W70t0jMjL8ihdgj5aVSl-W3UVw_tt8FfO60b-GDfMt_vCAyAk2N9lts"
+    + "n7Ql5NiQXeTM6NVDLCCBM27FAUuTiDVEJc-F7WgmXWip4nE"
+)
+
+
 @pytest.fixture
-def ikea_settings():
+def ikea_settings(monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setattr(ikea_api.auth, "get_guest_token", lambda: mock_token)
+    mock_get_authorized_token: Callable[
+        [Any, Any], str
+    ] = lambda username, password: mock_token
+    monkeypatch.setattr(
+        ikea_api.auth, "get_authorized_token", mock_get_authorized_token
+    )
+
     doc: IkeaSettings = frappe.get_single("Ikea Settings")
     doc.zip_code = "101000"
     doc.save()
     return doc
+
+
+@pytest.fixture
+def parsed_item() -> ParsedItem:
+    return {
+        "is_combination": True,
+        "item_code": "29128569",
+        "name": "ПАКС, Гардероб, 175x58x236 см, белый",
+        "image_url": "https://www.ikea.com/ru/ru/images/products/paks-garderob-belyj__0383288_PE557277_S5.JPG",
+        "weight": 0.0,
+        "child_items": [
+            {
+                "item_code": "10014030",
+                "item_name": "ПАКС, Каркас гардероба, 175x58x236 см, белый",
+                "weight": 41.3,
+                "qty": 2,
+            },
+            {
+                "item_code": "10366598",
+                "item_name": "КОМПЛИМЕНТ, Штанга платяная, 175x58x236 см, белый",
+                "weight": 0.43,
+                "qty": 1,
+            },
+            {
+                "item_code": "20277974",
+                "item_name": "КОМПЛИМЕНТ, Полка, 175x58x236 см, белый",
+                "weight": 4.66,
+                "qty": 2,
+            },
+            {
+                "item_code": "40277973",
+                "item_name": "КОМПЛИМЕНТ, Полка, 175x58x236 см, белый",
+                "weight": 2.98,
+                "qty": 6,
+            },
+            {
+                "item_code": "40366634",
+                "item_name": "КОМПЛИМЕНТ, Ящик, 175x58x236 см, белый",
+                "weight": 7.72,
+                "qty": 3,
+            },
+            {
+                "item_code": "50121575",
+                "item_name": "ПАКС, Каркас гардероба, 175x58x236 см, белый",
+                "weight": 46.8,
+                "qty": 1,
+            },
+            {
+                "item_code": "50366596",
+                "item_name": "КОМПЛИМЕНТ, Штанга платяная, 175x58x236 см, белый",
+                "weight": 0.3,
+                "qty": 1,
+            },
+        ],
+        "price": 17950,
+        "url": "https://www.ikea.com/ru/ru/p/-s29128569",
+        "category_name": "Открытые гардеробы",
+        "category_url": "https://www.ikea.com/ru/ru/cat/-43634",
+    }
