@@ -264,9 +264,7 @@ def test_get_templated_items_for_api(
 
 
 @pytest.mark.usefixtures("ikea_settings")
-def test_get_delivery_services(
-    purchase_order: PurchaseOrder, monkeypatch: pytest.MonkeyPatch
-):
+def test_get_delivery_services(purchase_order: PurchaseOrder):
     purchase_order.get_delivery_services()
     assert purchase_order.cannot_add_items == json.dumps(
         mock_delivery_services["cannot_add_items"]
@@ -427,7 +425,6 @@ unavailable_items = [
 
 
 def test_get_unavailable_items_in_cart_by_orders(purchase_order: PurchaseOrder):
-
     get_unavailable_items_in_cart_by_orders(
         unavailable_items,
         [s.sales_order_name for s in purchase_order.sales_orders],
@@ -436,3 +433,6 @@ def test_get_unavailable_items_in_cart_by_orders(purchase_order: PurchaseOrder):
             for i in purchase_order.items_to_sell
         ],
     )
+
+
+# TODO: Cover first Ikea Settings

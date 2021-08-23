@@ -1,7 +1,8 @@
 from datetime import date
-from typing import Any
+from typing import Any, Callable
 from unittest.mock import MagicMock
 
+import ikea_api_wrapped
 import pytest
 from pymysql import OperationalError
 
@@ -406,25 +407,13 @@ mock_purchase_info = {
 }
 
 
-def patch_ikeacartutils(monkeypatch: pytest.MonkeyPatch):  # TODO
-    return
-    # monkeypatch.setattr(
-    #     IkeaCartUtils,
-    #     "get_delivery_services",
-    #     lambda self, templated_items: mock_delivery_services,  # type: ignore
-    # )
-
-    # monkeypatch.setattr(
-    #     IkeaCartUtils,
-    #     "get_purchase_history",
-    #     lambda self: mock_purchase_history,  # type: ignore
-    # )
-
-    # monkeypatch.setattr(
-    #     IkeaCartUtils,
-    #     "get_purchase_info",
-    #     lambda self, purchase_id, use_lite_id: mock_purchase_info,  # type: ignore
-    # )
+def patch_get_delivery_services(monkeypatch: pytest.MonkeyPatch):
+    mock_get_delivery_services: Callable[
+        [Any, Any, Any], Any
+    ] = lambda api, items, zip_code: mock_delivery_services
+    monkeypatch.setattr(
+        ikea_api_wrapped, "get_delivery_services", mock_get_delivery_services
+    )
 
 
 @pytest.fixture
@@ -436,7 +425,7 @@ def purchase_order(
     sales_order.db_insert()
     sales_order.db_update_all()
 
-    patch_ikeacartutils(monkeypatch)
+    patch_get_delivery_services(monkeypatch)
 
     return frappe.get_doc(
         {
