@@ -108,6 +108,7 @@ exclude_lines = [
     "@overload",
     "def __repr__",
     "if __name__ == .__main__.:",
+    "= TypeVar"
 ]
 
 [build-system]

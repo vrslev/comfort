@@ -4,7 +4,7 @@ from comfort.entities.doctype.item.item import Item
 
 
 @frappe.whitelist()
-def get_items(item_codes: str) -> list[Item]:
+def get_items(item_codes: str) -> list[Item]:  # pragma: no cover
     response: FetchItemsResult = fetch_items(item_codes)
     if response["unsuccessful"]:
         frappe.msgprint(

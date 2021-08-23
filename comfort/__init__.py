@@ -8,8 +8,7 @@ import frappe
 
 __version__ = "0.2.0"
 
-# TODO: Add tests to all utils
-OrderTypes = Literal["Sales Order", "Purchase Order"]
+OrderTypes = Literal["Sales Order", "Purchase Order"]  # pragma: no cover
 
 T = TypeVar("T")
 
