@@ -1,6 +1,5 @@
 {
   "actions": [],
-  "autoname": "GLE-.YYYY.-.#####",
   "creation": "2020-12-29 15:53:39.714645",
   "doctype": "DocType",
   "editable_grid": 1,
@@ -88,7 +87,7 @@
   "in_create": 1,
   "is_submittable": 1,
   "links": [],
-  "modified": "2021-08-25 06:23:22.733343",
+  "modified": "2021-08-25 08:08:10.675751",
   "modified_by": "Administrator",
   "module": "Finance",
   "name": "GL Entry",

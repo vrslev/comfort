@@ -1,6 +1,7 @@
 {
   "actions": [],
   "allow_rename": 1,
+  "autoname": "PO-.YYYY.-.####",
   "creation": "2021-03-24 18:03:18.180476",
   "doctype": "DocType",
   "editable_grid": 1,
@@ -164,7 +165,7 @@
   ],
   "is_submittable": 1,
   "links": [],
-  "modified": "2021-08-20 00:28:21.763236",
+  "modified": "2021-08-25 08:08:52.144612",
   "modified_by": "Administrator",
   "module": "Transactions",
   "name": "Purchase Order",

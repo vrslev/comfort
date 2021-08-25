@@ -1,5 +1,6 @@
 {
   "actions": [],
+  "autoname": "PAY-.YYYY.-.####",
   "creation": "2021-08-17 22:54:46.533174",
   "doctype": "DocType",
   "editable_grid": 1,
@@ -78,7 +79,7 @@
   "index_web_pages_for_search": 1,
   "is_submittable": 1,
   "links": [],
-  "modified": "2021-08-25 06:19:21.295820",
+  "modified": "2021-08-25 08:15:44.701300",
   "modified_by": "Administrator",
   "module": "Finance",
   "name": "Payment",

@@ -1,6 +1,6 @@
 {
   "actions": [],
-  "autoname": "S-.YYYY.-.####",
+  "autoname": "SO-.YYYY.-.####",
   "creation": "2021-01-01 18:33:35.831110",
   "doctype": "DocType",
   "editable_grid": 1,
@@ -255,7 +255,7 @@
   "index_web_pages_for_search": 1,
   "is_submittable": 1,
   "links": [],
-  "modified": "2021-08-25 03:11:03.743821",
+  "modified": "2021-08-25 08:15:20.510586",
   "modified_by": "Administrator",
   "module": "Transactions",
   "name": "Sales Order",

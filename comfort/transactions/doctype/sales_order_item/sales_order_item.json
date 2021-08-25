@@ -1,6 +1,5 @@
 {
   "actions": [],
-  "autoname": "hash",
   "creation": "2021-01-01 18:29:09.563357",
   "doctype": "DocType",
   "editable_grid": 1,
@@ -95,7 +94,7 @@
   "index_web_pages_for_search": 1,
   "istable": 1,
   "links": [],
-  "modified": "2021-08-25 03:04:23.852374",
+  "modified": "2021-08-25 08:08:37.078865",
   "modified_by": "Administrator",
   "module": "Transactions",
   "name": "Sales Order Item",
