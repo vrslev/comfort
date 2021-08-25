@@ -65,7 +65,7 @@
   ],
   "issingle": 1,
   "links": [],
-  "modified": "2021-08-23 05:38:51.127022",
+  "modified": "2021-08-25 08:29:56.534052",
   "modified_by": "Administrator",
   "module": "Comfort Core",
   "name": "Ikea Settings",
@@ -74,11 +74,8 @@
     {
       "create": 1,
       "delete": 1,
-      "email": 1,
-      "print": 1,
       "read": 1,
       "role": "Purchase User",
-      "share": 1,
       "write": 1
     }
   ],

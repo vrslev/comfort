@@ -14,10 +14,9 @@
       "reqd": 1
     }
   ],
-  "index_web_pages_for_search": 1,
   "issingle": 1,
   "links": [],
-  "modified": "2021-08-13 06:04:26.467690",
+  "modified": "2021-08-25 08:29:35.505939",
   "modified_by": "Administrator",
   "module": "Comfort Core",
   "name": "Commission Settings",
@@ -26,11 +25,8 @@
     {
       "create": 1,
       "delete": 1,
-      "email": 1,
-      "print": 1,
       "read": 1,
       "role": "System Manager",
-      "share": 1,
       "write": 1
     }
   ],
