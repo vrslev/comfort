@@ -97,7 +97,7 @@ def test_calculate_sales_orders_cost(purchase_order: PurchaseOrder):
     purchase_order._calculate_sales_orders_cost()
     res: list[int] = frappe.get_all(
         "Sales Order Item",
-        fields=["SUM(qty * rate) AS sales_orders_cost"],
+        fields="SUM(qty * rate) AS sales_orders_cost",
         filters={
             "parent": (
                 "in",
@@ -139,7 +139,7 @@ def test_calculate_total_weight(
 
     res: list[float] = frappe.get_all(
         "Sales Order Item",
-        fields=["SUM(total_weight) AS total_weight"],
+        fields="SUM(total_weight) AS total_weight",
         filters={
             "parent": (
                 "in",
@@ -196,7 +196,7 @@ def test_get_items_to_sell_split_combinations(purchase_order: PurchaseOrder):
 
     child_items: list[ChildItem] = frappe.get_all(
         "Child Item",
-        fields=["parent", "item_code", "qty"],
+        fields=("parent", "item_code", "qty"),
         filters={"parent": ("in", (i.item_code for i in purchase_order.items_to_sell))},
     )
     parents = (child.parent for child in child_items)
@@ -218,7 +218,7 @@ def test_get_items_in_sales_orders_with_empty_sales_orders(
 def test_get_items_in_sales_orders_no_split_combinations(purchase_order: PurchaseOrder):
     exp_items: list[SalesOrderItem] = frappe.get_all(
         "Sales Order Item",
-        fields=["item_code", "qty"],
+        fields=("item_code", "qty"),
         filters={
             "parent": (
                 "in",
@@ -234,12 +234,12 @@ def test_get_items_in_sales_orders_split_combinations(purchase_order: PurchaseOr
     sales_order_names = (ord.sales_order_name for ord in purchase_order.sales_orders)
     so_items: list[SalesOrderItem] = frappe.get_all(
         "Sales Order Item",
-        fields=["item_code", "qty"],
+        fields=("item_code", "qty"),
         filters={"parent": ("in", sales_order_names)},
     )
     child_items: list[SalesOrderChildItem] = frappe.get_all(
         "Sales Order Child Item",
-        fields=["parent_item_code", "item_code", "qty"],
+        fields=("parent_item_code", "item_code", "qty"),
         filters={"parent": ("in", sales_order_names)},
     )
     parents = (i.parent_item_code for i in child_items)

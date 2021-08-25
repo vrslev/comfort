@@ -12,6 +12,6 @@ def get_items(item_codes: str) -> list[Item]:  # pragma: no cover
         )
     return frappe.get_all(
         "Item",
-        fields=["item_code", "item_name", "rate", "weight"],
+        fields=("item_code", "item_name", "rate", "weight"),
         filters={"item_code": ("in", response["successful"])},
     )

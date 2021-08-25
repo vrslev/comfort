@@ -172,7 +172,7 @@ def download_images(items: list[ImageItem]):  # pragma: no cover
         item.item_code
         for item in frappe.get_all(
             "Item",
-            fields=["item_code", "image"],
+            fields=("item_code", "image"),
             filters={"item_code": ("in", item_codes)},
         )
         if item.image

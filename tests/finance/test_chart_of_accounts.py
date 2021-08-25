@@ -25,7 +25,7 @@ def get_accounts_from_schema():
 def test_create_accounts_from_schema():
     accounts_from_schema = get_accounts_from_schema()
     created_accounts: list[dict[str, str | None]] = [
-        dict(a) for a in frappe.get_all("Account", ["name", "parent_account"])
+        dict(a) for a in frappe.get_all("Account", ("name", "parent_account"))
     ]
 
     not_matching_accounts: list[dict[str, str | None]] = [

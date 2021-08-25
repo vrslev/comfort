@@ -78,11 +78,11 @@ def test_create_sales_gl_entries(receipt_sales: Receipt, sales_order: SalesOrder
     ]
     entries: list[dict[str, str | int]] = frappe.get_all(
         "GL Entry",
+        fields=("account", "debit", "credit"),
         filters={
             "voucher_type": receipt_sales.doctype,
             "voucher_no": receipt_sales.name,
         },
-        fields=("account", "debit", "credit"),
     )
     for entry in entries:
         assert dict(entry) in exp_entries
@@ -134,11 +134,11 @@ def test_create_purchase_gl_entries(
 
     entries: list[dict[str, str | int]] = frappe.get_all(
         "GL Entry",
+        fields=("account", "debit", "credit"),
         filters={
             "voucher_type": receipt_purchase.doctype,
             "voucher_no": receipt_purchase.name,
         },
-        fields=("account", "debit", "credit"),
     )
     for entry in entries:
         assert dict(entry) in exp_entries
@@ -150,7 +150,7 @@ def test_create_purchase_stock_entries_for_sales_orders(receipt_purchase: Receip
 
     entry_names: list[str] = frappe.get_all(
         "Stock Entry",
-        filters={
+        {
             "voucher_type": receipt_purchase.doctype,
             "voucher_no": receipt_purchase.name,
         },
@@ -190,7 +190,7 @@ def test_create_purchase_stock_entries_for_items_to_sell(receipt_purchase: Recei
 
     entry_names: list[str] = frappe.get_all(
         "Stock Entry",
-        filters={
+        {
             "voucher_type": receipt_purchase.doctype,
             "voucher_no": receipt_purchase.name,
         },

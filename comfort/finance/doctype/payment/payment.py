@@ -88,10 +88,10 @@ class Payment(Document):
         prepaid_inventory, purchase_delivery = frappe.get_value(
             self.voucher_type,
             self.voucher_no,
-            fieldname=[
+            fieldname=(
                 "sales_orders_cost + items_to_sell_cost as prepaid_inventory",
                 "delivery_cost as purchase_delivery",
-            ],
+            ),
         )
         prepaid_inventory: int
         purchase_delivery: int

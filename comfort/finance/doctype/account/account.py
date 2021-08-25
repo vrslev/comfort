@@ -22,10 +22,10 @@ def get_children(doctype: str, parent: str | None = None, is_root: bool = False)
     if is_root:
         parent = ""
 
-    fields = ["name as value", "is_group as expandable"]
-    filters = [["docstatus", "<", "2"], ['ifnull(`parent_account`, "")', "=", parent]]
+    fields = ("name as value", "is_group as expandable")
+    filters = (("docstatus", "<", "2"), ('ifnull(`parent_account`, "")', "=", parent))
 
-    accounts: list[Any] = frappe.get_list(
+    accounts: list[Any] = frappe.get_all(
         doctype, fields=fields, filters=filters, order_by="name"
     )
 

@@ -45,7 +45,7 @@ def test_create_gl_entry(payment_sales: Payment):
     create_gl_entry(payment_sales.doctype, payment_sales.name, account, debit, credit)
     entries: list[GLEntry] = frappe.get_all(
         "GL Entry",
-        fields=["docstatus", "account", "debit", "credit"],
+        fields=("docstatus", "account", "debit", "credit"),
         filters={
             "voucher_type": payment_sales.doctype,
             "voucher_no": payment_sales.name,
@@ -86,7 +86,7 @@ def test_create_payment(sales_order: SalesOrder):
 
     payments: list[Payment] = frappe.get_all(
         "Payment",
-        fields=["amount", "paid_with_cash"],
+        fields=("amount", "paid_with_cash"),
         filters={
             "voucher_type": sales_order.doctype,
             "voucher_no": sales_order.name,

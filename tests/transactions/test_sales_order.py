@@ -334,7 +334,7 @@ def test_split_combinations(sales_order: SalesOrder):
 
     child_items: list[ChildItem] = frappe.get_all(
         "Child Item",
-        fields=["item_code", "qty"],
+        fields=("item_code", "qty"),
         filters={"parent": splitted_combination.item_code},
     )
     exp_item_codes_to_qty = count_quantity(child_items)

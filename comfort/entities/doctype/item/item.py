@@ -43,8 +43,8 @@ class ItemMethods:
 
         items: list[Item] = frappe.get_all(
             "Item",
-            ["item_code", "weight"],
-            {"item_code": ["in", [d.item_code for d in self.child_items]]},
+            fields=("item_code", "weight"),
+            filters={"item_code": ("in", (d.item_code for d in self.child_items))},
         )
         weight_map: Counter[str] = count_quantity(items, "item_code", "weight")
         self.weight = 0

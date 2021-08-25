@@ -60,7 +60,7 @@ def test_get_amounts_for_sales_gl_entries(
 def get_gl_entries(doc: Payment) -> list[GLEntry]:
     return frappe.get_all(
         "GL Entry",
-        fields=["account", "debit", "credit"],
+        fields=("account", "debit", "credit"),
         filters={"voucher_type": doc.doctype, "voucher_no": doc.name},
     )
 

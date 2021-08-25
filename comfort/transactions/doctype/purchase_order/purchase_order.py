@@ -87,7 +87,7 @@ class PurchaseOrderMethods(Document):
     def _calculate_sales_orders_cost(self):
         res: list[int] = frappe.get_all(
             "Sales Order Item",
-            fields=["SUM(qty * rate) AS sales_orders_cost"],
+            fields="SUM(qty * rate) AS sales_orders_cost",
             filters={
                 "parent": ("in", (ord.sales_order_name for ord in self.sales_orders))
             },
@@ -98,7 +98,7 @@ class PurchaseOrderMethods(Document):
     def _calculate_total_weight(self):
         res: list[float] = frappe.get_all(
             "Sales Order Item",
-            fields=["SUM(total_weight) AS total_weight"],
+            fields="SUM(total_weight) AS total_weight",
             filters={
                 "parent": ("in", (ord.sales_order_name for ord in self.sales_orders))
             },
@@ -138,14 +138,12 @@ class PurchaseOrderMethods(Document):
 
         child_items: list[ChildItem] = frappe.get_all(
             "Child Item",
-            fields=["parent", "item_code", "qty"],
+            fields=("parent", "item_code", "qty"),
             filters={"parent": ("in", (item.item_code for item in self.items_to_sell))},
         )
         parents = [child.parent for child in child_items]
         items_to_sell = [
-            item
-            for item in self.items_to_sell.copy()  # TODO: Is copy required?
-            if item.item_code not in parents
+            item for item in self.items_to_sell if item.item_code not in parents
         ]
 
         return items_to_sell + child_items
@@ -159,14 +157,14 @@ class PurchaseOrderMethods(Document):
         sales_order_names = (ord.sales_order_name for ord in self.sales_orders)
         so_items: list[SalesOrderItem] = frappe.get_all(
             "Sales Order Item",
-            fields=["item_code", "qty"],
+            fields=("item_code", "qty"),
             filters={"parent": ("in", sales_order_names)},
         )
 
         if split_combinations:
             child_items: list[SalesOrderChildItem] = frappe.get_all(
                 "Sales Order Child Item",
-                fields=["parent_item_code", "item_code", "qty"],
+                fields=("parent_item_code", "item_code", "qty"),
                 filters={"parent": ("in", sales_order_names)},
             )
             items += child_items
@@ -412,7 +410,7 @@ def sales_order_query(
 
 
 @frappe.whitelist()
-def get_purchase_info(purchase_id: int, use_lite_id: bool):  # TODO: Test this
+def get_purchase_info(purchase_id: int, use_lite_id: bool):  # pragma: no cover
     from comfort.comfort_core.ikea import get_purchase_info
 
     purchase_info = get_purchase_info(purchase_id, use_lite_id)

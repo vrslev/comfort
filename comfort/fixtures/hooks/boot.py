@@ -15,14 +15,14 @@ def extend_boot_session_with_currency(bootinfo: Any):
         currency_doc: dict[str, Any] = frappe.get_cached_value(
             "Currency",
             bootinfo.sysdefaults.currency,
-            [
+            (
                 "name",
                 "fraction",
                 "fraction_units",
                 "number_format",
                 "smallest_currency_fraction_value",
                 "symbol",
-            ],
+            ),
             as_dict=True,
         )
         currency_doc["doctype"] = ":Currency"

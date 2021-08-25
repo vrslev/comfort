@@ -285,7 +285,7 @@ class SalesOrder(SalesOrderStatuses):
 
         child_items: list[ChildItem] = frappe.get_all(
             "Child Item",
-            fields=["parent", "item_code", "qty"],
+            fields=("parent", "item_code", "qty"),
             filters={"parent": ("in", parent_item_codes_to_qty.keys())},
         )
 
@@ -317,7 +317,7 @@ def sales_order_item_query(
     if filters.get(field) is not None:
         available_items: Generator[str, None, None] = (
             d.item_code
-            for d in frappe.get_all("Bin", "item_code", {"available_actual": [">", 0]})
+            for d in frappe.get_all("Bin", "item_code", {"available_actual": (">", 0)})
         )
         filters["item_code"] = ["in", available_items]
         del filters[field]

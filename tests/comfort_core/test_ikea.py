@@ -17,7 +17,7 @@ from comfort.entities.doctype.item_category.item_category import ItemCategory
 def test_make_item_category_not_exists(parsed_item: ParsedItem):
     _make_item_category(parsed_item["category_name"], parsed_item["category_url"])
     categories: list[ItemCategory] = frappe.get_all(
-        "Item Category", ["category_name", "url"]
+        "Item Category", ("category_name", "url")
     )
     assert categories[0].category_name == parsed_item["category_name"]
     assert categories[0].url == parsed_item["category_url"]

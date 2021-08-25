@@ -54,7 +54,7 @@ def test_cancel_stock_entries_for(receipt_sales: Receipt):
 
     entries: list[StockEntry] = frappe.get_all(
         "Stock Entry",
-        fields="docstatus",
+        "docstatus",
         filters={
             "voucher_type": receipt_sales.doctype,
             "voucher_no": receipt_sales.name,
