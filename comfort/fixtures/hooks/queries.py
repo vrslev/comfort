@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Callable
+from typing import Any, Callable, Iterable
 
 import frappe
 from frappe.desk.reportview import get_filters_cond, get_match_cond
@@ -87,6 +87,6 @@ def default_query(
     return query
 
 
-def get_standard_queries(doctypes: list[str]):
+def get_standard_queries(doctypes: Iterable[str]):
     query_name = default_query.__module__ + "." + default_query.__name__
     return {d: query_name for d in doctypes}

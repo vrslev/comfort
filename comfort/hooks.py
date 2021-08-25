@@ -4,7 +4,7 @@ from comfort.fixtures.hooks.queries import get_standard_queries
 app_name, app_title, app_description, app_publisher = load_metadata()
 
 standard_queries = get_standard_queries(
-    ["Customer", "Item", "Purchase Order", "Sales Order"]
+    ("Customer", "Item", "Purchase Order", "Sales Order")
 )
 
 after_install = "comfort.finance.chart_of_accounts.initialize_accounts"
