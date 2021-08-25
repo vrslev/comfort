@@ -22,58 +22,56 @@ comfort.SalesOrderController = frappe.ui.form.Controller.extend({
 
   setup_buttons() {
     if (!this.frm.is_new() && this.frm.doc.per_paid < 100) {
-      this.frm
-        .add_custom_button(__("Add Payment"), () => {
-          frappe.prompt(
-            [
-              {
-                label: "Paid Amount",
-                fieldname: "paid_amount",
-                fieldtype: "Currency",
-                precision: "0",
-                default: this.frm.doc.pending_amount,
+      this.frm.add_custom_button(__("Add Payment"), () => {
+        frappe.prompt(
+          [
+            {
+              label: "Paid Amount",
+              fieldname: "paid_amount",
+              fieldtype: "Currency",
+              precision: "0",
+              default: this.frm.doc.pending_amount,
+            },
+            {
+              label: "Account",
+              fieldname: "account",
+              fieldtype: "Select",
+              options: "Cash\nBank",
+              default: "Cash",
+            },
+          ],
+          (values) => {
+            this.frm.call({
+              doc: this.frm.doc,
+              method: "add_payment",
+              args: {
+                paid_amount: values.paid_amount,
+                cash: values.account == "Cash",
               },
-              {
-                label: "Account",
-                fieldname: "account",
-                fieldtype: "Select",
-                options: "Cash\nBank",
-                default: "Cash",
+              callback: () => {
+                frappe.show_alert({
+                  message: __("Payment added!"),
+                  indicator: "green",
+                });
               },
-            ],
-            (values) => {
-              this.frm.call({
-                doc: this.frm.doc,
-                method: "add_payment",
-                args: {
-                  paid_amount: values.paid_amount,
-                  cash: values.account == "Cash",
-                },
-                callback: () => {
-                  this.frm.reload_doc();
-                  // frappe.show_alert(__("Payment added!"))
-                },
-              });
-            }
-          );
-        })
-        .removeClass("btn-default")
-        .addClass("btn-primary");
+            });
+          }
+        );
+      });
     }
 
     if (this.frm.doc.delivery_status == "To Deliver") {
-      this.frm
-        .add_custom_button(__("Add Receipt"), () => {
-          this.frm.call({
-            doc: this.frm.doc,
-            method: "add_receipt",
-            callback: () => {
-              this.frm.reload_doc();
-            },
-          });
-        })
-        .removeClass("btn-default")
-        .addClass("btn-primary");
+      this.frm.add_custom_button(__("Add Receipt"), () => {
+        frappe.confirm(
+          __("Are you sure you want to mark this Sales Order as delivered?"),
+          () => {
+            this.frm.call({
+              doc: this.frm.doc,
+              method: "add_receipt",
+            });
+          }
+        );
+      });
     }
 
     if (
@@ -93,7 +91,7 @@ comfort.SalesOrderController = frappe.ui.form.Controller.extend({
         ];
 
         var dialog = new frappe.ui.Dialog({
-          title: __("Split Combinations"),
+          title: __("Choose combinations to split"),
           fields: [
             {
               fieldname: "combinations",
@@ -106,36 +104,43 @@ comfort.SalesOrderController = frappe.ui.form.Controller.extend({
               fields: fields,
             },
           ],
+          primary_action_label: __("Save"),
           primary_action: () => {
-            let selected =
-              dialog.fields_dict.combinations.grid.get_selected_children();
-            selected = selected.filter((d) => d.__checked);
-            selected = selected.map((d) => d.name);
             this.frm.call({
               doc: this.frm.doc,
               method: "split_combinations",
               freeze: 1,
-              args: { combos_item_names: selected },
+              args: {
+                combos_docnames: dialog.fields_dict.combinations.grid
+                  .get_selected_children()
+                  .filter((d) => d.__checked)
+                  .map((d) => d.name),
+              },
+              callback: () => {
+                dialog.hide();
+                frappe.show_alert({
+                  message: __("Combinations are split!"),
+                  indicator: "green",
+                });
+              },
             });
-            dialog.hide();
           },
-          primary_action_label: __("Save"),
         });
 
-        var parent_items = [];
-        this.frm.doc.child_items.forEach((d) => {
-          parent_items.push(d.parent_item_code);
-        });
-        this.frm.doc.items.forEach((d) => {
-          if (parent_items.includes(d.item_code)) {
+        let parent_items = this.frm.doc.child_items.map(
+          (child) => child.parent_item_code
+        );
+        this.frm.doc.items.forEach((item) => {
+          if (parent_items.includes(item.item_code)) {
             dialog.fields_dict.combinations.df.data.push({
-              name: d.name,
-              item_code: d.item_code,
-              item_name: d.item_name,
+              name: item.name,
+              item_code: item.item_code,
+              item_name: item.item_name,
             });
           }
         });
         dialog.fields_dict.combinations.grid.refresh();
+
         if (
           !this.frm.doc.child_items ||
           this.frm.doc.child_items.length == 0 ||
@@ -164,137 +169,6 @@ comfort.SalesOrderController = frappe.ui.form.Controller.extend({
 $.extend(cur_frm.cscript, new comfort.SalesOrderController({ frm: cur_frm }));
 // DO: Add `add_multiple` to easily add items when From Actual Stock is checked
 frappe.ui.form.on("Sales Order", {
-  // refresh(frm) {
-  //   if (!frm.is_new() && frm.doc.per_paid < 100) {
-  //     frm
-  //       .add_custom_button(__("Paid"), () => {
-  //         frappe.prompt(
-  //           [
-  //             {
-  //               label: "Paid Amount",
-  //               fieldname: "paid_amount",
-  //               fieldtype: "Currency",
-  //               precision: "0",
-  //               default: frm.doc.pending_amount,
-  //             },
-  //             {
-  //               label: "Account",
-  //               fieldname: "account",
-  //               fieldtype: "Select",
-  //               options: "Cash\nBank",
-  //               default: "Cash",
-  //             },
-  //           ],
-  //           (values) => {
-  //             frm.call({
-  //               doc: frm.doc,
-  //               method: "add_payment",
-  //               args: {
-  //                 paid_amount: values.paid_amount,
-  //                 cash: values.account == "Cash",
-  //               },
-  //               callback: () => {
-  //                 frm.reload_doc();
-  //               },
-  //             });
-  //           }
-  //         );
-  //       })
-  //       .removeClass("btn-default")
-  //       .addClass("btn-primary");
-  //   }
-
-  //   if (frm.doc.delivery_status == "To Deliver") {
-  //     frm
-  //       .add_custom_button(__("Delivered"), () => {
-  //         frm.call({
-  //           doc: frm.doc,
-  //           method: "add_receipt",
-  //           callback: () => {
-  //             frm.reload_doc();
-  //           },
-  //         });
-  //       })
-  //       .removeClass("btn-default")
-  //       .addClass("btn-primary");
-  //   }
-
-  //   if (
-  //     frm.doc.docstatus == 0 &&
-  //     frm.doc.child_items &&
-  //     frm.doc.child_items.length > 0
-  //   ) {
-  //     frm.add_custom_button(__("Split Combinations"), () => {
-  //       const fields = [
-  //         {
-  //           fieldtype: "Link",
-  //           fieldname: "item_code",
-  //           options: "Item",
-  //           in_list_view: 1,
-  //           label: __("Item Code"),
-  //         },
-  //       ];
-
-  //       var dialog = new frappe.ui.Dialog({
-  //         title: __("Split Combinations"),
-  //         fields: [
-  //           {
-  //             fieldname: "combinations",
-  //             fieldtype: "Table",
-  //             label: "Combinations",
-  //             cannot_add_rows: true,
-  //             size: "large",
-  //             reqd: 1,
-  //             data: [],
-  //             fields: fields,
-  //           },
-  //         ],
-  //         primary_action: () => {
-  //           let selected =
-  //             dialog.fields_dict.combinations.grid.get_selected_children();
-  //           selected = selected.filter((d) => d.__checked);
-  //           selected = selected.map((d) => d.name);
-  //           frm.call({
-  //             doc: frm.doc,
-  //             method: "split_combinations",
-  //             freeze: 1,
-  //             args: { combos_item_names: selected },
-  //           });
-  //           dialog.hide();
-  //         },
-  //         primary_action_label: __("Save"),
-  //       });
-
-  //       var parent_items = [];
-  //       frm.doc.child_items.forEach((d) => {
-  //         parent_items.push(d.parent_item_code);
-  //       });
-  //       frm.doc.items.forEach((d) => {
-  //         if (parent_items.includes(d.item_code)) {
-  //           dialog.fields_dict.combinations.df.data.push({
-  //             name: d.name,
-  //             item_code: d.item_code,
-  //             item_name: d.item_name,
-  //           });
-  //         }
-  //       });
-  //       dialog.fields_dict.combinations.grid.refresh();
-  //       if (
-  //         !frm.doc.child_items ||
-  //         frm.doc.child_items.length == 0 ||
-  //         dialog.fields_dict.combinations.grid.data.length == 0
-  //       ) {
-  //         frappe.msgprint("В заказе нет комбинаций");
-  //         return;
-  //       }
-
-  //       dialog.fields_dict.combinations.grid.display_status = "Read";
-  //       dialog.fields_dict.combinations.grid.grid_buttons.hide();
-  //       dialog.show();
-  //     });
-  //   }
-  // },
-
   validate(frm) {
     frm.doc.child_items = [];
   },

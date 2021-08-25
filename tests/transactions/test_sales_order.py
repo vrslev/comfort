@@ -316,7 +316,7 @@ def test_add_receipt_raises_on_delivered(sales_order: SalesOrder):
     sales_order.delivery_status = "Delivered"
     with pytest.raises(
         ValidationError,
-        match='Delivery Status of this Sales Order is already "Delivered"',
+        match='Delivery Status Sales Order should be "To Deliver" to add Receipt',
     ):
         sales_order.add_receipt()
 

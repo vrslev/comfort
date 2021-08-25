@@ -257,9 +257,9 @@ class SalesOrder(SalesOrderStatuses):
 
     @frappe.whitelist()
     def add_receipt(self):
-        if self.delivery_status == "Delivered":
+        if self.delivery_status != "To Deliver":
             raise ValidationError(
-                _('Delivery Status of this Sales Order is already "Delivered"')
+                _('Delivery Status Sales Order should be "To Deliver" to add Receipt')
             )
 
         create_receipt(self.doctype, self.name)  # pragma: no cover
@@ -281,6 +281,7 @@ class SalesOrder(SalesOrderStatuses):
 
         for item in items_to_remove:
             self.items.remove(item)
+
         parent_item_codes_to_qty = count_quantity(removed_combos)
 
         child_items: list[ChildItem] = frappe.get_all(
