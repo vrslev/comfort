@@ -3,7 +3,7 @@
   "charts": [],
   "creation": "2021-06-25 03:06:14.012381",
   "developer_mode_only": 0,
-  "disable_user_customization": 0,
+  "disable_user_customization": 1,
   "docstatus": 0,
   "doctype": "Workspace",
   "extends_another_page": 0,
@@ -44,28 +44,10 @@
     {
       "hidden": 0,
       "is_query_report": 0,
-      "label": "Journal Entry Account",
-      "link_to": "Journal Entry Account",
-      "link_type": "DocType",
-      "onboard": 0,
-      "type": "Link"
-    },
-    {
-      "hidden": 0,
-      "is_query_report": 0,
       "label": "Parts",
       "link_type": "DocType",
       "onboard": 0,
       "type": "Card Break"
-    },
-    {
-      "hidden": 0,
-      "is_query_report": 0,
-      "label": "Bin",
-      "link_to": "Bin",
-      "link_type": "DocType",
-      "onboard": 0,
-      "type": "Link"
     },
     {
       "hidden": 0,
@@ -79,16 +61,7 @@
     {
       "hidden": 0,
       "is_query_report": 0,
-      "label": "Journal Entry",
-      "link_to": "Journal Entry",
-      "link_type": "DocType",
-      "onboard": 0,
-      "type": "Link"
-    },
-    {
-      "hidden": 0,
-      "is_query_report": 0,
-      "label": "Ikea Settings",
+      "label": "Ikea Cart Settings",
       "link_to": "Ikea Settings",
       "link_type": "DocType",
       "onboard": 0,
@@ -130,7 +103,7 @@
       "type": "Link"
     }
   ],
-  "modified": "2021-08-09 05:22:48.920856",
+  "modified": "2021-08-25 03:20:19.155339",
   "modified_by": "Administrator",
   "module": "Comfort Core",
   "name": "Home",
