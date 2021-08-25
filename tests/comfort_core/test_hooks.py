@@ -1,4 +1,4 @@
-from comfort.comfort_core.hooks.metadata import load_metadata
+from comfort.comfort_core.hooks import load_metadata
 
 
 def test_load_metadata():
