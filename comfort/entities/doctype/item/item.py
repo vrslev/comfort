@@ -1,11 +1,7 @@
 from __future__ import annotations
 
-import asyncio
 import re
 from collections import Counter
-from typing import TypedDict
-
-import aiohttp
 
 import frappe
 from comfort import ValidationError, count_quantity
@@ -78,50 +74,3 @@ class Item(Document, ItemMethods):
 
     def on_update(self):
         self.calculate_weight_in_parent_docs()
-
-
-def _save_image(item_code: str, image_url: str, content: bytes):
-    fpath = f"files/items/{item_code}"
-    fname = f"{image_url.rsplit('/', 1)[1]}"
-    site_path = frappe.get_site_path("public", fpath)
-
-    frappe.create_folder(site_path)
-    with open(f"{site_path}/{fname}", "wb+") as f:
-        f.write(content)
-
-    frappe.db.set_value("Item", item_code, "image", f"/{fpath}/{fname}")
-
-
-class ImageItem(TypedDict):
-    item_code: str
-    image_url: str
-
-
-def download_images(items: list[ImageItem]):
-    async def fetch(session: aiohttp.ClientSession, item: ImageItem):
-        async with session.get(item["image_url"]) as r:
-            content = await r.content.read()
-        _save_image(content=content, **item)
-
-    async def main(items: list[ImageItem]):
-        async with aiohttp.ClientSession() as session:
-            tasks = [fetch(session, item) for item in items]
-            return await asyncio.gather(*tasks)
-
-    item_codes = [item["item_code"] for item in items]
-    items_have_image: list[str] = [
-        item.item_code
-        for item in frappe.get_all(
-            "Item",
-            fields=["item_code", "image"],
-            filters={"item_code": ("in", item_codes)},
-        )
-        if item.image
-    ]
-
-    items_to_fetch = [item for item in items if item not in items_have_image]
-    if not items_to_fetch:
-        return
-
-    asyncio.run(main(items_to_fetch))
-    frappe.db.commit()
