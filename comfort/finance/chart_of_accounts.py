@@ -66,5 +66,6 @@ def _set_default_accounts():
 
 
 def initialize_accounts():
-    _create_accounts_from_schema()
+    if not frappe.get_all("Account", limit_page_length=1):
+        _create_accounts_from_schema()
     _set_default_accounts()
