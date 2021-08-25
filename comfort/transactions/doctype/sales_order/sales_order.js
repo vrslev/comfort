@@ -1,23 +1,15 @@
-// TODO: Know about autoocompletion in JS
-
 comfort.SalesOrderController = frappe.ui.form.Controller.extend({
   setup() {
     this.frm.show_submit_message = () => {}; // Hide "Submit this document to confirm" message
     this.frm.page.sidebar.hide(); // Hide sidebar
   },
 
-  setup_quick_add_items() {
-    this.frm.fields_dict.items.$wrapper.unbind("paste").on("paste", (e) => {
-      e.preventDefault();
-      let clipboard_data =
-        e.clipboardData ||
-        window.clipboardData ||
-        e.originalEvent.clipboardData;
-      let pasted_data = clipboard_data.getData("Text");
-      if (!pasted_data) return;
+  refresh() {
+    this.setup_buttons();
+  },
 
-      quick_add_items(pasted_data);
-    });
+  onload_post_render() {
+    this.setup_quick_add_items();
   },
 
   setup_buttons() {
@@ -157,68 +149,81 @@ comfort.SalesOrderController = frappe.ui.form.Controller.extend({
     }
   },
 
-  refresh() {
-    this.setup_buttons();
+  setup_quick_add_items() {
+    this.frm.fields_dict.items.$wrapper.unbind("paste").on("paste", (e) => {
+      e.preventDefault();
+      let clipboard_data =
+        e.clipboardData ||
+        window.clipboardData ||
+        e.originalEvent.clipboardData;
+      let pasted_data = clipboard_data.getData("Text");
+      if (!pasted_data) return;
+
+      quick_add_items(pasted_data);
+    });
   },
 
-  onload_post_render() {
-    this.setup_quick_add_items();
-  },
-});
-
-$.extend(cur_frm.cscript, new comfort.SalesOrderController({ frm: cur_frm }));
-// DO: Add `add_multiple` to easily add items when From Actual Stock is checked
-frappe.ui.form.on("Sales Order", {
-  validate(frm) {
-    frm.doc.child_items = [];
-  },
-
-  commission(frm) {
-    if (frm.doc.edit_commission == 1) {
-      apply_commission(frm);
-    }
-  },
-  edit_commission(frm) {
-    if (frm.doc.edit_commission == 0) {
-      apply_commission(frm);
+  commission() {
+    if (this.frm.doc.edit_commission == 1) {
+      apply_commission_and_margin();
     }
   },
 
-  discount(frm) {
-    calculate_total_amount(frm);
+  edit_commission() {
+    if (this.frm.doc.edit_commission == 0) {
+      apply_commission_and_margin();
+    }
   },
 
-  total_amount(frm) {
-    frm.set_value(
-      "pending_amount",
-      frm.doc.total_amount - frm.doc.paid_amount || null
-    );
+  discount() {
+    calculate_total_amount();
   },
 
-  items_cost(frm) {
-    apply_commission(frm);
+  total_amount() {
+    set_per_paid_and_pending_amount();
   },
 
-  service_amount(frm) {
-    calculate_total_amount(frm);
+  items_cost() {
+    apply_commission_and_margin();
+  },
+
+  service_amount() {
+    calculate_total_amount();
   },
 });
 
-function calculate_total_amount(frm) {
-  frm.set_value(
+function calculate_total_amount() {
+  cur_frm.set_value(
     "total_amount",
-    frm.doc.items_cost +
-      frm.doc.margin +
-      frm.doc.service_amount -
-      frm.doc.discount || null
+    cur_frm.doc.items_cost +
+      cur_frm.doc.margin +
+      cur_frm.doc.service_amount -
+      cur_frm.doc.discount || 0
   );
 }
 
-async function apply_commission(frm) {
-  await frm.call({
-    doc: frm.doc,
+function apply_commission_and_margin() {
+  cur_frm.call({
+    doc: cur_frm.doc,
     method: "calculate_commission_and_margin",
+    callback: () => {
+      calculate_total_amount();
+    },
   });
+}
+
+function set_per_paid_and_pending_amount() {
+  cur_frm.set_value(
+    "pending_amount",
+    cur_frm.doc.total_amount - cur_frm.doc.paid_amount
+  );
+
+  if (cur_frm.doc.total_amount == 0) {
+    var per_paid = 100;
+  } else {
+    per_paid = (cur_frm.doc.paid_amount / cur_frm.doc.total_amount) * 100;
+  }
+  cur_frm.set_value("per_paid", per_paid);
 }
 
 frappe.ui.form.on("Sales Order Item", {
@@ -239,55 +244,33 @@ frappe.ui.form.on("Sales Order Item", {
   qty(frm, cdt, cdn) {
     calculate_item_amount(frm, cdt, cdn);
     calculate_item_total_weight(frm, cdt, cdn);
-    calculate_total_quantity(frm);
+    calculate_total_quantity();
   },
 
   rate(frm, cdt, cdn) {
     calculate_item_amount(frm, cdt, cdn);
   },
 
-  amount(frm) {
-    calculate_items_cost(frm);
+  amount() {
+    calculate_items_cost();
   },
 
   weight(frm, cdt, cdn) {
     calculate_item_total_weight(frm, cdt, cdn);
   },
 
-  total_weight(frm) {
-    calculate_total_weight(frm);
+  total_weight() {
+    calculate_total_weight();
   },
 
   items_remove(frm) {
-    recalculate(frm);
+    recalculate_global_item_totals(frm);
   },
 });
-
-function calculate_items_cost(frm) {
-  if (frm.doc.items && frm.doc.items.length > 0) {
-    var total = frm.doc.items
-      .map((d) => (d.amount ? d.amount : 0))
-      .reduce((a, b) => a + b);
-  } else {
-    total = null;
-  }
-  frm.set_value("items_cost", total);
-}
 
 function calculate_item_total_weight(frm, cdt, cdn) {
   var doc = frappe.get_doc(cdt, cdn);
   frappe.model.set_value(cdt, cdn, "total_weight", doc.qty * doc.weight);
-}
-
-function calculate_total_quantity(frm) {
-  if (frm.doc.items && frm.doc.items.length > 0) {
-    var qty = frm.doc.items
-      .map((d) => (d.amount ? d.qty : 0))
-      .reduce((a, b) => a + b);
-  } else {
-    qty = null;
-  }
-  frm.set_value("total_quantity", qty);
 }
 
 function calculate_item_amount(frm, cdt, cdn) {
@@ -295,37 +278,55 @@ function calculate_item_amount(frm, cdt, cdn) {
   frappe.model.set_value(cdt, cdn, "amount", doc.qty * doc.rate);
 }
 
-function calculate_total_weight(frm) {
-  if (frm.doc.items && frm.doc.items.length > 0) {
-    var total = frm.doc.items
+function calculate_items_cost() {
+  if (cur_frm.doc.items && cur_frm.doc.items.length > 0) {
+    var total = cur_frm.doc.items
+      .map((d) => (d.amount ? d.amount : 0))
+      .reduce((a, b) => a + b);
+  } else {
+    total = 0;
+  }
+  cur_frm.set_value("items_cost", total);
+}
+
+function calculate_total_quantity() {
+  if (cur_frm.doc.items && cur_frm.doc.items.length > 0) {
+    var qty = cur_frm.doc.items
+      .map((item) => (item.amount ? item.qty : 0))
+      .reduce((a, b) => a + b);
+  } else {
+    qty = null;
+  }
+  cur_frm.set_value("total_quantity", qty);
+}
+
+function calculate_total_weight() {
+  if (cur_frm.doc.items && cur_frm.doc.items.length > 0) {
+    var total = cur_frm.doc.items
       .map((d) => (d.total_weight ? d.total_weight : 0))
       .reduce((a, b) => a + b);
   } else {
-    total = null;
+    total = 0;
   }
-  frm.set_value("total_weight", total);
+  cur_frm.set_value("total_weight", total);
 }
 
-function calculate_service_amount(frm) {
-  if (frm.doc.services && frm.doc.services.length > 0) {
-    var total = frm.doc.services
-      .map((d) => (d.rate ? d.rate : 0))
-      .reduce((a, b) => a + b);
-  } else {
-    total = null;
-  }
-  frm.set_value("service_amount", total);
+function recalculate_global_item_totals() {
+  calculate_items_cost();
+  calculate_total_quantity();
+  calculate_total_weight();
 }
 
 frappe.ui.form.on("Sales Order Service", {
   type(frm, cdt, cdn) {
-    var rates = {
+    let default_rates = {
       "Delivery to Apartment": 100,
       "Delivery to Entrance": 300,
+      Installation: 0,
     };
     let doc = frappe.get_doc(cdt, cdn);
-    frappe.model.set_value(cdt, cdn, "rate", rates[doc.type] || 0);
-    toggle_services_add_row_btn();
+    frappe.model.set_value(cdt, cdn, "rate", default_rates[doc.type]);
+    toggle_services_add_row_button();
   },
 
   rate(frm) {
@@ -337,10 +338,10 @@ frappe.ui.form.on("Sales Order Service", {
   },
 });
 
-function toggle_services_add_row_btn() {
+function toggle_services_add_row_button() {
+  // If there's both Delivery and Installation services hide "Add Row" button
   let btn = cur_frm.fields_dict.services.grid.wrapper.find(".grid-add-row");
   let services_joined = cur_frm.doc.services.map((d) => d.type).join();
-  btn.hide();
   if (
     services_joined.match("Delivery") &&
     services_joined.match("Installation")
@@ -351,21 +352,26 @@ function toggle_services_add_row_btn() {
   }
 }
 
-function recalculate(frm) {
-  calculate_items_cost(frm);
-  calculate_total_quantity(frm);
-  calculate_total_weight(frm);
+function calculate_service_amount() {
+  if (cur_frm.doc.services && cur_frm.doc.services.length > 0) {
+    var total = cur_frm.doc.services
+      .map((d) => (d.rate ? d.rate : 0))
+      .reduce((a, b) => a + b);
+  } else {
+    total = 0;
+  }
+  cur_frm.set_value("service_amount", total);
 }
 
 function quick_add_items(text) {
   comfort.get_items(text).then((values) => {
-    for (var item of values) {
+    for (var v of values) {
       let doc = cur_frm.add_child("items", {
-        item_code: item.item_code,
-        item_name: item.item_name,
+        item_code: v.item_code,
+        item_name: v.item_name,
         qty: 1,
-        rate: item.rate,
-        weight: item.weight,
+        rate: v.rate,
+        weight: v.weight,
       });
       calculate_item_amount(cur_frm, doc.doctype, doc.name);
       calculate_item_total_weight(cur_frm, doc.doctype, doc.name);
@@ -377,15 +383,16 @@ function quick_add_items(text) {
     grid.add_new_row(null, null, true);
     grid.grid_rows[grid.grid_rows.length - 1].toggle_editable_row();
 
-    let grid_rows = grid.grid_rows;
-    for (var i = grid_rows.length; i--; ) {
-      let doc = grid_rows[i].doc;
+    for (var i = grid.grid_rows.length; i--; ) {
+      let doc = grid.grid_rows[i].doc;
       if (!(doc.item_name && doc.item_code)) {
-        grid_rows[i].remove();
+        grid.grid_rows[i].remove();
       }
     }
 
-    recalculate(cur_frm);
+    recalculate_global_item_totals(cur_frm);
     refresh_field("items");
   });
 }
+
+$.extend(cur_frm.cscript, new comfort.SalesOrderController({ frm: cur_frm }));
