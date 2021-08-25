@@ -188,7 +188,7 @@ def download_images(items: list[ImageItem]):  # pragma: no cover
 
 def _schedule_download_images(parsed_items: list[ParsedItem]):  # pragma: no cover
     frappe.enqueue(
-        "comfort.comfort_core.ikea.download_images",
+        download_images,
         queue="short",
         items=[
             {"item_code": item["item_code"], "image_url": item["image_url"]}
