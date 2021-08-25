@@ -86,11 +86,10 @@
       "search_index": 1
     }
   ],
-  "icon": "fa fa-user",
   "image_field": "image",
   "index_web_pages_for_search": 1,
   "links": [],
-  "modified": "2021-08-25 03:11:54.772859",
+  "modified": "2021-08-25 03:17:03.967016",
   "modified_by": "Administrator",
   "module": "Entities",
   "name": "Customer",

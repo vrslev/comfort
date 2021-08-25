@@ -98,12 +98,11 @@
       "search_index": 1
     }
   ],
-  "icon": "fa fa-tag",
   "image_field": "image",
   "index_web_pages_for_search": 1,
   "links": [],
   "max_attachments": 1,
-  "modified": "2021-08-09 05:19:36.087291",
+  "modified": "2021-08-25 03:17:22.027916",
   "modified_by": "Administrator",
   "module": "Entities",
   "name": "Item",
