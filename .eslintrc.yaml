@@ -20,8 +20,7 @@ rules:
     - error
     - unix
   semi:
-    - warn
-    - always
+    - "off"
   camelcase:
     - "off"
   no-unused-vars:
