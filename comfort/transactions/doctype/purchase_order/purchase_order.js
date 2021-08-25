@@ -1,5 +1,3 @@
-frappe.provide("comfort");
-
 comfort.IkeaCartController = frappe.ui.form.Controller.extend({
   setup() {
     this.setup_sales_order_query();
