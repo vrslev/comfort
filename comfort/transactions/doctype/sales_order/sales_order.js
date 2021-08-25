@@ -1,21 +1,13 @@
-// DO: Add `add_multiple` to easily add items when From Actual Stock is checked
-frappe.ui.form.on("Sales Order", {
-  setup(frm) {
-    frm.page.sidebar.hide();
+// TODO: Know about autoocompletion in JS
 
-    frm.set_query("item_code", "items", () => {
-      return {
-        query:
-          "comfort.transactions.doctype.sales_order.sales_order.sales_order_item_query",
-        filters: {
-          from_actual_stock: frm.doc.from_actual_stock,
-        },
-      };
-    });
+comfort.SalesOrderController = frappe.ui.form.Controller.extend({
+  setup() {
+    this.frm.show_submit_message = () => {}; // Hide "Submit this document to confirm" message
+    this.frm.page.sidebar.hide(); // Hide sidebar
   },
 
-  onload_post_render(frm) {
-    frm.fields_dict.items.$wrapper.unbind("paste").on("paste", (e) => {
+  setup_quick_add_items() {
+    this.frm.fields_dict.items.$wrapper.unbind("paste").on("paste", (e) => {
       e.preventDefault();
       let clipboard_data =
         e.clipboardData ||
@@ -26,13 +18,12 @@ frappe.ui.form.on("Sales Order", {
 
       quick_add_items(pasted_data);
     });
-    return false;
   },
 
-  refresh(frm) {
-    if (!frm.is_new() && frm.doc.per_paid < 100) {
-      frm
-        .add_custom_button(__("Paid"), () => {
+  setup_buttons() {
+    if (!this.frm.is_new() && this.frm.doc.per_paid < 100) {
+      this.frm
+        .add_custom_button(__("Add Payment"), () => {
           frappe.prompt(
             [
               {
@@ -40,7 +31,7 @@ frappe.ui.form.on("Sales Order", {
                 fieldname: "paid_amount",
                 fieldtype: "Currency",
                 precision: "0",
-                default: frm.doc.pending_amount,
+                default: this.frm.doc.pending_amount,
               },
               {
                 label: "Account",
@@ -51,15 +42,16 @@ frappe.ui.form.on("Sales Order", {
               },
             ],
             (values) => {
-              frm.call({
-                doc: frm.doc,
+              this.frm.call({
+                doc: this.frm.doc,
                 method: "add_payment",
                 args: {
                   paid_amount: values.paid_amount,
                   cash: values.account == "Cash",
                 },
                 callback: () => {
-                  frm.reload_doc();
+                  this.frm.reload_doc();
+                  // frappe.show_alert(__("Payment added!"))
                 },
               });
             }
@@ -69,14 +61,14 @@ frappe.ui.form.on("Sales Order", {
         .addClass("btn-primary");
     }
 
-    if (frm.doc.delivery_status == "To Deliver") {
-      frm
-        .add_custom_button(__("Delivered"), () => {
-          frm.call({
-            doc: frm.doc,
+    if (this.frm.doc.delivery_status == "To Deliver") {
+      this.frm
+        .add_custom_button(__("Add Receipt"), () => {
+          this.frm.call({
+            doc: this.frm.doc,
             method: "add_receipt",
             callback: () => {
-              frm.reload_doc();
+              this.frm.reload_doc();
             },
           });
         })
@@ -85,11 +77,11 @@ frappe.ui.form.on("Sales Order", {
     }
 
     if (
-      frm.doc.docstatus == 0 &&
-      frm.doc.child_items &&
-      frm.doc.child_items.length > 0
+      this.frm.doc.docstatus == 0 &&
+      this.frm.doc.child_items &&
+      this.frm.doc.child_items.length > 0
     ) {
-      frm.add_custom_button(__("Split Combinations"), () => {
+      this.frm.add_custom_button(__("Split Combinations"), () => {
         const fields = [
           {
             fieldtype: "Link",
@@ -119,8 +111,8 @@ frappe.ui.form.on("Sales Order", {
               dialog.fields_dict.combinations.grid.get_selected_children();
             selected = selected.filter((d) => d.__checked);
             selected = selected.map((d) => d.name);
-            frm.call({
-              doc: frm.doc,
+            this.frm.call({
+              doc: this.frm.doc,
               method: "split_combinations",
               freeze: 1,
               args: { combos_item_names: selected },
@@ -131,10 +123,10 @@ frappe.ui.form.on("Sales Order", {
         });
 
         var parent_items = [];
-        frm.doc.child_items.forEach((d) => {
+        this.frm.doc.child_items.forEach((d) => {
           parent_items.push(d.parent_item_code);
         });
-        frm.doc.items.forEach((d) => {
+        this.frm.doc.items.forEach((d) => {
           if (parent_items.includes(d.item_code)) {
             dialog.fields_dict.combinations.df.data.push({
               name: d.name,
@@ -145,8 +137,8 @@ frappe.ui.form.on("Sales Order", {
         });
         dialog.fields_dict.combinations.grid.refresh();
         if (
-          !frm.doc.child_items ||
-          frm.doc.child_items.length == 0 ||
+          !this.frm.doc.child_items ||
+          this.frm.doc.child_items.length == 0 ||
           dialog.fields_dict.combinations.grid.data.length == 0
         ) {
           frappe.msgprint("В заказе нет комбинаций");
@@ -158,13 +150,150 @@ frappe.ui.form.on("Sales Order", {
         dialog.show();
       });
     }
-
-    if (frm.doc.from_not_received_items_to_sell) {
-      for (var d of ["commission", "discount"]) {
-        frm.set_df_property(d, "allow_on_submit", 1);
-      }
-    }
   },
+
+  refresh() {
+    this.setup_buttons();
+  },
+
+  onload_post_render() {
+    this.setup_quick_add_items();
+  },
+});
+
+$.extend(cur_frm.cscript, new comfort.SalesOrderController({ frm: cur_frm }));
+// DO: Add `add_multiple` to easily add items when From Actual Stock is checked
+frappe.ui.form.on("Sales Order", {
+  // refresh(frm) {
+  //   if (!frm.is_new() && frm.doc.per_paid < 100) {
+  //     frm
+  //       .add_custom_button(__("Paid"), () => {
+  //         frappe.prompt(
+  //           [
+  //             {
+  //               label: "Paid Amount",
+  //               fieldname: "paid_amount",
+  //               fieldtype: "Currency",
+  //               precision: "0",
+  //               default: frm.doc.pending_amount,
+  //             },
+  //             {
+  //               label: "Account",
+  //               fieldname: "account",
+  //               fieldtype: "Select",
+  //               options: "Cash\nBank",
+  //               default: "Cash",
+  //             },
+  //           ],
+  //           (values) => {
+  //             frm.call({
+  //               doc: frm.doc,
+  //               method: "add_payment",
+  //               args: {
+  //                 paid_amount: values.paid_amount,
+  //                 cash: values.account == "Cash",
+  //               },
+  //               callback: () => {
+  //                 frm.reload_doc();
+  //               },
+  //             });
+  //           }
+  //         );
+  //       })
+  //       .removeClass("btn-default")
+  //       .addClass("btn-primary");
+  //   }
+
+  //   if (frm.doc.delivery_status == "To Deliver") {
+  //     frm
+  //       .add_custom_button(__("Delivered"), () => {
+  //         frm.call({
+  //           doc: frm.doc,
+  //           method: "add_receipt",
+  //           callback: () => {
+  //             frm.reload_doc();
+  //           },
+  //         });
+  //       })
+  //       .removeClass("btn-default")
+  //       .addClass("btn-primary");
+  //   }
+
+  //   if (
+  //     frm.doc.docstatus == 0 &&
+  //     frm.doc.child_items &&
+  //     frm.doc.child_items.length > 0
+  //   ) {
+  //     frm.add_custom_button(__("Split Combinations"), () => {
+  //       const fields = [
+  //         {
+  //           fieldtype: "Link",
+  //           fieldname: "item_code",
+  //           options: "Item",
+  //           in_list_view: 1,
+  //           label: __("Item Code"),
+  //         },
+  //       ];
+
+  //       var dialog = new frappe.ui.Dialog({
+  //         title: __("Split Combinations"),
+  //         fields: [
+  //           {
+  //             fieldname: "combinations",
+  //             fieldtype: "Table",
+  //             label: "Combinations",
+  //             cannot_add_rows: true,
+  //             size: "large",
+  //             reqd: 1,
+  //             data: [],
+  //             fields: fields,
+  //           },
+  //         ],
+  //         primary_action: () => {
+  //           let selected =
+  //             dialog.fields_dict.combinations.grid.get_selected_children();
+  //           selected = selected.filter((d) => d.__checked);
+  //           selected = selected.map((d) => d.name);
+  //           frm.call({
+  //             doc: frm.doc,
+  //             method: "split_combinations",
+  //             freeze: 1,
+  //             args: { combos_item_names: selected },
+  //           });
+  //           dialog.hide();
+  //         },
+  //         primary_action_label: __("Save"),
+  //       });
+
+  //       var parent_items = [];
+  //       frm.doc.child_items.forEach((d) => {
+  //         parent_items.push(d.parent_item_code);
+  //       });
+  //       frm.doc.items.forEach((d) => {
+  //         if (parent_items.includes(d.item_code)) {
+  //           dialog.fields_dict.combinations.df.data.push({
+  //             name: d.name,
+  //             item_code: d.item_code,
+  //             item_name: d.item_name,
+  //           });
+  //         }
+  //       });
+  //       dialog.fields_dict.combinations.grid.refresh();
+  //       if (
+  //         !frm.doc.child_items ||
+  //         frm.doc.child_items.length == 0 ||
+  //         dialog.fields_dict.combinations.grid.data.length == 0
+  //       ) {
+  //         frappe.msgprint("В заказе нет комбинаций");
+  //         return;
+  //       }
+
+  //       dialog.fields_dict.combinations.grid.display_status = "Read";
+  //       dialog.fields_dict.combinations.grid.grid_buttons.hide();
+  //       dialog.show();
+  //     });
+  //   }
+  // },
 
   validate(frm) {
     frm.doc.child_items = [];
@@ -355,7 +484,7 @@ function recalculate(frm) {
 }
 
 function quick_add_items(text) {
-  comfort.fetch_items(text).then((values) => {
+  comfort.get_items(text).then((values) => {
     for (var item of values) {
       let doc = cur_frm.add_child("items", {
         item_code: item.item_code,

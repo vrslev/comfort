@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 # TODO: Allow change services on submit
-from typing import Any, Generator, Iterable, Literal
+from typing import Generator, Iterable, Literal
 
 import frappe
 from comfort import ValidationError, count_quantity, group_by_key
@@ -299,26 +299,3 @@ class SalesOrder(SalesOrderStatuses):
                 )
 
         self.save()
-
-
-@frappe.whitelist()  # pragma: no cover
-@frappe.validate_and_sanitize_search_inputs
-def sales_order_item_query(
-    doctype: str,
-    txt: str,
-    searchfield: str,
-    start: int,
-    page_len: int,
-    filters: dict[Any, Any],
-):
-    from comfort.fixtures.hooks.queries import default_query
-
-    field = "from_actual_stock"
-    if filters.get(field) is not None:
-        available_items: Generator[str, None, None] = (
-            d.item_code
-            for d in frappe.get_all("Bin", "item_code", {"available_actual": (">", 0)})
-        )
-        filters["item_code"] = ["in", available_items]
-        del filters[field]
-    return default_query(doctype, txt, searchfield, start, page_len, filters)
