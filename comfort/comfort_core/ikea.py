@@ -129,12 +129,11 @@ def _create_item_categories(items: list[ParsedItem]):
         _make_item_category(*category)
 
 
-def _fetch_child_items(items: list[ParsedItem], force_update: bool):
+def _fetch_child_items(items: list[ParsedItem], force_update: bool):  # pragma: no cover
     items_to_fetch: list[str] = []
     for item in items:
-        if item["is_combination"]:
-            for child in item["child_items"]:
-                items_to_fetch.append(child["item_code"])
+        for child in item["child_items"]:
+            items_to_fetch.append(child["item_code"])
     return fetch_items(items_to_fetch, force_update=force_update)
 
 
@@ -150,14 +149,14 @@ def _schedule_download_images(parsed_items: list[ParsedItem]):  # pragma: no cov
     )
 
 
-class FetchItemsResult(TypedDict):
+class FetchItemsResult(TypedDict):  # pragma: no cover
     unsuccessful: list[str]
     successful: list[str]
 
 
 def fetch_items(
     item_codes: list[str | int] | int | str, force_update: bool
-) -> FetchItemsResult:
+) -> FetchItemsResult:  # pragma: no cover
     items_to_fetch = _get_items_to_fetch(item_codes, force_update)
     if not items_to_fetch:
         return []
