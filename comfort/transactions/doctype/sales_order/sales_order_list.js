@@ -63,12 +63,12 @@ function add_not_in_po_check(list) {
         if (check.get_value() == 1) {
           await frappe.call({
             method:
-              "comfort.transactions.doctype.sales_order.sales_order_list.get_sales_orders_in_purchase_order",
+              "comfort.transactions.doctype.sales_order.sales_order_list.get_sales_orders_not_in_purchase_order",
             callback: (r) => {
               list.filter_area.filter_list.add_filter(
                 "Sales Order",
                 "name",
-                "not in",
+                "in",
                 r.message,
                 true
               );
