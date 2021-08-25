@@ -5,7 +5,7 @@ from comfort.entities.doctype.item.item import Item
 
 @frappe.whitelist()
 def get_items(item_codes: str) -> list[Item]:  # pragma: no cover
-    response: FetchItemsResult = fetch_items(item_codes)
+    response: FetchItemsResult = fetch_items(item_codes, force_update=True)
     if response["unsuccessful"]:
         frappe.msgprint(
             "Эти товары не удалось загрузить: " + ", ".join(response["unsuccessful"])
