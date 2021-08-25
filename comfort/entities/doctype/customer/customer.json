@@ -5,7 +5,6 @@
   "autoname": "Prompt",
   "creation": "2020-12-29 15:27:53.782555",
   "doctype": "DocType",
-  "document_type": "Setup",
   "editable_grid": 1,
   "engine": "InnoDB",
   "field_order": [
@@ -91,7 +90,7 @@
   "image_field": "image",
   "index_web_pages_for_search": 1,
   "links": [],
-  "modified": "2021-08-09 05:20:17.735791",
+  "modified": "2021-08-25 03:11:54.772859",
   "modified_by": "Administrator",
   "module": "Entities",
   "name": "Customer",
