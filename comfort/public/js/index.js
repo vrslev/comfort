@@ -1,6 +1,7 @@
 frappe.provide("comfort");
 
-comfort.fetch_items = (item_codes) => {
+comfort.get_items = (item_codes) => {
+  // TODO: Fix freeze
   var promise = new Promise((resolve) => {
     let isResolved = false;
     frappe.call({
@@ -12,11 +13,11 @@ comfort.fetch_items = (item_codes) => {
         resolve(r.message);
       },
     });
-    setTimeout(() => {
-      if (!isResolved) {
-        frappe.dom.freeze();
-      }
-    }, 1000);
+    // setTimeout(() => {
+    //   if (!isResolved) {
+    //     frappe.dom.freeze();
+    //   }
+    // }, 1000);
   });
   return promise;
 };
