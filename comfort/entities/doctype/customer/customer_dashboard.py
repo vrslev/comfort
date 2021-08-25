@@ -1,7 +1,4 @@
-from typing import Any
-
-
-def get_data() -> dict[str, Any]:
+def get_data():
     return {
         "heatmap": True,
         "fieldname": "customer",
