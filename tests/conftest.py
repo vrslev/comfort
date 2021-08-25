@@ -227,7 +227,7 @@ def payment_sales(sales_order: SalesOrder) -> Payment:
             "name": "ebd35a9cc9",
             "docstatus": 0,
             "voucher_type": "Sales Order",
-            "voucher_no": "SO-2021-0001",
+            "voucher_no": "S-2021-0001",
             "amount": 5000,
             "paid_with_cash": False,
             "doctype": "Payment",
@@ -290,7 +290,7 @@ def sales_order(
 
     doc: SalesOrder = frappe.get_doc(
         {
-            "name": "SO-2021-0001",
+            "name": "S-2021-0001",
             "customer": "Pavel Durov",
             "edit_commission": 0,
             "discount": 0,
@@ -462,7 +462,7 @@ def purchase_order(
             "delivery_options": [],
             "sales_orders": [
                 {
-                    "sales_order_name": "SO-2021-0001",
+                    "sales_order_name": "S-2021-0001",
                     "customer": "Pavel Durov",
                     "total": 24660,
                 }

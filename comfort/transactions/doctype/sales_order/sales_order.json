@@ -1,6 +1,6 @@
 {
   "actions": [],
-  "autoname": "SO-.YYYY.-.####",
+  "autoname": "S-.YYYY.-.####",
   "creation": "2021-01-01 18:33:35.831110",
   "doctype": "DocType",
   "editable_grid": 1,
@@ -11,24 +11,24 @@
     "items",
     "section_break_6",
     "services",
-    "section_break_9",
+    "column_break_6",
+    "discount",
     "commission",
     "edit_commission",
-    "column_break_7",
-    "discount",
-    "section_break_14",
-    "total_amount",
     "payment_section",
     "paid_amount",
     "column_break_18",
     "pending_amount",
     "totals_section",
-    "total_quantity",
+    "total_amount",
     "items_cost",
-    "service_amount",
     "column_break_25",
     "total_weight",
+    "service_amount",
+    "column_break_22",
+    "total_quantity",
     "margin",
+    "section_break_22",
     "child_items",
     "status_section",
     "status",
@@ -73,10 +73,6 @@
       "options": "Sales Order Service"
     },
     {
-      "fieldname": "section_break_9",
-      "fieldtype": "Section Break"
-    },
-    {
       "default": "15",
       "fieldname": "commission",
       "fieldtype": "Percent",
@@ -91,19 +87,11 @@
       "label": "Edit Commission"
     },
     {
-      "fieldname": "column_break_7",
-      "fieldtype": "Column Break"
-    },
-    {
       "default": "0",
       "fieldname": "discount",
       "fieldtype": "Currency",
       "label": "Discount",
       "precision": "0"
-    },
-    {
-      "fieldname": "section_break_14",
-      "fieldtype": "Section Break"
     },
     {
       "fieldname": "total_amount",
@@ -250,12 +238,24 @@
       "options": "Sales Order",
       "print_hide": 1,
       "read_only": 1
+    },
+    {
+      "fieldname": "column_break_6",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "section_break_22",
+      "fieldtype": "Section Break"
+    },
+    {
+      "fieldname": "column_break_22",
+      "fieldtype": "Column Break"
     }
   ],
   "index_web_pages_for_search": 1,
   "is_submittable": 1,
   "links": [],
-  "modified": "2021-08-19 01:03:31.628556",
+  "modified": "2021-08-25 03:11:03.743821",
   "modified_by": "Administrator",
   "module": "Transactions",
   "name": "Sales Order",
