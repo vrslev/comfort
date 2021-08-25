@@ -99,3 +99,7 @@ def test_calculate_weight_in_parent_docs(item: Item, child_items: list[Item]):
 
     new_weight: float = frappe.get_value("Item", item.item_code, "weight")
     assert expected_weight == new_weight
+
+
+def test_calculate_weight_in_parent_docs_if_parents_not_exist(child_items: list[Item]):
+    child_items[0].calculate_weight_in_parent_docs()

@@ -57,9 +57,10 @@ class ItemMethods:
         )
         parent_item_names = list({d.parent for d in parent_items})
         for d in parent_item_names:
-            doc: Item = frappe.get_doc("Item", d)
-            doc.calculate_weight()
-            doc.db_update()
+            if frappe.db.exists("Item", d):
+                doc: Item = frappe.get_doc("Item", d)
+                doc.calculate_weight()
+                doc.db_update()
 
 
 class Item(Document, ItemMethods):

@@ -47,8 +47,8 @@ def get_purchase_info(purchase_id: int, use_lite_id: bool):  # pragma: no cover
     return ikea_api_wrapped.get_purchase_info(get_authorized_api(), purchase_id, email)
 
 
-def _make_item_category(name: str, url: str):
-    if not frappe.db.exists("Item Category", name):
+def _make_item_category(name: str | None, url: str | None):
+    if name and not frappe.db.exists("Item Category", name):
         doc: ItemCategory = frappe.new_doc("Item Category")
         doc.category_name = name
         doc.url = url
@@ -208,12 +208,12 @@ def fetch_items(
 ) -> FetchItemsResult:  # pragma: no cover
     items_to_fetch = _get_items_to_fetch(item_codes, force_update)
     if not items_to_fetch:
-        return []
+        return {"unsuccessful": [], "successful": []}
 
     parsed_items = ikea_api_wrapped.get_items(items_to_fetch)
 
     _create_item_categories(parsed_items)
-    res = _fetch_child_items(parsed_items, force_update)
+    _fetch_child_items(parsed_items, force_update)
 
     fetched_item_codes: list[str] = []
     for parsed_item in parsed_items:
@@ -223,8 +223,7 @@ def fetch_items(
 
     _schedule_download_images(parsed_items)
 
-    res["successful"] = items_to_fetch + res["successful"]
-    res["unsuccessful"] = [
-        i for i in items_to_fetch if i not in fetched_item_codes
-    ] + res["unsuccessful"]
-    return res
+    return {
+        "successful": [i for i in items_to_fetch if i in fetched_item_codes],
+        "unsuccessful": [i for i in items_to_fetch if i not in fetched_item_codes],
+    }

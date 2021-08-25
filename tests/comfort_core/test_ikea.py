@@ -32,6 +32,12 @@ def test_make_item_category_exists(parsed_item: ParsedItem):
     assert categories[0].url == parsed_item["category_url"]
 
 
+def test_make_item_category_no_name(parsed_item: ParsedItem):
+    _make_item_category(None, parsed_item["category_url"])
+    categories: list[ItemCategory] = frappe.get_all("Item Category", "url")
+    assert len(categories) == 0
+
+
 def test_make_items_from_child_items_if_not_exist(parsed_item: ParsedItem):
     _make_items_from_child_items_if_not_exist(parsed_item)
     assert (
