@@ -339,25 +339,32 @@ def test_autoname_purchase_orders_not_exist_in_this_month(
     assert purchase_order.name == f"{get_this_month_ru_name()}-1"
 
 
-def test_before_save(purchase_order: PurchaseOrder):
+def test_purchase_order_before_save(purchase_order: PurchaseOrder):
     purchase_order.delivery_options.append("somevalue")
     purchase_order.before_save()
     assert len(purchase_order.delivery_options) == 0
 
 
-def test_before_insert(purchase_order: PurchaseOrder):
+def test_purchase_order_before_insert(purchase_order: PurchaseOrder):
     purchase_order.status = None
     purchase_order.before_insert()
     assert purchase_order.status == "Draft"
 
 
-def test_before_submit(purchase_order: PurchaseOrder):
-    purchase_order.status = "Draft"
+def test_purchase_order_before_submit(purchase_order: PurchaseOrder):
     purchase_order.get_delivery_services()
     purchase_order.before_submit()
 
     assert not purchase_order.delivery_options
     assert not purchase_order.cannot_add_items
+
+
+def test_on_submit_status(purchase_order: PurchaseOrder):
+    purchase_order.total_amount = 100
+    purchase_order.db_insert()
+    purchase_order.db_update_all()
+    purchase_order.status = "Draft"
+    purchase_order.on_submit()
     assert purchase_order.status == "To Receive"
 
 

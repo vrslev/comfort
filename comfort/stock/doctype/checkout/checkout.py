@@ -25,5 +25,11 @@ class Checkout(Document):
                 doc._get_items_to_sell(True),
             )
 
+    def set_purchase_draft_status(self):
+        doc: PurchaseOrder = frappe.get_doc("Purchase Order", self.purchase_order)
+        doc.status = "Draft"
+        doc.db_update()
+
     def before_cancel(self):  # pragma: no cover
         cancel_stock_entries_for(self.doctype, self.name)
+        self.set_purchase_draft_status()

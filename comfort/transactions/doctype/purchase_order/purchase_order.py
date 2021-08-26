@@ -275,12 +275,12 @@ class PurchaseOrder(PurchaseOrderMethods):
     def before_submit(self):
         self.delivery_options = []
         self.cannot_add_items = None
-        self.status = "To Receive"
 
-    def on_submit(self):  # pragma: no cover
-        self.create_payment()
-        self.create_checkout()
-        self.submit_sales_orders_and_update_statuses()
+    def on_submit(self):
+        self.create_payment()  # pragma: no cover
+        self.create_checkout()  # pragma: no cover
+        self.submit_sales_orders_and_update_statuses()  # pragma: no cover
+        self.status = "To Receive"
 
     def on_cancel(self):  # pragma: no cover
         self.submit_sales_orders_and_update_statuses()

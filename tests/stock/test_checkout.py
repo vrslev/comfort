@@ -28,3 +28,12 @@ def test_checkout_before_submit(checkout: Checkout, purchase_order: PurchaseOrde
             exp_items = count_quantity(purchase_order._get_items_to_sell(True))
             for i in count_quantity(doc.items):
                 assert i in exp_items
+
+
+def test_set_purchase_draft_status(checkout: Checkout, purchase_order: PurchaseOrder):
+    checkout.db_insert()
+    purchase_order.reload()
+    purchase_order.status = "To Receive"
+    checkout.set_purchase_draft_status()
+    purchase_order.reload()
+    assert purchase_order.status == "Draft"
