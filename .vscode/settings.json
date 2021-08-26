@@ -1,4 +1,5 @@
 {
+  "python.autoComplete.extraPaths": ["../frappe/frappe"],
   "python.analysis.diagnosticMode": "workspace",
   "python.analysis.extraPaths": ["../frappe"],
   "python.analysis.indexing": true,
