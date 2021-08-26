@@ -312,6 +312,24 @@ def test_get_sales_order_items_with_splitted_combinations(sales_order: SalesOrde
 #############################
 
 
+def test_add_payment_raises_on_cancelled(sales_order: SalesOrder):
+    sales_order.docstatus = 2
+    with pytest.raises(
+        ValidationError,
+        match="Sales Order should be not cancelled to add Payment",
+    ):
+        sales_order.add_payment(100, True)
+
+
+def test_add_receipt_raises_on_cancelled(sales_order: SalesOrder):
+    sales_order.docstatus = 2
+    with pytest.raises(
+        ValidationError,
+        match="Sales Order should be not cancelled to add Receipt",
+    ):
+        sales_order.add_receipt()
+
+
 def test_add_receipt_raises_on_delivered(sales_order: SalesOrder):
     sales_order.delivery_status = "Delivered"
     with pytest.raises(

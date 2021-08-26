@@ -250,13 +250,21 @@ class SalesOrder(SalesOrderStatuses):
         self._calculate_margin()
 
     @frappe.whitelist()
-    def add_payment(self, paid_amount: int, cash: bool):  # pragma: no cover
-        create_payment(self.doctype, self.name, paid_amount, cash)
-        self.set_statuses()
-        self.db_update()
+    def add_payment(self, paid_amount: int, cash: bool):
+        if self.docstatus == 2:
+            raise ValidationError(
+                _("Sales Order should be not cancelled to add Payment")
+            )
+        create_payment(self.doctype, self.name, paid_amount, cash)  # pragma: no cover
+        self.set_statuses()  # pragma: no cover
+        self.db_update()  # pragma: no cover
 
     @frappe.whitelist()
     def add_receipt(self):
+        if self.docstatus == 2:
+            raise ValidationError(
+                _("Sales Order should be not cancelled to add Receipt")
+            )
         if self.delivery_status != "To Deliver":
             raise ValidationError(
                 _('Delivery Status Sales Order should be "To Deliver" to add Receipt')
