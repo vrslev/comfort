@@ -29,6 +29,11 @@ comfort.IkeaCartController = frappe.ui.form.Controller.extend({
   },
 
   onload_post_render() {
+    this.setup_quick_add_items();
+    this.frm.fields_dict.sales_orders.grid.set_multiple_add("sales_order_name");
+  },
+
+  setup_quick_add_items() {
     this.frm.fields_dict.items_to_sell.grid.wrapper.on("paste", (e) => {
       e.preventDefault();
       let clipboard_data =
@@ -38,32 +43,37 @@ comfort.IkeaCartController = frappe.ui.form.Controller.extend({
       let pasted_data = clipboard_data.getData("Text");
       this.quick_add_items(pasted_data);
     });
-
-    this.frm.fields_dict.sales_orders.grid.set_multiple_add("sales_order_name");
   },
 
   refresh() {
-    if (this.frm.doc.docstatus == 0 && !this.frm.doc.__islocal) {
-      this.frm.add_custom_button(__("Update Delivery Services"), () => {
+    if (!this.frm.is_new() && this.frm.doc.docstatus == 0) {
+      this.frm.add_custom_button(__("Get Delivery Services"), () => {
         this.frm.call({
           doc: this.frm.doc,
           method: "get_delivery_services",
           freeze: 1,
+          callback: () => {
+            this.render_unavailable_items_buttons();
+          },
         });
       });
+    }
 
-      this.frm.add_custom_button(__("Checkout On IKEA Site"), () => {
-        if (this.frm.doc.__unsaved) {
-          frappe.msgprint("Чтобы оформить заказ, необходимо сохранить корзину");
+    if (!this.frm.is_new() && this.frm.doc.docstatus == 0) {
+      this.frm.add_custom_button(__("Checkout"), () => {
+        if (this.frm.is_dirty()) {
+          frappe.msgprint(__("Save Purchase Order before checkout"));
         } else {
           frappe.confirm(
-            "Нынешняя корзина пропадёт. Всё равно продолжить?",
+            __(
+              "Current cart in your IKEA account will be replaced with new one. Proceed?"
+            ),
             () => {
               this.frm.call({
                 doc: this.frm.doc,
                 method: "checkout",
                 freeze: 1,
-                freeze_message: "Загружаю товары в корзину...",
+                freeze_message: __("Loading items into cart..."),
                 callback: () => {
                   window.open("https://www.ikea.com/ru/ru/shoppingcart/");
                 },
@@ -75,139 +85,24 @@ comfort.IkeaCartController = frappe.ui.form.Controller.extend({
     }
 
     if (!this.frm.is_new() && this.frm.doc.status == "To Receive") {
-      this.frm.page.set_primary_action("Received", () => {
-        this.frm.call({
-          method: "create_receipt",
-          doc: this.frm.doc,
-          callback: () => {
-            frappe.show_alert({
-              message: __("Purchase Order completed"),
-              indicator: "green",
-            });
-            this.frm.refresh();
-          },
-        });
-      });
-    }
-
-    // if (this.frm.doc.status == 'To Receive') {
-    if (this.frm.doc.status == "Draft") {
-      this.frm.fields_dict.items_to_sell.grid
-        .add_custom_button(__("Create Sales Order"), () => {
-          const fields = [
-            {
-              fieldtype: "Link",
-              fieldname: "item_code",
-              options: "Item",
-              in_list_view: 1,
-              read_only: 1,
-              formatter: (value, df, options, doc) => {
-                // to delete links
-                if (
-                  doc &&
-                  value &&
-                  doc.item_name &&
-                  doc.item_name !== value &&
-                  doc.item_code === value
-                ) {
-                  return value + ": " + doc.item_name;
-                } else if (!value && doc.doctype && doc.item_name) {
-                  return doc.item_name;
-                } else {
-                  return value;
-                }
-              },
-              label: __("Item Code"),
-            },
-            {
-              fieldtype: "Int",
-              fieldname: "qty",
-              in_list_view: 1,
-              columns: 1,
-              label: __("Qty"),
-            },
-          ];
-
-          var dialog = new frappe.ui.Dialog({
-            title: __("Choose Items for new Sales Order"),
-            fields: [
-              {
-                fieldname: "customer",
-                fieldtype: "Link",
-                label: "Customer",
-                options: "Customer",
-                reqd: 1,
-                only_select: 1,
-              },
-              {
-                fieldtype: "Column Break",
-              },
-              {
-                fieldtype: "Section Break",
-              },
-              {
-                fieldname: "items",
-                fieldtype: "Table",
-                label: "Items",
-                cannot_add_rows: true,
-                reqd: 1,
-                data: [],
-                fields: fields,
-              },
-            ],
-            size: "large",
-            primary_action: (data) => {
-              console.log(data);
-              var selected_items = data.items
-                .filter((d) => d.__checked)
-                .map((d) => {
-                  return {
-                    item_code: d.item_code,
-                    qty: d.qty,
-                    rate: d.rate, // TODO: Need to fix rate. Somehow force it
-                  };
+      this.frm.page.set_primary_action("Add Receipt", () => {
+        frappe.confirm(
+          __("Are you sure you want to mark this Purchase Order as delivered?"),
+          () => {
+            this.frm.call({
+              doc: this.frm.doc,
+              method: "add_receipt",
+              callback: () => {
+                frappe.show_alert({
+                  message: __("Purchase Order completed"),
+                  indicator: "green",
                 });
-              // let selected =
-              //   dialog.fields_dict.items.grid.get_selected_children();
-              // selected = selected.filter((d) => d.__checked);
-
-              this.frm.call({
-                doc: this.frm.doc,
-                method: "create_new_sales_order_from_items_to_sell",
-                args: {
-                  items: selected_items,
-                  customer: data.customer,
-                },
-                // callback:
-              });
-              // for (var d of selected) {
-
-              // }
-              dialog.hide();
-            },
-            primary_action_label: __("Choose"),
-          });
-
-          dialog.fields_dict.items.df.data = this.frm.doc.items_to_sell.map(
-            (d) => {
-              return {
-                name: d.name,
-                item_code: d.item_code,
-                item_name: d.item_name,
-                qty: d.qty,
-                rate: d.rate,
-              };
-            }
-          );
-
-          let grid = dialog.fields_dict.items.grid;
-          grid.grid_buttons.hide();
-          grid.refresh();
-          grid.wrapper.find('[data-fieldname="item_code"]').unbind("click");
-
-          dialog.show();
-        })
-        .attr("class", "btn btn-xs btn-secondary btn-custom");
+                this.frm.refresh();
+              },
+            });
+          }
+        );
+      });
     }
 
     this.render_unavailable_items_buttons();
@@ -333,7 +228,7 @@ comfort.IkeaCartController = frappe.ui.form.Controller.extend({
       method: "comfort.comfort_core.ikea.get_purchase_history",
       freeze: true,
       callback: (r) => {
-        if (r.message) {
+        if (r.message && r.message.length > 0) {
           var select_data = [];
           for (var p of r.message) {
             if (p.status == "IN_PROGRESS") {

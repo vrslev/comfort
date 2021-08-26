@@ -322,7 +322,7 @@ class PurchaseOrder(PurchaseOrderMethods):
         add_items_to_cart(items, authorize=True)
 
     @frappe.whitelist()
-    def create_receipt(self):  # pragma: no cover
+    def add_receipt(self):  # pragma: no cover
         create_receipt(self.doctype, self.name)
         self.status = "Completed"  # type: ignore
         self.db_update()
