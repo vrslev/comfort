@@ -40,6 +40,7 @@ def get_purchase_history():  # pragma: no cover
     return ikea_api_wrapped.get_purchase_history(get_authorized_api())
 
 
+@frappe.whitelist()
 def get_purchase_info(purchase_id: int, use_lite_id: bool):  # pragma: no cover
     email: str | None = None
     if use_lite_id:

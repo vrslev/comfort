@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from typing import Any, Literal
+from typing import Literal
 
 import frappe
-from comfort import OrderTypes
+from comfort import OrderTypes, count_quantity
 from frappe.model.document import Document
 
 StockTypes = Literal[
@@ -31,15 +31,19 @@ def create_stock_entry(
     doctype: Literal["Receipt", "Checkout"],
     name: str,
     stock_type: StockTypes,
-    items: list[Any],
+    items: list[object],
 ):
+
     doc: Document = frappe.get_doc(
         {
             "doctype": "Stock Entry",
             "voucher_type": doctype,
             "voucher_no": name,
             "stock_type": stock_type,
-            "items": items,
+            "items": [
+                {"item_code": item_code, "qty": qty}
+                for item_code, qty in count_quantity(items).items()
+            ],
         }
     )
     doc.insert()

@@ -6,6 +6,7 @@ from datetime import datetime
 from typing import Any, Literal, ValuesView
 
 from ikea_api_wrapped.parsers.order_capture import DeliveryOptionDict
+from ikea_api_wrapped.wrappers import PurchaseInfoDict
 
 import frappe
 from comfort import ValidationError, count_quantity, group_by_key, maybe_json
@@ -281,12 +282,12 @@ class PurchaseOrder(PurchaseOrderMethods):
     def before_submit(self):
         self.delivery_options = []
         self.cannot_add_items = None
-
-    def on_submit(self):
-        self.create_payment()  # pragma: no cover
-        self.create_checkout()  # pragma: no cover
-        self.submit_sales_orders_and_update_statuses()  # pragma: no cover
         self.status = "To Receive"
+
+    def on_submit(self):  # pragma: no cover
+        self.create_payment()
+        self.create_checkout()
+        self.submit_sales_orders_and_update_statuses()
 
     def on_cancel(self):  # pragma: no cover
         self.submit_sales_orders_and_update_statuses()
@@ -295,20 +296,15 @@ class PurchaseOrder(PurchaseOrderMethods):
     def add_purchase_info_and_submit(
         self,
         purchase_id: str,
-        purchase_info_loaded: bool,
-        purchase_info: dict[str, Any],
-        delivery_cost: int = 0,
+        purchase_info: PurchaseInfoDict,
     ):
-
-        if purchase_info_loaded:
-            self.schedule_date: datetime = getdate(purchase_info["delivery_date"])
-            self.posting_date: datetime = getdate(purchase_info["purchase_date"])
-            self.delivery_cost = purchase_info["delivery_cost"]
-        else:
-            self.schedule_date: datetime = add_to_date(None, weeks=2)
-            self.posting_date: datetime = today()
-            self.delivery_cost = delivery_cost
-
+        self.schedule_date: datetime = getdate(
+            purchase_info.get("delivery_date", add_to_date(None, weeks=2))
+        )
+        self.posting_date: datetime = getdate(
+            purchase_info.get("purchase_date", today())
+        )
+        self.delivery_cost = int(purchase_info["delivery_cost"])
         self.order_confirmation_no = purchase_id
         self.submit()
 
@@ -409,14 +405,3 @@ def sales_order_query(
     for order in orders:
         order[2] = frappe.format(order[2], "Currency")
     return orders
-
-
-@frappe.whitelist()
-def get_purchase_info(purchase_id: int, use_lite_id: bool):  # pragma: no cover
-    from comfort.comfort_core.ikea import get_purchase_info
-
-    purchase_info = get_purchase_info(purchase_id, use_lite_id)
-    return {
-        "purchase_info": purchase_info,
-        "purchase_info_loaded": True if purchase_info else False,
-    }

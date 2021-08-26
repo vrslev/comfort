@@ -46,20 +46,29 @@ comfort.IkeaCartController = frappe.ui.form.Controller.extend({
   },
 
   refresh() {
-    if (!this.frm.is_new() && this.frm.doc.docstatus == 0) {
+    this.setup_buttons();
+    this.refresh_delivery_options();
+  },
+
+  setup_buttons() {
+    if (this.frm.is_new()) {
+      return;
+    }
+
+    if (this.frm.doc.docstatus == 0) {
       this.frm.add_custom_button(__("Get Delivery Services"), () => {
         this.frm.call({
           doc: this.frm.doc,
           method: "get_delivery_services",
           freeze: 1,
           callback: () => {
-            this.render_unavailable_items_buttons();
+            this.refresh_delivery_options();
           },
         });
       });
     }
 
-    if (!this.frm.is_new() && this.frm.doc.docstatus == 0) {
+    if (this.frm.doc.docstatus == 0) {
       this.frm.add_custom_button(__("Checkout"), () => {
         if (this.frm.is_dirty()) {
           frappe.msgprint(__("Save Purchase Order before checkout"));
@@ -84,7 +93,7 @@ comfort.IkeaCartController = frappe.ui.form.Controller.extend({
       });
     }
 
-    if (!this.frm.is_new() && this.frm.doc.status == "To Receive") {
+    if (this.frm.doc.status == "To Receive") {
       this.frm.page.set_primary_action("Add Receipt", () => {
         frappe.confirm(
           __("Are you sure you want to mark this Purchase Order as delivered?"),
@@ -104,8 +113,10 @@ comfort.IkeaCartController = frappe.ui.form.Controller.extend({
         );
       });
     }
+  },
 
-    this.render_unavailable_items_buttons();
+  refresh_delivery_options() {
+    this.render_delivery_options_buttons();
 
     if (
       this.frm.doc.delivery_options &&
@@ -121,7 +132,7 @@ comfort.IkeaCartController = frappe.ui.form.Controller.extend({
     }
   },
 
-  render_unavailable_items_buttons() {
+  render_delivery_options_buttons() {
     var fields_dict = cur_frm.fields_dict.delivery_options;
     var el = fields_dict.$wrapper.find(".btn-open-row");
     el.find("a").html(frappe.utils.icon("small-message", "xs"));
@@ -166,56 +177,50 @@ comfort.IkeaCartController = frappe.ui.form.Controller.extend({
   },
 
   before_submit() {
-    function before_submit_events(purchase_id, use_lite_id = false) {
+    function add_purchase_info_and_submit(purchase_id, use_lite_id) {
       return new Promise((resolve) => {
+        function _send(args) {
+          cur_frm.call({
+            doc: cur_frm.doc,
+            method: "add_purchase_info_and_submit",
+            args: args,
+            freeze: 1,
+            callback: () => {
+              cur_frm.reload_doc();
+              resolve();
+            },
+          });
+        }
+
         frappe.call({
-          method:
-            "comfort.transactions.doctype.purchase_order.purchase_order.get_purchase_info",
-          freeze: true,
+          method: "comfort.comfort_core.ikea.get_purchase_info",
           args: {
             purchase_id: purchase_id,
             use_lite_id: use_lite_id,
           },
-          callback: (res) => {
-            if (res.message) {
-              var args = res.message;
-              args.purchase_id = purchase_id;
-
-              if (!res.message.purchase_info_loaded) {
-                frappe.prompt(
-                  {
-                    label:
-                      "Не удалось загрузить информацию о заказе. Введите стоимость доставки",
-                    fieldname: "delivery_cost",
-                    fieldtype: "Currency",
-                    reqd: 1,
-                  },
-                  ({ delivery_cost }) => {
-                    args.delivery_cost = delivery_cost;
-                    cur_frm.call({
-                      method: "add_purchase_info_and_submit",
-                      doc: cur_frm.doc,
-                      args: args,
-                      freeze: 1,
-                      callback: () => {
-                        cur_frm.reload_doc();
-                        resolve();
-                      },
-                    });
-                  }
-                );
-              } else {
-                cur_frm.call({
-                  method: "add_purchase_info_and_submit",
-                  doc: cur_frm.doc,
-                  args: args,
-                  freeze: 1,
-                  callback: () => {
-                    cur_frm.reload_doc();
-                    resolve();
-                  },
-                });
-              }
+          freeze: true,
+          callback: (r) => {
+            var args = {
+              purchase_id: purchase_id,
+              purchase_info: r.message,
+            };
+            if (Object.keys(r.message).length > 0) {
+              _send(args);
+            } else {
+              frappe.prompt(
+                {
+                  label: __(
+                    "Can't load information about this order, enter delivery cost"
+                  ),
+                  fieldname: "delivery_cost",
+                  fieldtype: "Currency",
+                  reqd: 1,
+                },
+                ({ delivery_cost }) => {
+                  args.purchase_info.delivery_cost = delivery_cost;
+                  _send(args);
+                }
+              );
             }
           },
         });
@@ -229,28 +234,30 @@ comfort.IkeaCartController = frappe.ui.form.Controller.extend({
       freeze: true,
       callback: (r) => {
         if (r.message && r.message.length > 0) {
-          var select_data = [];
+          let purchases = [];
           for (var p of r.message) {
             if (p.status == "IN_PROGRESS") {
-              select_data.push([
+              purchases.push([
                 [p.id, p.datetime_formatted, p.cost + " ₽"].join(" | "),
               ]);
             }
           }
+
           var dialog = new frappe.ui.Dialog({
-            title: "Выберите заказ",
+            title: __("Choose order"),
             fields: [
               {
                 fieldname: "select",
                 fieldtype: "Select",
                 in_list_view: 1,
-                options: select_data.join("\n"),
+                options: purchases.join("\n"),
               },
             ],
 
-            primary_action(v) {
-              var purchase_id = /\d+/.exec(v.select)[0];
-              before_submit_events(purchase_id);
+            primary_action({ select }) {
+              let purchase_id = /\d+/.exec(select)[0];
+              add_purchase_info_and_submit(purchase_id, false);
+              dialog.hide();
             },
           });
           dialog.no_cancel();
@@ -258,14 +265,13 @@ comfort.IkeaCartController = frappe.ui.form.Controller.extend({
         } else {
           frappe.prompt(
             {
-              label:
-                "Не удалось получить историю покупок. Введите номер заказа",
+              label: __("Can't receive purchase history, enter order number"),
               fieldname: "purchase_id",
               fieldtype: "Int",
               reqd: 1,
             },
             ({ purchase_id }) => {
-              before_submit_events(purchase_id, true);
+              add_purchase_info_and_submit(purchase_id, true);
             }
           );
         }
