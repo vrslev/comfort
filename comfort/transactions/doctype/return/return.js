@@ -1,3 +1,4 @@
+/* eslint-disable */
 frappe.provide("comfort");
 
 comfort.ReturnController = frappe.ui.form.Controller.extend({

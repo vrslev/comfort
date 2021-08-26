@@ -3,7 +3,9 @@ frappe.provide("comfort");
 comfort.get_items = (item_codes) => {
   // TODO: Fix freeze
   var promise = new Promise((resolve) => {
+    /* eslint-disable */
     let isResolved = false;
+    /* eslint-enable */
     frappe.call({
       method: "comfort.comfort_core.get_items",
       args: { item_codes: item_codes },

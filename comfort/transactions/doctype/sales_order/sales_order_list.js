@@ -1,7 +1,7 @@
 frappe.listview_settings["Sales Order"] = {
   add_fields: ["status"],
-  get_indicator: function (doc) {
-    if (in_list(["Cancelled", "Draft"], doc.status)) {
+  get_indicator: (doc) => {
+    if (["Cancelled", "Draft"].includes(doc.status)) {
       return [__(doc.status), "red"];
     } else if (doc.status == "In Progress") {
       return [__(doc.status), "orange"];
