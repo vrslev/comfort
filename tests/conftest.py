@@ -33,6 +33,7 @@ def db_instance():
     frappe.init(site=TEST_SITE_NAME, sites_path="../../sites")
     frappe.connect()
     frappe.db.commit = MagicMock()
+    frappe.flags.in_test = True
     yield frappe.db
     frappe.destroy()
 
