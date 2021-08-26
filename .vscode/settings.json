@@ -5,7 +5,6 @@
   "python.analysis.indexing": true,
   "python.formatting.provider": "black",
   "python.pythonPath": "../../env/bin/python",
-  "python.linting.flake8Enabled": true,
   "python.linting.banditEnabled": true,
   "python.linting.banditArgs": ["-c", ".bandit.yaml"],
   "python.testing.autoTestDiscoverOnSaveEnabled": false,

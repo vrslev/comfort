@@ -1,0 +1,3 @@
+- [ ] Add fields to index and know what it is (in Customize Field)
+- [ ] Remove currency precision in all doctypes and set global default
+- [ ] Change eslint config
