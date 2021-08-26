@@ -74,7 +74,9 @@ def cancel_gl_entries_for(doctype: str, name: str):
         doc.cancel()
 
 
-def create_payment(doctype: OrderTypes, name: str, amount: int, paid_with_cash: bool):
+def create_payment(
+    doctype: OrderTypes, name: str, amount: int, paid_with_cash: bool
+):  # TODO: For consistency, pass whole doc to capture real state of the doc
     doc: Document = frappe.get_doc(
         {
             "doctype": "Payment",

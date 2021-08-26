@@ -75,7 +75,9 @@ def _child_items_are_same(old_child_items: list[ChildItem], new_child_items: lis
 
 
 def _create_item(parsed_item: ParsedItem):
-    if frappe.db.exists("Item", parsed_item["item_code"]):
+    if frappe.db.exists(
+        "Item", parsed_item["item_code"]
+    ):  # TODO: Update only if doc changed
         doc: Item = frappe.get_doc("Item", parsed_item["item_code"])
         doc.item_name = parsed_item["name"]
         doc.url = parsed_item["url"]
