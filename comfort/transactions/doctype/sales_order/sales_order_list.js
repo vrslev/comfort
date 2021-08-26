@@ -41,16 +41,14 @@ function substitute_status_colours() {
 }
 
 function add_not_in_po_check(list) {
-  function clear_not_in_po_filter(refresh) {
+  function clear_not_in_po_filter() {
     list.filter_area.filter_list.filters
-      .filter((d) => d.fieldname == "name" && d.condition == "not in")
+      .filter((d) => d.fieldname == "name" && d.condition == "in")
       .forEach((d) => d.remove());
-    if (refresh) {
-      list.filter_area.filter_list.apply();
-    }
   }
 
-  clear_not_in_po_filter(true);
+  clear_not_in_po_filter();
+  list.filter_area.filter_list.apply();
 
   var check = list.page.add_field(
     {
