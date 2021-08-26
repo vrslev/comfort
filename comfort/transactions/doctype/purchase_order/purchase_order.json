@@ -7,25 +7,33 @@
   "editable_grid": 1,
   "engine": "InnoDB",
   "field_order": [
+    "delivery_options_section",
     "delivery_options",
     "cannot_add_items",
     "reference_section",
     "posting_date",
-    "order_confirmation_no",
-    "amended_from",
+    "column_break_6",
     "schedule_date",
     "column_break_5",
+    "order_confirmation_no",
     "totals_section",
     "total_amount",
-    "sales_orders_cost",
+    "column_break_11",
     "delivery_cost",
-    "column_break_2",
+    "column_break_13",
     "total_weight",
+    "column_break_2",
+    "sales_orders_cost",
+    "column_break_17",
     "items_to_sell_cost",
     "section_break_6",
+    "sales_orders_section",
     "sales_orders",
+    "items_to_sell_section",
     "items_to_sell",
-    "status"
+    "section_break_25",
+    "status",
+    "amended_from"
   ],
   "fields": [
     {
@@ -91,7 +99,6 @@
       "read_only": 1
     },
     {
-      "depends_on": "eval:doc.docstatus == 1",
       "fieldname": "delivery_cost",
       "fieldtype": "Currency",
       "label": "Delivery Cost",
@@ -139,6 +146,7 @@
       "default": "Draft",
       "fieldname": "status",
       "fieldtype": "Select",
+      "hidden": 1,
       "in_list_view": 1,
       "in_standard_filter": 1,
       "label": "Status",
@@ -154,11 +162,47 @@
       "label": "Sales Orders Cost",
       "precision": "0",
       "read_only": 1
+    },
+    {
+      "fieldname": "column_break_11",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "column_break_13",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "column_break_17",
+      "fieldtype": "Column Break"
+    },
+    {
+      "depends_on": "eval:doc.docstatus == 0",
+      "fieldname": "delivery_options_section",
+      "fieldtype": "Section Break",
+      "label": "Delivery Options"
+    },
+    {
+      "fieldname": "sales_orders_section",
+      "fieldtype": "Section Break",
+      "label": "Sales Orders"
+    },
+    {
+      "fieldname": "items_to_sell_section",
+      "fieldtype": "Section Break",
+      "label": "Items to Sell"
+    },
+    {
+      "fieldname": "column_break_6",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "section_break_25",
+      "fieldtype": "Section Break"
     }
   ],
   "is_submittable": 1,
   "links": [],
-  "modified": "2021-08-26 06:20:19.363502",
+  "modified": "2021-08-26 08:09:14.897126",
   "modified_by": "Administrator",
   "module": "Transactions",
   "name": "Purchase Order",
