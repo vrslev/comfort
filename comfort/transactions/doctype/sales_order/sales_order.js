@@ -18,7 +18,11 @@ comfort.SalesOrderController = frappe.ui.form.Controller.extend({
   },
 
   setup_buttons() {
-    if (!this.frm.is_new() && this.frm.doc.per_paid < 100) {
+    if (
+      this.frm.doc.docstatus != 2 &&
+      !this.frm.is_new() &&
+      this.frm.doc.per_paid < 100
+    ) {
       this.frm.add_custom_button(__("Add Payment"), () => {
         frappe.prompt(
           [
@@ -57,7 +61,10 @@ comfort.SalesOrderController = frappe.ui.form.Controller.extend({
       });
     }
 
-    if (this.frm.doc.delivery_status == "To Deliver") {
+    if (
+      this.frm.docstatus != 2 &&
+      this.frm.doc.delivery_status == "To Deliver"
+    ) {
       this.frm.add_custom_button(__("Add Receipt"), () => {
         frappe.confirm(
           __("Are you sure you want to mark this Sales Order as delivered?"),
