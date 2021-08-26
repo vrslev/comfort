@@ -1,7 +1,7 @@
 comfort.IkeaCartController = frappe.ui.form.Controller.extend({
   setup() {
-    // this.frm.show_submit_message = () => {}; // Hide "Submit this document to confirm" message
-    // this.frm.page.sidebar.hide(); // Hide sidebar
+    this.frm.show_submit_message = () => {}; // Hide "Submit this document to confirm" message
+    this.frm.page.sidebar.hide(); // Hide sidebar
     this.setup_sales_order_query();
   },
 
