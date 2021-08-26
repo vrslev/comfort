@@ -29,39 +29,41 @@ def load_metadata():
     return app_name, app_title, app_description, app_publisher
 
 
-def _format_money(money: str | int):
+def _format_money(money: str | int):  # pragma: no cover
     return f"{int(money)} ₽"
 
 
-def _format_weight(weight: int | float):
+def _format_weight(weight: int | float):  # pragma: no cover
     return f"{float(weight)} кг"
 
 
-def _format_item_query(d: list[Any]):
+def _format_item_query(d: list[Any]):  # pragma: no cover
     if d[2]:
         d[2] = _format_money(d[2])
 
 
-def _format_purchase_order_query(d: list[Any]):
+def _format_purchase_order_query(d: list[Any]):  # pragma: no cover
     if d[2]:
         d[2] = _format_money(d[2])
     if d[3]:
         d[3] = _format_weight(d[3])
 
 
-def _format_sales_order_query(d: list[Any]):
+def _format_sales_order_query(d: list[Any]):  # pragma: no cover
     if d[3]:
         d[3] = _format_money(d[3])
 
 
-_QUERY_FORMATTERS: dict[str, Callable[[list[Any]], Any]] = {
+_QUERY_FORMATTERS: dict[str, Callable[[list[Any]], Any]] = {  # pragma: no cover
     "Item": _format_item_query,
     "Purchase Order": _format_purchase_order_query,
     "Sales Order": _format_sales_order_query,
 }
 
 
-def _get_fields(doctype: str, fields: list[Any] | None = None) -> list[Any]:
+def _get_fields(
+    doctype: str, fields: list[Any] | None = None
+) -> list[Any]:  # pragma: no cover
     # From ERPNext
     if fields is None:
         fields = []
@@ -76,7 +78,7 @@ def _get_fields(doctype: str, fields: list[Any] | None = None) -> list[Any]:
     return unique(fields)
 
 
-@frappe.whitelist()
+@frappe.whitelist()  # pragma: no cover
 @frappe.validate_and_sanitize_search_inputs
 def default_query(
     doctype: str,
@@ -108,7 +110,7 @@ def default_query(
     return query
 
 
-def get_standard_queries(doctypes: Iterable[str]):
+def get_standard_queries(doctypes: Iterable[str]):  # pragma: no cover
     query_name = default_query.__module__ + "." + default_query.__name__
     return {d: query_name for d in doctypes}
 
@@ -122,12 +124,25 @@ def _set_currency_symbol():
     frappe.db.set_default("currency_precision", 0)
 
 
-def after_install():
+def _add_app_name():
+    frappe.db.set_value("System Settings", None, "app_name", "Comfort")
+
+
+def _set_default_date_and_number_format():
+    date_format = "dd.mm.yyyy"
+    frappe.db.set_default("date_format", date_format)
+    frappe.db.set_value("System Settings", None, "date_format", date_format)
+    frappe.db.set_value("System Settings", None, "number_format", "#.###,##")
+
+
+def after_install():  # pragma: no cover
     initialize_accounts()
     _set_currency_symbol()
+    _add_app_name()
+    _set_default_date_and_number_format()
 
 
-def extend_boot_session(bootinfo: Any):
+def extend_boot_session(bootinfo: Any):  # pragma: no cover
     currency_doc: dict[str, Any] = frappe.get_cached_value(
         "Currency",
         bootinfo.sysdefaults.currency,
@@ -145,7 +160,7 @@ def extend_boot_session(bootinfo: Any):
     bootinfo.docs.append(currency_doc)
 
 
-class CustomDocType(DocType):
+class CustomDocType(DocType):  # pragma: no cover
     def make_controller_template(self):
         """Do not madly create dt.js, test_dt.py files"""
         make_boilerplate("controller._py", self)
