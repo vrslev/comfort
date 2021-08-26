@@ -28,13 +28,15 @@
   "index_web_pages_for_search": 1,
   "is_submittable": 1,
   "links": [],
-  "modified": "2021-08-26 06:53:38.831100",
+  "modified": "2021-08-26 08:11:48.848486",
   "modified_by": "Administrator",
   "module": "Stock",
   "name": "Checkout",
   "owner": "Administrator",
   "permissions": [
     {
+      "amend": 1,
+      "cancel": 1,
       "create": 1,
       "delete": 1,
       "email": 1,
@@ -44,6 +46,7 @@
       "report": 1,
       "role": "System Manager",
       "share": 1,
+      "submit": 1,
       "write": 1
     }
   ],
