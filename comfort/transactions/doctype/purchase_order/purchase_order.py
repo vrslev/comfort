@@ -186,7 +186,9 @@ class PurchaseOrderMethods(Document):
 
         return count_quantity(items)
 
+    @frappe.whitelist()
     def get_delivery_services(self):
+        self.delivery_options = []
         templated_items = self._get_templated_items_for_api(split_combinations=True)
         response = get_delivery_services(templated_items)
         if not response:
@@ -205,6 +207,7 @@ class PurchaseOrderMethods(Document):
                     "unavailable_items": json.dumps(option["unavailable_items"]),
                 },
             )
+        self.db_update_all()
 
     def submit_sales_orders_and_update_statuses(self):  # pragma: no cover
         for s in self.sales_orders:
@@ -276,9 +279,8 @@ class PurchaseOrder(PurchaseOrderMethods):
     def before_insert(self):
         self.status = "Draft"
 
-    # def before_save(self):
-    #     if self.docstatus == 0:
-    #         self.get_delivery_services()
+    def before_save(self):
+        self.delivery_options = []
 
     def before_submit(self):
         self.delivery_options = []
@@ -377,7 +379,11 @@ def sales_order_query(
 ) -> dict[str, Any]:
     ignore_orders: list[str] = [
         s.sales_order_name
-        for s in frappe.get_all("Purchase Order Sales Order", "sales_order_name")
+        for s in frappe.get_all(
+            "Purchase Order Sales Order",
+            "sales_order_name",
+            {"parent": ("!=", filters["docname"])},
+        )
     ] + filters["not in"]
 
     ignore_orders_cond = ""

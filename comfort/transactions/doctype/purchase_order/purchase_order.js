@@ -1,14 +1,16 @@
 comfort.IkeaCartController = frappe.ui.form.Controller.extend({
   setup() {
+    // this.frm.show_submit_message = () => {}; // Hide "Submit this document to confirm" message
+    // this.frm.page.sidebar.hide(); // Hide sidebar
     this.setup_sales_order_query();
   },
 
   setup_sales_order_query() {
     this.frm.set_query("sales_order_name", "sales_orders", () => {
-      var cur_sales_orders = [];
-      this.frm.doc.sales_orders.forEach((d) => {
-        if (d.sales_order_name) {
-          cur_sales_orders.push(d.sales_order_name);
+      let cur_sales_orders = [];
+      this.frm.doc.sales_orders.forEach((order) => {
+        if (order.sales_order_name) {
+          cur_sales_orders.push(order.sales_order_name);
         }
       });
       return {
@@ -16,9 +18,11 @@ comfort.IkeaCartController = frappe.ui.form.Controller.extend({
           "comfort.transactions.doctype.purchase_order.purchase_order.sales_order_query",
         filters: {
           "not in": cur_sales_orders,
+          docname: this.frm.doc.name,
         },
       };
     });
+
     this.frm.fields_dict.sales_orders.grid.get_docfield(
       "sales_order_name"
     ).only_select = 1;
@@ -41,8 +45,11 @@ comfort.IkeaCartController = frappe.ui.form.Controller.extend({
   refresh() {
     if (this.frm.doc.docstatus == 0 && !this.frm.doc.__islocal) {
       this.frm.add_custom_button(__("Update Delivery Services"), () => {
-        this.frm.doc.__unsaved = 1;
-        this.frm.save();
+        this.frm.call({
+          doc: this.frm.doc,
+          method: "get_delivery_services",
+          freeze: 1,
+        });
       });
 
       this.frm.add_custom_button(__("Checkout On IKEA Site"), () => {

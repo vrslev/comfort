@@ -367,6 +367,12 @@ def test_autoname_purchase_orders_not_exist_in_this_month(
     assert purchase_order.name == f"{get_this_month_ru_name()}-1"
 
 
+def test_before_save(purchase_order: PurchaseOrder):
+    purchase_order.delivery_options.append("somevalue")
+    purchase_order.before_save()
+    assert len(purchase_order.delivery_options) == 0
+
+
 def test_before_insert(purchase_order: PurchaseOrder):
     purchase_order.status = None
     purchase_order.before_insert()
