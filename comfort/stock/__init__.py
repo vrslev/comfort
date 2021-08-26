@@ -19,8 +19,16 @@ def create_receipt(doctype: OrderTypes, name: str):
     doc.submit()
 
 
+def create_checkout(purchase_order: str):
+    doc: Document = frappe.get_doc(
+        {"doctype": "Checkout", "purchase_order": purchase_order}
+    )
+    doc.insert()
+    doc.submit()
+
+
 def create_stock_entry(
-    doctype: Literal["Sales Order", "Purchase Order", "Receipt"],
+    doctype: Literal["Receipt", "Checkout"],
     name: str,
     stock_type: StockTypes,
     items: list[Any],
@@ -38,9 +46,7 @@ def create_stock_entry(
     doc.submit()
 
 
-def cancel_stock_entries_for(
-    doctype: Literal["Sales Order", "Purchase Order", "Receipt"], name: str
-):
+def cancel_stock_entries_for(doctype: Literal["Checkout", "Receipt"], name: str):
     entries: list[Document] = frappe.get_all(
         "Stock Entry",
         {"voucher_type": doctype, "voucher_no": name, "docstatus": ("!=", 2)},

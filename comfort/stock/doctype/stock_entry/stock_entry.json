@@ -21,7 +21,7 @@
       "fieldtype": "Select",
       "in_list_view": 1,
       "label": "Voucher Type",
-      "options": "\nSales Order\nPurchase Order\nReceipt"
+      "options": "\nReceipt\nCheckout"
     },
     {
       "fieldname": "voucher_no",
@@ -77,7 +77,7 @@
   "index_web_pages_for_search": 1,
   "is_submittable": 1,
   "links": [],
-  "modified": "2021-08-25 08:39:42.099804",
+  "modified": "2021-08-26 06:36:13.867261",
   "modified_by": "Administrator",
   "module": "Stock",
   "name": "Stock Entry",

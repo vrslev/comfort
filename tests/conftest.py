@@ -19,6 +19,7 @@ from comfort.entities.doctype.item_category.item_category import ItemCategory
 from comfort.finance.chart_of_accounts import initialize_accounts
 from comfort.finance.doctype.gl_entry.gl_entry import GLEntry
 from comfort.finance.doctype.payment.payment import Payment
+from comfort.stock.doctype.checkout.checkout import Checkout
 from comfort.stock.doctype.receipt.receipt import Receipt
 from comfort.transactions.doctype.purchase_order.purchase_order import PurchaseOrder
 from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
@@ -587,3 +588,13 @@ def parsed_item() -> ParsedItem:
         "category_name": "Открытые гардеробы",
         "category_url": "https://www.ikea.com/ru/ru/cat/-43634",
     }
+
+
+@pytest.fixture
+def checkout(purchase_order: PurchaseOrder) -> Checkout:
+    purchase_order.db_insert()
+    purchase_order.db_update_all()
+
+    return frappe.get_doc(
+        {"doctype": "Checkout", "purchase_order": purchase_order.name}
+    )

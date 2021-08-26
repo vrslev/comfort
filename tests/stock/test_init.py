@@ -2,9 +2,15 @@ from __future__ import annotations
 
 import frappe
 from comfort import count_quantity
-from comfort.stock import cancel_stock_entries_for, create_receipt, create_stock_entry
+from comfort.stock import (
+    cancel_stock_entries_for,
+    create_checkout,
+    create_receipt,
+    create_stock_entry,
+)
 from comfort.stock.doctype.receipt.receipt import Receipt
 from comfort.stock.doctype.stock_entry.stock_entry import StockEntry
+from comfort.transactions.doctype.purchase_order.purchase_order import PurchaseOrder
 from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
 
 
@@ -20,9 +26,22 @@ def test_create_receipt(sales_order: SalesOrder):
     assert docstatus == 1
 
 
-def test_create_stock_entry(sales_order: SalesOrder):
-    sales_order.db_insert()
-    sales_order.db_update_all()
+def test_create_checkout(purchase_order: PurchaseOrder):
+    purchase_order.db_insert()
+    purchase_order.db_update_all()
+    create_checkout(purchase_order.name)
+    res: tuple[int, str] = frappe.get_value(
+        "Checkout",
+        {"purchase_order": purchase_order.name},
+        ("docstatus", "purchase_order"),
+    )
+    assert res[0] == 1
+    assert res[1] == purchase_order.name
+
+
+def test_create_stock_entry(receipt_sales: Receipt, sales_order: SalesOrder):
+    receipt_sales.db_insert()
+    receipt_sales.create_sales_stock_entries()
 
     stock_type = "Reserved Actual"
     items_obj = sales_order._get_items_with_splitted_combinations()
@@ -30,11 +49,14 @@ def test_create_stock_entry(sales_order: SalesOrder):
         {"item_code": item_code, "qty": qty}
         for item_code, qty in count_quantity(items_obj).items()
     ]
-    create_stock_entry(sales_order.doctype, sales_order.name, stock_type, items)
+    create_stock_entry(receipt_sales.doctype, receipt_sales.name, stock_type, items)
 
     entry_name: str | None = frappe.get_value(
         "Stock Entry",
-        filters={"voucher_type": sales_order.doctype, "voucher_no": sales_order.name},
+        filters={
+            "voucher_type": receipt_sales.doctype,
+            "voucher_no": receipt_sales.name,
+        },
     )
     assert entry_name is not None
 
