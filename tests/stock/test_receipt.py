@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import pytest
+
 import frappe
 from comfort.entities.doctype.item.item import Item
 from comfort.finance import get_account
@@ -222,3 +224,26 @@ def test_create_purchase_stock_entries_for_items_to_sell_not_executed_if_no_item
         {"voucher_type": receipt_purchase.doctype, "voucher_no": receipt_purchase.name},
     )
     assert first_entry_name is None
+
+
+@pytest.mark.parametrize("docstatus", (0, 1))
+def test_set_status_in_sales_order(sales_order: SalesOrder, docstatus: int):
+    sales_order.docstatus = docstatus
+    sales_order.delivery_status = "To Deliver"
+    sales_order.update_items_from_db()
+    sales_order.calculate()
+    sales_order.db_insert()
+    sales_order.db_update_all()
+    sales_order.add_receipt()
+
+    receipt_name: str = frappe.get_value(
+        "Receipt",
+        {"voucher_type": sales_order.doctype, "voucher_no": sales_order.name},
+    )
+    receipt: Receipt = frappe.get_doc("Receipt", receipt_name)
+    receipt.docstatus = 2
+    receipt.db_update()
+    receipt.set_status_in_sales_order()
+
+    sales_order.reload()
+    assert sales_order.delivery_status != "Delivered"

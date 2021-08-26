@@ -52,10 +52,11 @@ class Receipt(Document):
             self.create_purchase_gl_entries()
             self.create_purchase_stock_entries()
 
-    def before_cancel(self):  # pragma: no cover
+    def on_cancel(self):  # pragma: no cover
         # TODO: Need to transfer items to available if Sales Order is cancelled
         cancel_gl_entries_for(self.doctype, self.name)
         cancel_stock_entries_for(self.doctype, self.name)
+        self.set_status_in_sales_order()
 
     # Sales Order
 
@@ -124,3 +125,9 @@ class Receipt(Document):
 
         self._new_stock_entry("Available Purchased", reverse_items)
         self._new_stock_entry("Available Actual", items)
+
+    def set_status_in_sales_order(self):
+        if self.voucher_type == "Sales Order":
+            doc: SalesOrder = frappe.get_doc(self.voucher_type, self.voucher_no)
+            doc.set_statuses()
+            doc.db_update()
