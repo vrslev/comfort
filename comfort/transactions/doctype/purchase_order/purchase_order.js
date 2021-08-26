@@ -2,6 +2,7 @@ comfort.IkeaCartController = frappe.ui.form.Controller.extend({
   setup() {
     this.frm.show_submit_message = () => {}; // Hide "Submit this document to confirm" message
     this.frm.page.sidebar.hide(); // Hide sidebar
+
     this.setup_sales_order_query();
   },
 
@@ -34,15 +35,19 @@ comfort.IkeaCartController = frappe.ui.form.Controller.extend({
   },
 
   setup_quick_add_items() {
-    this.frm.fields_dict.items_to_sell.grid.wrapper.on("paste", (e) => {
-      e.preventDefault();
-      let clipboard_data =
-        e.clipboardData ||
-        window.clipboardData ||
-        e.originalEvent.clipboardData;
-      let pasted_data = clipboard_data.getData("Text");
-      this.quick_add_items(pasted_data);
-    });
+    this.frm.fields_dict.items_to_sell.$wrapper
+      .unbind("paste")
+      .on("paste", (e) => {
+        e.preventDefault();
+        let clipboard_data =
+          e.clipboardData ||
+          window.clipboardData ||
+          e.originalEvent.clipboardData;
+        let pasted_data = clipboard_data.getData("Text");
+        if (!pasted_data) return;
+
+        quick_add_items(pasted_data);
+      });
   },
 
   refresh() {
@@ -116,7 +121,7 @@ comfort.IkeaCartController = frappe.ui.form.Controller.extend({
   },
 
   refresh_delivery_options() {
-    this.render_delivery_options_buttons();
+    this._render_delivery_options_buttons();
 
     if (
       this.frm.doc.delivery_options &&
@@ -127,43 +132,41 @@ comfort.IkeaCartController = frappe.ui.form.Controller.extend({
         .hide();
 
       if (this.frm.doc.cannot_add_items) {
-        this.render_cannot_add_items_button();
+        this._render_cannot_add_items_button();
       }
     }
   },
 
-  render_delivery_options_buttons() {
+  _render_delivery_options_buttons() {
     var fields_dict = cur_frm.fields_dict.delivery_options;
-    var el = fields_dict.$wrapper.find(".btn-open-row");
+    let el = fields_dict.$wrapper.find(".btn-open-row");
     el.find("a").html(frappe.utils.icon("small-message", "xs"));
     el.find(".edit-grid-row").text(__("Open"));
     $.each(fields_dict.grid.grid_rows, (i) => {
-      var row = fields_dict.grid.grid_rows[i];
+      let row = fields_dict.grid.grid_rows[i];
       row.show_form = () => {
         show_unavailable_items_dialog(row);
       };
     });
   },
 
-  render_cannot_add_items_button() {
+  _render_cannot_add_items_button() {
     var grid = this.frm.fields_dict.delivery_options.grid;
-
     var cannot_add_items = JSON.parse(this.frm.doc.cannot_add_items);
-    if (cannot_add_items.length > 0) {
+    if (cannot_add_items && cannot_add_items.length > 0) {
       grid.add_custom_button(__("Items cannot be added"), () => {
         if (this.frm.doc.cannot_add_items) {
           var fake_grid_row = {
             doc: {
-              unavailable_items_json: JSON.stringify(
+              type: __("Items cannot be added"),
+              unavailable_items: JSON.stringify(
                 cannot_add_items.map((d) => {
                   return {
                     item_code: d,
-                    required_qty: 1000,
                     available_qty: 0,
                   };
                 })
               ),
-              type: __("Items cannot be added"),
             },
           };
           show_unavailable_items_dialog(fake_grid_row);
@@ -235,13 +238,13 @@ comfort.IkeaCartController = frappe.ui.form.Controller.extend({
       callback: (r) => {
         if (r.message && r.message.length > 0) {
           let purchases = [];
-          for (var p of r.message) {
+          r.message.forEach((p) => {
             if (p.status == "IN_PROGRESS") {
               purchases.push([
                 [p.id, p.datetime_formatted, p.cost + " ₽"].join(" | "),
               ]);
             }
-          }
+          });
 
           var dialog = new frappe.ui.Dialog({
             title: __("Choose order"),
@@ -279,129 +282,83 @@ comfort.IkeaCartController = frappe.ui.form.Controller.extend({
     });
   },
 
-  quick_add_items(text) {
-    comfort.quick_add_items(text, fetch_callback, "items_to_sell");
-    for (var i of this.frm.doc.items_to_sell) {
-      if (
-        !i.item_name ||
-        i.item_name == "" ||
-        !i.item_code ||
-        i.item_code == ""
-      ) {
-        this.frm.doc.items_to_sell.pop(i);
-      }
-    }
+  delivery_cost() {
+    calculate_total_amount();
+  },
 
-    function fetch_callback(item_code) {
-      frappe.db.get_value(
-        "Item",
-        item_code,
-        ["standard_rate", "item_name", "weight_per_unit"],
-        (r) => {
-          var child = cur_frm.add_child("items_to_sell");
-          frappe.model.set_value(
-            child.doctype,
-            child.name,
-            "item_code",
-            item_code
-          );
-          frappe.model.set_value(
-            child.doctype,
-            child.name,
-            "rate",
-            r.standard_rate
-          );
-          frappe.model.set_value(
-            child.doctype,
-            child.name,
-            "item_name",
-            r.item_name
-          );
-          frappe.model.set_value(
-            child.doctype,
-            child.name,
-            "weight",
-            r.weight_per_unit
-          );
-        }
-      );
-    }
+  sales_orders_cost() {
+    calculate_total_amount();
+  },
+
+  items_to_sell_cost() {
+    calculate_total_amount();
   },
 });
 
-frappe.ui.form.on("Purchase Order Sales Order", {
-  sales_order_name(frm, cdt, cdn) {
-    let doc = frappe.get_doc(cdt, cdn);
-    if (doc.sales_order_name) {
-      frappe.db.get_value(
-        "Sales Order",
-        doc.sales_order_name,
-        ["customer", "total_amount"],
-        (r) => {
-          frappe.model.set_value(cdt, cdn, "customer", r.customer);
-          frappe.model.set_value(cdt, cdn, "total", r.total_amount);
-        }
-      );
+function quick_add_items(text) {
+  comfort.get_items(text).then((values) => {
+    values.forEach((v) => {
+      let doc = cur_frm.add_child("items_to_sell", {
+        item_code: v.item_code,
+        item_name: v.item_name,
+        qty: 1,
+        rate: v.rate,
+        weight: v.weight,
+      });
+      calculate_item_amount(doc.doctype, doc.name);
+    });
+  });
+
+  let grid = cur_frm.fields_dict.items_to_sell.grid;
+
+  // loose focus from current row
+  grid.add_new_row(null, null, true);
+  grid.grid_rows[grid.grid_rows.length - 1].toggle_editable_row();
+
+  for (let i = grid.grid_rows.length; i--; ) {
+    let doc = grid.grid_rows[i].doc;
+    if (!(doc.item_name && doc.item_code)) {
+      grid.grid_rows[i].remove();
     }
-  },
-});
-
-frappe.ui.form.on("Purchase Order Item To Sell", {
-  qty(frm, cdt, cdn) {
-    calculate_amount(frm, cdt, cdn);
-  },
-  rate(frm, cdt, cdn) {
-    calculate_amount(frm, cdt, cdn);
-  },
-  item_code(frm, cdt, cdn) {
-    calculate_amount(frm, cdt, cdn);
-  },
-});
-
-function calculate_amount(frm, cdt, cdn) {
-  var doc = frappe.get_doc(cdt, cdn);
-  if (doc.rate) {
-    if (!doc.qty) doc.qty = 1;
-    doc.amount = doc.rate * doc.qty;
-    frm.refresh_fields();
   }
+
+  refresh_field("items_to_sell");
 }
 
 function create_unavailable_items_table(response) {
-  var orders_to_customers = {};
-  for (var order of cur_frm.doc.sales_orders) {
-    orders_to_customers[order.sales_order_name] = order.customer;
-  }
+  let orders_to_customers = {};
+  cur_frm.doc.sales_orders.forEach((o) => {
+    orders_to_customers[o.sales_order_name] = o.customer;
+  });
 
-  var data = [];
-  for (var item of response) {
-    data.push({
+  let data = response.map((item) => {
+    return {
       item_code: item.item_code,
       item_name: item.item_name,
       parent: item.parent,
       customer: orders_to_customers[item.parent],
       required_qty: item.required_qty,
       available_qty: item.available_qty,
-    });
-  }
+    };
+  });
 
-  var fields = [
+  let fields = [
     {
       fieldname: "item_code",
       fieldtype: "Link",
       options: "Item",
+      label: __("Item Code"),
       in_list_view: 1,
-      label: "Артикул",
-      columns: 4,
       read_only: 1,
+      columns: 4,
     },
     {
       fieldname: "parent",
       fieldtype: "Link",
-      label: "Parent",
+      label: __("Parent"),
       in_list_view: 1,
-      options: "Parent",
       read_only: 1,
+      options: "Parent",
       formatter: (value, df, options, doc) => {
         if (value && doc.customer) {
           return `<a href="/app/sales-order/${value}" data-doctype="Sales Order" data-name="${value}">
@@ -416,7 +373,7 @@ function create_unavailable_items_table(response) {
     {
       fieldname: "required_qty",
       fieldtype: "Int",
-      label: "Required",
+      label: __("Required"),
       in_list_view: 1,
       read_only: 1,
       columns: 1,
@@ -424,7 +381,7 @@ function create_unavailable_items_table(response) {
     {
       fieldname: "available_qty",
       fieldtype: "Int",
-      label: "Available",
+      label: __("Available"),
       in_list_view: 1,
       read_only: 1,
       columns: 1,
@@ -434,9 +391,9 @@ function create_unavailable_items_table(response) {
   return {
     fieldname: "unavailable_items",
     fieldtype: "Table",
+    label: __("Unavailable Items"),
     cannot_add_rows: true,
     in_place_edit: true,
-    label: __("Unavailable Items"),
     data: data,
     fields: fields,
   };
@@ -450,48 +407,111 @@ function show_unavailable_items_dialog(grid_row) {
       unavailable_items: grid_row.doc.unavailable_items,
     },
     callback: (r) => {
-      if (!Array.isArray(r.message)) {
-        r.message = [r.message];
-      }
       if (r.message && r.message.length > 0) {
-        var title = grid_row.doc.type;
-        if (grid_row.doc.service_provider) {
+        let title = grid_row.doc.type;
+        if (grid_row.doc.service_provider)
           title += ", " + grid_row.doc.service_provider;
-        }
+
         var dialog = new frappe.ui.Dialog({
           title: title,
           size: "extra-large",
-          fields: [create_unavailable_items_table(r.message)],
           indicator: "red",
+          fields: [create_unavailable_items_table(r.message)],
         });
         let grid = dialog.fields_dict.unavailable_items.grid;
         grid.wrapper.find(".col").unbind("click");
         grid.toggle_checkboxes(false);
         dialog.show();
       } else {
-        frappe.show_alert({
-          message: "При этом способе доставки все товары есть в наличии",
-          indicator: "green",
-        });
+        frappe.show_alert(
+          {
+            message: __("All items are available for this delivery option"),
+            indicator: "green",
+          },
+          1 // seconds
+        );
       }
     },
   });
 }
 
-function show_items_cannot_be_added_dialog() {
-  // TODO: Items cannot be added dialog
-  var cannot_add_items = JSON.parse(cur_frm.doc.cannot_add_items);
-  cannot_add_items = cannot_add_items.map((d) => {
-    return {
-      item_code: d,
-      required_qty: 1000,
-      available_qty: 0,
-    };
-  });
-  var grid_row = {};
-  grid_row.doc = {};
-  grid_row.doc.unavailable_items_json = JSON.stringify(cannot_add_items);
-  grid_row.doc.type = __("Items cannot be added");
-  show_unavailable_items_dialog(grid_row);
+function calculate_total_amount() {
+  cur_frm.set_value(
+    "total_amount",
+    (cur_frm.doc.delivery_cost || 0) +
+      (cur_frm.doc.items_to_sell_cost || 0) +
+      (cur_frm.doc.sales_orders_cost || 0)
+  );
 }
+
+frappe.ui.form.on("Purchase Order Sales Order", {
+  total_amount() {
+    calculate_sales_orders_cost();
+  },
+
+  sales_orders_remove() {
+    calculate_total_weight().then(() => {
+      calculate_sales_orders_cost();
+    });
+  },
+});
+
+function calculate_sales_orders_cost() {
+  let sales_orders_cost = 0;
+  cur_frm.doc.sales_orders.forEach((o) => {
+    sales_orders_cost += o.total_amount;
+  });
+  cur_frm.set_value("sales_orders_cost", sales_orders_cost);
+}
+
+function calculate_total_weight() {
+  return cur_frm.call({ doc: cur_frm.doc, method: "_calculate_total_weight" });
+}
+
+frappe.ui.form.on("Purchase Order Item To Sell", {
+  item_code(frm, cdt, cdn) {
+    calculate_item_amount(cdt, cdn);
+  },
+
+  qty(frm, cdt, cdn) {
+    calculate_total_weight().then(() => {
+      calculate_item_amount(cdt, cdn);
+    });
+  },
+
+  rate(frm, cdt, cdn) {
+    calculate_item_amount(cdt, cdn);
+  },
+
+  amount() {
+    calculate_items_to_sell_cost();
+  },
+
+  weight() {
+    calculate_total_weight();
+  },
+
+  items_to_sell_remove() {
+    calculate_total_weight().then(() => {
+      calculate_items_to_sell_cost();
+    });
+  },
+});
+
+function calculate_item_amount(cdt, cdn) {
+  let doc = frappe.get_doc(cdt, cdn);
+  if (doc.rate) {
+    if (!doc.qty) frappe.model.set_value(cdt, cdn, "qty", 1);
+    frappe.model.set_value(cdt, cdn, "amount", (doc.qty || 1) * doc.rate);
+  }
+}
+
+function calculate_items_to_sell_cost() {
+  let items_to_sell = 0;
+  cur_frm.doc.items_to_sell.forEach((item) => {
+    items_to_sell += item.amount;
+  });
+  cur_frm.set_value("items_to_sell_cost", items_to_sell);
+}
+
 $.extend(cur_frm.cscript, new comfort.IkeaCartController({ frm: cur_frm }));

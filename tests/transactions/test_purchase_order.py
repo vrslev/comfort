@@ -31,12 +31,12 @@ def test_validate_not_empty(purchase_order: PurchaseOrder):
         purchase_order.validate_not_empty()
 
 
-def test_delete_sales_order_dublicates(purchase_order: PurchaseOrder):
+def test_delete_sales_order_duplicates(purchase_order: PurchaseOrder):
     purchase_order.sales_orders = [
         purchase_order.sales_orders[0],
         purchase_order.sales_orders[0],
     ]
-    purchase_order.delete_sales_order_dublicates()
+    purchase_order.delete_sales_order_duplicates()
 
     for orders in group_by_key(
         purchase_order.sales_orders, key="sales_order_name"
@@ -410,6 +410,7 @@ def test_get_unavailable_items_in_cart_by_orders(
     res = purchase_order.get_unavailable_items_in_cart_by_orders(
         unavailable_items,
     )
+    assert res
 
     acceptable_parents = [s.sales_order_name for s in purchase_order.sales_orders]
     acceptable_parents.append(purchase_order.name)

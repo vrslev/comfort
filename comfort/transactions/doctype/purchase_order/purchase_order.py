@@ -57,7 +57,7 @@ class PurchaseOrderMethods(Document):
         if not (self.sales_orders or self.items_to_sell):
             raise ValidationError(_("Add Sales Orders or Items to Sell"))
 
-    def delete_sales_order_dublicates(self):
+    def delete_sales_order_duplicates(self):
         sales_orders_grouped_by_name: ValuesView[
             list[PurchaseOrderSalesOrder]
         ] = group_by_key(self.sales_orders, "sales_order_name").values()
@@ -69,10 +69,10 @@ class PurchaseOrderMethods(Document):
 
     def update_sales_orders_from_db(self):
         for order in self.sales_orders:
-            customer_and_total: tuple[str, int] = frappe.get_value(
+            customer_and_total_amount: tuple[str, int] = frappe.get_value(
                 "Sales Order", order.sales_order_name, ("customer", "total_amount")
             )
-            order.customer, order.total = customer_and_total
+            order.customer, order.total_amount = customer_and_total_amount
 
     def update_items_to_sell_from_db(self):
         for item in self.items_to_sell:
@@ -96,6 +96,7 @@ class PurchaseOrderMethods(Document):
         )
         self.sales_orders_cost = res[0][0] or 0
 
+    @frappe.whitelist()
     def _calculate_total_weight(self):
         res: list[float] = frappe.get_all(
             "Sales Order Item",
@@ -268,7 +269,7 @@ class PurchaseOrder(PurchaseOrderMethods):
 
     def validate(self):  # pragma: no cover
         self.validate_not_empty()
-        self.delete_sales_order_dublicates()
+        self.delete_sales_order_duplicates()
         self.update_sales_orders_from_db()
         self.update_items_to_sell_from_db()
         self.calculate()
@@ -320,7 +321,7 @@ class PurchaseOrder(PurchaseOrderMethods):
         self.db_update()
 
     @frappe.whitelist()
-    def get_unavailable_items_in_cart_by_orders(
+    def get_unavailable_items_in_cart_by_orders(  # TODO: It renders with duplicates
         self, unavailable_items: list[dict[str, str | int]]
     ):
         all_items: list[
@@ -349,14 +350,14 @@ class PurchaseOrder(PurchaseOrderMethods):
                     )
                 res.append(
                     {
-                        "item_code": item.item_code,
-                        "item_name": item.item_name,
+                        "item_code": item.item_code if idx == 0 else None,
+                        "item_name": item.item_name if idx == 0 else None,
                         "required_qty": item.qty,
                         "available_qty": counter[item.item_code] if idx == 0 else None,
                         "parent": item.parent,
                     }
                 )
-        return res
+        return res or None
 
 
 @frappe.whitelist()

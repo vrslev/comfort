@@ -4,7 +4,7 @@
   "doctype": "DocType",
   "editable_grid": 1,
   "engine": "InnoDB",
-  "field_order": ["sales_order_name", "customer", "total"],
+  "field_order": ["sales_order_name", "customer", "total_amount"],
   "fields": [
     {
       "fieldname": "sales_order_name",
@@ -25,10 +25,11 @@
     },
     {
       "depends_on": "eval:doc.docstatus == 0",
-      "fieldname": "total",
+      "fetch_from": "sales_order_name.total_amount",
+      "fieldname": "total_amount",
       "fieldtype": "Currency",
       "in_list_view": 1,
-      "label": "Total",
+      "label": "Total Amount",
       "precision": "0",
       "read_only": 1
     }
@@ -36,7 +37,7 @@
   "index_web_pages_for_search": 1,
   "istable": 1,
   "links": [],
-  "modified": "2021-08-19 01:00:56.673220",
+  "modified": "2021-08-26 11:59:38.841276",
   "modified_by": "Administrator",
   "module": "Transactions",
   "name": "Purchase Order Sales Order",
