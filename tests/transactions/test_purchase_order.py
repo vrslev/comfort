@@ -9,7 +9,6 @@ import pytest
 import frappe
 from comfort import count_quantity, group_by_key
 from comfort.entities.doctype.child_item.child_item import ChildItem
-from comfort.stock.doctype.stock_entry.stock_entry import StockEntry
 from comfort.transactions.doctype.purchase_order.purchase_order import PurchaseOrder
 from comfort.transactions.doctype.sales_order_child_item.sales_order_child_item import (
     SalesOrderChildItem,
@@ -282,33 +281,6 @@ def test_get_delivery_services_no_response(
     purchase_order.get_delivery_services()
     assert not purchase_order.cannot_add_items
     assert not purchase_order.delivery_options
-
-
-def test_create_stock_entries_for_purchased(purchase_order: PurchaseOrder):
-    purchase_order.db_insert()
-    purchase_order.db_update_all()
-    purchase_order.create_stock_entries_for_purchased()
-
-    entry_names: list[StockEntry] = frappe.get_all(
-        "Stock Entry",
-        filters={
-            "voucher_type": purchase_order.doctype,
-            "voucher_no": purchase_order.name,
-        },
-    )
-
-    for name in entry_names:
-        doc: StockEntry = frappe.get_doc("Stock Entry", name)
-        assert doc.stock_type in ("Reserved Purchased", "Available Purchased")
-        if doc.stock_type == "Reserved Purchased":
-            exp_items = count_quantity(purchase_order._get_items_in_sales_orders(True))
-            for i in count_quantity(doc.items):
-                assert i in exp_items
-
-        elif doc.stock_type == "Available Purchased":
-            exp_items = count_quantity(purchase_order._get_items_to_sell(True))
-            for i in count_quantity(doc.items):
-                assert i in exp_items
 
 
 def test_create_payment(purchase_order: PurchaseOrder):

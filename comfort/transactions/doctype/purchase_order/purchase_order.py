@@ -12,7 +12,7 @@ from comfort import ValidationError, count_quantity, group_by_key, maybe_json
 from comfort.comfort_core.ikea import add_items_to_cart, get_delivery_services
 from comfort.entities.doctype.child_item.child_item import ChildItem
 from comfort.finance import create_payment
-from comfort.stock import create_receipt, create_stock_entry
+from comfort.stock import create_checkout, create_receipt
 from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
 from comfort.transactions.doctype.sales_order_child_item.sales_order_child_item import (
     SalesOrderChildItem,
@@ -213,24 +213,14 @@ class PurchaseOrderMethods(Document):
         for s in self.sales_orders:
             doc: SalesOrder = frappe.get_doc("Sales Order", s.sales_order_name)
             doc.set_statuses()
+            doc.flags.ignore_validate_update_after_submit = True
             doc.submit()
-
-    def create_stock_entries_for_purchased(self):
-        create_stock_entry(
-            self.doctype,
-            self.name,
-            "Reserved Purchased",
-            self._get_items_in_sales_orders(True),
-        )
-        create_stock_entry(
-            self.doctype,
-            self.name,
-            "Available Purchased",
-            self._get_items_to_sell(True),
-        )
 
     def create_payment(self):
         create_payment(self.doctype, self.name, self.total_amount, paid_with_cash=True)
+
+    def create_checkout(self):  # pragma: no cover
+        create_checkout(self.name)
 
 
 class PurchaseOrder(PurchaseOrderMethods):
@@ -289,7 +279,7 @@ class PurchaseOrder(PurchaseOrderMethods):
 
     def on_submit(self):  # pragma: no cover
         self.create_payment()
-        self.create_stock_entries_for_purchased()
+        self.create_checkout()
         self.submit_sales_orders_and_update_statuses()
 
     def on_cancel(self):  # pragma: no cover

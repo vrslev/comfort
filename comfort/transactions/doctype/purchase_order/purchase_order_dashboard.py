@@ -1,8 +1,8 @@
 def get_data():
     return {
         "fieldname": "voucher_no",
-        "non_standard_fieldnames": {"Purchase Order": "sales_order_name"},
+        "non_standard_fieldnames": {"Checkout": "purchase_order"},
         "transactions": [
-            {"items": ["Payment", "Receipt"]},
+            {"items": ["Payment", "Checkout", "Receipt"]},
         ],
     }
