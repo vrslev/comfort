@@ -262,6 +262,14 @@ def test_get_templated_items_for_api(
 
 
 @pytest.mark.usefixtures("ikea_settings")
+def test_clear_delivery_services(purchase_order: PurchaseOrder):
+    purchase_order.get_delivery_services()
+    purchase_order._clear_delivery_options()
+    assert len(purchase_order.delivery_options) == 0
+    assert not frappe.get_all("Purchase Order Delivery Option", limit_page_length=1)
+
+
+@pytest.mark.usefixtures("ikea_settings")
 def test_get_delivery_services(purchase_order: PurchaseOrder):
     purchase_order.get_delivery_services()
     assert purchase_order.cannot_add_items == json.dumps(

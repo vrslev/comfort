@@ -186,9 +186,15 @@ class PurchaseOrderMethods(Document):
 
         return count_quantity(items)
 
+    def _clear_delivery_options(self):
+        for option in self.delivery_options:
+            frappe.delete_doc(option.doctype, option.name)
+        self.delivery_options = []
+
     @frappe.whitelist()
     def get_delivery_services(self):
-        self.delivery_options = []
+        self._clear_delivery_options()
+
         templated_items = self._get_templated_items_for_api(split_combinations=True)
         response = get_delivery_services(templated_items)
         if not response:
