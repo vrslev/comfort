@@ -1,23 +1,16 @@
 {
-  "python.autoComplete.extraPaths": ["../frappe/frappe"],
-  "python.analysis.diagnosticMode": "workspace",
+  "git.autoRepositoryDetection": false,
+  "javascript.validate.enable": false,
   "python.analysis.extraPaths": ["../frappe"],
-  "python.analysis.indexing": true,
   "python.formatting.provider": "black",
   "python.pythonPath": "../../env/bin/python",
   "python.linting.banditEnabled": true,
   "python.linting.banditArgs": ["-c", ".bandit.yaml"],
+  "python.sortImports.args": ["--profile=black"],
   "python.testing.autoTestDiscoverOnSaveEnabled": false,
+  "python.testing.pytestEnabled": false,
   "python.testing.pytestPath": "../../env/bin/pytest",
-  "python.testing.pytestArgs": [],
-  "python.testing.unittestEnabled": false,
-  "python.testing.nosetestsEnabled": false,
   "pytest.command": "../../env/bin/pytest",
-  "eslint.options": {
-    "configFile": ".eslintrc.yaml",
-    "ignorePath": ".eslintignore"
-  },
-  "git.ignoredRepositories": ["../frappe", "~"],
   "sqltools.connections": [
     {
       "mysqlOptions": {
