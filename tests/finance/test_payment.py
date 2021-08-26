@@ -174,3 +174,25 @@ def test_create_purchase_gl_entries(
     assert bank == -(exp_prepaid_inventory + exp_purchase_delivery)
     assert prepaid_inventory == exp_prepaid_inventory
     assert purchase_delivery == purchase_delivery
+
+
+@pytest.mark.parametrize("docstatus", (0, 1))
+def test_set_status_in_sales_order(sales_order: SalesOrder, docstatus: int):
+    sales_order.docstatus = docstatus
+    sales_order.update_items_from_db()
+    sales_order.calculate()
+    sales_order.db_insert()
+    sales_order.db_update_all()
+    sales_order.add_payment(300, cash=True)
+
+    payment_name: str = frappe.get_value(
+        "Payment",
+        {"voucher_type": sales_order.doctype, "voucher_no": sales_order.name},
+    )
+    payment: Payment = frappe.get_doc("Payment", payment_name)
+    payment.cancel_gl_entries()
+    payment.set_status_in_sales_order()
+
+    sales_order.reload()
+    assert sales_order.paid_amount == 0
+    assert sales_order.payment_status == "Unpaid"

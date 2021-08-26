@@ -115,5 +115,12 @@ class Payment(Document):
     def cancel_gl_entries(self):  # pragma: no cover
         cancel_gl_entries_for(self.doctype, self.name)
 
-    def before_cancel(self):  # pragma: no cover
+    def set_status_in_sales_order(self):
+        if self.voucher_type == "Sales Order":
+            doc: SalesOrder = frappe.get_doc(self.voucher_type, self.voucher_no)
+            doc.set_statuses()
+            doc.db_update()
+
+    def on_cancel(self):  # pragma: no cover
         self.cancel_gl_entries()
+        self.set_status_in_sales_order()
