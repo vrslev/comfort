@@ -2,6 +2,7 @@ comfort.SalesOrderController = frappe.ui.form.Controller.extend({
   setup() {
     this.frm.show_submit_message = () => {}; // Hide "Submit this document to confirm" message
     this.frm.page.sidebar.hide(); // Hide sidebar
+    this.frm.page.btn_primary.remove();
   },
 
   refresh() {
