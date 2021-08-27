@@ -19,7 +19,7 @@ from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
 @pytest.mark.usefixtures("accounts")
 def test_get_account():
     for field_name, account in DEFAULT_ACCOUNT_SETTINGS.items():
-        shorten_field_name = re.findall(r"default_(.*)_account", field_name)[0]
+        shorten_field_name = re.findall(r"(.*)_account", field_name)[0]
         assert get_account(shorten_field_name) == account
 
 
@@ -28,7 +28,7 @@ def test_get_account_raises_on_wrong_name():
     account_name = "toys"
     with pytest.raises(
         frappe.ValidationError,
-        match=f'Account Settings has no field "default_{account_name}_account"',
+        match=f'Account Settings has no field "{account_name}_account"',
     ):
         get_account(account_name)
 

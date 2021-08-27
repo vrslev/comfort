@@ -9,8 +9,8 @@ from frappe.model.document import Document
 
 
 def get_account(field_name: str) -> str:
-    settings_docname = "Accounts Settings"
-    actual_field_name = f"default_{field_name}_account"
+    settings_docname = "Finance Settings"
+    actual_field_name = f"{field_name}_account"
     account: str | None = frappe.get_cached_value(
         settings_docname, settings_docname, actual_field_name
     )

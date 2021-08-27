@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 import frappe
-from comfort.finance.doctype.accounts_settings.accounts_settings import AccountsSettings
+from comfort.finance.doctype.finance_settings.finance_settings import FinanceSettings
 from frappe import _
 from frappe.utils.nestedset import rebuild_tree
 
@@ -24,21 +24,20 @@ ACCOUNTS: dict[str, dict[str, Any]] = {
         "Sales": {},
         "Service": {"Delivery": {}, "Installation": {}},
     },
-    "Liabilities": {},
 }
 
 DEFAULT_ACCOUNT_SETTINGS = {
-    "default_bank_account": "Bank",
-    "default_cash_account": "Cash",
-    "default_prepaid_inventory_account": "Prepaid Inventory",
-    "default_inventory_account": "Inventory",
-    "default_cost_of_goods_sold_account": "Cost of Goods Sold",
-    "default_purchase_delivery_account": "Purchase Delivery",
-    "default_sales_account": "Sales",
-    "default_delivery_account": "Delivery",
-    "default_installation_account": "Installation",
-    "default_sales_compensations_account": "Sales Compensations",
-    "default_purchase_compensations_account": "Purchase Compensations",
+    "bank_account": "Bank",
+    "cash_account": "Cash",
+    "prepaid_inventory_account": "Prepaid Inventory",
+    "inventory_account": "Inventory",
+    "cost_of_goods_sold_account": "Cost of Goods Sold",
+    "purchase_delivery_account": "Purchase Delivery",
+    "sales_account": "Sales",
+    "delivery_account": "Delivery",
+    "installation_account": "Installation",
+    "sales_compensations_account": "Sales Compensations",
+    "purchase_compensations_account": "Purchase Compensations",
 }
 
 
@@ -60,7 +59,7 @@ def _create_accounts_from_schema():  # TODO: All account are groups
 
 
 def _set_default_accounts():
-    doc: AccountsSettings = frappe.get_single("Accounts Settings")
+    doc: FinanceSettings = frappe.get_single("Finance Settings")
     doc.update(DEFAULT_ACCOUNT_SETTINGS)
     doc.save()
 
