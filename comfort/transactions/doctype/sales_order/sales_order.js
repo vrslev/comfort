@@ -1,11 +1,25 @@
 comfort.SalesOrderController = frappe.ui.form.Controller.extend({
   setup() {
-    this.frm.show_submit_message = () => {}; // Hide "Submit this document to confirm" message
-    this.frm.page.sidebar.hide(); // Hide sidebar
-    this.frm.page.btn_primary.remove();
+    this.frm.show_submit_message = () => {};
+    this.frm.page.sidebar.hide();
+    this.patch_toolbar_set_page_actions();
+  },
+
+  patch_toolbar_set_page_actions() {
+    // This hides "Submit" button
+    let old_func = cur_frm.toolbar.set_page_actions;
+    cur_frm.toolbar.set_page_actions = (status) => {
+      old_func.call(cur_frm.toolbar, status);
+      if (cur_frm.toolbar.current_status == "Submit") {
+        cur_frm.toolbar.page.clear_primary_action();
+      }
+    };
   },
 
   refresh() {
+    // if (cur_frm.toolbar.current_status == "Submit") {
+    //   cur_frm.toolbar.page.clear_primary_action();
+    // }
     this.setup_buttons();
     this.frm.custom_make_buttons = {
       Payment: "Payment",
