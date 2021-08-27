@@ -67,6 +67,7 @@
       "read_only": 1
     },
     {
+      "allow_on_submit": 1,
       "fieldname": "services",
       "fieldtype": "Table",
       "label": "Services",
@@ -94,6 +95,7 @@
       "precision": "0"
     },
     {
+      "allow_on_submit": 1,
       "fieldname": "total_amount",
       "fieldtype": "Currency",
       "in_preview": 1,
@@ -118,6 +120,7 @@
       "fieldtype": "Column Break"
     },
     {
+      "allow_on_submit": 1,
       "fieldname": "pending_amount",
       "fieldtype": "Currency",
       "label": "Pending Amount",
@@ -144,6 +147,7 @@
       "read_only": 1
     },
     {
+      "allow_on_submit": 1,
       "fieldname": "service_amount",
       "fieldtype": "Currency",
       "label": "Service Amount",
@@ -209,6 +213,7 @@
       "search_index": 1
     },
     {
+      "allow_on_submit": 1,
       "fieldname": "per_paid",
       "fieldtype": "Percent",
       "label": "% Paid",
@@ -255,7 +260,7 @@
   "index_web_pages_for_search": 1,
   "is_submittable": 1,
   "links": [],
-  "modified": "2021-08-25 08:40:47.136112",
+  "modified": "2021-08-27 04:11:50.479990",
   "modified_by": "Administrator",
   "module": "Transactions",
   "name": "Sales Order",
