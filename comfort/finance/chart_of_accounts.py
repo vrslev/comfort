@@ -41,7 +41,7 @@ DEFAULT_ACCOUNT_SETTINGS = {
 }
 
 
-def _create_accounts_from_schema():  # TODO: All account are groups
+def _create_accounts_from_schema():
     def execute(parent: str | None, children: dict[str, Any]):
         for child, children_of_child in children.items():
             frappe.get_doc(
@@ -49,7 +49,7 @@ def _create_accounts_from_schema():  # TODO: All account are groups
                     "doctype": "Account",
                     "account_name": _(child),
                     "parent_account": _(parent),
-                    "is_group": 1,
+                    "is_group": bool(children_of_child),
                 }
             ).insert()
             execute(child, children_of_child)
