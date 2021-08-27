@@ -681,14 +681,9 @@ class FakeBot(MagicMock):
 @pytest.fixture
 def telegram_settings(monkeypatch: pytest.MonkeyPatch) -> TelegramSettings:
     monkeypatch.setattr("telegram.Bot", FakeBot)
-    doc: TelegramSettings = frappe.get_doc(
-        {
-            "name": "Telegram Settings",
-            "doctype": "Telegram Settings",
-            "bot_token": "28910482:82359djtg3fi0denjk",
-            "chat_id": -103921437849,
-        }
-    )
+    doc: TelegramSettings = frappe.get_single("Telegram Settings")
+    doc.bot_token = "28910482:82359djtg3fi0denjk"
+    doc.chat_id = -103921437849
     doc.save()
     return doc
 
