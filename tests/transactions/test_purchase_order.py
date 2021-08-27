@@ -46,17 +46,17 @@ def test_delete_sales_order_duplicates(purchase_order: PurchaseOrder):
 
 def test_update_sales_orders_from_db(purchase_order: PurchaseOrder):
     for order in purchase_order.sales_orders:
-        order.customer = order.total = None
+        order.customer = order.total_amount = None
 
     purchase_order.update_sales_orders_from_db()
     for order in purchase_order.sales_orders:
-        customer, total = frappe.get_value(
+        customer, total_amount = frappe.get_value(
             "Sales Order", order.sales_order_name, ("customer", "total_amount")
         )
         customer: str
-        total: int
+        total_amount: int
         assert order.customer == customer
-        assert order.total == total
+        assert order.total_amount == total_amount
 
 
 def test_update_items_to_sell_from_db(purchase_order: PurchaseOrder):
@@ -373,7 +373,7 @@ def test_add_purchase_info_and_submit_info_loaded(purchase_order: PurchaseOrder)
     purchase_order.db_insert()
     purchase_id = "111111110"
     purchase_order.add_purchase_info_and_submit(
-        purchase_id, purchase_info_loaded=True, purchase_info=mock_purchase_info
+        purchase_id, purchase_info=mock_purchase_info
     )
     assert purchase_order.schedule_date == getdate(mock_purchase_info["delivery_date"])
     assert purchase_order.posting_date == getdate(mock_purchase_info["purchase_date"])
@@ -387,44 +387,10 @@ def test_add_purchase_info_and_submit_info_not_loaded(purchase_order: PurchaseOr
     purchase_order.db_insert()
     purchase_order.add_purchase_info_and_submit(
         purchase_id,
-        purchase_info_loaded=False,
-        purchase_info={},
-        delivery_cost=delivery_cost,
+        purchase_info={"delivery_cost": delivery_cost},
     )
-    assert purchase_order.schedule_date.date() == add_to_date(None, weeks=2).date()
-    assert purchase_order.posting_date == today()
+    assert purchase_order.schedule_date == add_to_date(None, weeks=2).date()
+    assert purchase_order.posting_date == getdate(today())
     assert purchase_order.delivery_cost == delivery_cost
     assert purchase_order.order_confirmation_no == purchase_id
     assert purchase_order.docstatus == 1
-
-
-def test_get_unavailable_items_in_cart_by_orders(
-    purchase_order: PurchaseOrder,
-):  # TODO: Test business logic
-    unavailable_items = [
-        {"item_code": "50366596", "available_qty": 0},
-        {"item_code": "10366598", "available_qty": 0},
-        {"item_code": "29128569", "available_qty": 0},
-    ]
-
-    res = purchase_order.get_unavailable_items_in_cart_by_orders(
-        unavailable_items,
-    )
-    assert res
-
-    acceptable_parents = [s.sales_order_name for s in purchase_order.sales_orders]
-    acceptable_parents.append(purchase_order.name)
-
-    grouped_items = group_by_key(frappe._dict(i) for i in res)
-
-    for items in grouped_items.values():
-        for idx, item in enumerate(items):
-            assert item.item_name == frappe.get_value(
-                "Item", item.item_code, "item_name"
-            )
-            assert item.parent in acceptable_parents
-
-            if idx == 0:
-                assert item.available_qty is not None
-            else:
-                assert item.available_qty is None

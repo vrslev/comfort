@@ -323,7 +323,8 @@ class PurchaseOrder(PurchaseOrderMethods):
     @frappe.whitelist()
     def get_unavailable_items_in_cart_by_orders(  # TODO: It renders with duplicates
         self, unavailable_items: list[dict[str, str | int]]
-    ):
+    ):  # pragma: no cover
+
         all_items: list[
             PurchaseOrderItemToSell | ChildItem | SalesOrderItem | SalesOrderChildItem
         ] = []
