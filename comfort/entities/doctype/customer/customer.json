@@ -17,7 +17,11 @@
     "vk_id",
     "vk_url",
     "column_break_1",
-    "phone"
+    "phone",
+    "address_section",
+    "city",
+    "column_break_13",
+    "address"
   ],
   "fields": [
     {
@@ -84,12 +88,32 @@
       "label": "Phone",
       "options": "Phone",
       "search_index": 1
+    },
+    {
+      "fieldname": "address_section",
+      "fieldtype": "Section Break",
+      "label": "Address"
+    },
+    {
+      "default": "\u0421\u0435\u0432\u0435\u0440\u043e\u0434\u0432\u0438\u043d\u0441\u043a",
+      "fieldname": "city",
+      "fieldtype": "Data",
+      "label": "City"
+    },
+    {
+      "fieldname": "address",
+      "fieldtype": "Data",
+      "label": "Address"
+    },
+    {
+      "fieldname": "column_break_13",
+      "fieldtype": "Column Break"
     }
   ],
   "image_field": "image",
   "index_web_pages_for_search": 1,
   "links": [],
-  "modified": "2021-08-25 08:30:39.111704",
+  "modified": "2021-08-26 23:47:33.134130",
   "modified_by": "Administrator",
   "module": "Entities",
   "name": "Customer",

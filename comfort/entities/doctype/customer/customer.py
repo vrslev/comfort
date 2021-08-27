@@ -16,7 +16,9 @@ class Customer(Document):
     customer_group: str
     vk_id: str | None
     vk_url: str | None
-    phone: str
+    phone: str | None
+    city: str | None
+    address: str | None
 
     def validate(self):  # pragma: no cover
         self.validate_vk_url_and_set_vk_id()

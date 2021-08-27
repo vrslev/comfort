@@ -55,12 +55,14 @@ def db_transaction(db_instance: MariaDBDatabase):
 def customer() -> Customer:
     return frappe.get_doc(
         {
+            "doctype": "Customer",
             "name": "Pavel Durov",
             "gender": "Male",
             "vk_id": "1",
             "vk_url": "https://vk.com/im?sel=1",
             "phone": "89115553535",
-            "doctype": "Customer",
+            "city": "Moscow",
+            "address": "Arbat, 1",
         }
     )
 
@@ -229,7 +231,7 @@ def payment_sales(sales_order: SalesOrder) -> Payment:
             "name": "ebd35a9cc9",
             "docstatus": 0,
             "voucher_type": "Sales Order",
-            "voucher_no": "S-2021-0001",
+            "voucher_no": "SO-2021-0001",
             "amount": 5000,
             "paid_with_cash": False,
             "doctype": "Payment",
@@ -292,7 +294,7 @@ def sales_order(
 
     doc: SalesOrder = frappe.get_doc(
         {
-            "name": "S-2021-0001",
+            "name": "SO-2021-0001",
             "customer": "Pavel Durov",
             "edit_commission": 0,
             "discount": 0,
@@ -464,7 +466,7 @@ def purchase_order(
             "delivery_options": [],
             "sales_orders": [
                 {
-                    "sales_order_name": "S-2021-0001",
+                    "sales_order_name": "SO-2021-0001",
                     "customer": "Pavel Durov",
                     "total": 24660,
                 }
