@@ -42,7 +42,9 @@ def create_stock_entry(
             "stock_type": stock_type,
             "items": [
                 {"item_code": item_code, "qty": qty}
-                for item_code, qty in count_quantity(items).items()
+                for item_code, qty in count_quantity(
+                    frappe._dict(i) for i in items
+                ).items()
             ],
         }
     )
