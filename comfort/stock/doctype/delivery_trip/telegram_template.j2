@@ -1,0 +1,28 @@
+<b><a href="{{form_url}}">{{doctype}} {{docname}}</a></b>
+<br>
+------
+<br>
+{%- for stop in stops -%}
+    <br><br>
+    <b>{{loop.index}}. {{stop.customer}}</b>
+    {% if stop.deilvery_type %}
+        ({{ stop.deilvery_type.lower()}})
+    {% endif %}
+    <br>
+    {{stop.phone}}
+    <br>
+    <a href="{{stop.route_url}}">{{stop.address}}</a>
+    {% if stop.pending_amount > 0 %}
+        <br>
+        {{stop.pending_amount}} ₽
+    {% endif %}
+    {% if stop.details %}
+        <br>
+        {{ stop.details }}
+    {% endif %}
+    <br>
+    {%- for item in stop.items_ -%}
+        <br>
+        &nbsp;&nbsp;&nbsp;— {{item.item_code}} ⨉ {{item.qty}} шт ({{item.item_name}})
+    {%- endfor -%}
+{%- endfor -%}

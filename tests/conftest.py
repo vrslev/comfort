@@ -13,6 +13,9 @@ from comfort.comfort_core.doctype.commission_settings.commission_settings import
     CommissionSettings,
 )
 from comfort.comfort_core.doctype.ikea_settings.ikea_settings import IkeaSettings
+from comfort.comfort_core.doctype.telegram_settings.telegram_settings import (
+    TelegramSettings,
+)
 from comfort.entities.doctype.customer.customer import Customer
 from comfort.entities.doctype.item.item import Item
 from comfort.entities.doctype.item_category.item_category import ItemCategory
@@ -20,6 +23,7 @@ from comfort.finance.chart_of_accounts import initialize_accounts
 from comfort.finance.doctype.gl_entry.gl_entry import GLEntry
 from comfort.finance.doctype.payment.payment import Payment
 from comfort.stock.doctype.checkout.checkout import Checkout
+from comfort.stock.doctype.delivery_trip.delivery_trip import DeliveryTrip
 from comfort.stock.doctype.receipt.receipt import Receipt
 from comfort.transactions.doctype.purchase_order.purchase_order import PurchaseOrder
 from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
@@ -599,4 +603,115 @@ def checkout(purchase_order: PurchaseOrder) -> Checkout:
 
     return frappe.get_doc(
         {"doctype": "Checkout", "purchase_order": purchase_order.name}
+    )
+
+
+class FakeBot(MagicMock):
+    def send_message(self, *args: Any, **kwargs: Any):
+        pass
+
+    def get_updates(self):
+        return [
+            frappe._dict(
+                {
+                    "my_chat_member": frappe._dict(
+                        {
+                            "old_chat_member": {
+                                "status": "left",
+                                "user": frappe._dict(
+                                    {
+                                        "id": 428190844,
+                                        "username": "some_random_test_bot_name_bot",
+                                        "is_bot": True,
+                                        "first_name": "Yet Another Test Bot",
+                                    }
+                                ),
+                                "until_date": None,
+                            },
+                            "new_chat_member": frappe._dict(
+                                {
+                                    "can_be_edited": False,
+                                    "can_change_info": True,
+                                    "is_anonymous": False,
+                                    "can_edit_messages": True,
+                                    "can_delete_messages": True,
+                                    "can_manage_chat": True,
+                                    "status": "administrator",
+                                    "can_restrict_members": True,
+                                    "user": frappe._dict(
+                                        {
+                                            "id": 428190844,
+                                            "username": "some_random_test_bot_name_bot",
+                                            "is_bot": True,
+                                            "first_name": "Yet Another Test Bot",
+                                        }
+                                    ),
+                                    "can_manage_voice_chats": True,
+                                    "can_post_messages": True,
+                                    "can_invite_users": True,
+                                    "can_promote_members": False,
+                                    "until_date": None,
+                                }
+                            ),
+                            "chat": frappe._dict(
+                                {
+                                    "id": -249104912890,
+                                    "title": "Test Channel",
+                                    "type": "channel",
+                                }
+                            ),
+                            "date": 1630059515,
+                            "from": frappe._dict(
+                                {
+                                    "language_code": "en",
+                                    "id": 248091841,
+                                    "username": "some_random_username",
+                                    "is_bot": False,
+                                    "first_name": "John",
+                                }
+                            ),
+                        }
+                    ),
+                    "update_id": 839065573,
+                }
+            )
+        ]
+
+
+@pytest.fixture
+def telegram_settings(monkeypatch: pytest.MonkeyPatch) -> TelegramSettings:
+    monkeypatch.setattr("telegram.Bot", FakeBot)
+    doc: TelegramSettings = frappe.get_doc(
+        {
+            "name": "Telegram Settings",
+            "doctype": "Telegram Settings",
+            "bot_token": "28910482:82359djtg3fi0denjk",
+            "chat_id": -103921437849,
+        }
+    )
+    doc.save()
+    return doc
+
+
+@pytest.fixture
+def delivery_trip(sales_order: SalesOrder) -> DeliveryTrip:
+    sales_order.db_insert()
+    sales_order.db_update_all()
+    return frappe.get_doc(
+        {
+            "doctype": "Delivery Trip",
+            "stops": [
+                {
+                    "doctype": "Delivery Stop",
+                    "sales_order": "SO-2021-0001",
+                    "address": "Arbat, 1",
+                    "pending_amount": 700,
+                    "customer": "Pavel Durov",
+                    "city": "Moscow",
+                    "phone": "89115553535",
+                    "delivery_type": "To Apartment",
+                    "installation": True,
+                }
+            ],
+        }
     )
