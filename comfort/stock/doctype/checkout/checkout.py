@@ -25,7 +25,7 @@ class Checkout(Document):
                 doc._get_items_to_sell(True),
             )
 
-    def set_purchase_draft_status(self):
+    def set_purchase_draft_status(self):  # TODO: Cover
         doc: PurchaseOrder = frappe.get_doc("Purchase Order", self.purchase_order)
         doc.status = "Draft"
         doc.db_update()
