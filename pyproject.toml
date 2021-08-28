@@ -94,8 +94,8 @@ omit = [
   "comfort/fixtures/hooks/boot.py",
   "comfort/fixtures/hooks/overrides.py",
   "comfort/fixtures/hooks/queries.py",
-  "comfort/entities/doctype/customer/customer_dashboard.py",
-  "comfort/entities/doctype/customer_group/customer_group.py"
+  "comfort/entities/doctype/customer_group/customer_group.py",
+  "*_dashboard.py",
 
 ]
 data_file = "tests/.cache/.coverage"
