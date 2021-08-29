@@ -23,7 +23,19 @@ from frappe import ValidationError
 #############################
 
 
-def test_merge_same_items(sales_order: SalesOrder):  # TODO: test not messed up
+def test_merge_same_items(sales_order: SalesOrder):
+    # TODO: test not messed up
+    # TODO
+    # @@ -49,7 +49,7 @@
+    # -            if len(cur_items) > 1:
+    # +            if len(cur_items) >= 1:
+    # +            if len(cur_items) > 2:
+    # -                full_qty = list(count_quantity(cur_items).values())[0]
+    # +                full_qty = None
+    # -                cur_items[0].qty = full_qty
+    # +                cur_items[1].qty = full_qty
+    # +                cur_items[1].qty = None
+
     item = sales_order.items[0].as_dict().copy()
     item.qty = 4
     second_item = sales_order.items[1].as_dict().copy()
@@ -74,7 +86,15 @@ def test_set_child_items(sales_order: SalesOrder, item: Item):
 
     item_code_qty_pairs = count_quantity(sales_order.child_items).items()
     exp_item_code_qty_pairs = count_quantity(item.child_items).items()
-
+    # TODO
+    # -        self.child_items = []
+    # +        self.child_items = None
+    # TODO
+    # -            d.qty = d.qty * item_codes_to_qty[d.parent_item_code]  # type: ignore
+    # +            d.qty = d.qty / item_codes_to_qty[d.parent_item_code]  # type: ignore
+    # TODO
+    # -        base_margin = self.items_cost * self.commission / 100
+    # +        base_margin = self.items_cost * self.commission / 101
     for p in exp_item_code_qty_pairs:
         assert p in item_code_qty_pairs
 
@@ -121,6 +141,9 @@ def test_calculate_commission_with_edit_commission(sales_order: SalesOrder):
 
 
 def test_calculate_margin_zero_if_items_cost_is_zero(sales_order: SalesOrder):
+    # TODO
+    # -        if self.items_cost <= 0:
+    # +        if self.items_cost <= 1:
     sales_order.items_cost = 0
     sales_order._calculate_margin()
     assert sales_order.margin == 0
@@ -219,6 +242,12 @@ def test_set_payment_status_with_cancelled_status(sales_order: SalesOrder):
 def test_set_payment_status(
     sales_order: SalesOrder, per_paid: int, expected_status: str
 ):
+    # TODO
+    # -        elif self.per_paid > 100:
+    # +        elif self.per_paid > 101:
+    # TODO:
+    # -        elif self.per_paid > 0:
+    # +        elif self.per_paid > 1:
     sales_order.per_paid = per_paid
     sales_order._set_payment_status()
     assert sales_order.payment_status == expected_status
@@ -285,6 +314,9 @@ def test_set_document_status(
     delivery_status: str,
     expected_status: str,
 ):
+    # TODO
+    # -            if self.payment_status == "Paid" and self.delivery_status == "Delivered":
+    # +            if self.payment_status == "Paid" or self.delivery_status == "Delivered":
     sales_order.docstatus = docstatus
     sales_order.payment_status = payment_status
     sales_order.delivery_status = delivery_status
@@ -362,3 +394,16 @@ def test_split_combinations(sales_order: SalesOrder):
 
     for i in count_quantity(sales_order.items).items():
         assert i in exp_item_codes_to_qty
+
+
+# TODO
+# @@ -235,7 +235,7 @@
+#          self.set_statuses()
+
+#      def before_submit(self):
+# -        self.edit_commission = True
+# +        self.edit_commission = False
+# +        self.edit_commission = None
+
+#      def before_cancel(self):  # pragma: no cover
+#          self.set_statuses()

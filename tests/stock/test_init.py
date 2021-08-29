@@ -84,3 +84,8 @@ def test_cancel_stock_entries_for(receipt_sales: Receipt):
     )
     for entry in entries:
         assert entry.docstatus == 2
+
+
+# TODO
+# -        {"voucher_type": doctype, "voucher_no": name, "docstatus": ("!=", 2)},
+# +        {"voucher_type": doctype, "voucher_no": name, "docstatus": ("!=", 3)},

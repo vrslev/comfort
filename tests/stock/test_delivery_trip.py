@@ -154,3 +154,11 @@ def test_prepare_message_for_telegram():
     assert (
         _prepare_message_for_telegram("<br><br>\n\n   &nbsp;&nbsp;&nbsp;") == "\n\n    "
     )
+
+
+# TODO
+# -            if stop.installation and not res["installation"]:
+# +            if stop.installation or not res["installation"]:
+# TODO
+# -            is_path=True,
+# +            is_path=False,

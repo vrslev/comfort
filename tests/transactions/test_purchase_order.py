@@ -148,7 +148,8 @@ def test_calculate_total_weight(
         as_list=True,
     )
     exp_total_weight = res[0][0] or 0 + sum(
-        i.weight * i.qty for i in purchase_order.items_to_sell
+        i.weight * i.qty
+        for i in purchase_order.items_to_sell  # TODO: This passes * is replaced with /
     )
     assert purchase_order.total_weight == exp_total_weight
 
@@ -209,6 +210,7 @@ def test_get_items_to_sell_split_combinations(purchase_order: PurchaseOrder):
 def test_get_items_in_sales_orders_with_empty_sales_orders(
     purchase_order: PurchaseOrder,
 ):
+    # TODO: If set items = child_items instead of items += child_items, then test passes
     purchase_order.sales_orders = []
     items = purchase_order._get_items_in_sales_orders(split_combinations=False)
     assert items == []
@@ -264,6 +266,13 @@ def test_get_templated_items_for_api(
 @pytest.mark.usefixtures("ikea_settings")
 def test_clear_delivery_services(purchase_order: PurchaseOrder):
     purchase_order.get_delivery_services()
+    # TODO: Cover this method properly
+    # -        templated_items = self._get_templated_items_for_api(split_combinations=True)
+    # +        templated_items = self._get_templated_items_for_api(split_combinations=False)
+    # -        templated_items = self._get_templated_items_for_api(split_combinations=True)
+    # +        templated_items = None
+    # -                    "type": option["delivery_type"],
+    # +                    "XXtypeXX": option["delivery_type"],
     purchase_order._clear_delivery_options()
     assert len(purchase_order.delivery_options) == 0
     assert not frappe.get_all("Purchase Order Delivery Option", limit_page_length=1)
@@ -334,6 +343,11 @@ def get_this_month_ru_name():
 
 
 def test_autoname_purchase_orders_exist_in_this_month(purchase_order: PurchaseOrder):
+    # TODO:
+    # -            latest_cart_number: str | int = matches[0] if matches else 0
+    # +            latest_cart_number: str | int = matches[0] if matches else 1
+
+    # TODO: Parametrize
     this_month = get_this_month_ru_name()
     frappe.get_doc({"doctype": "Purchase Order", "name": f"{this_month}-1"}).db_insert()
     purchase_order.autoname()
@@ -360,6 +374,11 @@ def test_purchase_order_before_insert(purchase_order: PurchaseOrder):
 
 
 def test_purchase_order_before_submit(purchase_order: PurchaseOrder):
+    # TODO:
+    # -        self.delivery_options = []
+    # +        self.delivery_options = None
+    # -        self.cannot_add_items = None
+    # +        self.cannot_add_items = ""
     purchase_order.status = "Draft"
     purchase_order.get_delivery_services()
     purchase_order.before_submit()
@@ -394,3 +413,6 @@ def test_add_purchase_info_and_submit_info_not_loaded(purchase_order: PurchaseOr
     assert purchase_order.delivery_cost == delivery_cost
     assert purchase_order.order_confirmation_no == purchase_id
     assert purchase_order.docstatus == 1
+
+
+# TODO: Cover submit_sales_orders_and_update_statuses

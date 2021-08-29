@@ -15,6 +15,9 @@ acceptable_vk_urls = (
     None,
 )
 expected_vk_ids = ("1", "1", "18392044", "1", "1", "18392044", None)
+# TODO
+# -                if vk_id and int(vk_id):
+# +                if vk_id or int(vk_id):
 
 
 @pytest.mark.parametrize("vk_url", acceptable_vk_urls)

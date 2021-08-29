@@ -174,3 +174,10 @@ def test_create_item_categories(parsed_item: ParsedItem):
         )
         == 0
     )
+
+
+# TODO: Test and make translatable
+# -        frappe.msgprint("Нет доступных способов доставки", alert=True, indicator="red")
+# +        frappe.msgprint("Нет доступных способов доставки", alert=False, indicator="red")
+
+# TODO: Test adding item properly

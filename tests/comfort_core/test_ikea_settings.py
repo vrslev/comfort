@@ -103,3 +103,19 @@ def test_get_authorized_api_raises_on_login_data_missing():
         ValidationError, match="Enter login and password in Ikea Settings"
     ):
         get_authorized_api()
+
+
+# TODO
+# -        or convert_to_datetime(doc.guest_token_expiration) <= now_datetime()
+# +        or convert_to_datetime(doc.guest_token_expiration) < now_datetime()
+# TODO
+#      if (
+# -        doc.guest_token is None
+# -        or doc.guest_token_expiration is None
+# +        doc.guest_token is None and doc.guest_token_expiration is None
+# TODO
+# -        or convert_to_datetime(doc.authorized_token_expiration) <= now_datetime()
+# +        or convert_to_datetime(doc.authorized_token_expiration) < now_datetime()
+# TODO
+# -        if doc.username is None or password is None:
+# +        if doc.username is None and password is None:

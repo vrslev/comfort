@@ -33,3 +33,18 @@ def test_set_default_date_and_number_format():
     assert frappe.db.get_default("date_format") == date_format
     assert frappe.db.get_value("System Settings", None, "date_format") == date_format
     assert frappe.db.get_value("System Settings", None, "number_format") == "#.###,##"
+
+
+# TODO: Cover comfort.comfort_core.hooks.get_standard_queries
+
+# TODO: Cover hooks presence
+# -after_install = "comfort.comfort_core.hooks.after_install"
+# +after_install = None
+
+# TODO: Cover doctype override
+# -override_doctype_class = {"DocType": "comfort.comfort_core.hooks.CustomDocType"}
+# +override_doctype_class = {"XXDocTypeXX": "comfort.comfort_core.hooks.CustomDocType"}
+
+# TODO: Cover treeviews
+# -treeviews = ["Account"]
+# +treeviews = ["XXAccountXX"]

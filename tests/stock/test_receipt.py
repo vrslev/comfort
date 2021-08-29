@@ -149,7 +149,19 @@ def test_create_purchase_gl_entries(
 def test_create_purchase_stock_entries_for_sales_orders(receipt_purchase: Receipt):
     receipt_purchase.db_insert()
     receipt_purchase._create_purchase_stock_entries_for_sales_orders()
-
+    # TODO
+    #      def _create_purchase_stock_entries_for_sales_orders(self):
+    #          items_obj: list[
+    #              SalesOrderItem | SalesOrderChildItem
+    # -        ] = self._voucher._get_items_in_sales_orders(split_combinations=True)
+    # +        ] = self._voucher._get_items_in_sales_orders(split_combinations=False)
+    # TODO
+    #         items_obj: list[
+    #             SalesOrderItem | SalesOrderChildItem
+    # -        ] = self._voucher._get_items_in_sales_orders(split_combinations=True)
+    # +        ] = None
+    # +        ] = self._voucher._get_items_to_sell(split_combinations=False)
+    # +        ] = None
     entry_names: list[str] = frappe.get_all(
         "Stock Entry",
         {

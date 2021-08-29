@@ -10,6 +10,9 @@ from frappe import ValidationError
 
 
 def test_validate_amount_more_than_zero_raises_on_zero_amount(payment_sales: Payment):
+    # TODO
+    # -        if self.amount <= 0:
+    # +        if self.amount <= 1:
     payment_sales.amount = 0
     with pytest.raises(ValidationError, match="Amount should be more that zero"):
         payment_sales.validate_amount_more_than_zero()
@@ -84,6 +87,49 @@ def test_make_categories_invoice_gl_entries(
     exp_delivery_amount: int,
     exp_installation_amount: int,
 ):
+    # # TODO
+    # -                delivery_amount += s.rate
+    # +                delivery_amount = s.rate
+    # TODO
+    # -                installation_amount += s.rate
+    # +                installation_amount = s.rate
+    # TODO
+    # -            if amount == 0:
+    # +            if amount == 1:
+    # TODO
+    # @@ -60,7 +60,7 @@
+    #              ("installation", installation_amount),
+    #          ):
+    #              if amount == 0:
+    # -                continue
+    # +                break
+    # TODO
+    # -            elif amount > remaining_amount:
+    # +            elif amount >= remaining_amount:
+    # TODO
+    #              elif amount > remaining_amount:
+    # -                self._new_gl_entry(accounts_name, 0, remaining_amount)
+    # +                self._new_gl_entry(accounts_name, 1, remaining_amount)
+    # TODO
+    #              elif amount > remaining_amount:
+    #                  self._new_gl_entry(accounts_name, 0, remaining_amount)
+    #                  remaining_amount = 0
+    # -                break
+    # +                continue
+    # TODO
+    # -        if remaining_amount > 0:
+    # +        if remaining_amount >= 0:
+    # +        if remaining_amount > 1:
+    # TODO
+    # -            self._new_gl_entry("sales", 0, remaining_amount)
+    # +            self._new_gl_entry("sales", 1, remaining_amount)
+    # TODO
+    # -        if purchase_delivery > 0:
+    # +        if purchase_delivery >= 0:
+    # +        if purchase_delivery > 1:
+    # TODO
+    # -            self._new_gl_entry("purchase_delivery", purchase_delivery, 0)
+    # +            self._new_gl_entry("purchase_delivery", purchase_delivery, 1)
     sales_order.total_amount = 5800
     sales_order.service_amount = 800
     sales_order.db_update_all()

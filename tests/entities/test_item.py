@@ -72,6 +72,12 @@ def test_set_name(item: Item):
 
 @pytest.mark.usefixtures("child_items")
 def test_calculate_weight(item: Item):
+    # TODO
+    # -        if not (self.child_items and len(self.child_items) > 0):
+    # +        if not (self.child_items and len(self.child_items) >= 0):
+    # TODO
+    # -        if not (self.child_items and len(self.child_items) > 0):
+    # +        if not (self.child_items or len(self.child_items) > 0):
     item.calculate_weight()
     assert item.weight == 180.49
 

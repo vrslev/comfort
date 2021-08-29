@@ -34,3 +34,8 @@ def test_create_accounts_from_schema():
         if acc not in accounts_from_schema or acc not in created_accounts
     ]
     assert len(not_matching_accounts) == 0
+
+
+# TODO
+# -    if not frappe.get_all("Account", limit_page_length=1):
+# +    if not frappe.get_all("Account", limit_page_length=2):
