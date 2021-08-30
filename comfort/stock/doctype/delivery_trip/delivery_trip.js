@@ -1,7 +1,6 @@
 frappe.ui.form.on("Delivery Trip", {
   setup(frm) {
     frm.show_submit_message = () => {};
-    frm.page.sidebar.hide();
 
     frm.fields_dict.stops.grid.get_docfield("sales_order").only_select = 1;
     frm.set_query("sales_order", "stops", () => {

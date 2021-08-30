@@ -1,5 +1,18 @@
 frappe.provide("comfort");
 
+$(document).on("form-load", () => {
+  cur_frm.page.sidebar.remove();
+  $(".sidebar-toggle-btn").remove();
+});
+
+$(document).on("page-change", () => {
+  $(".sidebar-toggle-btn").remove();
+});
+
+$(document).on("list_sidebar_setup", () => {
+  cur_list.page.sidebar.remove();
+});
+
 comfort.get_items = (item_codes) => {
   // TODO: Fix freeze
   var promise = new Promise((resolve) => {

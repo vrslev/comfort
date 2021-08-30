@@ -1,7 +1,6 @@
 comfort.SalesOrderController = frappe.ui.form.Controller.extend({
   setup() {
     this.frm.show_submit_message = () => {};
-    this.frm.page.sidebar.hide();
     this.patch_toolbar_set_page_actions();
   },
 
