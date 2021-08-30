@@ -1,4 +1,5 @@
 {
+  "cards_label": "",
   "category": "Modules",
   "charts": [],
   "creation": "2021-06-25 03:06:14.012381",
@@ -17,8 +18,16 @@
     {
       "hidden": 0,
       "is_query_report": 0,
-      "label": "Account",
-      "link_to": "Account",
+      "label": "Comfort Core",
+      "link_type": "DocType",
+      "onboard": 0,
+      "type": "Card Break"
+    },
+    {
+      "hidden": 0,
+      "is_query_report": 0,
+      "label": "Commission Settings",
+      "link_to": "Commission Settings",
       "link_type": "DocType",
       "onboard": 0,
       "type": "Link"
@@ -26,8 +35,43 @@
     {
       "hidden": 0,
       "is_query_report": 0,
+      "label": "Ikea Settings",
+      "link_to": "Ikea Settings",
+      "link_type": "DocType",
+      "onboard": 0,
+      "type": "Link"
+    },
+    {
+      "hidden": 0,
+      "is_query_report": 0,
+      "label": "Telegram Settings",
+      "link_to": "Telegram Settings",
+      "link_type": "DocType",
+      "onboard": 0,
+      "type": "Link"
+    },
+    {
+      "hidden": 0,
+      "is_query_report": 0,
+      "label": "Entities",
+      "link_type": "DocType",
+      "onboard": 0,
+      "type": "Card Break"
+    },
+    {
+      "hidden": 0,
+      "is_query_report": 0,
       "label": "Customer",
       "link_to": "Customer",
+      "link_type": "DocType",
+      "onboard": 0,
+      "type": "Link"
+    },
+    {
+      "hidden": 0,
+      "is_query_report": 0,
+      "label": "Customer Group",
+      "link_to": "Customer Group",
       "link_type": "DocType",
       "onboard": 0,
       "type": "Link"
@@ -44,10 +88,37 @@
     {
       "hidden": 0,
       "is_query_report": 0,
-      "label": "Parts",
+      "label": "Item Category",
+      "link_to": "Item Category",
+      "link_type": "DocType",
+      "onboard": 0,
+      "type": "Link"
+    },
+    {
+      "hidden": 0,
+      "is_query_report": 0,
+      "label": "Finance",
       "link_type": "DocType",
       "onboard": 0,
       "type": "Card Break"
+    },
+    {
+      "hidden": 0,
+      "is_query_report": 0,
+      "label": "Account",
+      "link_to": "Account",
+      "link_type": "DocType",
+      "onboard": 0,
+      "type": "Link"
+    },
+    {
+      "hidden": 0,
+      "is_query_report": 0,
+      "label": "Finance Settings",
+      "link_to": "Finance Settings",
+      "link_type": "DocType",
+      "onboard": 0,
+      "type": "Link"
     },
     {
       "hidden": 0,
@@ -61,14 +132,111 @@
     {
       "hidden": 0,
       "is_query_report": 0,
-      "label": "Ikea Cart Settings",
-      "link_to": "Ikea Settings",
+      "label": "Payment",
+      "link_to": "Payment",
+      "link_type": "DocType",
+      "onboard": 0,
+      "type": "Link"
+    },
+    {
+      "hidden": 0,
+      "is_query_report": 1,
+      "label": "General Ledger",
+      "link_to": "General Ledger",
+      "link_type": "Report",
+      "onboard": 0,
+      "type": "Link"
+    },
+    {
+      "hidden": 0,
+      "is_query_report": 1,
+      "label": "Profit and Loss Statement",
+      "link_to": "Profit and Loss Statement",
+      "link_type": "Report",
+      "onboard": 0,
+      "type": "Link"
+    },
+    {
+      "hidden": 0,
+      "is_query_report": 0,
+      "label": "Stock",
+      "link_type": "DocType",
+      "onboard": 0,
+      "type": "Card Break"
+    },
+    {
+      "hidden": 0,
+      "is_query_report": 0,
+      "label": "Checkout",
+      "link_to": "Checkout",
+      "link_type": "DocType",
+      "onboard": 0,
+      "type": "Link"
+    },
+    {
+      "hidden": 0,
+      "is_query_report": 0,
+      "label": "Delivery Trip",
+      "link_to": "Delivery Trip",
+      "link_type": "DocType",
+      "onboard": 0,
+      "type": "Link"
+    },
+    {
+      "hidden": 0,
+      "is_query_report": 0,
+      "label": "Receipt",
+      "link_to": "Receipt",
+      "link_type": "DocType",
+      "onboard": 0,
+      "type": "Link"
+    },
+    {
+      "hidden": 0,
+      "is_query_report": 0,
+      "label": "Stock Entry",
+      "link_to": "Stock Entry",
+      "link_type": "DocType",
+      "onboard": 0,
+      "type": "Link"
+    },
+    {
+      "hidden": 0,
+      "is_query_report": 0,
+      "label": "Transactions",
+      "link_type": "Page",
+      "onboard": 0,
+      "type": "Card Break"
+    },
+    {
+      "hidden": 0,
+      "is_query_report": 0,
+      "label": "Purchase Order",
+      "link_to": "Purchase Order",
+      "link_type": "DocType",
+      "onboard": 0,
+      "type": "Link"
+    },
+    {
+      "hidden": 0,
+      "is_query_report": 0,
+      "label": "Return",
+      "link_to": "Return",
+      "link_type": "DocType",
+      "onboard": 0,
+      "type": "Link"
+    },
+    {
+      "hidden": 0,
+      "is_query_report": 0,
+      "label": "Sales Order",
+      "link_to": "Sales Order",
       "link_type": "DocType",
       "onboard": 0,
       "type": "Link"
     }
   ],
-  "modified": "2021-08-28 20:43:51.494569",
+  "modified": "2021-08-30 07:02:02.612338",
   "modified_by": "Administrator",
   "module": "Comfort Core",
   "name": "Home",
@@ -76,6 +244,12 @@
   "pin_to_bottom": 0,
   "pin_to_top": 1,
   "shortcuts": [
+    {
+      "doc_view": "",
+      "label": "DocType",
+      "link_to": "DocType",
+      "type": "DocType"
+    },
     {
       "doc_view": "",
       "label": "Sales Order",
@@ -88,5 +262,6 @@
       "link_to": "Purchase Order",
       "type": "DocType"
     }
-  ]
+  ],
+  "shortcuts_label": ""
 }
