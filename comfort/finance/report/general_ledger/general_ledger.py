@@ -1,29 +1,24 @@
-# type: ignore
-#
+from __future__ import annotations
+
+from typing import Any
+
 import frappe
 from comfort import ValidationError
-from frappe import _dict
-from frappe.utils import flt
+from frappe import _
 
 
-def execute(filters=None):
-    columns, data = [], []
-
+def execute(filters: dict[str, str]):  # pragma: no cover
     validate_filters(filters)
-
-    columns = get_columns()
-    data = get_data(filters)
-
-    return columns, data
+    return get_columns(), get_data(filters)
 
 
-def validate_filters(filters):
-    if filters.from_date > filters.to_date:
-        raise ValidationError("From Date Should be less than To Date")
+def validate_filters(filters: dict[str, str]):
+    if filters["from_date"] > filters["to_date"]:
+        raise ValidationError(_("To Date should be after From Date"))
 
 
-def get_columns():
-    columns = [
+def get_columns():  # pragma: no cover
+    return [
         {
             "label": "GL Entry",
             "fieldname": "gl_entry",
@@ -32,37 +27,42 @@ def get_columns():
             "hidden": 1,
         },
         {
-            "label": "Posting Date",
-            "fieldname": "posting_date",
+            "label": "Date",
+            "fieldname": "date",
             "fieldtype": "Date",
-            "width": 90,
+            "width": 150,
         },
         {
             "label": "Account",
             "fieldname": "account",
             "fieldtype": "Link",
             "options": "Account",
-            "width": 180,
-        },
-        {
-            "label": "Debit (INR)",
-            "fieldname": "debit",
-            "fieldtype": "Float",
-            "width": 100,
-        },
-        {
-            "label": "Credit (INR)",
-            "fieldname": "credit",
-            "fieldtype": "Float",
-            "width": 100,
-        },
-        {
-            "label": "Balance (INR)",
-            "fieldname": "balance",
-            "fieldtype": "Float",
             "width": 130,
         },
-        {"label": "Voucher Type", "fieldname": "voucher_type", "width": 120},
+        {
+            "label": "Debit",
+            "fieldname": "debit",
+            "fieldtype": "Currency",
+            "width": 110,
+        },
+        {
+            "label": "Credit",
+            "fieldname": "credit",
+            "fieldtype": "Currency",
+            "width": 110,
+        },
+        {
+            "label": "Balance",
+            "fieldname": "balance",
+            "fieldtype": "Currency",
+            "width": 130,
+        },
+        {
+            "label": "Voucher Type",
+            "fieldname": "voucher_type",
+            "fieldtype": "Data",
+            "width": 120,
+        },
         {
             "label": "Voucher No",
             "fieldname": "voucher_no",
@@ -70,89 +70,28 @@ def get_columns():
             "options": "voucher_type",
             "width": 180,
         },
-        {"label": "Customer", "fieldname": "customer", "width": 100},
     ]
-    return columns
 
 
-def get_data(filters):
-    gl_entries = get_gl_entries(filters)
-    entries = get_all_entries(filters, gl_entries)
-    data = add_balance_in_entries(entries)
-    return data
-
-
-def get_gl_entries(filters):
-
-    gl_entries = frappe.db.sql(
-        """
-        SELECT name as gl_entry, posting_date, account, customer, voucher_type,
-               voucher_no, debit, credit
-        FROM `tabGL Entry`
-        WHERE %(conditions)s
-        ORDER BY voucher_no, account
-        """,
-        values={"conditions": get_conditions(filters)},
-        as_dict=1,
+def get_data(filters: dict[str, str]):
+    entries: list[Any] = frappe.get_all(
+        "GL Entry",
+        fields=(
+            "name as gl_entry",
+            "creation as date",
+            "account",
+            "voucher_type",
+            "voucher_no",
+            "debit",
+            "credit",
+        ),
+        filters=(
+            ("docstatus", "!=", 2),
+            ("creation", "between", (filters["from_date"], filters["to_date"])),
+        ),
+        order_by="voucher_no and account",
     )
-
-    return gl_entries
-
-
-def get_conditions(filters):
-    conditions = []
-
-    if filters.get("account"):
-        conditions.append("account=%(account)s")
-
-    if filters.get("voucher_no"):
-        conditions.append("voucher_no=%(voucher_no)s")
-
-    if filters.get("customer"):
-        conditions.append("customer = %(customer)s")
-
-    conditions.append("posting_date>=%(from_date)s")
-    conditions.append("posting_date<=%(to_date)s")
-    conditions.append("is_cancelled=0")
-
-    return "{}".format(" and ".join(conditions)) if conditions else ""
-
-
-def get_all_entries(filters, gl_entries):
-    data = []
-    opening_total_closing = get_updated_entries(filters, gl_entries)
-    data.append(opening_total_closing.opening)
-    data += gl_entries
-    data.append(opening_total_closing.total)
-    data.append(opening_total_closing.closing)
-    return data
-
-
-def get_updated_entries(filters, gl_entries):
-    opening = get_opening_total_closing("Opening")
-    total = get_opening_total_closing("Total")
-    closing = get_opening_total_closing("Closing (Opening + Total)")
-
-    for gl_entry in gl_entries:
-        total.debit += flt(gl_entry.debit)
-        total.credit += flt(gl_entry.credit)
-        closing.debit += flt(gl_entry.debit)
-        closing.credit += flt(gl_entry.credit)
-
-    return _dict(opening=opening, total=total, closing=closing)  # type: ignore
-
-
-def get_opening_total_closing(label):
-    return _dict(account=label, debit=0.0, credit=0.0, balance=0.0)  # type: ignore
-
-
-def add_balance_in_entries(data):
-    balance = 0
-
-    for d in data:
-        if not d.posting_date:
-            balance = 0
-        balance += d.debit - d.credit
-        d.balance = balance
-
-    return data
+    for entry in entries:
+        entry.date = entry.date.date()
+        entry.balance = entry.debit - entry.credit
+    return entries

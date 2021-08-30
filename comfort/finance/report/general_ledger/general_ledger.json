@@ -1,5 +1,5 @@
 {
-  "add_total_row": 0,
+  "add_total_row": 1,
   "columns": [],
   "creation": "2021-01-02 18:21:48.572632",
   "disable_prepared_report": 1,
@@ -9,7 +9,7 @@
   "filters": [],
   "idx": 0,
   "is_standard": "Yes",
-  "modified": "2021-08-09 05:23:29.886702",
+  "modified": "2021-08-31 03:53:46.454867",
   "modified_by": "Administrator",
   "module": "Finance",
   "name": "General Ledger",
