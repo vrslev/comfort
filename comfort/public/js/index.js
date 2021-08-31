@@ -60,7 +60,7 @@ frappe.ui.form.ControlLink = frappe.ui.form.ControlLink.extend({
   },
 });
 
-function get_currency_symbol(currency) {
+get_currency_symbol = (currency) => {
   if (frappe.boot) {
     if (
       frappe.boot.sysdefaults &&
@@ -75,15 +75,16 @@ function get_currency_symbol(currency) {
     // load in template
     return frappe.currency_symbols[currency];
   }
-}
+};
 
 format_currency = (v, currency, decimals) => {
-  var format = get_number_format(currency);
-  var symbol = get_currency_symbol(currency);
-  if (decimals === undefined) {
-    decimals = frappe.boot.sysdefaults.currency_precision || 0;
-  }
+  decimals = frappe.boot.sysdefaults.currency_precision || 0;
+  let format = get_number_format(currency);
+  let symbol = get_currency_symbol(currency);
 
-  if (symbol) return format_number(v, format, decimals) + " " + symbol;
-  else return format_number(v, format, decimals);
+  if (symbol) {
+    return format_number(v, format, decimals) + " " + symbol;
+  } else {
+    return format_number(v, format, decimals);
+  }
 };

@@ -25,3 +25,4 @@ globals:
   format_currency: true
   format_number: true
   get_number_format: true
+  get_currency_symbol: true
