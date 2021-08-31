@@ -46,7 +46,7 @@ def test_create_stock_entry(receipt_sales: Receipt, sales_order: SalesOrder):
     stock_type = "Reserved Actual"
     items_obj = sales_order._get_items_with_splitted_combinations()
     items = [
-        {"item_code": item_code, "qty": qty}
+        frappe._dict({"item_code": item_code, "qty": qty})
         for item_code, qty in count_quantity(items_obj).items()
     ]
     create_stock_entry(receipt_sales.doctype, receipt_sales.name, stock_type, items)

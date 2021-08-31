@@ -70,7 +70,7 @@ class Receipt(Document):
             SalesOrderItem | SalesOrderChildItem
         ] = self._voucher._get_items_with_splitted_combinations()
         items = [
-            {"item_code": item_code, "qty": -qty}
+            frappe._dict({"item_code": item_code, "qty": -qty})
             for item_code, qty in count_quantity(items_obj).items()
         ]
         self._new_stock_entry("Reserved Actual", items)
@@ -105,7 +105,9 @@ class Receipt(Document):
         if not items_obj:
             return
 
-        items = [{"item_code": i.item_code, "qty": i.qty} for i in items_obj]
+        items = [
+            frappe._dict({"item_code": i.item_code, "qty": i.qty}) for i in items_obj
+        ]
         reverse_items = self._get_items_with_reversed_qty(items)
 
         self._new_stock_entry("Reserved Purchased", reverse_items)
@@ -119,7 +121,7 @@ class Receipt(Document):
             return
 
         items: dict[str, str | int] = [
-            {"item_code": i.item_code, "qty": i.qty} for i in items_obj
+            frappe._dict({"item_code": i.item_code, "qty": i.qty}) for i in items_obj
         ]
         reverse_items = self._get_items_with_reversed_qty(items)
 

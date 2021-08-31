@@ -41,7 +41,7 @@ def test_new_gl_entry(receipt_sales: Receipt):
 
 def test_new_stock_entry(receipt_sales: Receipt, item_no_children: Item):
     stock_type, items = "Reserved Actual", [
-        {"item_code": item_no_children.item_code, "qty": 5}
+        frappe._dict({"item_code": item_no_children.item_code, "qty": 5})
     ]
     receipt_sales.db_insert()
     receipt_sales._new_stock_entry(stock_type, items)
