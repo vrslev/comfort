@@ -33,12 +33,24 @@ def test_get_children_not_root_all_entries_present():
 @pytest.mark.usefixtures("accounts")
 def test_get_children_not_root_balance():
     create_gl_entry(None, None, "Sales", 0, 300)
+    create_gl_entry(None, None, "Sales", 0, 500)
+    doc = frappe.get_doc("GL Entry", frappe.get_value("GL Entry", {"account": "Sales"}))
+    doc.docstatus = 2
+    doc.db_update()
+
+    res = get_children("Account", "Income")
     assert {
         "value": "Sales",
         "expandable": 0,
         "parent_account": "Income",
         "balance": -300,
-    } in get_children("Account", "Income")
+    } in res
+    assert {
+        "value": "Sales",
+        "expandable": 0,
+        "parent_account": "Income",
+        "balance": -500,
+    } not in res
 
 
 def test_add_node():

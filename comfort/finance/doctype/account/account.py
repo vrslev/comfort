@@ -26,7 +26,7 @@ def get_children(doctype: str, parent: str = "", is_root: bool = False):
             v = frappe.get_all(
                 "GL Entry",
                 fields="SUM(debit) - SUM(credit) as balance",
-                filters={"account": account.value},
+                filters={"account": account.value, "docstatus": ("!=", 2)},
             )
             account.balance = v[0].balance if v and v[0] and v[0].get("balance") else 0
     return accounts
