@@ -91,6 +91,7 @@ cache_dir = "tests/.cache"
 [tool.coverage.run]
 source = ["comfort"]
 omit = [
+  "comfort/commands.py",
   "comfort/fixtures/hooks/boot.py",
   "comfort/fixtures/hooks/overrides.py",
   "comfort/fixtures/hooks/queries.py",
