@@ -1,22 +1,26 @@
 frappe.provide("comfort");
 
-var DONT_HIDE_SIDEBAR_DOCTYPES = ["Item"];
+var DONT_REMOVE_SIDEBAR_IN_DOCTYPES = ["Item"];
 
+// Remove sidebar in Form view
 $(document).on("form-load", () => {
-  if (!DONT_HIDE_SIDEBAR_DOCTYPES.includes(cur_frm.doctype)) {
+  if (!DONT_REMOVE_SIDEBAR_IN_DOCTYPES.includes(cur_frm.doctype)) {
     cur_frm.page.sidebar.remove();
   }
   $(".sidebar-toggle-btn").remove();
 });
 
-$(document).on("page-change", () => {
-  $(".sidebar-toggle-btn").remove();
-});
-
+// Remove sidebar in List view
 $(document).on("list_sidebar_setup", () => {
   cur_list.page.sidebar.remove();
 });
 
+// Remove sidebar toggle button in all pages. Exists for Workspace view
+$(document).on("page-change", () => {
+  $(".sidebar-toggle-btn").remove();
+});
+
+// Remove buttons from profile dropdown in all pages
 $(document).ready(() => {
   $(
     '[class="nav-item dropdown dropdown-help dropdown-mobile d-none d-lg-block"]'
@@ -103,3 +107,18 @@ format_currency = (v, currency, decimals) => {
     return format_number(v, format, decimals);
   }
 };
+
+// Hide "Cancel" buttons in low level DocTypes
+for (let doctype of ["GL Entry", "Checkout", "Stock Entry"]) {
+  frappe.ui.form.on(doctype, {
+    setup(frm) {
+      let old_func = frm.toolbar.set_page_actions;
+      frm.toolbar.set_page_actions = (status) => {
+        old_func.call(frm.toolbar, status);
+        if (frm.toolbar.current_status == "Cancel") {
+          frm.toolbar.page.clear_secondary_action();
+        }
+      };
+    },
+  });
+}
