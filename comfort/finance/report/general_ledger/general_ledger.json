@@ -9,7 +9,7 @@
   "filters": [],
   "idx": 0,
   "is_standard": "Yes",
-  "modified": "2021-08-31 03:53:46.454867",
+  "modified": "2021-08-31 22:11:01.223999",
   "modified_by": "Administrator",
   "module": "Finance",
   "name": "General Ledger",
@@ -21,6 +21,9 @@
   "roles": [
     {
       "role": "System Manager"
+    },
+    {
+      "role": "Comfort User"
     }
   ]
 }

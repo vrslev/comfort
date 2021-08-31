@@ -24,7 +24,7 @@
   ],
   "index_web_pages_for_search": 1,
   "links": [],
-  "modified": "2021-08-31 05:11:52.249953",
+  "modified": "2021-08-31 22:07:37.573982",
   "modified_by": "Administrator",
   "module": "Entities",
   "name": "Item Category",
@@ -34,9 +34,12 @@
       "create": 1,
       "delete": 1,
       "read": 1,
-      "report": 1,
       "role": "System Manager",
       "write": 1
+    },
+    {
+      "read": 1,
+      "role": "Comfort User"
     }
   ],
   "sort_field": "modified",

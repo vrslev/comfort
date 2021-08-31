@@ -30,7 +30,7 @@
   "index_web_pages_for_search": 1,
   "is_submittable": 1,
   "links": [],
-  "modified": "2021-08-31 05:22:53.858779",
+  "modified": "2021-08-31 22:15:15.969274",
   "modified_by": "Administrator",
   "module": "Stock",
   "name": "Checkout",
@@ -40,14 +40,17 @@
       "amend": 1,
       "cancel": 1,
       "create": 1,
-      "delete": 1,
-      "email": 1,
-      "export": 1,
-      "print": 1,
       "read": 1,
-      "report": 1,
       "role": "System Manager",
-      "share": 1,
+      "submit": 1,
+      "write": 1
+    },
+    {
+      "amend": 1,
+      "cancel": 1,
+      "create": 1,
+      "read": 1,
+      "role": "Comfort User",
       "submit": 1,
       "write": 1
     }

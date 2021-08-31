@@ -98,7 +98,7 @@
   ],
   "issingle": 1,
   "links": [],
-  "modified": "2021-08-31 05:53:54.041850",
+  "modified": "2021-08-31 21:10:10.362955",
   "modified_by": "Administrator",
   "module": "Finance",
   "name": "Finance Settings",
@@ -111,6 +111,10 @@
       "read": 1,
       "role": "System Manager",
       "write": 1
+    },
+    {
+      "read": 1,
+      "role": "Comfort User"
     }
   ],
   "sort_field": "modified",

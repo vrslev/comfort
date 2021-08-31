@@ -84,7 +84,7 @@
   "in_create": 1,
   "is_submittable": 1,
   "links": [],
-  "modified": "2021-08-31 05:46:40.436448",
+  "modified": "2021-08-31 22:09:01.317541",
   "modified_by": "Administrator",
   "module": "Finance",
   "name": "GL Entry",
@@ -92,10 +92,19 @@
   "permissions": [
     {
       "cancel": 1,
-      "export": 1,
+      "create": 1,
       "read": 1,
       "report": 1,
       "role": "System Manager",
+      "submit": 1,
+      "write": 1
+    },
+    {
+      "cancel": 1,
+      "create": 1,
+      "read": 1,
+      "report": 1,
+      "role": "Comfort User",
       "submit": 1,
       "write": 1
     }

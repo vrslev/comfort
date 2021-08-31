@@ -16,7 +16,7 @@
   ],
   "issingle": 1,
   "links": [],
-  "modified": "2021-08-25 08:29:35.505939",
+  "modified": "2021-08-31 22:06:39.141124",
   "modified_by": "Administrator",
   "module": "Comfort Core",
   "name": "Commission Settings",
@@ -27,6 +27,13 @@
       "delete": 1,
       "read": 1,
       "role": "System Manager",
+      "write": 1
+    },
+    {
+      "create": 1,
+      "delete": 1,
+      "read": 1,
+      "role": "Comfort User",
       "write": 1
     }
   ],
