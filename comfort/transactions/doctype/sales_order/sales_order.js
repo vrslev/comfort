@@ -365,6 +365,7 @@ frappe.ui.form.on("Sales Order Service", {
 });
 
 function toggle_services_add_row_button() {
+  // TODO: Doesn't work
   // If there's both Delivery and Installation services hide "Add Row" button
   let btn = cur_frm.fields_dict.services.grid.wrapper.find(".grid-add-row");
   let services_joined = cur_frm.doc.services.map((d) => d.type).join();
