@@ -53,8 +53,7 @@
       "in_preview": 1,
       "in_standard_filter": 1,
       "label": "Customer Group",
-      "options": "Customer Group",
-      "search_index": 1
+      "options": "Customer Group"
     },
     {
       "fieldname": "contact_details_section",
@@ -85,6 +84,7 @@
       "in_global_search": 1,
       "in_list_view": 1,
       "in_preview": 1,
+      "in_standard_filter": 1,
       "label": "Phone",
       "options": "Phone",
       "search_index": 1
@@ -113,7 +113,7 @@
   "image_field": "image",
   "index_web_pages_for_search": 1,
   "links": [],
-  "modified": "2021-08-26 23:47:33.134130",
+  "modified": "2021-08-31 04:59:31.719373",
   "modified_by": "Administrator",
   "module": "Entities",
   "name": "Customer",

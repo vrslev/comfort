@@ -36,7 +36,6 @@
       "fieldname": "price",
       "fieldtype": "Currency",
       "in_list_view": 1,
-      "in_preview": 1,
       "label": "Price",
       "precision": "0",
       "read_only": 1
@@ -52,7 +51,7 @@
   "hide_toolbar": 1,
   "istable": 1,
   "links": [],
-  "modified": "2021-08-23 06:42:45.507765",
+  "modified": "2021-08-31 04:41:22.109971",
   "modified_by": "Administrator",
   "module": "Transactions",
   "name": "Purchase Order Delivery Option",

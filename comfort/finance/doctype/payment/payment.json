@@ -13,8 +13,8 @@
     "amount_section",
     "amount",
     "section_break_7",
-    "amended_from",
-    "paid_with_cash"
+    "paid_with_cash",
+    "amended_from"
   ],
   "fields": [
     {
@@ -31,7 +31,8 @@
       "in_list_view": 1,
       "label": "Voucher No",
       "options": "voucher_type",
-      "reqd": 1
+      "reqd": 1,
+      "search_index": 1
     },
     {
       "fieldname": "amended_from",
@@ -79,7 +80,7 @@
   "index_web_pages_for_search": 1,
   "is_submittable": 1,
   "links": [],
-  "modified": "2021-08-25 08:33:06.224497",
+  "modified": "2021-08-31 04:46:24.283520",
   "modified_by": "Administrator",
   "module": "Finance",
   "name": "Payment",

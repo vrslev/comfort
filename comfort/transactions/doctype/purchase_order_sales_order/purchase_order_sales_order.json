@@ -13,7 +13,8 @@
       "in_preview": 1,
       "label": "Sales Order Name",
       "options": "Sales Order",
-      "reqd": 1
+      "reqd": 1,
+      "search_index": 1
     },
     {
       "fetch_from": "sales_order_name.customer",
@@ -37,7 +38,7 @@
   "index_web_pages_for_search": 1,
   "istable": 1,
   "links": [],
-  "modified": "2021-08-26 11:59:38.841276",
+  "modified": "2021-08-31 04:49:01.841164",
   "modified_by": "Administrator",
   "module": "Transactions",
   "name": "Purchase Order Sales Order",

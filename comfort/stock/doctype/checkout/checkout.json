@@ -13,7 +13,8 @@
       "in_list_view": 1,
       "label": "Purchase Order",
       "options": "Purchase Order",
-      "reqd": 1
+      "reqd": 1,
+      "search_index": 1
     },
     {
       "fieldname": "amended_from",
@@ -28,7 +29,7 @@
   "index_web_pages_for_search": 1,
   "is_submittable": 1,
   "links": [],
-  "modified": "2021-08-26 08:11:48.848486",
+  "modified": "2021-08-31 04:47:08.283467",
   "modified_by": "Administrator",
   "module": "Stock",
   "name": "Checkout",

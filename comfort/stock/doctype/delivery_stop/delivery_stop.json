@@ -25,7 +25,8 @@
       "in_list_view": 1,
       "label": "Sales Order",
       "options": "Sales Order",
-      "reqd": 1
+      "reqd": 1,
+      "search_index": 1
     },
     {
       "fetch_from": "sales_order.customer",
@@ -103,7 +104,7 @@
   "index_web_pages_for_search": 1,
   "istable": 1,
   "links": [],
-  "modified": "2021-08-27 03:48:15.803050",
+  "modified": "2021-08-31 04:48:20.210664",
   "modified_by": "Administrator",
   "module": "Stock",
   "name": "Delivery Stop",

@@ -29,8 +29,7 @@
       "in_list_view": 1,
       "in_standard_filter": 1,
       "label": "Account",
-      "options": "Account",
-      "search_index": 1
+      "options": "Account"
     },
     {
       "fieldname": "voucher_section",
@@ -42,8 +41,7 @@
       "fieldtype": "Select",
       "in_filter": 1,
       "label": "Voucher Type",
-      "options": "\nPayment\nReceipt",
-      "search_index": 1
+      "options": "\nPayment\nReceipt"
     },
     {
       "fieldname": "voucher_no",
@@ -87,7 +85,7 @@
   "in_create": 1,
   "is_submittable": 1,
   "links": [],
-  "modified": "2021-08-25 08:32:29.455237",
+  "modified": "2021-08-31 04:33:11.128937",
   "modified_by": "Administrator",
   "module": "Finance",
   "name": "GL Entry",

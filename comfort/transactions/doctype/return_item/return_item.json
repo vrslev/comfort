@@ -22,6 +22,7 @@
       "label": "Item Code",
       "options": "Item",
       "print_hide": 1,
+      "reqd": 1,
       "search_index": 1
     },
     {
@@ -29,7 +30,8 @@
       "fieldtype": "Data",
       "hidden": 1,
       "label": "Item Name",
-      "read_only": 1
+      "read_only": 1,
+      "search_index": 1
     },
     {
       "depends_on": "eval:doc.voucher_type == 'Purchase Order'",
@@ -38,7 +40,8 @@
       "in_list_view": 1,
       "label": "Sales Order",
       "options": "Sales Order",
-      "read_only": 1
+      "read_only": 1,
+      "search_index": 1
     },
     {
       "columns": 1,
@@ -76,7 +79,7 @@
   "index_web_pages_for_search": 1,
   "istable": 1,
   "links": [],
-  "modified": "2021-08-25 08:10:24.911302",
+  "modified": "2021-08-31 04:48:42.498798",
   "modified_by": "Administrator",
   "module": "Transactions",
   "name": "Return Item",

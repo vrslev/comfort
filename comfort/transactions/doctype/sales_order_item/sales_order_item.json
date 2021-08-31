@@ -25,6 +25,7 @@
       "label": "Item Code",
       "options": "Item",
       "print_hide": 1,
+      "reqd": 1,
       "search_index": 1
     },
     {
@@ -32,7 +33,7 @@
       "fieldtype": "Data",
       "label": "Item Name",
       "read_only": 1,
-      "reqd": 1
+      "search_index": 1
     },
     {
       "columns": 1,
@@ -49,8 +50,6 @@
       "fieldtype": "Currency",
       "in_list_view": 1,
       "label": "Rate",
-      "non_negative": 1,
-      "precision": "0",
       "read_only": 1
     },
     {
@@ -58,15 +57,12 @@
       "fieldtype": "Currency",
       "in_list_view": 1,
       "label": "Amount",
-      "non_negative": 1,
-      "precision": "0",
       "read_only": 1
     },
     {
       "fieldname": "weight",
       "fieldtype": "Float",
       "label": "Weight",
-      "non_negative": 1,
       "precision": "2",
       "read_only": 1
     },
@@ -74,7 +70,6 @@
       "fieldname": "total_weight",
       "fieldtype": "Float",
       "label": "Total Weight",
-      "non_negative": 1,
       "precision": "2",
       "read_only": 1
     },
@@ -94,7 +89,7 @@
   "index_web_pages_for_search": 1,
   "istable": 1,
   "links": [],
-  "modified": "2021-08-25 08:08:37.078865",
+  "modified": "2021-08-31 04:43:25.121034",
   "modified_by": "Administrator",
   "module": "Transactions",
   "name": "Sales Order Item",
