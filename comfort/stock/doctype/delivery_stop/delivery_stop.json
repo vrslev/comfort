@@ -8,13 +8,13 @@
     "sales_order",
     "customer",
     "address",
-    "column_break_4",
+    "column_break_1",
     "phone",
     "pending_amount",
     "city",
-    "section_break_7",
+    "section_break",
     "details",
-    "column_break_9",
+    "column_break_2",
     "delivery_type",
     "installation"
   ],
@@ -51,7 +51,6 @@
       "fieldtype": "Currency",
       "in_list_view": 1,
       "label": "Pending Amount",
-      "precision": "0",
       "read_only": 1
     },
     {
@@ -77,18 +76,6 @@
       "read_only": 1
     },
     {
-      "fieldname": "column_break_4",
-      "fieldtype": "Column Break"
-    },
-    {
-      "fieldname": "section_break_7",
-      "fieldtype": "Section Break"
-    },
-    {
-      "fieldname": "column_break_9",
-      "fieldtype": "Column Break"
-    },
-    {
       "fetch_from": "customer.city",
       "fieldname": "city",
       "fieldtype": "Data",
@@ -99,12 +86,24 @@
       "fieldname": "details",
       "fieldtype": "Small Text",
       "label": "Details"
+    },
+    {
+      "fieldname": "column_break_1",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "section_break",
+      "fieldtype": "Section Break"
+    },
+    {
+      "fieldname": "column_break_2",
+      "fieldtype": "Column Break"
     }
   ],
   "index_web_pages_for_search": 1,
   "istable": 1,
   "links": [],
-  "modified": "2021-08-31 04:48:20.210664",
+  "modified": "2021-08-31 05:20:24.749531",
   "modified_by": "Administrator",
   "module": "Stock",
   "name": "Delivery Stop",

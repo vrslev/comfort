@@ -7,12 +7,12 @@
   "field_order": [
     "item_code",
     "qty",
-    "column_break_2",
+    "column_break_1",
     "item_name",
-    "section_break_5",
+    "section_break",
     "rate",
     "weight",
-    "column_break_8",
+    "column_break_2",
     "amount"
   ],
   "fields": [
@@ -42,7 +42,6 @@
       "fieldtype": "Int",
       "in_list_view": 1,
       "label": "Quantity",
-      "print_width": "100px",
       "reqd": 1,
       "width": "100px"
     },
@@ -53,7 +52,6 @@
       "fieldtype": "Currency",
       "in_list_view": 1,
       "label": "Rate",
-      "precision": "0",
       "read_only": 1,
       "width": "100px"
     },
@@ -63,7 +61,6 @@
       "fieldtype": "Currency",
       "in_list_view": 1,
       "label": "Amount",
-      "precision": "0",
       "read_only": 1,
       "width": "100px"
     },
@@ -79,23 +76,22 @@
       "fieldtype": "Column Break"
     },
     {
-      "fieldname": "section_break_5",
-      "fieldtype": "Section Break"
+      "fieldname": "column_break_1",
+      "fieldtype": "Column Break"
     },
     {
-      "fieldname": "column_break_8",
-      "fieldtype": "Column Break"
+      "fieldname": "section_break",
+      "fieldtype": "Section Break"
     }
   ],
   "istable": 1,
   "links": [],
-  "modified": "2021-08-31 04:49:07.765827",
+  "modified": "2021-08-31 05:34:02.150740",
   "modified_by": "Administrator",
   "module": "Transactions",
   "name": "Purchase Order Item To Sell",
   "owner": "Administrator",
   "permissions": [],
-  "quick_entry": 1,
   "sort_field": "modified",
   "sort_order": "DESC",
   "track_changes": 1

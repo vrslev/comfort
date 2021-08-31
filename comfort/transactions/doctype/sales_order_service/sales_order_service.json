@@ -20,14 +20,13 @@
       "in_list_view": 1,
       "label": "Rate",
       "non_negative": 1,
-      "precision": "0",
       "reqd": 1
     }
   ],
   "index_web_pages_for_search": 1,
   "istable": 1,
   "links": [],
-  "modified": "2021-08-09 05:17:02.760698",
+  "modified": "2021-08-31 05:46:14.459606",
   "modified_by": "Administrator",
   "module": "Transactions",
   "name": "Sales Order Service",

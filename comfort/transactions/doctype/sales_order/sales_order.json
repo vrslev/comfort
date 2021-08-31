@@ -7,34 +7,34 @@
   "engine": "InnoDB",
   "field_order": [
     "customer",
-    "section_break_4",
+    "section_break_1",
     "items",
-    "section_break_6",
+    "section_break_2",
     "services",
-    "column_break_6",
+    "column_break_1",
     "discount",
     "commission",
     "edit_commission",
     "payment_section",
     "paid_amount",
-    "column_break_18",
+    "column_break_2",
     "pending_amount",
     "totals_section",
     "total_amount",
     "items_cost",
-    "column_break_25",
+    "column_break_3",
     "total_weight",
     "service_amount",
-    "column_break_22",
+    "column_break_4",
     "total_quantity",
     "margin",
-    "section_break_22",
+    "section_break_3",
     "child_items",
     "status_section",
     "status",
     "payment_status",
     "per_paid",
-    "column_break_32",
+    "column_break_5",
     "delivery_status",
     "amended_from"
   ],
@@ -46,13 +46,8 @@
       "in_standard_filter": 1,
       "label": "Customer",
       "options": "Customer",
-      "print_hide": 1,
       "reqd": 1,
       "search_index": 1
-    },
-    {
-      "fieldname": "section_break_4",
-      "fieldtype": "Section Break"
     },
     {
       "fieldname": "items",
@@ -62,11 +57,6 @@
       "reqd": 1
     },
     {
-      "fieldname": "section_break_6",
-      "fieldtype": "Section Break",
-      "read_only": 1
-    },
-    {
       "allow_on_submit": 1,
       "fieldname": "services",
       "fieldtype": "Table",
@@ -74,7 +64,6 @@
       "options": "Sales Order Service"
     },
     {
-      "default": "15",
       "fieldname": "commission",
       "fieldtype": "Percent",
       "label": "Commission",
@@ -91,16 +80,15 @@
       "default": "0",
       "fieldname": "discount",
       "fieldtype": "Currency",
-      "label": "Discount",
-      "precision": "0"
+      "label": "Discount"
     },
     {
       "allow_on_submit": 1,
       "fieldname": "total_amount",
       "fieldtype": "Currency",
+      "in_list_view": 1,
       "in_preview": 1,
       "label": "Total Amount",
-      "precision": "0",
       "read_only": 1
     },
     {
@@ -112,19 +100,13 @@
       "fieldname": "paid_amount",
       "fieldtype": "Currency",
       "label": "Paid Amount",
-      "precision": "0",
       "read_only": 1
-    },
-    {
-      "fieldname": "column_break_18",
-      "fieldtype": "Column Break"
     },
     {
       "allow_on_submit": 1,
       "fieldname": "pending_amount",
       "fieldtype": "Currency",
       "label": "Pending Amount",
-      "precision": "0",
       "read_only": 1
     },
     {
@@ -136,14 +118,12 @@
       "fieldname": "total_quantity",
       "fieldtype": "Int",
       "label": "Total Quantity",
-      "precision": "0",
       "read_only": 1
     },
     {
       "fieldname": "items_cost",
       "fieldtype": "Currency",
       "label": "Items Cost",
-      "precision": "0",
       "read_only": 1
     },
     {
@@ -151,13 +131,7 @@
       "fieldname": "service_amount",
       "fieldtype": "Currency",
       "label": "Service Amount",
-      "precision": "0",
       "read_only": 1
-    },
-    {
-      "depends_on": "items",
-      "fieldname": "column_break_25",
-      "fieldtype": "Column Break"
     },
     {
       "fieldname": "total_weight",
@@ -170,7 +144,6 @@
       "fieldname": "margin",
       "fieldtype": "Currency",
       "label": "Margin",
-      "precision": "0",
       "read_only": 1
     },
     {
@@ -196,7 +169,6 @@
       "label": "Status",
       "no_copy": 1,
       "options": "\nDraft\nIn Progress\nCompleted\nCancelled",
-      "print_hide": 1,
       "read_only": 1,
       "reqd": 1,
       "search_index": 1
@@ -205,10 +177,10 @@
       "fieldname": "payment_status",
       "fieldtype": "Select",
       "in_list_view": 1,
+      "in_standard_filter": 1,
       "label": "Payment Status",
       "no_copy": 1,
       "options": "\nUnpaid\nPartially Paid\nPaid\nOverpaid",
-      "print_hide": 1,
       "read_only": 1,
       "search_index": 1
     },
@@ -220,10 +192,6 @@
       "read_only": 1
     },
     {
-      "fieldname": "column_break_32",
-      "fieldtype": "Column Break"
-    },
-    {
       "fieldname": "delivery_status",
       "fieldtype": "Select",
       "in_list_view": 1,
@@ -231,7 +199,6 @@
       "label": "Delivery Status",
       "no_copy": 1,
       "options": "\nTo Purchase\nPurchased\nTo Deliver\nDelivered",
-      "print_hide": 1,
       "read_only": 1,
       "search_index": 1
     },
@@ -245,22 +212,42 @@
       "read_only": 1
     },
     {
-      "fieldname": "column_break_6",
-      "fieldtype": "Column Break"
-    },
-    {
-      "fieldname": "section_break_22",
+      "fieldname": "section_break_1",
       "fieldtype": "Section Break"
     },
     {
-      "fieldname": "column_break_22",
+      "fieldname": "section_break_2",
+      "fieldtype": "Section Break"
+    },
+    {
+      "fieldname": "column_break_1",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "column_break_2",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "column_break_3",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "column_break_4",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "section_break_3",
+      "fieldtype": "Section Break"
+    },
+    {
+      "fieldname": "column_break_5",
       "fieldtype": "Column Break"
     }
   ],
   "index_web_pages_for_search": 1,
   "is_submittable": 1,
   "links": [],
-  "modified": "2021-08-27 04:11:50.479990",
+  "modified": "2021-08-31 05:42:34.939398",
   "modified_by": "Administrator",
   "module": "Transactions",
   "name": "Sales Order",

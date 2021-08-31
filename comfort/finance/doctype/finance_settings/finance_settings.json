@@ -1,6 +1,5 @@
 {
   "actions": [],
-  "allow_rename": 1,
   "creation": "2021-07-05 13:57:47.248304",
   "doctype": "DocType",
   "editable_grid": 1,
@@ -97,10 +96,9 @@
       "fieldtype": "Column Break"
     }
   ],
-  "index_web_pages_for_search": 1,
   "issingle": 1,
   "links": [],
-  "modified": "2021-08-27 22:44:24.980462",
+  "modified": "2021-08-31 05:53:54.041850",
   "modified_by": "Administrator",
   "module": "Finance",
   "name": "Finance Settings",

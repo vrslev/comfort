@@ -37,7 +37,6 @@
       "fieldtype": "Currency",
       "in_list_view": 1,
       "label": "Price",
-      "precision": "0",
       "read_only": 1
     },
     {
@@ -48,16 +47,14 @@
       "read_only": 1
     }
   ],
-  "hide_toolbar": 1,
   "istable": 1,
   "links": [],
-  "modified": "2021-08-31 04:41:22.109971",
+  "modified": "2021-08-31 05:33:00.020898",
   "modified_by": "Administrator",
   "module": "Transactions",
   "name": "Purchase Order Delivery Option",
   "owner": "Administrator",
   "permissions": [],
-  "quick_entry": 1,
   "sort_field": "modified",
   "sort_order": "DESC",
   "track_changes": 1

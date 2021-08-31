@@ -7,12 +7,12 @@
   "field_order": [
     "item_code",
     "qty",
-    "column_break_2",
+    "column_break_1",
     "item_name",
-    "section_break_3",
+    "section_break",
     "rate",
     "weight",
-    "column_break_8",
+    "column_break_2",
     "amount",
     "total_weight"
   ],
@@ -24,7 +24,6 @@
       "in_list_view": 1,
       "label": "Item Code",
       "options": "Item",
-      "print_hide": 1,
       "reqd": 1,
       "search_index": 1
     },
@@ -42,7 +41,6 @@
       "in_list_view": 1,
       "label": "Quantity",
       "non_negative": 1,
-      "precision": "2",
       "reqd": 1
     },
     {
@@ -78,24 +76,23 @@
       "fieldtype": "Column Break"
     },
     {
-      "fieldname": "section_break_3",
-      "fieldtype": "Section Break"
+      "fieldname": "column_break_1",
+      "fieldtype": "Column Break"
     },
     {
-      "fieldname": "column_break_8",
-      "fieldtype": "Column Break"
+      "fieldname": "section_break",
+      "fieldtype": "Section Break"
     }
   ],
   "index_web_pages_for_search": 1,
   "istable": 1,
   "links": [],
-  "modified": "2021-08-31 04:43:25.121034",
+  "modified": "2021-08-31 05:45:54.667416",
   "modified_by": "Administrator",
   "module": "Transactions",
   "name": "Sales Order Item",
   "owner": "Administrator",
   "permissions": [],
-  "quick_entry": 1,
   "sort_field": "modified",
   "sort_order": "DESC",
   "track_changes": 1

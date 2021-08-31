@@ -1,7 +1,6 @@
 {
   "actions": [],
   "allow_guest_to_view": 1,
-  "allow_rename": 1,
   "autoname": "field:item_code",
   "creation": "2020-12-29 15:14:19.006164",
   "doctype": "DocType",
@@ -13,10 +12,10 @@
     "item_name",
     "item_categories",
     "url",
-    "column_break_3",
+    "column_break",
     "rate",
     "weight",
-    "section_break_12",
+    "section_break",
     "child_items"
   ],
   "fields": [
@@ -63,18 +62,13 @@
       "read_only": 1
     },
     {
-      "fieldname": "column_break_3",
-      "fieldtype": "Column Break"
-    },
-    {
       "allow_in_quick_entry": 1,
       "fieldname": "rate",
       "fieldtype": "Currency",
       "in_list_view": 1,
       "in_preview": 1,
       "label": "Rate",
-      "non_negative": 1,
-      "precision": "0"
+      "non_negative": 1
     },
     {
       "allow_in_quick_entry": 1,
@@ -85,21 +79,25 @@
       "read_only_depends_on": "eval:doc.child_items && doc.child_items.length > 0"
     },
     {
-      "fieldname": "section_break_12",
-      "fieldtype": "Section Break"
-    },
-    {
       "fieldname": "child_items",
       "fieldtype": "Table",
       "label": "Child Items",
       "options": "Child Item"
+    },
+    {
+      "fieldname": "column_break",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "section_break",
+      "fieldtype": "Section Break"
     }
   ],
   "image_field": "image",
   "index_web_pages_for_search": 1,
   "links": [],
   "max_attachments": 1,
-  "modified": "2021-08-31 04:30:40.284430",
+  "modified": "2021-08-31 05:50:30.852080",
   "modified_by": "Administrator",
   "module": "Entities",
   "name": "Item",

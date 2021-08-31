@@ -11,16 +11,16 @@
     "image",
     "basic_info_section",
     "gender",
-    "column_break_4",
+    "column_break_1",
     "customer_group",
     "contact_details_section",
     "vk_id",
     "vk_url",
-    "column_break_1",
+    "column_break_2",
     "phone",
     "address_section",
     "city",
-    "column_break_13",
+    "column_break_3",
     "address"
   ],
   "fields": [
@@ -41,10 +41,6 @@
       "in_standard_filter": 1,
       "label": "Gender",
       "options": "\nMale\nFemale"
-    },
-    {
-      "fieldname": "column_break_4",
-      "fieldtype": "Column Break"
     },
     {
       "fieldname": "customer_group",
@@ -106,14 +102,18 @@
       "label": "Address"
     },
     {
-      "fieldname": "column_break_13",
+      "fieldname": "column_break_2",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "column_break_3",
       "fieldtype": "Column Break"
     }
   ],
   "image_field": "image",
   "index_web_pages_for_search": 1,
   "links": [],
-  "modified": "2021-08-31 04:59:31.719373",
+  "modified": "2021-08-31 05:05:45.159969",
   "modified_by": "Administrator",
   "module": "Entities",
   "name": "Customer",

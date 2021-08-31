@@ -24,7 +24,7 @@
   ],
   "index_web_pages_for_search": 1,
   "links": [],
-  "modified": "2021-08-25 08:31:23.202661",
+  "modified": "2021-08-31 05:11:52.249953",
   "modified_by": "Administrator",
   "module": "Entities",
   "name": "Item Category",
@@ -33,7 +33,6 @@
     {
       "create": 1,
       "delete": 1,
-      "export": 1,
       "read": 1,
       "report": 1,
       "role": "System Manager",

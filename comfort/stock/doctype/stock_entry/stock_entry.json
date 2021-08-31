@@ -8,11 +8,11 @@
     "stock_type",
     "voucher_section",
     "voucher_type",
-    "column_break_2",
+    "column_break",
     "voucher_no",
     "items_section",
     "items",
-    "section_break_7",
+    "section_break",
     "amended_from"
   ],
   "fields": [
@@ -36,7 +36,7 @@
       "fieldtype": "Select",
       "in_list_view": 1,
       "label": "Stock Type",
-      "options": "Reserved Actual\nAvailable Actual\nReserved Purchased\nAvailable Purchased",
+      "options": "\nReserved Actual\nAvailable Actual\nReserved Purchased\nAvailable Purchased",
       "reqd": 1
     },
     {
@@ -56,14 +56,6 @@
       "read_only": 1
     },
     {
-      "fieldname": "column_break_2",
-      "fieldtype": "Column Break"
-    },
-    {
-      "fieldname": "section_break_7",
-      "fieldtype": "Section Break"
-    },
-    {
       "fieldname": "voucher_section",
       "fieldtype": "Section Break",
       "label": "Voucher"
@@ -72,13 +64,20 @@
       "fieldname": "items_section",
       "fieldtype": "Section Break",
       "label": "Items"
+    },
+    {
+      "fieldname": "column_break",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "section_break",
+      "fieldtype": "Section Break"
     }
   ],
   "in_create": 1,
-  "index_web_pages_for_search": 1,
   "is_submittable": 1,
   "links": [],
-  "modified": "2021-08-31 04:46:58.772831",
+  "modified": "2021-08-31 05:22:42.093281",
   "modified_by": "Administrator",
   "module": "Stock",
   "name": "Stock Entry",
