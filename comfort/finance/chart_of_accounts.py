@@ -14,7 +14,7 @@ ACCOUNTS: dict[str, dict[str, Any]] = {
         "Inventory": {},
         "Prepaid Inventory": {},
     },
-    "Expenses": {
+    "Expense": {
         "Cost of Goods Sold": {},
         "Purchase Delivery": {},
         "Sales Compensations": {},

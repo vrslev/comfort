@@ -11,7 +11,7 @@ from comfort.finance.report.profit_and_loss_statement.profit_and_loss_statement 
     _get_parent_children_accounts_map,
     get_chart_data,
     get_data,
-    get_income_expenses_profit_loss_totals,
+    get_income_expense_profit_loss_totals,
     get_report_summary,
 )
 from frappe.utils import get_datetime_str, today
@@ -25,7 +25,7 @@ def test_get_parent_children_accounts_map():
     for account in accounts:
         if account.parent_account is None and account.name not in (
             "Income",
-            "Expenses",
+            "Expense",
         ):
             to_remove.append(account)
     for account in to_remove:
@@ -45,10 +45,10 @@ def test_filter_accounts():
         {"name": "Delivery", "parent_account": "Service", "indent": 2},
         {"name": "Sales", "parent_account": "Income", "indent": 1},
         {"name": "Purchase Compensations", "parent_account": "Income", "indent": 1},
-        {"name": "Expenses", "parent_account": None, "indent": 0},
-        {"name": "Sales Compensations", "parent_account": "Expenses", "indent": 1},
-        {"name": "Purchase Delivery", "parent_account": "Expenses", "indent": 1},
-        {"name": "Cost of Goods Sold", "parent_account": "Expenses", "indent": 1},
+        {"name": "Expense", "parent_account": None, "indent": 0},
+        {"name": "Sales Compensations", "parent_account": "Expense", "indent": 1},
+        {"name": "Purchase Delivery", "parent_account": "Expense", "indent": 1},
+        {"name": "Cost of Goods Sold", "parent_account": "Expense", "indent": 1},
     ]
 
 
@@ -89,37 +89,35 @@ def test_calculate_total_in_parent_accounts(gl_entry: GLEntry):
             assert account.total == 0
 
 
-def generate_income_expenses_profit_loss_totals(gl_entry: GLEntry):
+def generate_income_expense_profit_loss_totals(gl_entry: GLEntry):
     insert_gl_entries_with_wrong_conditions(gl_entry)
     data = get_data(get_filters())
-    return get_income_expenses_profit_loss_totals(data)
+    return get_income_expense_profit_loss_totals(data)
 
 
-def test_get_income_expenses_profit_loss_totals(gl_entry: GLEntry):
-    income, expenses, profit_loss = generate_income_expenses_profit_loss_totals(
-        gl_entry
-    )
+def test_get_income_expense_profit_loss_totals(gl_entry: GLEntry):
+    income, expense, profit_loss = generate_income_expense_profit_loss_totals(gl_entry)
     assert income == 300
-    assert expenses == 0
+    assert expense == 0
     assert profit_loss == 300
 
 
 def test_get_chart_data():
-    income, expenses, profit_loss = 300, 200, 100
+    income, expense, profit_loss = 300, 200, 100
     filters = get_filters()
-    chart = get_chart_data(filters, income, expenses, profit_loss)
+    chart = get_chart_data(filters, income, expense, profit_loss)
     assert chart["data"]["labels"][0] == f"{filters['from_date']}—{filters['to_date']}"
     for dataset in chart["data"]["datasets"]:
         if dataset["name"] == "Income":
             assert dataset["values"][0] == income
-        elif dataset["name"] == "Expenses":
-            assert dataset["values"][0] == expenses
+        elif dataset["name"] == "Expense":
+            assert dataset["values"][0] == expense
         elif dataset["name"] == "Profit/Loss":
             assert dataset["values"][0] == profit_loss
 
 
 @pytest.mark.parametrize(
-    ("income", "expenses", "profit_loss", "indicator"),
+    ("income", "expense", "profit_loss", "indicator"),
     (
         (300, 200, 100, "Green"),
         (300, 300, 0, "Green"),
@@ -127,13 +125,13 @@ def test_get_chart_data():
     ),
 )
 def test_get_report_summary(
-    income: int, expenses: int, profit_loss: int, indicator: str
+    income: int, expense: int, profit_loss: int, indicator: str
 ):
-    for v in get_report_summary(income, expenses, profit_loss):
+    for v in get_report_summary(income, expense, profit_loss):
         if v["label"] == "Income":
             assert v["value"] == income
-        elif v["label"] == "Expenses":
-            assert v["value"] == expenses
+        elif v["label"] == "Expense":
+            assert v["value"] == expense
         elif v["label"] == "Total Profit This Year":
             assert v["value"] == profit_loss
             assert v["indicator"] == indicator

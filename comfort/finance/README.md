@@ -17,7 +17,7 @@ Service
 Delivery
 Installation
 
-**Expenses**
+**Expense**
 Service
 Delivery
 Cost of Goods Sold
