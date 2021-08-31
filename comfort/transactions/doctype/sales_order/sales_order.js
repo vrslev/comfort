@@ -16,15 +16,7 @@ comfort.SalesOrderController = frappe.ui.form.Controller.extend({
   },
 
   refresh() {
-    // if (cur_frm.toolbar.current_status == "Submit") {
-    //   cur_frm.toolbar.page.clear_primary_action();
-    // }
     this.setup_buttons();
-    this.frm.custom_make_buttons = {
-      Payment: "Payment",
-      Receipt: "Receipt",
-      "Purchase Order": "Purchase Order",
-    };
   },
 
   onload_post_render() {
