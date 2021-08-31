@@ -115,6 +115,38 @@ def get_standard_queries(doctypes: Iterable[str]):  # pragma: no cover
     return {d: query_name for d in doctypes}
 
 
+def _create_comfort_user_role():
+    doc = {"doctype": "Role", "name": "Comfort User"}
+    if frappe.db.exists(doc):
+        frappe.delete_doc(doc["doctype"], doc["name"])
+    else:
+        frappe.get_doc(
+            {
+                **doc,
+                "doctype": "Role",
+                "name": "Comfort User",
+                "role_name": "Comfort User",
+                "desk_access": 1,
+                "two_factor_auth": 0,
+                "search_bar": 1,
+                "notifications": 0,
+                "chat": 0,
+                "list_sidebar": 1,
+                "bulk_actions": 1,
+                "view_switcher": 0,  # List/Report/Kanban views
+                "form_sidebar": 1,
+                "timeline": 1,
+                "dashboard": 1,
+                "is_custom": 0,
+            }
+        ).insert()
+
+
+def before_install():
+    _create_comfort_user_role()
+    frappe.db.commit()
+
+
 def _set_currency_symbol():
     doc: Currency = frappe.get_doc("Currency", "RUB")
     doc.symbol = "₽"
@@ -124,7 +156,7 @@ def _set_currency_symbol():
     frappe.db.set_default("currency_precision", 0)
 
 
-def _add_app_name():
+def _add_app_name():  # TODO: Make normal tests (insert another value before testing this)
     frappe.db.set_value("System Settings", None, "app_name", "Comfort")
 
 
