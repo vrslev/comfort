@@ -13,6 +13,17 @@ $(document).on("list_sidebar_setup", () => {
   cur_list.page.sidebar.remove();
 });
 
+$(document).ready(() => {
+  $(
+    '[class="nav-item dropdown dropdown-help dropdown-mobile d-none d-lg-block"]'
+  ).remove();
+  $('[onclick="return frappe.ui.toolbar.setup_session_defaults()"]').remove();
+  $('[onclick="return frappe.ui.toolbar.view_website()"]').remove();
+  $('[onclick="return frappe.ui.toolbar.toggle_full_width()"]').remove();
+  $('[href="/app/background_jobs"]').remove();
+  $('[href="/app/user-profile"]').remove();
+});
+
 comfort.get_items = (item_codes) => {
   // TODO: Fix freeze
   var promise = new Promise((resolve) => {
