@@ -4,7 +4,7 @@
   "doctype": "DocType",
   "editable_grid": 1,
   "engine": "InnoDB",
-  "field_order": ["bot_token", "get_chat_id", "column_break_2", "chat_id"],
+  "field_order": ["bot_token", "get_chat_id", "column_break", "chat_id"],
   "fields": [
     {
       "fieldname": "bot_token",
@@ -25,14 +25,13 @@
       "read_only": 1
     },
     {
-      "fieldname": "column_break_2",
+      "fieldname": "column_break",
       "fieldtype": "Column Break"
     }
   ],
-  "index_web_pages_for_search": 1,
   "issingle": 1,
   "links": [],
-  "modified": "2021-08-27 02:05:56.229332",
+  "modified": "2021-08-31 04:56:55.594138",
   "modified_by": "Administrator",
   "module": "Comfort Core",
   "name": "Telegram Settings",
@@ -41,11 +40,8 @@
     {
       "create": 1,
       "delete": 1,
-      "email": 1,
-      "print": 1,
       "read": 1,
       "role": "System Manager",
-      "share": 1,
       "write": 1
     }
   ],
