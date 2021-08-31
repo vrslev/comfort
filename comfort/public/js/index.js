@@ -1,7 +1,11 @@
 frappe.provide("comfort");
 
+var DONT_HIDE_SIDEBAR_DOCTYPES = ["Item"];
+
 $(document).on("form-load", () => {
-  cur_frm.page.sidebar.remove();
+  if (!DONT_HIDE_SIDEBAR_DOCTYPES.includes(cur_frm.doctype)) {
+    cur_frm.page.sidebar.remove();
+  }
   $(".sidebar-toggle-btn").remove();
 });
 
