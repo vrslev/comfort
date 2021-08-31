@@ -4,7 +4,7 @@ from collections import defaultdict
 from typing import Any
 
 import frappe
-from comfort import group_by_key
+from comfort import group_by_attr
 from comfort.finance.doctype.account.account import Account
 from frappe import _
 
@@ -48,7 +48,7 @@ def _get_parent_children_accounts_map() -> dict[str | None, list[Account]]:
             to_remove.append(account)
     for account in to_remove:
         accounts.remove(account)
-    return group_by_key(accounts, key="parent_account")
+    return group_by_attr(accounts, "parent_account")
 
 
 def _filter_accounts(parent_children_map: dict[str | None, list[Account]]):

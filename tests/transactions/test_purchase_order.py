@@ -7,7 +7,7 @@ import ikea_api_wrapped
 import pytest
 
 import frappe
-from comfort import count_quantity, group_by_key
+from comfort import count_quantity, group_by_attr
 from comfort.entities.doctype.child_item.child_item import ChildItem
 from comfort.transactions.doctype.purchase_order.purchase_order import PurchaseOrder
 from comfort.transactions.doctype.sales_order_child_item.sales_order_child_item import (
@@ -38,8 +38,8 @@ def test_delete_sales_order_duplicates(purchase_order: PurchaseOrder):
     ]
     purchase_order.delete_sales_order_duplicates()
 
-    for orders in group_by_key(
-        purchase_order.sales_orders, key="sales_order_name"
+    for orders in group_by_attr(
+        purchase_order.sales_orders, "sales_order_name"
     ).values():
         assert len(orders) == 1
 

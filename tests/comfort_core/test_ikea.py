@@ -1,7 +1,7 @@
 from ikea_api_wrapped.parsers.item import ParsedItem
 
 import frappe
-from comfort import count_quantity, counters_are_same
+from comfort import are_same_counters, count_quantity
 from comfort.comfort_core.ikea import (
     _child_items_are_same,
     _create_item,
@@ -83,7 +83,7 @@ def test_create_item_exists(parsed_item: ParsedItem):
     assert doc.item_name == parsed_item["name"]
     assert doc.url == parsed_item["url"]
     assert doc.rate == parsed_item["price"]
-    assert counters_are_same(
+    assert are_same_counters(
         count_quantity(doc.child_items),
         count_quantity(
             frappe._dict(item_code=i["item_code"], qty=i["qty"])
@@ -102,7 +102,7 @@ def test_create_item_exists_child_items_changed(parsed_item: ParsedItem):
     _create_item(parsed_item)
 
     doc: Item = frappe.get_doc("Item", parsed_item["item_code"])
-    assert counters_are_same(
+    assert are_same_counters(
         count_quantity(doc.child_items),
         count_quantity(
             frappe._dict(item_code=i["item_code"], qty=i["qty"])
@@ -121,7 +121,7 @@ def test_create_item_not_exists(parsed_item: ParsedItem):
     assert doc.url == parsed_item["url"]
     assert doc.rate == parsed_item["price"]
     assert doc.weight == parsed_item["weight"]
-    assert counters_are_same(
+    assert are_same_counters(
         count_quantity(doc.child_items),
         count_quantity(
             frappe._dict(item_code=i["item_code"], qty=i["qty"])

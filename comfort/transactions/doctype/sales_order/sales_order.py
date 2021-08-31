@@ -4,7 +4,7 @@ from __future__ import annotations
 from typing import Generator, Iterable, Literal
 
 import frappe
-from comfort import ValidationError, count_quantity, group_by_key
+from comfort import ValidationError, count_quantity, group_by_attr
 from comfort.comfort_core.doctype.commission_settings.commission_settings import (
     CommissionSettings,
 )
@@ -43,7 +43,7 @@ class SalesOrderMethods(Document):
 
     def merge_same_items(self):
         """Merge items that have same Item Code."""
-        items_grouped_by_item_code: Iterable[list[SalesOrderItem]] = group_by_key(
+        items_grouped_by_item_code: Iterable[list[SalesOrderItem]] = group_by_attr(
             self.items
         ).values()
         final_items: list[SalesOrderItem] = []
@@ -299,7 +299,7 @@ class SalesOrder(SalesOrderStatuses):
             filters={"parent": ("in", parent_item_codes_to_qty.keys())},
         )
 
-        for parent_item_code, items in group_by_key(child_items, key="parent").items():
+        for parent_item_code, items in group_by_attr(child_items, "parent").items():
             parent_item_code: str
             items: list[ChildItem]
             parent_qty = parent_item_codes_to_qty[parent_item_code]

@@ -1,7 +1,7 @@
 import pytest
 
 import frappe
-from comfort import group_by_key
+from comfort import group_by_attr
 from comfort.finance.doctype.account.account import Account
 from comfort.finance.doctype.gl_entry.gl_entry import GLEntry
 from comfort.finance.report.profit_and_loss_statement.profit_and_loss_statement import (
@@ -31,8 +31,8 @@ def test_get_parent_children_accounts_map():
     for account in to_remove:
         accounts.remove(account)
 
-    assert _get_parent_children_accounts_map() == group_by_key(
-        accounts, key="parent_account"
+    assert _get_parent_children_accounts_map() == group_by_attr(
+        accounts, "parent_account"
     )
 
 

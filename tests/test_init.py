@@ -4,7 +4,7 @@ import pytest
 
 import comfort
 import frappe
-from comfort import count_quantity, counters_are_same, group_by_key, maybe_json
+from comfort import are_same_counters, count_quantity, group_by_attr, maybe_json
 
 
 @dataclass
@@ -26,31 +26,31 @@ def test_count_quantity():
         assert pair in expected
 
 
-def test_counters_are_same_true():
+def test_are_same_counters_true():
     second_data = [
         MockItem(item_code="2", qty=5),
         MockItem(item_code="1", qty=4),
         MockItem(item_code="1", qty=3),
     ]
-    assert counters_are_same(count_quantity(data), count_quantity(second_data))
+    assert are_same_counters(count_quantity(data), count_quantity(second_data))
 
 
-def test_counters_are_same_not_true():
+def test_are_same_counters_not_true():
     second_data = [
         MockItem(item_code="2", qty=5),
         MockItem(item_code="1", qty=20),
         MockItem(item_code="1", qty=3),
         MockItem(item_code="3", qty=1),
     ]
-    assert not counters_are_same(count_quantity(data), count_quantity(second_data))
+    assert not are_same_counters(count_quantity(data), count_quantity(second_data))
 
 
-def test_group_by_key():
+def test_group_by_attr():
     expected = (
         ("1", [MockItem(item_code="1", qty=2), MockItem(item_code="1", qty=5)]),
         ("2", [MockItem(item_code="2", qty=5)]),
     )
-    for pair in group_by_key(data).items():
+    for pair in group_by_attr(data).items():
         assert pair in expected
 
 

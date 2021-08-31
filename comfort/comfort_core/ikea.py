@@ -9,7 +9,7 @@ from ikea_api_wrapped.parsers.item import ParsedItem
 from ikea_api_wrapped.wrappers import NoDeliveryOptionsAvailableError
 
 import frappe
-from comfort import count_quantity, counters_are_same
+from comfort import are_same_counters, count_quantity
 from comfort.comfort_core.doctype.ikea_settings.ikea_settings import (
     get_authorized_api,
     get_guest_api,
@@ -72,7 +72,7 @@ def _child_items_are_same(old_child_items: list[ChildItem], new_child_items: lis
         for item in new_child_items
     )
     counted_old_child_items = count_quantity(old_child_items)
-    return counters_are_same(counted_new_child_items, counted_old_child_items)
+    return are_same_counters(counted_new_child_items, counted_old_child_items)
 
 
 def _create_item(parsed_item: ParsedItem):

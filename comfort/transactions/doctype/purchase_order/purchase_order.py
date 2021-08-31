@@ -9,7 +9,7 @@ from ikea_api_wrapped.parsers.order_capture import DeliveryOptionDict
 from ikea_api_wrapped.wrappers import PurchaseInfoDict
 
 import frappe
-from comfort import ValidationError, count_quantity, group_by_key, maybe_json
+from comfort import ValidationError, count_quantity, group_by_attr, maybe_json
 from comfort.comfort_core.ikea import add_items_to_cart, get_delivery_services
 from comfort.entities.doctype.child_item.child_item import ChildItem
 from comfort.finance import create_payment
@@ -60,7 +60,7 @@ class PurchaseOrderMethods(Document):
     def delete_sales_order_duplicates(self):
         sales_orders_grouped_by_name: ValuesView[
             list[PurchaseOrderSalesOrder]
-        ] = group_by_key(self.sales_orders, "sales_order_name").values()
+        ] = group_by_attr(self.sales_orders, "sales_order_name").values()
         final_orders: list[PurchaseOrderSalesOrder] = []
         for orders in sales_orders_grouped_by_name:
             final_orders.append(orders[0])
@@ -338,9 +338,9 @@ class PurchaseOrder(PurchaseOrderMethods):
 
         counter = count_quantity(
             (frappe._dict(i) for i in maybe_json(unavailable_items)),
-            value_key="available_qty",
+            value_attr="available_qty",
         )
-        grouped_items = group_by_key(i for i in all_items if i.item_code in counter)
+        grouped_items = group_by_attr(i for i in all_items if i.item_code in counter)
 
         res: list[dict[str, str | int | None]] = []
         for items in grouped_items.values():

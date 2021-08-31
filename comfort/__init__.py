@@ -10,32 +10,32 @@ __version__ = "0.2.0"
 
 OrderTypes = Literal["Sales Order", "Purchase Order"]  # pragma: no cover
 
-T = TypeVar("T")
+_T = TypeVar("_T")
 
 
 def count_quantity(
-    data: Iterable[Any], key_key: str = "item_code", value_key: str = "qty"
+    data: Iterable[Any], key_attr: str = "item_code", value_attr: str = "qty"
 ):
-    """Count something (most often quantity) in list of objects."""
-    c: Counter[str] = Counter()
+    """Count something (most often item quantity) in list of objects."""
+    counter: Counter[str] = Counter()
     for item in data:
-        c[getattr(item, key_key)] += getattr(item, value_key)
-    return c
+        counter[getattr(item, key_attr)] += getattr(item, value_attr)
+    return counter
 
 
-def counters_are_same(first: Counter[str], second: Counter[str]):
+def are_same_counters(first: Counter[str], second: Counter[str]):
     return len(set(first.items()).symmetric_difference(set(second.items()))) == 0
 
 
-def group_by_key(data: Iterable[T], key: str = "item_code") -> dict[Any, list[T]]:
-    """Group iterable of objects by key."""
-    d: defaultdict[Any, list[T]] = defaultdict(list)
+def group_by_attr(data: Iterable[_T], attr: str = "item_code") -> dict[Any, list[_T]]:
+    """Group iterable of objects by attribute."""
+    ddict: defaultdict[Any, list[_T]] = defaultdict(list)
     for item in data:
-        d[getattr(item, key)].append(item)
-    return dict(d)
+        ddict[getattr(item, attr)].append(item)
+    return dict(ddict)
 
 
-def maybe_json(value: T) -> T:
+def maybe_json(value: _T) -> _T:
     """Normalize payload from frontend without messing type hints."""
     try:
         return json.loads(value)  # type: ignore
