@@ -1,183 +1,144 @@
-# type: ignore
+from __future__ import annotations
+
+from collections import defaultdict
+from typing import Any
 
 import frappe
+from comfort import group_by_key
+from comfort.finance.doctype.account.account import Account
+from frappe import _
 
 
-def execute(filters=None):
-    columns, data = [], []
-
-    period_key, period_label = "Date Range", "Date Range"
-    date = [filters.from_date, filters.to_date]
-
-    columns = get_columns(period_key, period_label)
-
-    income = get_data(date, "Income", "Credit", period_key)
-    expense = get_data(date, "Expense", "Debit", period_key)
-
-    data = []
-    data.extend(income or [])
-    data.extend(expense or [])
-
-    profit_loss, income, expense = get_profit_loss_amount(data, period_key)
-    data.append({"account": "Profit for the year", period_key: profit_loss})
-
-    chart = get_chart_data(
-        filters, columns, income, expense, data[-1][period_key], period_key
+def execute(filters: dict[str, str]):  # pragma: no cover
+    data = get_data(filters)
+    income, expenses, profit_loss = get_income_expenses_profit_loss_totals(data)
+    return (
+        get_columns(),
+        data,
+        None,
+        get_chart_data(filters, income, expenses, profit_loss),
+        get_report_summary(income, expenses, profit_loss),
     )
-    report_summary = get_report_summary(data, period_key)
-
-    return columns, data, None, chart, report_summary
 
 
-def get_columns(period_key, period_label):
-    columns = [
+def get_columns():  # pragma: no cover
+    return [
         {
-            "fieldname": "account",
+            "fieldname": "name",
             "label": "Account",
             "fieldtype": "Link",
             "options": "Account",
             "width": 300,
         },
         {
-            "fieldname": period_key,
-            "label": period_label,
+            "fieldname": "total",
+            "label": "Total",
             "fieldtype": "Currency",
-            "options": "currency",
             "width": 150,
         },
     ]
-    return columns
 
 
-def get_data(date, root_type, dr_cr, period_key):
-    accounts = get_accounts_with_root_type(root_type)
-    data = []
-    if accounts:
-        i = 0
-        for d in accounts:
-            if d.parent_account is None or d.parent_account == data[-1]["account"]:
-                append(data, d, i, period_key)
-                i += 1
-            else:
-                for a in data:
-                    if a["account"] == d.parent_account:
-                        i = a["indent"] + 1
-                        break
-                append(data, d, i, period_key)
-                i += 1
-    temp = []
-    for d in data:
-        bal = get_account_balance(d["account"], date)
-        if bal:
-            d[period_key] = abs(bal)
-            temp.append(d)
-    for t in temp:
-        for d in data:
-            if d["account"] == t["parent_account"]:
-                if d[period_key] == 0:
-                    d[period_key] = t[period_key]
-                    temp.append(d)
-                else:
-                    d[period_key] += t[period_key]
-    data = [d for d in data if d[period_key] != 0]
-    if data:
-        data.append(
-            {
-                "account": "Total " + root_type + " (" + dr_cr + ")",
-                period_key: data[0][period_key],
-            }
-        )
-        data.append({})
-    return data
+def _get_parent_children_accounts_map() -> dict[str | None, list[Account]]:
+    accounts: list[Account] = frappe.get_all("Account", ("name", "parent_account"))
+    acceptable_parents = (_("Income"), _("Expenses"))
+    to_remove: list[Account] = []
+    for account in accounts:
+        if account.parent_account is None and account.name not in acceptable_parents:
+            to_remove.append(account)
+    for account in to_remove:
+        accounts.remove(account)
+    return group_by_key(accounts, key="parent_account")
 
 
-def append(data, d, i, period_key):
-    data.append(
-        {
-            "account": d.name,
-            "parent_account": d.parent_account,
-            "indent": i,
-            "has_value": d.is_group,
-            period_key: 0,
-        }
+def _filter_accounts(parent_children_map: dict[str | None, list[Account]]):
+    filtered_accounts: list[Account] = []
+
+    def add_to_list(parent: str | None, level: int):
+        for child in parent_children_map.get(parent, []):
+            child.indent = level
+            filtered_accounts.append(child)
+            # Try to run over children of this child
+            add_to_list(child.name, level + 1)
+
+    add_to_list(None, 0)
+    return filtered_accounts
+
+
+def _get_account_balance_map(filters: dict[str, str]):
+    entries: list[Any] = frappe.get_all(
+        "GL Entry",
+        fields=("account", "(debit - credit) as balance"),
+        filters=(
+            ("docstatus", "!=", 2),
+            ("creation", "between", (filters["from_date"], filters["to_date"])),
+        ),
     )
+    account_balance_map: defaultdict[str, int] = defaultdict(int)
+    for entry in entries:
+        account_balance_map[entry.account] += abs(entry.balance)
+    return account_balance_map
 
 
-def get_accounts_with_root_type(root_type):
-    return frappe.db.sql(
-        """ SELECT
-                name, parent_account, lft, root_type, is_group
-            FROM
-                tabAccount
-            WHERE
-                root_type=%s
-            ORDER BY
-                lft""",
-        (root_type),
-        as_dict=1,
+def _calculate_total_in_parent_accounts(
+    account_balance_map: defaultdict[str, int],
+    parent_children_map: dict[str | None, list[Account]],
+    accounts: list[Account],
+):
+    for account in reversed(accounts):
+        account.total = account_balance_map[account.name]
+        children: list[Account] = parent_children_map.get(account.name)
+        if children:
+            account_balance_map[account.name] = account.total = sum(
+                account_balance_map[c.name] for c in children
+            )
+
+
+def get_data(filters: dict[str, str]):  # pragma: no cover
+    account_balance_map = _get_account_balance_map(filters)
+    parent_children_map = _get_parent_children_accounts_map()
+    accounts = _filter_accounts(parent_children_map)
+    _calculate_total_in_parent_accounts(
+        account_balance_map, parent_children_map, accounts
     )
+    return accounts
 
 
-def get_account_balance(account, date):
-    return frappe.db.sql(
-        """ SELECT
-                    sum(debit) - sum(credit)
-                FROM
-                    `tabGL Entry`
-                WHERE
-                    is_cancelled=0 and account=%s and posting_date>=%s and posting_date<=%s""",
-        (account, date[0], date[1]),
-    )[0][0]
+def get_income_expenses_profit_loss_totals(data: list[Account]):
+    income: int = 0
+    expenses: int = 0
+    for account in data:
+        if account.name == _("Income"):
+            income = account.total
+        elif account.name == _("Expenses"):
+            expenses = account.total
+    return income, expenses, income - expenses
 
 
-def get_profit_loss_amount(data, period_key):
-    income, expense = 0, 0
-    for d in data:
-        if d and d["account"] == "Total Income (Credit)":
-            income = d[period_key]
-        elif d and d["account"] == "Total Expense (Debit)":
-            expense = d[period_key]
-    profit_loss = income - expense
-    return profit_loss, income, expense
+def get_chart_data(
+    filters: dict[str, str], income: int, expenses: int, profit_loss: int
+):
+    return {
+        "data": {
+            "labels": [f"{filters['from_date']}—{filters['to_date']}"],
+            "datasets": [
+                {"name": "Income", "values": [income]},
+                {"name": "Expenses", "values": [expenses]},
+                {"name": "Profit/Loss", "values": [profit_loss]},
+            ],
+        },
+        "type": "bar",
+    }
 
 
-def get_report_summary(data, period_key):
-    profit, income, expense = get_profit_loss_amount(data, period_key)
-
-    report_summary = [
-        {"value": income, "label": "Income", "datatype": "Currency", "currency": "₹"},
-        {"value": expense, "label": "Expense", "datatype": "Currency", "currency": "₹"},
+def get_report_summary(income: int, expenses: int, profit_loss: int):
+    return [
+        {"value": income, "label": "Income", "datatype": "Currency"},
+        {"value": expenses, "label": "Expenses", "datatype": "Currency"},
         {
-            "value": profit,
-            "indicator": "Green" if profit > 0 else "Red",
+            "value": profit_loss,
+            "indicator": "Green" if profit_loss >= 0 else "Red",
             "label": "Total Profit This Year",
             "datatype": "Currency",
-            "currency": "₹",
         },
     ]
-    return report_summary
-
-
-def get_chart_data(filters, columns, income, expense, profit, period_key):
-    labels = [period_key]
-
-    income_data, expense_data, profit_data = [], [], []
-
-    if income != 0:
-        income_data.append(income)
-    if expense != 0:
-        expense_data.append(expense)
-    if profit != 0:
-        profit_data.append(profit)
-
-    datasets = []
-    if income_data:
-        datasets.append({"name": "Income", "values": income_data})
-    if expense_data:
-        datasets.append({"name": "Expense", "values": expense_data})
-    if profit_data:
-        datasets.append({"name": "Net Profit/Loss", "values": profit_data})
-
-    chart = {"data": {"labels": labels, "datasets": datasets}, "type": "bar"}
-
-    return chart
