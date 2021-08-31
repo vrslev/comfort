@@ -17,6 +17,11 @@ comfort.SalesOrderController = frappe.ui.form.Controller.extend({
 
   refresh() {
     this.setup_buttons();
+    this.frm.custom_make_buttons = {
+      Payment: "Payment",
+      Receipt: "Receipt",
+      "Purchase Order": "Purchase Order",
+    };
   },
 
   onload_post_render() {

@@ -51,6 +51,11 @@ comfort.IkeaCartController = frappe.ui.form.Controller.extend({
   refresh() {
     this.setup_buttons();
     this.refresh_delivery_options();
+    this.frm.custom_make_buttons = {
+      Payment: "Payment",
+      Checkout: "Checkout",
+      Receipt: "Receipt",
+    };
   },
 
   setup_buttons() {
