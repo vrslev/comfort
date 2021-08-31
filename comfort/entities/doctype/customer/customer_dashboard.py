@@ -1,6 +1,6 @@
 def get_data():
     return {
-        "heatmap": True,
         "fieldname": "customer",
+        "non_standard_fieldnames": {"Purchase Order": "customer"},
         "transactions": [{"items": ["Sales Order"]}, {"items": ["Purchase Order"]}],
     }
