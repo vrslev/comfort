@@ -16,7 +16,7 @@ def get_account(field_name: str) -> str:
     )
     if account is None:
         raise ValidationError(
-            _('Account Settings has no field "{}"').format(actual_field_name)
+            _('Finance Settings has no field "{}"').format(actual_field_name)
         )
     return account
 
