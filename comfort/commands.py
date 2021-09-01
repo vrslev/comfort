@@ -3,20 +3,16 @@ from typing import Any
 import click
 
 import frappe
-from comfort.comfort_core.hooks import after_install, before_install
+from comfort.comfort_core.hooks import after_install
 from comfort.hooks import app_name
 from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
 from frappe.commands import get_site, pass_context
+from frappe.utils.fixtures import sync_fixtures
 
 
 def connect(context: Any):
     frappe.init(get_site(context))
     frappe.connect()
-
-
-def _trigger_before_and_after_install_hooks():
-    before_install()
-    after_install()
 
 
 def _cleanup():
@@ -37,7 +33,8 @@ def _cleanup():
         else:
             frappe.db.sql(f"DELETE FROM `tab{doctype.name}`")  # nosec
 
-    _trigger_before_and_after_install_hooks()
+    after_install()
+    sync_fixtures(app_name)
     frappe.db.commit()
 
 
