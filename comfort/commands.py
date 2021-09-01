@@ -3,6 +3,7 @@ from typing import Any
 import click
 
 import frappe
+from comfort.comfort_core.hooks import after_install, before_install
 from comfort.hooks import app_name
 from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
 from frappe.commands import get_site, pass_context
@@ -14,9 +15,8 @@ def connect(context: Any):
 
 
 def _trigger_before_and_after_install_hooks():
-    app_hooks = frappe.get_hooks(app_name=app_name)
-    for hook in app_hooks.before_install or [] + app_hooks.after_install or []:
-        frappe.get_attr(hook)()
+    before_install()
+    after_install()
 
 
 def _cleanup():
@@ -24,7 +24,12 @@ def _cleanup():
         m.name for m in frappe.get_all("Module Def", filters={"app_name": app_name})
     )
     doctypes: list[Any] = frappe.get_all(
-        "DocType", fields=("name", "issingle"), filters={"module": ("in", modules)}
+        "DocType",
+        fields=("name", "issingle"),
+        filters={
+            "module": ("in", modules),
+            "name": ("not in", ("Ikea Settings", "Telegram Settings")),
+        },
     )
     for doctype in doctypes:
         if doctype.issingle:
