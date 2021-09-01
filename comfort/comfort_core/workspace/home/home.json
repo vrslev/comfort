@@ -202,6 +202,15 @@
     },
     {
       "hidden": 0,
+      "is_query_report": 1,
+      "label": "Stock Balance",
+      "link_to": "Stock Balance",
+      "link_type": "Report",
+      "onboard": 0,
+      "type": "Link"
+    },
+    {
+      "hidden": 0,
       "is_query_report": 0,
       "label": "Transactions",
       "link_type": "Page",
@@ -236,7 +245,7 @@
       "type": "Link"
     }
   ],
-  "modified": "2021-08-31 21:58:57.595136",
+  "modified": "2021-09-01 16:35:00.757332",
   "modified_by": "Administrator",
   "module": "Comfort Core",
   "name": "Home",

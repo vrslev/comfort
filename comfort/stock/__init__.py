@@ -4,6 +4,7 @@ from typing import Literal
 
 import frappe
 from comfort import OrderTypes, count_quantity
+from comfort.stock.doctype.stock_entry_item.stock_entry_item import StockEntryItem
 from frappe.model.document import Document
 
 StockTypes = Literal[
@@ -58,3 +59,22 @@ def cancel_stock_entries_for(doctype: Literal["Checkout", "Receipt"], name: str)
     for entry in entries:
         doc: Document = frappe.get_doc("Stock Entry", entry.name)
         doc.cancel()
+
+
+def get_stock_balance(stock_type: StockTypes) -> dict[str, int]:
+    stock_entries: list[str] = [
+        entry.name
+        for entry in frappe.get_all(
+            "Stock Entry", {"docstatus": ("!=", 2), "stock_type": stock_type}
+        )
+    ]
+    items: list[StockEntryItem] = frappe.get_all(
+        "Stock Entry Item",
+        fields=("item_code", "qty"),
+        filters={"parent": ("in", stock_entries)},
+    )
+    res = {}
+    for item_code, qty in count_quantity(items).items():
+        if qty > 0:
+            res[item_code] = qty
+    return res

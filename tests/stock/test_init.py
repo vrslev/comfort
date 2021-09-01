@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import pytest
+
 import frappe
 from comfort import count_quantity
 from comfort.stock import (
@@ -7,6 +9,7 @@ from comfort.stock import (
     create_checkout,
     create_receipt,
     create_stock_entry,
+    get_stock_balance,
 )
 from comfort.stock.doctype.receipt.receipt import Receipt
 from comfort.stock.doctype.stock_entry.stock_entry import StockEntry
@@ -89,3 +92,32 @@ def test_cancel_stock_entries_for(receipt_sales: Receipt):
 # TODO
 # -        {"voucher_type": doctype, "voucher_no": name, "docstatus": ("!=", 2)},
 # +        {"voucher_type": doctype, "voucher_no": name, "docstatus": ("!=", 3)},
+
+
+@pytest.mark.parametrize(
+    ("qty_sets", "expected_res"),
+    (
+        (((1, 4), (-10, 0), (15, 5)), {"10014030": 6, "10366598": 9}),
+        (((10, 4), (-10, 0)), {"10366598": 4}),
+        (((10, 4), (-10, -4)), {}),
+    ),
+)
+def test_get_stock_balance(
+    receipt_sales: Receipt,
+    qty_sets: tuple[tuple[int, int]],
+    expected_res: dict[str, int],
+):
+    for first_qty, second_qty in qty_sets:
+        frappe.get_doc(
+            {
+                "doctype": "Stock Entry",
+                "stock_type": "Available Actual",
+                "voucher_type": receipt_sales.doctype,
+                "voucher_no": receipt_sales.name,
+                "items": [
+                    {"item_code": "10014030", "qty": first_qty},
+                    {"item_code": "10366598", "qty": second_qty},
+                ],
+            }
+        ).insert()
+    assert get_stock_balance("Available Actual") == expected_res
