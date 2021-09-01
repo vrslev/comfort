@@ -21,6 +21,7 @@ comfort.SalesOrderController = frappe.ui.form.Controller.extend({
       Payment: "Payment",
       Receipt: "Receipt",
       "Purchase Order": "Purchase Order",
+      "Delivery Trip": "Delivery Trip",
     };
   },
 
@@ -28,7 +29,7 @@ comfort.SalesOrderController = frappe.ui.form.Controller.extend({
     this.setup_quick_add_items();
   },
 
-  setup_buttons() {
+  async setup_buttons() {
     if (
       this.frm.doc.docstatus != 2 &&
       !this.frm.is_new() &&
@@ -72,9 +73,16 @@ comfort.SalesOrderController = frappe.ui.form.Controller.extend({
       });
     }
 
+    let has_linked_delivery_stop = await frappe.call({
+      method:
+        "comfort.transactions.doctype.sales_order.sales_order.has_linked_delivery_trip",
+      args: { sales_order_name: cur_frm.doc.name },
+    });
+
     if (
       this.frm.docstatus != 2 &&
-      this.frm.doc.delivery_status == "To Deliver"
+      this.frm.doc.delivery_status == "To Deliver" &&
+      !has_linked_delivery_stop
     ) {
       this.frm.add_custom_button(__("Add Receipt"), () => {
         frappe.confirm(

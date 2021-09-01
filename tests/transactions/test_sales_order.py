@@ -15,7 +15,10 @@ from comfort.entities.doctype.item.item import Item
 from comfort.finance import create_payment
 from comfort.stock.doctype.receipt.receipt import Receipt
 from comfort.transactions.doctype.purchase_order.purchase_order import PurchaseOrder
-from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
+from comfort.transactions.doctype.sales_order.sales_order import (
+    SalesOrder,
+    has_linked_delivery_trip,
+)
 from frappe import ValidationError
 
 #############################
@@ -407,3 +410,16 @@ def test_split_combinations(sales_order: SalesOrder):
 
 #      def before_cancel(self):  # pragma: no cover
 #          self.set_statuses()
+
+
+def test_has_linked_delivery_trip_true(sales_order: SalesOrder):
+    sales_order.db_insert()
+    frappe.get_doc(
+        {"doctype": "Delivery Stop", "sales_order": sales_order.name}
+    ).db_insert()
+    assert has_linked_delivery_trip(sales_order.name)
+
+
+def test_has_linked_delivery_trip_false(sales_order: SalesOrder):
+    sales_order.db_insert()
+    assert not has_linked_delivery_trip(sales_order.name)

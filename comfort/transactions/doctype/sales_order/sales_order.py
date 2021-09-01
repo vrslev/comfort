@@ -309,3 +309,14 @@ class SalesOrder(SalesOrderStatuses):
                 )
 
         self.save()
+
+
+@frappe.whitelist()
+def has_linked_delivery_trip(sales_order_name: str):
+    return (
+        True
+        if frappe.db.exists(
+            {"doctype": "Delivery Stop", "sales_order": sales_order_name}
+        )
+        else False
+    )
