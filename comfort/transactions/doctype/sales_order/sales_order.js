@@ -66,6 +66,7 @@ comfort.SalesOrderController = frappe.ui.form.Controller.extend({
                   message: __("Payment added!"),
                   indicator: "green",
                 });
+                this.frm.refresh();
               },
             });
           }
@@ -73,12 +74,12 @@ comfort.SalesOrderController = frappe.ui.form.Controller.extend({
       });
     }
 
-    let has_linked_delivery_stop = await frappe.call({
+    let r = await frappe.call({
       method:
         "comfort.transactions.doctype.sales_order.sales_order.has_linked_delivery_trip",
       args: { sales_order_name: cur_frm.doc.name },
     });
-
+    let has_linked_delivery_stop = await r.message;
     if (
       this.frm.docstatus != 2 &&
       this.frm.doc.delivery_status == "To Deliver" &&
@@ -91,6 +92,9 @@ comfort.SalesOrderController = frappe.ui.form.Controller.extend({
             this.frm.call({
               doc: this.frm.doc,
               method: "add_receipt",
+              callback: () => {
+                this.frm.refresh();
+              },
             });
           }
         );
