@@ -319,6 +319,7 @@ class PurchaseOrder(PurchaseOrderMethods):
         create_receipt(self.doctype, self.name)
         self.status = "Completed"  # type: ignore
         self.db_update()
+        self.submit_sales_orders_and_update_statuses()
 
     @frappe.whitelist()
     def get_unavailable_items_in_cart_by_orders(  # TODO: It renders with duplicates
