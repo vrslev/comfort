@@ -7,11 +7,13 @@ comfort.IkeaCartController = frappe.ui.form.Controller.extend({
   setup_sales_order_query() {
     this.frm.set_query("sales_order_name", "sales_orders", () => {
       let cur_sales_orders = [];
-      this.frm.doc.sales_orders.forEach((order) => {
-        if (order.sales_order_name) {
-          cur_sales_orders.push(order.sales_order_name);
-        }
-      });
+      if (this.frm.doc.sales_orders) {
+        this.frm.doc.sales_orders.forEach((order) => {
+          if (order.sales_order_name) {
+            cur_sales_orders.push(order.sales_order_name);
+          }
+        });
+      }
       return {
         query:
           "comfort.transactions.doctype.purchase_order.purchase_order.sales_order_query",
