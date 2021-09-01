@@ -3,6 +3,7 @@ from __future__ import annotations
 import pytest
 
 import frappe
+from comfort.entities.doctype.item.item import Item
 from comfort.stock.doctype.delivery_trip.delivery_trip import (
     DeliveryTrip,
     _get_items_for_order,
@@ -59,6 +60,33 @@ def test_validate_orders_have_services_raises_on_no_delivery(
         match=f"Sales Order {sales_order.name} has no delivery service",
     ):
         delivery_trip._validate_orders_have_services()
+
+
+@pytest.mark.parametrize("insert_receipt_before", (True, False))
+def test_add_receipts_to_sales_orders(
+    delivery_trip: DeliveryTrip,
+    sales_order: SalesOrder,
+    item_no_children: Item,
+    insert_receipt_before: bool,
+):
+    sales_order.delivery_status = "To Deliver"
+    sales_order.db_update()
+    new_doc: SalesOrder = frappe.new_doc("Sales Order")
+    new_doc.name = "SO-2021-0002"
+    new_doc.customer = sales_order.customer
+    new_doc.append("items", {"item_code": item_no_children.item_code, "qty": 1})
+    new_doc.services = []
+    new_doc.validate()
+    new_doc.delivery_status = "To Deliver"
+    new_doc.db_insert()
+    new_doc.db_update_all()
+    if insert_receipt_before:
+        new_doc.add_receipt()
+
+    delivery_trip.append("stops", {"sales_order": new_doc.name})
+    delivery_trip._add_receipts_to_sales_orders()
+    assert frappe.db.exists({"doctype": "Receipt", "voucher_no": sales_order.name})
+    assert frappe.db.exists({"doctype": "Receipt", "voucher_no": new_doc.name})
 
 
 def test_validate_orders_have_services_raises_on_no_delivery(

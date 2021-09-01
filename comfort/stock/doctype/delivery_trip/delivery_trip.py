@@ -92,6 +92,31 @@ class DeliveryTrip(Document):
             is_path=True,
         )
 
+    def _add_receipts_to_sales_orders(self):
+        orders_have_receipt: list[str] = [
+            r.voucher_no
+            for r in frappe.get_all(
+                "Receipt",
+                fields="voucher_no",
+                filters={
+                    "voucher_type": "Sales Order",
+                    "voucher_no": ("in", (s.sales_order for s in self.stops)),
+                    "docstatus": ("!=", 2),
+                },
+            )
+        ]
+
+        for stop in self.stops:
+            if stop.sales_order not in orders_have_receipt:
+                doc: SalesOrder = frappe.get_doc("Sales Order", stop.sales_order)
+                doc.add_receipt()
+
+    @frappe.whitelist()
+    def set_completed_status(self):
+        self.status = "Completed"
+        self.db_update()
+        self._add_receipts_to_sales_orders()
+
 
 def _make_route_url(city: str, address: str):
     url = "https://yandex.ru/maps/10849/severodvinsk/?"
