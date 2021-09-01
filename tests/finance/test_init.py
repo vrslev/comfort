@@ -28,7 +28,7 @@ def test_get_account_raises_on_wrong_name():
     account_name = "toys"
     with pytest.raises(
         frappe.ValidationError,
-        match=f'Account Settings has no field "{account_name}_account"',
+        match=f'Finance Settings has no field "{account_name}_account"',
     ):
         get_account(account_name)
 
