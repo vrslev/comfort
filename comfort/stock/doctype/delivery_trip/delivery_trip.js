@@ -2,7 +2,7 @@ frappe.ui.form.on("Delivery Trip", {
   setup(frm) {
     frm.show_submit_message = () => {};
 
-    frm.fields_dict.stops.grid.get_docfield("sales_order").only_select = 1;
+    frm.fields_dict.stops.grid.get_docfield("sales_order").only_select = 1; // TODO: Do this on refresh
     frm.set_query("sales_order", "stops", () => {
       let cur_sales_orders = [];
       frm.doc.stops.forEach((order) => {
@@ -61,8 +61,17 @@ frappe.ui.form.on("Delivery Trip", {
 
     if (frm.doc.status == "In Progress") {
       frm.page.set_primary_action(__("Complete"), () => {
-        frm.set_value("status", "Completed");
-        frm.save("Update");
+        frm.call({
+          doc: frm.doc,
+          method: "set_completed_status",
+          callback: () => {
+            frappe.show_alert({
+              message: __("Delivery Trip completed"),
+              indicator: "green",
+            });
+            frm.reload_doc();
+          },
+        });
       });
     }
   },

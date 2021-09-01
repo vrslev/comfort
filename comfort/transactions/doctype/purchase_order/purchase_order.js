@@ -23,6 +23,7 @@ comfort.IkeaCartController = frappe.ui.form.Controller.extend({
     });
 
     this.frm.fields_dict.sales_orders.grid.get_docfield(
+      // TODO: Do this on refresh
       "sales_order_name"
     ).only_select = 1;
   },
