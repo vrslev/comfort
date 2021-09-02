@@ -27,6 +27,7 @@ from comfort.stock.doctype.delivery_trip.delivery_trip import DeliveryTrip
 from comfort.stock.doctype.receipt.receipt import Receipt
 from comfort.transactions.doctype.purchase_order.purchase_order import PurchaseOrder
 from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
+from comfort.transactions.doctype.sales_return.sales_return import SalesReturn
 from frappe.database.mariadb.database import MariaDBDatabase
 
 TEST_SITE_NAME = "tests"
@@ -707,6 +708,35 @@ def delivery_trip(sales_order: SalesOrder) -> DeliveryTrip:
                     "delivery_type": "To Apartment",
                     "installation": True,
                 }
+            ],
+        }
+    )
+
+
+@pytest.fixture
+def sales_return(sales_order: SalesOrder) -> SalesReturn:
+    sales_order.update_items_from_db()
+    sales_order.set_child_items()
+    sales_order.calculate()
+    sales_order.db_insert()
+    sales_order.db_update_all()
+    return frappe.get_doc(
+        {
+            "sales_order": sales_order.name,
+            "doctype": "Sales Return",
+            "items": [
+                {
+                    "item_code": "10366598",
+                    "item_name": "КОМПЛИМЕНТ Штанга платяная, 75 см, белый",
+                    "qty": 1,
+                    "rate": 250,
+                },
+                {
+                    "item_code": "40366634",
+                    "item_name": "КОМПЛИМЕНТ Ящик, 75x58 см, белый",
+                    "qty": 1,
+                    "rate": 1700,
+                },
             ],
         }
     )

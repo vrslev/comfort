@@ -1,0 +1,86 @@
+{
+  "actions": [],
+  "autoname": "SR-.YYYY.-.####",
+  "creation": "2021-09-01 18:16:02.956826",
+  "doctype": "DocType",
+  "editable_grid": 1,
+  "engine": "InnoDB",
+  "field_order": [
+    "sales_order",
+    "column_break",
+    "total_amount",
+    "section_break_1",
+    "items",
+    "section_break_2",
+    "amended_from"
+  ],
+  "fields": [
+    {
+      "fieldname": "sales_order",
+      "fieldtype": "Link",
+      "in_list_view": 1,
+      "label": "Sales Order",
+      "options": "Sales Order",
+      "reqd": 1
+    },
+    {
+      "fieldname": "items",
+      "fieldtype": "Table",
+      "label": "Items",
+      "options": "Sales Return Item",
+      "reqd": 1
+    },
+    {
+      "fieldname": "total_amount",
+      "fieldtype": "Currency",
+      "label": "Total Amount",
+      "read_only": 1
+    },
+    {
+      "fieldname": "amended_from",
+      "fieldtype": "Link",
+      "label": "Amended From",
+      "no_copy": 1,
+      "options": "Sales Return",
+      "print_hide": 1,
+      "read_only": 1
+    },
+    {
+      "fieldname": "column_break",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "section_break_1",
+      "fieldtype": "Section Break"
+    },
+    {
+      "fieldname": "section_break_2",
+      "fieldtype": "Section Break"
+    }
+  ],
+  "index_web_pages_for_search": 1,
+  "is_submittable": 1,
+  "links": [],
+  "modified": "2021-09-01 18:27:07.633071",
+  "modified_by": "Administrator",
+  "module": "Transactions",
+  "name": "Sales Return",
+  "owner": "Administrator",
+  "permissions": [
+    {
+      "create": 1,
+      "delete": 1,
+      "email": 1,
+      "export": 1,
+      "print": 1,
+      "read": 1,
+      "report": 1,
+      "role": "System Manager",
+      "share": 1,
+      "write": 1
+    }
+  ],
+  "sort_field": "modified",
+  "sort_order": "DESC",
+  "track_changes": 1
+}

@@ -39,7 +39,7 @@ class SalesOrderMethods(Document):
     status: Literal["Draft", "In Progress", "Completed", "Cancelled"]
     payment_status: Literal["", "Unpaid", "Partially Paid", "Paid", "Overpaid"]
     per_paid: float
-    delivery_status: Literal["To Purchase", "Purchased", "To Deliver", "Delivered"]
+    delivery_status: Literal["", "To Purchase", "Purchased", "To Deliver", "Delivered"]
 
     def merge_same_items(self):
         """Merge items that have same Item Code."""
