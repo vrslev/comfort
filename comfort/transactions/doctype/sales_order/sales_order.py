@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-# TODO: Allow change services on submit
-from typing import Generator, Iterable, Literal
+from copy import copy
+from typing import Iterable, Literal
 
 import frappe
 from comfort import ValidationError, count_quantity, group_by_attr
@@ -59,11 +59,11 @@ class SalesOrderMethods(Document):
 
     def delete_empty_items(self):
         """Delete items that have zero quantity."""
-        to_remove: Generator[SalesOrderItem, None, None] = (
-            item for item in self.items if item.qty == 0
-        )
-        for item in to_remove:
-            self.items.remove(item)
+        items = copy(self.items)
+        self.items = []
+        for item in items:
+            if item.qty != 0:
+                self.items.append(item)
 
     def update_items_from_db(self):
         """Load item properties from database and calculate Amount and Total Weight."""
@@ -277,6 +277,7 @@ class SalesOrder(SalesOrderStatuses):
 
     @frappe.whitelist()
     def split_combinations(self, combos_docnames: Iterable[str], save: bool):
+        # TODO: Check if there's any child items with this item_codes before removing them. Otherwise throw ValidationError
         combos_docnames = list(set(combos_docnames))
 
         items_to_remove: list[SalesOrderItem] = []
