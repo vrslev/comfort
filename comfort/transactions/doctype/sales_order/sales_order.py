@@ -276,7 +276,7 @@ class SalesOrder(SalesOrderStatuses):
         self.db_update()  # pragma: no cover
 
     @frappe.whitelist()
-    def split_combinations(self, combos_docnames: list[str]):
+    def split_combinations(self, combos_docnames: Iterable[str], save: bool):
         combos_docnames = list(set(combos_docnames))
 
         items_to_remove: list[SalesOrderItem] = []
@@ -308,7 +308,8 @@ class SalesOrder(SalesOrderStatuses):
                     "items", {"item_code": item.item_code, "qty": item.qty * parent_qty}
                 )
 
-        self.save()
+        if save:
+            self.save()
 
 
 @frappe.whitelist()

@@ -142,6 +142,7 @@ comfort.SalesOrderController = frappe.ui.form.Controller.extend({
                   .get_selected_children()
                   .filter((d) => d.__checked)
                   .map((d) => d.name),
+                save: true,
               },
               callback: () => {
                 dialog.hide();
