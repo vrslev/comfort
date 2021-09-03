@@ -112,7 +112,7 @@ class DeliveryTrip(Document):
                 doc.add_receipt()
 
     @frappe.whitelist()
-    def set_completed_status(self):
+    def set_completed_status(self):  # TODO: Cover
         self.status = "Completed"
         self.db_update()
         self._add_receipts_to_sales_orders()
