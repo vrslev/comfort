@@ -89,6 +89,6 @@ async function show_add_row_dialog() {
 
 frappe.ui.form.on("Sales Return Item", {
   items_remove(frm) {
-    frm.call({ doc: frm.doc, method: "calculate_amounts" });
+    frm.call({ doc: frm.doc, method: "calculate" });
   },
 });

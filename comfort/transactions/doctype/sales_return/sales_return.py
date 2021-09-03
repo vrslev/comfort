@@ -28,8 +28,17 @@ GL Entry: "Cash" or "Bank" -> "Sales"
 
 # Overpaid
 
+
+Accept by this conditions:
+docstatus == 1
+delivery_status in ["Purchased", "To Deliver", "Delivered"]
+payment_status any
+
 """
 from __future__ import annotations
+
+from copy import copy
+from typing import Callable
 
 import frappe
 from comfort import ValidationError, count_quantity, group_by_attr
@@ -46,31 +55,87 @@ from ..sales_return_item.sales_return_item import SalesReturnItem
 # TODO: Observe case when all items are returned
 class SalesReturn(Document):
     sales_order: str
-    total_amount: int
+    returned_paid_amount: int
     items: list[SalesReturnItem]
 
-    def _get_items_in_sales_order(self):
-        sales_order: SalesOrder = frappe.get_doc("Sales Order", self.sales_order)
-        items = sales_order._get_items_with_splitted_combinations()
-        _add_rates_to_child_items(items)
-        return items
+    __voucher: SalesOrder | None = None
+
+    @property
+    def _voucher(self) -> SalesOrder:
+        if not self.__voucher:
+            self.__voucher: SalesOrder = frappe.get_doc("Sales Order", self.sales_order)
+        return self.__voucher
+
+    def _validate_not_all_items_returned(self):
+        if (
+            len(
+                [
+                    i
+                    for i in self._get_remaining_qtys(
+                        self._voucher._get_items_with_splitted_combinations()
+                    )
+                ]
+            )
+            == 0
+        ):
+            raise ValidationError(_("Can't return all items in Sales Order"))
+
+    def _validate_voucher_statuses(self):
+        if self._voucher.docstatus != 1:
+            raise ValidationError(_("Sales Order should be submitted"))
+        elif self._voucher.delivery_status not in [
+            "Purchased",
+            "To Deliver",
+            "Delivered",
+        ]:
+            raise ValidationError(
+                _("Delivery Status should be Purchased, To Deliver or Delivered")
+            )
+
+    def _calculate_item_values(self):
+        for item in self.items:
+            item.amount = item.qty * item.rate
+
+    def _calculate_returned_paid_amount(self):
+        self._modify_voucher()
+        self._voucher._set_paid_and_pending_per_amount()
+        self.returned_paid_amount = (
+            -copy(self._voucher.pending_amount)
+            if self._voucher.pending_amount < 0
+            else 0
+        )
+        self._voucher.reload()
+
+    @frappe.whitelist()
+    def calculate(self):  # pragma: no cover
+        self._calculate_item_values()
+        self._calculate_returned_paid_amount()
+
+    def validate(self):  # pragma: no cover
+        self._validate_voucher_statuses()
+        self._validate_not_all_items_returned()
+        self.calculate()
+
+    def before_cancel(self):
+        raise ValidationError(_("Not allowed to cancel Sales Return"))
 
     def _get_remaining_qtys(
-        self, items_in_sales_order: list[SalesOrderItem | SalesOrderChildItem]
+        self, items_in_voucher: list[SalesOrderItem | SalesOrderChildItem]
     ):
-        in_order = count_quantity(items_in_sales_order)
+        in_order = count_quantity(items_in_voucher)
         in_return = count_quantity(self.items)
         for item in in_order:
             in_order[item] -= in_return.get(item, 0)
         return (item for item in in_order.items() if item[1] > 0)
 
     @frappe.whitelist()
-    def get_items_available_to_add(self) -> dict[str, str | int]:
-        items_in_order = self._get_items_in_sales_order()
+    def get_items_available_to_add(self):
+        items_in_order = self._voucher._get_items_with_splitted_combinations()
+        _add_rates_to_child_items(items_in_order)
         available_item_and_qty = self._get_remaining_qtys(items_in_order)
         grouped_items = group_by_attr(items_in_order)
 
-        return [
+        res: dict[str, str | int] = [
             {
                 "item_code": item_code,
                 "item_name": grouped_items[item_code][0].item_name,
@@ -79,13 +144,9 @@ class SalesReturn(Document):
             }
             for item_code, qty in available_item_and_qty
         ]
-
-    @frappe.whitelist()
-    def calculate_amounts(self):
-        self.total_amount = 0
-        for item in self.items:
-            item.amount = item.qty * item.rate
-            self.total_amount += item.amount
+        sort_by: Callable[[res], str] = lambda i: i["item_name"]
+        res.sort(key=sort_by)
+        return res
 
     @frappe.whitelist()
     def add_items(self, items: list[dict[str, str | int]]):
@@ -107,7 +168,7 @@ class SalesReturn(Document):
                         "rate": item["rate"],
                     },
                 )
-                self.calculate_amounts()
+                self.calculate()
             else:
                 raise ValidationError(
                     _(
@@ -118,6 +179,66 @@ class SalesReturn(Document):
                         counter[item["item_code"]],
                     )
                 )
+
+    def _split_combinations_in_voucher(self):
+        return_qty_counter = count_quantity(self.items)
+        items_no_children_qty_counter = count_quantity(self._voucher.items)
+        parent_item_codes_to_modify: list[str] = []
+
+        for c in self._voucher.child_items:
+            qty_to_return = return_qty_counter.get(c.item_code)
+            qty_in_items = items_no_children_qty_counter.get(c.item_code)
+
+            if qty_to_return and (
+                # Item is present in child items and in items but there's not enough qty
+                (qty_in_items and qty_to_return > qty_in_items)
+                # Item in child items and not in items
+                or (not qty_in_items)
+            ):
+                parent_item_codes_to_modify.append(c.parent_item_code)
+
+        if parent_item_codes_to_modify:
+            self._voucher.set_name_in_children()  # Critical because in next step we use `item.name`
+            self._voucher.split_combinations(
+                [
+                    item.name
+                    for item in self._voucher.items
+                    if item.item_code  # It is ok because we merge items in SO on validate
+                    in parent_item_codes_to_modify
+                ],
+                save=False,
+            )
+
+    def _add_missing_rate_and_weight_to_items_in_voucher(self):
+        for item in self._voucher.items:
+            if not item.rate or not item.weight:
+                item.rate, item.weight = frappe.get_value(
+                    "Item", item.item_code, ("rate", "weight")
+                )
+                item.amount = item.qty * item.rate
+                item.total_weight = item.qty * item.weight
+
+    def _modify_voucher(self):
+        self._split_combinations_in_voucher()
+
+        qty_counter = count_quantity(self.items)
+        for item in self._voucher.items:
+            if item.item_code in qty_counter:
+                item.qty -= qty_counter[item.item_code]
+                del qty_counter[item.item_code]
+
+        self._voucher.edit_commission = True
+        # NOTE: Never use `update_items_from_db`
+        self._voucher.delete_empty_items()
+        self._voucher.merge_same_items()
+        self._voucher.set_child_items()
+        self._add_missing_rate_and_weight_to_items_in_voucher()
+        self._voucher.calculate()
+
+    def before_submit(self):  # pragma: no cover
+        self._modify_voucher()
+        self._voucher.flags.ignore_validate_update_after_submit = True
+        self._voucher.save()
 
 
 def _add_rates_to_child_items(items: list[SalesOrderItem | SalesOrderChildItem]):

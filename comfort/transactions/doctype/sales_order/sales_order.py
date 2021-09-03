@@ -122,7 +122,6 @@ class SalesOrderMethods(Document):
         if self.items_cost <= 0:
             self.margin = 0
             return
-
         base_margin = self.items_cost * self.commission / 100
         items_cost_rounding_remainder = round(self.items_cost, -1) - self.items_cost
         rounded_margin = int(round(base_margin, -1) + items_cost_rounding_remainder)
