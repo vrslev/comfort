@@ -7,8 +7,7 @@
   "python.linting.banditEnabled": true,
   "python.linting.banditArgs": ["-c", ".bandit.yaml"],
   "python.sortImports.args": ["--profile=black"],
-  "python.testing.autoTestDiscoverOnSaveEnabled": false,
-  "python.testing.pytestEnabled": false,
+  "python.testing.pytestEnabled": true,
   "python.testing.pytestPath": "../../env/bin/pytest",
   "pytest.command": "../../env/bin/pytest",
   "sqltools.connections": [
