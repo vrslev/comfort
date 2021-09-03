@@ -74,8 +74,6 @@ def test_update_items_from_db(sales_order: SalesOrder):
         assert i.item_name == doc.item_name
         assert i.rate == doc.rate
         assert i.weight == doc.weight
-        assert i.amount == doc.rate * i.qty
-        assert i.total_weight == doc.weight * i.qty
 
 
 def test_set_child_items_not_set_if_no_items(sales_order: SalesOrder):
@@ -107,6 +105,9 @@ def test_calculate_item_totals(sales_order: SalesOrder):
 
     exp_total_quantity, exp_total_weight, exp_items_cost = 0, 0.0, 0
     for i in sales_order.items:
+        assert i.amount == i.qty * i.rate
+        assert i.total_weight == i.qty * i.weight
+
         exp_total_quantity += i.qty
         exp_total_weight += i.total_weight
         exp_items_cost += i.amount
@@ -374,16 +375,15 @@ def test_add_receipt_raises_on_delivered(sales_order: SalesOrder):
         sales_order.add_receipt()
 
 
-def test_split_combinations(sales_order: SalesOrder):
+@pytest.mark.parametrize("save", (True, False))
+def test_split_combinations(sales_order: SalesOrder, save: bool):
     sales_order.db_insert()
     sales_order.db_update_all()
     sales_order.items = sales_order.items[:1]
     sales_order.items[0].qty = 3
     splitted_combination = deepcopy(sales_order.items[0])
 
-    sales_order.split_combinations([splitted_combination.name])
-
-    assert splitted_combination not in sales_order.items
+    sales_order.split_combinations([splitted_combination.name], save)
 
     child_items: list[ChildItem] = frappe.get_all(
         "Child Item",
@@ -397,6 +397,11 @@ def test_split_combinations(sales_order: SalesOrder):
 
     for i in count_quantity(sales_order.items).items():
         assert i in exp_item_codes_to_qty
+
+    # load_doc_before_save is called before save,
+    # so this is quite a hack to determine whether document is saved
+    doc_was_saved = sales_order.get_doc_before_save() is not None
+    assert doc_was_saved if save else not doc_was_saved
 
 
 # TODO

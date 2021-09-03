@@ -99,6 +99,9 @@ class SalesOrderMethods(Document):
         """Calculate global Total Quantity, Weight and Items Cost."""
         self.total_quantity, self.total_weight, self.items_cost = 0, 0.0, 0
         for item in self.items:
+            item.total_weight = item.qty * item.weight
+            item.amount = item.qty * item.rate
+
             self.total_quantity += item.qty
             self.total_weight += item.total_weight
             self.items_cost += item.amount
