@@ -89,9 +89,8 @@ def get_data(filters: dict[str, str]):
             ("docstatus", "!=", 2),
             ("creation", "between", (filters["from_date"], filters["to_date"])),
         ),
-        order_by="voucher_no and account",
+        order_by="creation",
     )
     for entry in entries:
-        entry.date = entry.date.date()
         entry.balance = entry.debit - entry.credit
     return entries
