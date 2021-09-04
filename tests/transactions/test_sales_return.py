@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from copy import copy
+from typing import Counter
 
 import pytest
 
@@ -19,6 +20,16 @@ from comfort.transactions.doctype.sales_return.sales_return import (
 def test_sales_return_voucher_property(sales_return: SalesReturn):
     assert type(sales_return._voucher) == SalesOrder
     assert sales_return._voucher.name == sales_return.sales_order
+
+
+def test_sales_return_delete_empty_items(sales_return: SalesReturn):
+    sales_return.append("items", {"qty": 0})
+    sales_return.delete_empty_items()
+    c: Counter[str] = Counter()
+    for i in sales_return.items:
+        c[i.item_code] += i.qty
+    for qty in c.values():
+        assert qty > 0
 
 
 def test_validate_not_all_items_returned_not_raises(sales_return: SalesReturn):
@@ -245,19 +256,20 @@ def test_split_combinations_in_voucher_needed(
     assert counter_before == counter_after
 
 
-def test_add_missing_rate_and_weight_to_items_in_voucher(sales_return: SalesReturn):
+def test_add_missing_info_to_items_in_voucher(sales_return: SalesReturn):
     for item in sales_return._voucher.items:
         item.rate = None
         item.weight = None
 
-    sales_return._add_missing_rate_and_weight_to_items_in_voucher()
+    sales_return._add_missing_info_to_items_in_voucher()
 
     for item in sales_return._voucher.items:
-        res: tuple[int, int] = frappe.get_value(
-            "Item", item.item_code, ("rate", "weight")
+        res: tuple[str, int, int] = frappe.get_value(
+            "Item", item.item_code, ("item_name", "rate", "weight")
         )
-        assert item.rate == res[0]
-        assert item.weight == res[1]
+        assert item.item_name == res[0]
+        assert item.rate == res[1]
+        assert item.weight == res[2]
 
 
 def test_modify_voucher(sales_return: SalesReturn):

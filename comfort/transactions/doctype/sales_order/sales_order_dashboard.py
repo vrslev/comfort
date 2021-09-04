@@ -4,10 +4,16 @@ def get_data():
         "non_standard_fieldnames": {
             "Purchase Order": "sales_order_name",
             "Delivery Trip": "sales_order",
+            "Sales Return": "sales_order",
         },
         "transactions": [
             {"items": ["Payment"]},
-            {"items": ["Purchase Order"]},
+            {
+                "items": [
+                    "Purchase Order",
+                    "Sales Return",  # TODO: Validate delivery status before showing "+" button
+                ]
+            },
             {"items": ["Delivery Trip", "Receipt"]},
         ],
     }

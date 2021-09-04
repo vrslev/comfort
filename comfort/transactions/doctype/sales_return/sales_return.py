@@ -31,6 +31,15 @@ class SalesReturn(Document):
             self.__voucher: SalesOrder = frappe.get_doc("Sales Order", self.sales_order)
         return self.__voucher
 
+    def delete_empty_items(self):
+        if not hasattr(self, "items") or self.items is None:
+            self.items = []
+        items = copy(self.items)
+        self.items = []
+        for item in items:
+            if item.qty != 0:
+                self.items.append(item)
+
     def _validate_not_all_items_returned(self):
         if (
             len(
@@ -87,6 +96,7 @@ class SalesReturn(Document):
 
     @frappe.whitelist()
     def get_items_available_to_add(self):
+        self.delete_empty_items()
         items_in_order = self._voucher._get_items_with_splitted_combinations()
         _add_rates_to_child_items(items_in_order)
         available_item_and_qty = self._get_remaining_qtys(items_in_order)
@@ -166,11 +176,11 @@ class SalesReturn(Document):
                 save=False,
             )
 
-    def _add_missing_rate_and_weight_to_items_in_voucher(self):
+    def _add_missing_info_to_items_in_voucher(self):  # TODO: Add `item_name`
         for item in self._voucher.items:
             if not item.rate or not item.weight:
-                item.rate, item.weight = frappe.get_value(
-                    "Item", item.item_code, ("rate", "weight")
+                item.item_name, item.rate, item.weight = frappe.get_value(
+                    "Item", item.item_code, ("item_name", "rate", "weight")
                 )
                 item.amount = item.qty * item.rate
                 item.total_weight = item.qty * item.weight
@@ -189,7 +199,7 @@ class SalesReturn(Document):
         self._voucher.delete_empty_items()
         self._voucher.merge_same_items()
         self._voucher.set_child_items()
-        self._add_missing_rate_and_weight_to_items_in_voucher()
+        self._add_missing_info_to_items_in_voucher()
         self._voucher.calculate()
 
     def _modify_and_save_voucher(self):  # TODO: Cover
@@ -249,6 +259,7 @@ class SalesReturn(Document):
         create_gl_entry(self.doctype, self.name, get_account("sales"), amt, 0)
 
     def validate(self):  # pragma: no cover
+        self.delete_empty_items()
         self._validate_voucher_statuses()
         self._validate_not_all_items_returned()
         self.calculate()

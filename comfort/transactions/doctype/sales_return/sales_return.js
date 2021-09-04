@@ -1,3 +1,4 @@
+// TODO: Add button "Update Return Paid Amount" in case transactions changed
 frappe.ui.form.on("Sales Return", {
   refresh(frm) {
     frm.fields_dict.items.grid.grid_buttons
