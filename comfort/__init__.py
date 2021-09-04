@@ -19,7 +19,7 @@ def count_quantity(
     """Count something (most often item quantity) in list of objects."""
     counter: Counter[str] = Counter()
     for item in data:
-        counter[getattr(item, key_attr)] += getattr(item, value_attr)
+        counter[getattr(item, key_attr)] += getattr(item, value_attr) or 0
     return counter
 
 

@@ -21,7 +21,9 @@ data = [
 
 
 def test_count_quantity():
-    expected = (("1", 7), ("2", 5))
+    new_data = data.copy()
+    new_data.append(MockItem(item_code="3", qty=None))
+    expected = (("1", 7), ("2", 5), ("3", 0))
     for pair in count_quantity(data).items():
         assert pair in expected
 
