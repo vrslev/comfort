@@ -1,7 +1,14 @@
+from __future__ import annotations
+
+from copy import copy
+
 import pytest
 
 import frappe
 from comfort import count_quantity, group_by_attr
+from comfort.finance import create_payment, get_account
+from comfort.finance.doctype.gl_entry.gl_entry import GLEntry
+from comfort.stock.doctype.stock_entry.stock_entry import StockEntry
 from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
 from comfort.transactions.doctype.sales_return.sales_return import (
     SalesReturn,
@@ -87,13 +94,6 @@ def test_calculate_returned_paid_amount(
         sales_return._voucher.add_payment(paid_amount, True)
     sales_return._calculate_returned_paid_amount()
     assert sales_return.returned_paid_amount == exp_returned_paid_amount
-
-
-def test_before_cancel(sales_return: SalesReturn):
-    with pytest.raises(
-        frappe.ValidationError, match="Not allowed to cancel Sales Return"
-    ):
-        sales_return.before_cancel()
 
 
 def test_get_remaining_qtys(sales_return: SalesReturn):
@@ -276,6 +276,145 @@ def test_modify_voucher(sales_return: SalesReturn):
             del diff[item_code]
 
     assert diff == count_quantity(sales_return.items)
+
+
+def test_make_delivery_gl_entries_create(sales_return: SalesReturn):
+    sales_return._voucher.delivery_status = "Delivered"
+    sales_return.db_insert()
+    sales_return._make_delivery_gl_entries()
+    prev_items_cost = copy(sales_return._voucher.items_cost)
+    sales_return._modify_voucher()
+    new_items_cost = copy(sales_return._voucher.items_cost)
+    amount = prev_items_cost - new_items_cost
+    entries: list[GLEntry] = frappe.get_all(
+        "GL Entry",
+        fields=("account", "debit", "credit"),
+        filters={
+            "voucher_type": sales_return.doctype,
+            "voucher_no": sales_return.name,
+        },
+    )
+    assert len(entries) == 2
+    accounts = get_account("cost_of_goods_sold"), get_account("inventory")
+    for entry in entries:
+        assert entry.account in accounts
+        if entry.account == accounts[0]:
+            assert entry.debit == 0
+            assert entry.credit == amount
+        elif entry.account == accounts[1]:
+            assert entry.debit == amount
+            assert entry.credit == 0
+
+
+def test_make_delivery_gl_entries_not_create(sales_return: SalesReturn):
+    sales_return._voucher.delivery_status = "Random Delivery Status"
+    sales_return.db_insert()
+    sales_return._make_delivery_gl_entries()
+    assert not frappe.db.exists(
+        "GL Entry",
+        {"voucher_type": sales_return.doctype, "voucher_no": sales_return.name},
+    )
+
+
+@pytest.mark.parametrize(
+    ("delivery_status", "exp_stock_types"),
+    (
+        ("Purchased", ("Reserved Purchased", "Available Purchased")),
+        ("To Deliver", ("Reserved Actual", "Available Actual")),
+        ("Delivered", ("Reserved Actual", "Available Actual")),
+    ),
+)
+def test_make_stock_entries_create(
+    sales_return: SalesReturn, delivery_status: str, exp_stock_types: tuple[str, str]
+):
+    sales_return._voucher.delivery_status = delivery_status
+    sales_return.db_insert()
+    sales_return._make_stock_entries()
+
+    entry_names: list[str] = [
+        e.name
+        for e in frappe.get_all(
+            "Stock Entry",
+            {
+                "voucher_type": sales_return.doctype,
+                "voucher_no": sales_return.name,
+            },
+        )
+    ]
+    assert len(entry_names) == 2
+    return_counter = count_quantity(sales_return.items)
+    entry_with_first_type, entry_with_second_type = False, False
+
+    for name in entry_names:
+        doc: StockEntry = frappe.get_doc("Stock Entry", name)
+        if doc.stock_type == exp_stock_types[0]:
+            entry_with_first_type = True
+        elif doc.stock_type == exp_stock_types[1]:
+            entry_with_second_type = True
+
+        assert count_quantity(doc.items) == return_counter
+
+    assert entry_with_first_type
+    assert entry_with_second_type
+
+
+def test_make_stock_entries_not_create(sales_return: SalesReturn):
+    sales_return._voucher.delivery_status = "Some Random Delivery Status"
+    sales_return.db_insert()
+    sales_return._make_stock_entries()
+    assert not frappe.db.exists(
+        "Stock Entry",
+        {"voucher_type": sales_return.doctype, "voucher_no": sales_return.name},
+    )
+
+
+@pytest.mark.parametrize(
+    ("paid_with_cash", "exp_asset_account"),
+    ((True, "cash"), (False, "bank"), (None, "bank")),
+)
+def test_make_payment_gl_entries_create(
+    sales_return: SalesReturn, paid_with_cash: bool | None, exp_asset_account: str
+):
+    sales_return.returned_paid_amount = 1000
+    sales_return.db_insert()
+    if paid_with_cash is not None:
+        create_payment("Sales Order", sales_return.sales_order, 1000, paid_with_cash)
+    sales_return._make_payment_gl_entries()
+    entries: list[GLEntry] = frappe.get_all(
+        "GL Entry",
+        fields=("account", "debit", "credit"),
+        filters={"voucher_type": sales_return.doctype, "voucher_no": sales_return.name},
+    )
+    cash_account = get_account("cash")
+    bank_account = get_account("bank")
+    sales_account = get_account("sales")
+    assert len(entries) == 2
+    for entry in entries:
+        assert entry.account in (cash_account, bank_account, sales_account)
+        if entry.account in (cash_account, bank_account):
+            assert entry.account == get_account(exp_asset_account)
+            assert entry.debit == 0
+            assert entry.credit == 1000
+        elif entry.account == sales_account:
+            assert entry.debit == 1000
+            assert entry.credit == 0
+
+
+def test_make_payment_gl_entries_not_create(sales_return: SalesReturn):
+    sales_return.returned_paid_amount = 0
+    sales_return.db_insert()
+    sales_return._make_payment_gl_entries()
+    assert not frappe.db.exists(
+        "GL Entry",
+        {"voucher_type": sales_return.doctype, "voucher_no": sales_return.name},
+    )
+
+
+def test_before_cancel(sales_return: SalesReturn):
+    with pytest.raises(
+        frappe.ValidationError, match="Not allowed to cancel Sales Return"
+    ):
+        sales_return.before_cancel()
 
 
 @pytest.mark.usefixtures("sales_return")

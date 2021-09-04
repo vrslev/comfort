@@ -1,40 +1,3 @@
-"""
-Delivery Statuses
-
-# "To Purchase"
-Stock Entry : None
-GL Entry: None
-
-# "Purchased"
-Stock Entry: "Reserved Purchased" -> "Available Purchased"
-GL Entry: None
-
-# "To Deliver" or "Delivered"
-Stock Entry: "Reserved Actual" -> "Available Actual"
-GL Entry: "Cost of Goods Sold" -> "Inventory"
-
-
-
-Payment Statuses
-["Unpaid", "Partially Paid", "Paid", "Overpaid"]
-
-# Unpaid
-None
-
-# Partially Paid
-
-# Paid
-GL Entry: "Cash" or "Bank" -> "Sales"
-
-# Overpaid
-
-
-Accept by this conditions:
-docstatus == 1
-delivery_status in ["Purchased", "To Deliver", "Delivered"]
-payment_status any
-
-"""
 from __future__ import annotations
 
 from copy import copy
@@ -43,6 +6,8 @@ from typing import Callable
 import frappe
 from comfort import ValidationError, count_quantity, group_by_attr
 from comfort.entities.doctype.item.item import Item
+from comfort.finance import create_gl_entry, get_account
+from comfort.stock import create_stock_entry
 from frappe import _
 from frappe.model.document import Document
 
@@ -110,14 +75,6 @@ class SalesReturn(Document):
     def calculate(self):  # pragma: no cover
         self._calculate_item_values()
         self._calculate_returned_paid_amount()
-
-    def validate(self):  # pragma: no cover
-        self._validate_voucher_statuses()
-        self._validate_not_all_items_returned()
-        self.calculate()
-
-    def before_cancel(self):
-        raise ValidationError(_("Not allowed to cancel Sales Return"))
 
     def _get_remaining_qtys(
         self, items_in_voucher: list[SalesOrderItem | SalesOrderChildItem]
@@ -235,10 +192,75 @@ class SalesReturn(Document):
         self._add_missing_rate_and_weight_to_items_in_voucher()
         self._voucher.calculate()
 
-    def before_submit(self):  # pragma: no cover
+    def _modify_and_save_voucher(self):  # TODO: Cover
         self._modify_voucher()
         self._voucher.flags.ignore_validate_update_after_submit = True
         self._voucher.save()
+
+    def _make_delivery_gl_entries(self):
+        """Transfer cost of returned items from "Cost of Goods Sold" to "Inventory" account if Sales Order is delivered.
+        Changes Sales Receipt behavior."""
+        if not self._voucher.delivery_status == "Delivered":
+            return
+        prev_items_cost = copy(self._voucher.items_cost)
+        self._modify_voucher()
+        new_items_cost = copy(self._voucher.items_cost)
+        self._voucher.reload()
+        amount = prev_items_cost - new_items_cost
+        create_gl_entry(
+            self.doctype, self.name, get_account("cost_of_goods_sold"), 0, amount
+        )
+        create_gl_entry(self.doctype, self.name, get_account("inventory"), amount, 0)
+
+    def _make_stock_entries(self):
+        """Transfer returned items.
+
+        Depends on `delivery_status`:
+            "":          None
+            To Purchase: None
+            Purchased:   "Reserved Purchased" -> "Available Purchased" (change Checkout behavior)
+            To Deliver:  "Reserved Actual"    -> "Available Actual"    (change Purchase Receipt behavior)
+            Delivered:   "Reserved Actual"    -> "Available Actual"    (change Sales Receipt behavior)
+        """
+        status_to_stock_types = {
+            "Purchased": ("Reserved Purchased", "Available Purchased"),
+            "To Deliver": ("Reserved Actual", "Available Actual"),
+            "Delivered": ("Reserved Actual", "Available Actual"),
+        }
+        if self._voucher.delivery_status not in status_to_stock_types.keys():
+            return
+        for stock_type in status_to_stock_types[self._voucher.delivery_status]:
+            create_stock_entry(self.doctype, self.name, stock_type, self.items)
+
+    def _make_payment_gl_entries(self):
+        """Return `returned_paid_amount` from "Cash" or "Bank" -> "Sales".
+        Changes Payment behavior.
+        """
+        if not self.returned_paid_amount:
+            return
+        paid_with_cash: bool | None = frappe.get_value(
+            "Payment",
+            fieldname="paid_with_cash",
+            filters={"voucher_type": "Sales Order", "voucher_no": self.sales_order},
+        )
+        amt = self.returned_paid_amount
+        asset_account = get_account("cash") if paid_with_cash else get_account("bank")
+        create_gl_entry(self.doctype, self.name, asset_account, 0, amt)
+        create_gl_entry(self.doctype, self.name, get_account("sales"), amt, 0)
+
+    def validate(self):  # pragma: no cover
+        self._validate_voucher_statuses()
+        self._validate_not_all_items_returned()
+        self.calculate()
+
+    def before_submit(self):  # pragma: no cover
+        self._modify_and_save_voucher()
+        self._make_delivery_gl_entries()
+        self._make_stock_entries()
+        self._make_payment_gl_entries()
+
+    def before_cancel(self):
+        raise ValidationError(_("Not allowed to cancel Sales Return"))
 
 
 def _add_rates_to_child_items(items: list[SalesOrderItem | SalesOrderChildItem]):
