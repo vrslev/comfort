@@ -7,6 +7,8 @@ from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
 from frappe import _
 from frappe.model.document import Document
 
+# TODO: Allow to change Cash/Bank after submit
+
 
 class Payment(Document):
     voucher_type: OrderTypes

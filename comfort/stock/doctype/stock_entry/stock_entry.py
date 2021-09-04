@@ -10,7 +10,7 @@ from ..stock_entry_item.stock_entry_item import StockEntryItem
 
 class StockEntry(Document):
     stock_type: StockTypes
-    voucher_type: Literal["Receipt", "Checkout"]
+    voucher_type: Literal["Receipt", "Checkout", "Sales Return"]
     voucher_no: str
     items: list[StockEntryItem]
 

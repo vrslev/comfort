@@ -6,7 +6,7 @@ from frappe.model.document import Document
 
 
 class GLEntry(Document):
-    voucher_type: Literal["Payment", "Receipt"]
+    voucher_type: Literal["Payment", "Receipt", "Sales Return"]
     voucher_no: str
     account: str
     debit: int

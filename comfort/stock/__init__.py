@@ -29,7 +29,7 @@ def create_checkout(purchase_order: str):
 
 
 def create_stock_entry(
-    doctype: Literal["Receipt", "Checkout"],
+    doctype: Literal["Receipt", "Checkout", "Sales Return"],
     name: str,
     stock_type: StockTypes,
     items: list[object],

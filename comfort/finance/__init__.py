@@ -44,7 +44,7 @@ def get_received_amount(doc: Document) -> int:
 
 
 def create_gl_entry(
-    doctype: Literal["Payment", "Receipt"],
+    doctype: Literal["Payment", "Receipt", "Sales Return"],
     name: str,
     account: str,
     debit: int,
