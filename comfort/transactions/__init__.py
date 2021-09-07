@@ -21,8 +21,8 @@ from .doctype.sales_order_child_item.sales_order_child_item import SalesOrderChi
 from .doctype.sales_order_item.sales_order_item import SalesOrderItem
 from .doctype.sales_return_item.sales_return_item import SalesReturnItem
 
-_AnyItems = list[
-    Union[SalesOrderItem, SalesOrderChildItem, ChildItem, PurchaseOrderItemToSell]
+_AnyItem = Union[
+    SalesOrderItem, SalesOrderChildItem, ChildItem, PurchaseOrderItemToSell
 ]
 
 
@@ -40,7 +40,9 @@ class Return(Document):
     def _validate_voucher_statuses(self):
         pass
 
-    def _get_all_items(self) -> _AnyItems | list[SalesOrderChildItem | SalesOrderItem]:
+    def _get_all_items(
+        self,
+    ) -> list[_AnyItem] | list[SalesOrderChildItem | SalesOrderItem]:
         pass
 
     def delete_empty_items(self):
@@ -61,22 +63,19 @@ class Return(Document):
         self._calculate_item_values()
         self._calculate_returned_paid_amount()
 
-    def _get_remaining_qtys(self, items: _AnyItems):
+    def _get_remaining_qtys(self, items: list[_AnyItem]):
         in_voucher = count_quantity(items)
         in_return = count_quantity(self.items)
         for item in in_voucher:
             in_voucher[item] -= in_return.get(item, 0)
         return (item for item in in_voucher.items() if item[1] > 0)
 
-    def _add_missing_fields_to_items(self, items: _AnyItems):
+    def _add_missing_fields_to_items(self, items: list[_AnyItem]):
         items_with_rates: list[Item] = frappe.get_all(
             "Item",
             fields=("item_code", "item_name", "rate"),
             filters={
-                "item_code": (
-                    "in",
-                    (i.item_code for i in items if not i.get("rate")),
-                )
+                "item_code": ("in", (i.item_code for i in items if not i.get("rate")))
             },
         )
         grouped_items = group_by_attr(items_with_rates)
@@ -151,9 +150,9 @@ class Return(Document):
         raise ValidationError(_("Not allowed to cancel Return"))
 
 
-def merge_items(items: _AnyItems):  # TODO: Cover
+def merge_items(items: list[_AnyItem]):  # TODO: Cover
     counter = count_quantity(items)
-    merged_items: _AnyItems = []
+    merged_items: list[_AnyItem] = []
 
     for item_code, cur_items in group_by_attr(items).items():
         cur_items[0].qty = counter[item_code]
