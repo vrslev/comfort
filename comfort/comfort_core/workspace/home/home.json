@@ -243,9 +243,18 @@
       "link_type": "DocType",
       "onboard": 0,
       "type": "Link"
+    },
+    {
+      "hidden": 0,
+      "is_query_report": 0,
+      "label": "Sales Return",
+      "link_to": "Sales Return",
+      "link_type": "DocType",
+      "onboard": 0,
+      "type": "Link"
     }
   ],
-  "modified": "2021-09-01 16:35:00.757332",
+  "modified": "2021-09-07 12:28:40.108529",
   "modified_by": "Administrator",
   "module": "Comfort Core",
   "name": "Home",
