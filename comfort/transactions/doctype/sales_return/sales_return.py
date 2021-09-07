@@ -17,7 +17,6 @@ from ..sales_order_item.sales_order_item import SalesOrderItem
 from ..sales_return_item.sales_return_item import SalesReturnItem
 
 
-# TODO: Observe case when all items are returned
 class SalesReturn(Document):
     sales_order: str
     returned_paid_amount: int
@@ -176,7 +175,7 @@ class SalesReturn(Document):
                 save=False,
             )
 
-    def _add_missing_info_to_items_in_voucher(self):  # TODO: Add `item_name`
+    def _add_missing_info_to_items_in_voucher(self):
         for item in self._voucher.items:
             if not item.rate or not item.weight:
                 item.item_name, item.rate, item.weight = frappe.get_value(
@@ -202,7 +201,7 @@ class SalesReturn(Document):
         self._add_missing_info_to_items_in_voucher()
         self._voucher.calculate()
 
-    def _modify_and_save_voucher(self):  # TODO: Cover
+    def _modify_and_save_voucher(self):
         self._modify_voucher()
         self._voucher.flags.ignore_validate_update_after_submit = True
         self._voucher.save()

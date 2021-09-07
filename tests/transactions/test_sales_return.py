@@ -32,6 +32,16 @@ def test_sales_return_delete_empty_items(sales_return: SalesReturn):
         assert qty > 0
 
 
+def test_sales_return_delete_empty_items_no_attr(sales_return: SalesReturn):
+    del sales_return.items
+    sales_return.delete_empty_items()
+
+
+def test_sales_return_delete_empty_items_attr_is_none(sales_return: SalesReturn):
+    sales_return.items = None
+    sales_return.delete_empty_items()
+
+
 def test_validate_not_all_items_returned_not_raises(sales_return: SalesReturn):
     sales_return._validate_not_all_items_returned()
 
@@ -288,6 +298,12 @@ def test_modify_voucher(sales_return: SalesReturn):
             del diff[item_code]
 
     assert diff == count_quantity(sales_return.items)
+
+
+def test_modify_and_save_voucher(sales_return: SalesReturn):
+    sales_return._voucher.docstatus = 1
+    sales_return._voucher.db_update_all()
+    sales_return._modify_and_save_voucher()
 
 
 def test_make_delivery_gl_entries_create(sales_return: SalesReturn):
