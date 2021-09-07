@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from copy import deepcopy
 from typing import Any
 
 import frappe
@@ -41,8 +40,13 @@ class Receipt(Document):
             self.doctype, self.name, get_account(account_field), debit, credit
         )
 
-    def _new_stock_entry(self, stock_type: StockTypes, items: list[Any]):
-        create_stock_entry(self.doctype, self.name, stock_type, items)
+    def _new_stock_entry(
+        self,
+        stock_type: StockTypes,
+        items: list[Any],
+        reverse_qty: bool = False,  # TODO: Cover
+    ):
+        create_stock_entry(self.doctype, self.name, stock_type, items, reverse_qty)
 
     def before_submit(self):  # pragma: no cover
         if self.voucher_type == "Sales Order":
@@ -90,14 +94,6 @@ class Receipt(Document):
         self._create_purchase_stock_entries_for_sales_orders()
         self._create_purchase_stock_entries_for_items_to_sell()
 
-    def _get_items_with_reversed_qty(
-        self, items: list[dict[str, Any]]
-    ):  # pragma: no cover
-        reverse_items = deepcopy(items)
-        for item in reverse_items:
-            item["qty"] = -item["qty"]
-        return reverse_items
-
     def _create_purchase_stock_entries_for_sales_orders(self):
         items_obj: list[
             SalesOrderItem | SalesOrderChildItem
@@ -108,9 +104,7 @@ class Receipt(Document):
         items = [
             frappe._dict({"item_code": i.item_code, "qty": i.qty}) for i in items_obj
         ]
-        reverse_items = self._get_items_with_reversed_qty(items)
-
-        self._new_stock_entry("Reserved Purchased", reverse_items)
+        self._new_stock_entry("Reserved Purchased", items, reverse_qty=True)
         self._new_stock_entry("Reserved Actual", items)
 
     def _create_purchase_stock_entries_for_items_to_sell(self):
@@ -120,12 +114,10 @@ class Receipt(Document):
         if not items_obj:
             return
 
-        items: dict[str, str | int] = [
+        items: dict[str, str | int] = [  # TODO: is this necessary?
             frappe._dict({"item_code": i.item_code, "qty": i.qty}) for i in items_obj
         ]
-        reverse_items = self._get_items_with_reversed_qty(items)
-
-        self._new_stock_entry("Available Purchased", reverse_items)
+        self._new_stock_entry("Available Purchased", items, reverse_qty=True)
         self._new_stock_entry("Available Actual", items)
 
     def set_status_in_sales_order(self):
