@@ -45,6 +45,19 @@ def test_get_remaining_qtys(sales_return: SalesReturn):
             assert qty == in_order[item_code] - in_return.get(item_code, 0)
 
 
+def test_get_items_available_to_add(sales_return: SalesReturn):
+    available_item_and_qty = dict(
+        sales_return._get_remaining_qtys(
+            sales_return._voucher._get_items_with_splitted_combinations()
+        )
+    )
+    for item in sales_return.get_items_available_to_add():
+        assert (item["item_name"], item["rate"]) == frappe.get_value(
+            "Item", item["item_code"], ("item_name", "rate")
+        )
+        assert item["qty"] == available_item_and_qty[item["item_code"]]
+
+
 @pytest.mark.parametrize(
     ("item_code", "qty"),
     (("invalid_item_code", 10), ("40366634", 0), ("40366634", 3)),
@@ -109,3 +122,18 @@ def test_add_missing_fields_to_items(
             assert item.rate == grouped_order_items[item.name][0].rate
         elif item.doctype == "Sales Order Child Item":
             assert item.rate == frappe.get_value("Item", item.item_code, "rate")
+
+
+def test_validate_not_all_items_returned_not_raises(sales_return: SalesReturn):
+    sales_return._validate_not_all_items_returned()
+
+
+def test_validate_not_all_items_returned_raises(sales_return: SalesReturn):
+    sales_return.add_items(sales_return.get_items_available_to_add())
+    with pytest.raises(frappe.ValidationError, match="Can't return all items"):
+        sales_return._validate_not_all_items_returned()
+
+
+def test_before_cancel(sales_return: SalesReturn):
+    with pytest.raises(frappe.ValidationError, match="Not allowed to cancel Return"):
+        sales_return.before_cancel()

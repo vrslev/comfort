@@ -1,10 +1,9 @@
 from __future__ import annotations
 
 from copy import copy
-from typing import Callable
 
 import frappe
-from comfort import ValidationError, count_quantity, group_by_attr
+from comfort import ValidationError, count_quantity
 from comfort.finance import create_gl_entry, get_account
 from comfort.stock import create_stock_entry
 from comfort.transactions import Return
@@ -27,19 +26,15 @@ class SalesReturn(Return):
             self.__voucher: SalesOrder = frappe.get_doc("Sales Order", self.sales_order)
         return self.__voucher
 
-    def _validate_not_all_items_returned(self):
-        if (
-            len(
-                [
-                    i
-                    for i in self._get_remaining_qtys(
-                        self._voucher._get_items_with_splitted_combinations()
-                    )
-                ]
-            )
-            == 0
-        ):
-            raise ValidationError(_("Can't return all items in Sales Order"))
+    def _calculate_returned_paid_amount(self):  # TODO: Why is this not used?
+        self._modify_voucher()
+        self._voucher._set_paid_and_pending_per_amount()
+        self.returned_paid_amount = (
+            -copy(self._voucher.pending_amount)
+            if self._voucher.pending_amount < 0
+            else 0
+        )
+        self._voucher.reload()
 
     def _validate_voucher_statuses(self):
         if self._voucher.docstatus != 1:
@@ -53,36 +48,8 @@ class SalesReturn(Return):
                 _("Delivery Status should be Purchased, To Deliver or Delivered")
             )
 
-    def _calculate_returned_paid_amount(self):
-        self._modify_voucher()
-        self._voucher._set_paid_and_pending_per_amount()
-        self.returned_paid_amount = (
-            -copy(self._voucher.pending_amount)
-            if self._voucher.pending_amount < 0
-            else 0
-        )
-        self._voucher.reload()
-
-    @frappe.whitelist()
-    def get_items_available_to_add(self):
-        self.delete_empty_items()
-        items_in_order = self._voucher._get_items_with_splitted_combinations()
-        self._add_missing_fields_to_items(items_in_order)
-        available_item_and_qty = self._get_remaining_qtys(items_in_order)
-        grouped_items = group_by_attr(items_in_order)
-
-        res: dict[str, str | int] = [
-            {
-                "item_code": item_code,
-                "item_name": grouped_items[item_code][0].item_name,
-                "qty": qty,
-                "rate": grouped_items[item_code][0].rate,
-            }
-            for item_code, qty in available_item_and_qty
-        ]
-        sort_by: Callable[[res], str] = lambda i: i["item_name"]
-        res.sort(key=sort_by)
-        return res
+    def _get_all_items(self):
+        return self._voucher._get_items_with_splitted_combinations()
 
     def _split_combinations_in_voucher(self):
         return_qty_counter = count_quantity(self.items)
@@ -195,17 +162,8 @@ class SalesReturn(Return):
         create_gl_entry(self.doctype, self.name, asset_account, 0, amt)
         create_gl_entry(self.doctype, self.name, get_account("sales"), amt, 0)
 
-    def validate(self):  # pragma: no cover
-        self.delete_empty_items()
-        self._validate_voucher_statuses()
-        self._validate_not_all_items_returned()
-        self.calculate()
-
     def before_submit(self):  # pragma: no cover
         self._modify_and_save_voucher()
         self._make_delivery_gl_entries()
         self._make_stock_entries()
         self._make_payment_gl_entries()
-
-    def before_cancel(self):
-        raise ValidationError(_("Not allowed to cancel Sales Return"))

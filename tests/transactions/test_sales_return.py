@@ -18,18 +18,6 @@ def test_sales_return_voucher_property(sales_return: SalesReturn):
     assert sales_return._voucher.name == sales_return.sales_order
 
 
-def test_validate_not_all_items_returned_not_raises(sales_return: SalesReturn):
-    sales_return._validate_not_all_items_returned()
-
-
-def test_validate_not_all_items_returned_raises(sales_return: SalesReturn):
-    sales_return.add_items(sales_return.get_items_available_to_add())
-    with pytest.raises(
-        frappe.ValidationError, match="Can't return all items in Sales Order"
-    ):
-        sales_return._validate_not_all_items_returned()
-
-
 def test_validate_voucher_statuses_docstatus_not_raises(sales_return: SalesReturn):
     sales_return._voucher.docstatus = 1
     sales_return._voucher.delivery_status = "Purchased"
@@ -85,19 +73,6 @@ def test_calculate_returned_paid_amount(
         sales_return._voucher.add_payment(paid_amount, True)
     sales_return._calculate_returned_paid_amount()
     assert sales_return.returned_paid_amount == exp_returned_paid_amount
-
-
-def test_get_items_available_to_add(sales_return: SalesReturn):
-    available_item_and_qty = dict(
-        sales_return._get_remaining_qtys(
-            sales_return._voucher._get_items_with_splitted_combinations()
-        )
-    )
-    for item in sales_return.get_items_available_to_add():
-        assert (item["item_name"], item["rate"]) == frappe.get_value(
-            "Item", item["item_code"], ("item_name", "rate")
-        )
-        assert item["qty"] == available_item_and_qty[item["item_code"]]
 
 
 def generate_items_from_counter(counter: dict[str, int]):
@@ -343,10 +318,3 @@ def test_make_payment_gl_entries_not_create(sales_return: SalesReturn):
         "GL Entry",
         {"voucher_type": sales_return.doctype, "voucher_no": sales_return.name},
     )
-
-
-def test_before_cancel(sales_return: SalesReturn):
-    with pytest.raises(
-        frappe.ValidationError, match="Not allowed to cancel Sales Return"
-    ):
-        sales_return.before_cancel()
