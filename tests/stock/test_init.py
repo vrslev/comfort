@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+from collections import Counter
+
 import pytest
 
 import frappe
-from comfort import count_quantity
+from comfort import are_same_counters, count_quantity
 from comfort.stock import (
     cancel_stock_entries_for,
     create_checkout,
@@ -42,7 +44,17 @@ def test_create_checkout(purchase_order: PurchaseOrder):
     assert res[1] == purchase_order.name
 
 
-def test_create_stock_entry(receipt_sales: Receipt, sales_order: SalesOrder):
+def reverse_qtys(counter: Counter[str]):
+    new_counter = counter.copy()
+    for item_code in new_counter:
+        new_counter[item_code] = -new_counter[item_code]
+    return new_counter
+
+
+@pytest.mark.parametrize("reverse_qty", (True, False, None))
+def test_create_stock_entry(
+    receipt_sales: Receipt, sales_order: SalesOrder, reverse_qty: bool | None
+):
     receipt_sales.db_insert()
     receipt_sales.create_sales_stock_entries()
 
@@ -52,7 +64,9 @@ def test_create_stock_entry(receipt_sales: Receipt, sales_order: SalesOrder):
         frappe._dict({"item_code": item_code, "qty": qty})
         for item_code, qty in count_quantity(items_obj).items()
     ]
-    create_stock_entry(receipt_sales.doctype, receipt_sales.name, stock_type, items)
+    create_stock_entry(
+        receipt_sales.doctype, receipt_sales.name, stock_type, items, reverse_qty
+    )
 
     entry_name: str | None = frappe.get_value(
         "Stock Entry",
@@ -64,10 +78,11 @@ def test_create_stock_entry(receipt_sales: Receipt, sales_order: SalesOrder):
     assert entry_name is not None
 
     doc: StockEntry = frappe.get_doc("Stock Entry", entry_name)
-    exp_items = count_quantity(items_obj).items()
-    for i in count_quantity(doc.items).items():
-        assert i in exp_items
+    exp_items = count_quantity(items_obj)
+    if reverse_qty:
+        exp_items = reverse_qtys(exp_items)
 
+    assert are_same_counters(count_quantity(doc.items), exp_items)
     assert doc.docstatus == 1
     assert doc.stock_type == stock_type
 
@@ -100,6 +115,7 @@ def test_cancel_stock_entries_for(receipt_sales: Receipt):
         (((1, 4), (-10, 0), (15, 5)), {"10014030": 6, "10366598": 9}),
         (((10, 4), (-10, 0)), {"10366598": 4}),
         (((10, 4), (-10, -4)), {}),
+        (((10, 4), (-20, -5)), {"10014030": -10, "10366598": -1}),
     ),
 )
 def test_get_stock_balance(

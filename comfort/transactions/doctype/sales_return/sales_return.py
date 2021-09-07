@@ -39,11 +39,11 @@ class SalesReturn(Return):
     def _validate_voucher_statuses(self):
         if self._voucher.docstatus != 1:
             raise ValidationError(_("Sales Order should be submitted"))
-        elif self._voucher.delivery_status not in [
+        elif self._voucher.delivery_status not in (
             "Purchased",
             "To Deliver",
             "Delivered",
-        ]:
+        ):
             raise ValidationError(
                 _("Delivery Status should be Purchased, To Deliver or Delivered")
             )
@@ -136,18 +136,18 @@ class SalesReturn(Return):
             To Deliver:  "Reserved Actual"    -> "Available Actual"    (change Purchase Receipt behavior)
             Delivered:   "Reserved Actual"    -> "Available Actual"    (change Sales Receipt behavior)
         """
-        status_to_stock_types = {
+        stock_types = {
             "Purchased": ("Reserved Purchased", "Available Purchased"),
             "To Deliver": ("Reserved Actual", "Available Actual"),
             "Delivered": ("Reserved Actual", "Available Actual"),
-        }
-        if self._voucher.delivery_status not in status_to_stock_types.keys():
-            return
-        for stock_type in status_to_stock_types[self._voucher.delivery_status]:
-            create_stock_entry(self.doctype, self.name, stock_type, self.items)
+        }[self._voucher.delivery_status]
+        create_stock_entry(
+            self.doctype, self.name, stock_types[0], self.items, reverse_qty=True
+        )
+        create_stock_entry(self.doctype, self.name, stock_types[1], self.items)
 
     def _make_payment_gl_entries(self):
-        """Return `returned_paid_amount` from "Cash" or "Bank" -> "Sales".
+        """Return `returned_paid_amount` from "Cash" or "Bank" to "Sales".
         Changes Payment behavior.
         """
         if not self.returned_paid_amount:

@@ -29,12 +29,12 @@ def create_checkout(purchase_order: str):
 
 
 def create_stock_entry(
-    doctype: Literal["Receipt", "Checkout", "Sales Return"],
+    doctype: Literal["Receipt", "Checkout", "Sales Return", "Purchase Return"],
     name: str,
     stock_type: StockTypes,
     items: list[object],
+    reverse_qty: bool = False,
 ):
-
     doc: Document = frappe.get_doc(
         {
             "doctype": "Stock Entry",
@@ -42,7 +42,7 @@ def create_stock_entry(
             "voucher_no": name,
             "stock_type": stock_type,
             "items": [
-                {"item_code": item_code, "qty": qty}
+                {"item_code": item_code, "qty": -qty if reverse_qty else qty}
                 for item_code, qty in count_quantity(items).items()
             ],
         }
@@ -75,6 +75,6 @@ def get_stock_balance(stock_type: StockTypes) -> dict[str, int]:
     )
     res = {}
     for item_code, qty in count_quantity(items).items():
-        if qty > 0:
+        if qty != 0:
             res[item_code] = qty
     return res
