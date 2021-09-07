@@ -11,6 +11,7 @@ from comfort.finance.doctype.gl_entry.gl_entry import GLEntry
 from comfort.stock.doctype.stock_entry.stock_entry import StockEntry
 from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
 from comfort.transactions.doctype.sales_return.sales_return import SalesReturn
+from tests.stock.test_init import reverse_qtys
 
 
 def test_sales_return_voucher_property(sales_return: SalesReturn):
@@ -257,12 +258,13 @@ def test_make_stock_entries_create(
 
     for name in entry_names:
         doc: StockEntry = frappe.get_doc("Stock Entry", name)
+        expected_counter = return_counter
         if doc.stock_type == exp_stock_types[0]:
+            expected_counter = reverse_qtys(return_counter)
             entry_with_first_type = True
         elif doc.stock_type == exp_stock_types[1]:
             entry_with_second_type = True
-
-        assert count_quantity(doc.items) == return_counter
+        assert count_quantity(doc.items) == expected_counter
 
     assert entry_with_first_type
     assert entry_with_second_type
@@ -271,11 +273,8 @@ def test_make_stock_entries_create(
 def test_make_stock_entries_not_create(sales_return: SalesReturn):
     sales_return._voucher.delivery_status = "Some Random Delivery Status"
     sales_return.db_insert()
-    sales_return._make_stock_entries()
-    assert not frappe.db.exists(
-        "Stock Entry",
-        {"voucher_type": sales_return.doctype, "voucher_no": sales_return.name},
-    )
+    with pytest.raises(KeyError):
+        sales_return._make_stock_entries()
 
 
 @pytest.mark.parametrize(
