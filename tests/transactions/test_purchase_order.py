@@ -232,7 +232,7 @@ def test_get_items_in_sales_orders_no_split_combinations(purchase_order: Purchas
 
 
 def test_get_items_in_sales_orders_split_combinations(purchase_order: PurchaseOrder):
-    sales_order_names = (ord.sales_order_name for ord in purchase_order.sales_orders)
+    sales_order_names = [ord.sales_order_name for ord in purchase_order.sales_orders]
     so_items: list[SalesOrderItem] = frappe.get_all(
         "Sales Order Item",
         fields=("item_code", "qty"),
@@ -243,7 +243,7 @@ def test_get_items_in_sales_orders_split_combinations(purchase_order: PurchaseOr
         fields=("parent_item_code", "item_code", "qty"),
         filters={"parent": ("in", sales_order_names)},
     )
-    parents = (i.parent_item_code for i in child_items)
+    parents = [i.parent_item_code for i in child_items]
     exp_items = child_items + [i for i in so_items if i.item_code not in parents]
     items = purchase_order._get_items_in_sales_orders(split_combinations=True)
     assert items == exp_items

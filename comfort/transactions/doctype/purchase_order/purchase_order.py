@@ -14,13 +14,6 @@ from comfort.comfort_core.ikea import add_items_to_cart, get_delivery_services
 from comfort.entities.doctype.child_item.child_item import ChildItem
 from comfort.finance import create_payment
 from comfort.stock import create_checkout, create_receipt
-from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
-from comfort.transactions.doctype.sales_order_child_item.sales_order_child_item import (
-    SalesOrderChildItem,
-)
-from comfort.transactions.doctype.sales_order_item.sales_order_item import (
-    SalesOrderItem,
-)
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils.data import add_to_date, getdate, now_datetime, today
@@ -34,6 +27,9 @@ from ..purchase_order_item_to_sell.purchase_order_item_to_sell import (
 from ..purchase_order_sales_order.purchase_order_sales_order import (
     PurchaseOrderSalesOrder,
 )
+from ..sales_order.sales_order import SalesOrder
+from ..sales_order_child_item.sales_order_child_item import SalesOrderChildItem
+from ..sales_order_item.sales_order_item import SalesOrderItem
 
 # TODO: Validate that this Purchase Order is the only one that contains current Sales Orders
 
@@ -156,7 +152,7 @@ class PurchaseOrderMethods(Document):
 
         items: list[SalesOrderItem | SalesOrderChildItem] = []
 
-        sales_order_names = (ord.sales_order_name for ord in self.sales_orders)
+        sales_order_names = [ord.sales_order_name for ord in self.sales_orders]
         so_items: list[SalesOrderItem] = frappe.get_all(
             "Sales Order Item",
             fields=("item_code", "qty"),
@@ -317,7 +313,7 @@ class PurchaseOrder(PurchaseOrderMethods):
     @frappe.whitelist()
     def add_receipt(self):  # pragma: no cover
         create_receipt(self.doctype, self.name)
-        self.status = "Completed"  # type: ignore
+        self.status = "Completed"
         self.db_update()
         self.submit_sales_orders_and_update_statuses()
 
