@@ -1,0 +1,86 @@
+{
+  "actions": [],
+  "autoname": "PR-.YYYY.-.####",
+  "creation": "2021-09-07 12:41:19.913907",
+  "doctype": "DocType",
+  "editable_grid": 1,
+  "engine": "InnoDB",
+  "field_order": [
+    "purchase_order",
+    "column_break",
+    "returned_paid_amount",
+    "section_break_1",
+    "items",
+    "section_break_2",
+    "amended_from"
+  ],
+  "fields": [
+    {
+      "fieldname": "purchase_order",
+      "fieldtype": "Link",
+      "in_list_view": 1,
+      "label": "Purchase Order",
+      "options": "Purchase Order",
+      "reqd": 1
+    },
+    {
+      "fieldname": "column_break",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "returned_paid_amount",
+      "fieldtype": "Currency",
+      "label": "Returned Paid Amount",
+      "read_only": 1
+    },
+    {
+      "fieldname": "section_break_1",
+      "fieldtype": "Section Break"
+    },
+    {
+      "fieldname": "items",
+      "fieldtype": "Table",
+      "label": "Items",
+      "options": "Purchase Return Item",
+      "reqd": 1
+    },
+    {
+      "fieldname": "section_break_2",
+      "fieldtype": "Section Break"
+    },
+    {
+      "fieldname": "amended_from",
+      "fieldtype": "Link",
+      "label": "Amended From",
+      "no_copy": 1,
+      "options": "Purchase Return",
+      "print_hide": 1,
+      "read_only": 1
+    }
+  ],
+  "index_web_pages_for_search": 1,
+  "is_submittable": 1,
+  "links": [],
+  "modified": "2021-09-07 12:41:38.062334",
+  "modified_by": "Administrator",
+  "module": "Transactions",
+  "name": "Purchase Return",
+  "owner": "Administrator",
+  "permissions": [
+    {
+      "create": 1,
+      "delete": 1,
+      "email": 1,
+      "export": 1,
+      "print": 1,
+      "read": 1,
+      "report": 1,
+      "role": "System Manager",
+      "share": 1,
+      "write": 1
+    }
+  ],
+  "sort_field": "modified",
+  "sort_order": "DESC",
+  "track_changes": 1
+}

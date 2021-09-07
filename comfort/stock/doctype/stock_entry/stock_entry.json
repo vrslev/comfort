@@ -21,7 +21,7 @@
       "fieldtype": "Select",
       "in_list_view": 1,
       "label": "Voucher Type",
-      "options": "\nReceipt\nCheckout\nSales Return"
+      "options": "\nReceipt\nCheckout\nSales Return\nPurchase Return"
     },
     {
       "fieldname": "voucher_no",
@@ -77,7 +77,7 @@
   "in_create": 1,
   "is_submittable": 1,
   "links": [],
-  "modified": "2021-09-04 13:38:30.601010",
+  "modified": "2021-09-07 16:46:17.563048",
   "modified_by": "Administrator",
   "module": "Stock",
   "name": "Stock Entry",

@@ -26,6 +26,7 @@ from comfort.stock.doctype.checkout.checkout import Checkout
 from comfort.stock.doctype.delivery_trip.delivery_trip import DeliveryTrip
 from comfort.stock.doctype.receipt.receipt import Receipt
 from comfort.transactions.doctype.purchase_order.purchase_order import PurchaseOrder
+from comfort.transactions.doctype.purchase_return.purchase_return import PurchaseReturn
 from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
 from comfort.transactions.doctype.sales_return.sales_return import SalesReturn
 from frappe.database.mariadb.database import MariaDBDatabase
@@ -729,6 +730,35 @@ def sales_return(sales_order: SalesOrder) -> SalesReturn:
                     "item_code": "10366598",
                     "item_name": "КОМПЛИМЕНТ Штанга платяная, 75 см, белый",
                     "qty": 1,
+                    "rate": 250,
+                },
+                {
+                    "item_code": "40366634",
+                    "item_name": "КОМПЛИМЕНТ Ящик, 75x58 см, белый",
+                    "qty": 1,
+                    "rate": 1700,
+                },
+            ],
+        }
+    )
+
+
+@pytest.fixture
+def purchase_return(
+    purchase_order: PurchaseOrder, sales_order: SalesOrder
+) -> PurchaseReturn:
+    sales_order.save()
+    purchase_order.db_insert()
+    purchase_order.db_update_all()
+    return frappe.get_doc(
+        {
+            "purchase_order": purchase_order.name,
+            "doctype": "Purchase Return",
+            "items": [
+                {
+                    "item_code": "10366598",
+                    "item_name": "КОМПЛИМЕНТ Штанга платяная, 75 см, белый",
+                    "qty": 2,
                     "rate": 250,
                 },
                 {
