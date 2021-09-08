@@ -1,7 +1,8 @@
-from comfort.comfort_core.hooks import get_standard_queries, load_metadata
+from comfort.comfort_core.hooks import get_standard_queries as _get_standard_queries
+from comfort.comfort_core.hooks import load_metadata as _load_metadata
 
-app_name, app_title, app_description, app_publisher = load_metadata()
-standard_queries = get_standard_queries(
+app_name, app_title, app_description, app_publisher = _load_metadata()
+standard_queries = _get_standard_queries(
     ("Customer", "Item", "Purchase Order", "Sales Order")
 )
 

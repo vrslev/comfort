@@ -34,26 +34,36 @@ from frappe.database.mariadb.database import MariaDBDatabase
 TEST_SITE_NAME = "tests"
 
 
-@pytest.fixture
+def patch_frappe_document():
+    import frappe.model.document
+
+    def save_version(self: frappe.model.document.Document):
+        return
+
+    frappe.model.document.Document.save_version = save_version
+
+
+@pytest.fixture(scope="session")
 def db_instance():
     """Init frappe, connect to database, do nothing on db.commit()"""
     frappe.init(site=TEST_SITE_NAME, sites_path="../../sites")
+    frappe.flags.in_test = True
+    frappe.local.dev_server = True
     frappe.connect()
     frappe.db.commit = MagicMock()
-    frappe.flags.in_test = True
+    patch_frappe_document()
+
     yield frappe.db
-    frappe.destroy()
+    frappe.db.close()
 
 
 @pytest.fixture(autouse=True)
 def db_transaction(db_instance: MariaDBDatabase):
     """Rollback after db transaction"""
     try:
-        db_instance.begin()
+        yield db_instance
     except OperationalError as e:
         pytest.exit(str(e), returncode=1)
-
-    yield db_instance
     db_instance.rollback()
 
 
@@ -148,7 +158,7 @@ def item() -> Item:
     return frappe.get_doc(
         {
             "item_code": "29128569",
-            "item_name": "ПАКС Гардероб, 175x58x236 см, белый",
+            "item_name": "ПАКС, Гардероб, 175x58x236 см, белый",
             "url": "https://www.ikea.com/ru/ru/p/-s29128569",
             "rate": 17950,
             "doctype": "Item",
@@ -300,9 +310,12 @@ def sales_order(
     commission_settings: CommissionSettings,
 ):
     customer.db_insert()
-    item.insert()
+    item.set_new_name(set_child_names=True)
+    item.set_parent_in_children()
+    item.db_insert()
+    for child in item.get_all_children():  # type: ignore
+        child.db_insert()
     commission_settings.insert()
-
     doc: SalesOrder = frappe.get_doc(
         {
             "name": "SO-2021-0001",
@@ -312,14 +325,8 @@ def sales_order(
             "paid_amount": 0,
             "doctype": "Sales Order",
             "services": [
-                {
-                    "type": "Delivery to Entrance",
-                    "rate": 300,
-                },
-                {
-                    "type": "Installation",
-                    "rate": 500,
-                },
+                {"type": "Delivery to Entrance", "rate": 300},
+                {"type": "Installation", "rate": 500},
             ],
         }
     )
