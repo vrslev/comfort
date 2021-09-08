@@ -135,7 +135,12 @@ def child_items() -> list[Item]:
         },
     ]
 
-    return [frappe.get_doc(i).insert() for i in test_data]
+    res: list[Item] = []
+    for i in test_data:
+        doc = frappe.get_doc(i)
+        doc.db_insert()
+        res.append(doc)
+    return res
 
 
 @pytest.fixture
@@ -294,7 +299,7 @@ def sales_order(
     item: Item,
     commission_settings: CommissionSettings,
 ):
-    customer.insert()
+    customer.db_insert()
     item.insert()
     commission_settings.insert()
 
