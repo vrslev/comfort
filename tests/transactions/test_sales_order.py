@@ -5,7 +5,7 @@ from copy import deepcopy
 import pytest
 
 import frappe
-from comfort import count_quantity
+from comfort import count_qty
 from comfort.comfort_core.doctype.commission_settings.commission_settings import (
     CommissionSettings,
 )
@@ -44,8 +44,8 @@ def test_set_child_items_not_set_if_no_items(sales_order: SalesOrder):
 def test_set_child_items(sales_order: SalesOrder, item: Item):
     sales_order.set_child_items()
 
-    item_code_qty_pairs = count_quantity(sales_order.child_items).items()
-    exp_item_code_qty_pairs = count_quantity(item.child_items).items()
+    item_code_qty_pairs = count_qty(sales_order.child_items).items()
+    exp_item_code_qty_pairs = count_qty(item.child_items).items()
     # TODO
     # -        self.child_items = []
     # +        self.child_items = None
@@ -349,12 +349,12 @@ def test_split_combinations(sales_order: SalesOrder, save: bool):
         fields=("item_code", "qty"),
         filters={"parent": splitted_combination.item_code},
     )
-    exp_item_codes_to_qty = count_quantity(child_items)
+    exp_item_codes_to_qty = count_qty(child_items)
     for i in exp_item_codes_to_qty:
         exp_item_codes_to_qty[i] *= 3
     exp_item_codes_to_qty = exp_item_codes_to_qty.items()
 
-    for i in count_quantity(sales_order.items).items():
+    for i in count_qty(sales_order.items).items():
         assert i in exp_item_codes_to_qty
 
     # load_doc_before_save is called before save,

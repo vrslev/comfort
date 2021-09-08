@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from collections import Counter
 from copy import copy
-from typing import Callable, TypeVar, Union
+from typing import Callable, Literal, TypeVar, Union
 
 import frappe
-from comfort import ValidationError, count_quantity, group_by_attr
+from comfort import ValidationError, count_qty, group_by_attr
 from comfort.entities.doctype.child_item.child_item import ChildItem
 from comfort.entities.doctype.item.item import Item
 from comfort.transactions.doctype.purchase_order_item_to_sell.purchase_order_item_to_sell import (
@@ -19,9 +19,10 @@ from .doctype.sales_order_child_item.sales_order_child_item import SalesOrderChi
 from .doctype.sales_order_item.sales_order_item import SalesOrderItem
 from .doctype.sales_return_item.sales_return_item import SalesReturnItem
 
-_AnyItem = Union[
+AnyChildItem = Union[
     SalesOrderItem, SalesOrderChildItem, ChildItem, PurchaseOrderItemToSell
 ]
+OrderTypes = Literal["Sales Order", "Purchase Order"]  # pragma: no cover
 
 
 class Return(Document):
@@ -40,7 +41,7 @@ class Return(Document):
 
     def _get_all_items(
         self,
-    ) -> list[_AnyItem] | list[SalesOrderChildItem | SalesOrderItem]:
+    ) -> list[AnyChildItem] | list[SalesOrderChildItem | SalesOrderItem]:
         pass
 
     def delete_empty_items(self):
@@ -61,14 +62,14 @@ class Return(Document):
         self._calculate_item_values()
         self._calculate_returned_paid_amount()
 
-    def _get_remaining_qtys(self, items: list[_AnyItem]):
-        in_voucher = count_quantity(items)
-        in_return = count_quantity(self.items)
+    def _get_remaining_qtys(self, items: list[AnyChildItem]):
+        in_voucher = count_qty(items)
+        in_return = count_qty(self.items)
         for item in in_voucher:
             in_voucher[item] -= in_return.get(item, 0)
         return (item for item in in_voucher.items() if item[1] > 0)
 
-    def _add_missing_fields_to_items(self, items: list[_AnyItem]):
+    def _add_missing_fields_to_items(self, items: list[AnyChildItem]):
         items_with_missing_fields: list[Item] = frappe.get_all(
             "Item",
             fields=("item_code", "item_name", "rate"),
@@ -119,7 +120,7 @@ class Return(Document):
     @frappe.whitelist()
     def add_items(self, items: list[dict[str, str | int]]):
         all_items = self.get_items_available_to_add()
-        counter = count_quantity(frappe._dict(item) for item in all_items)
+        counter = count_qty(frappe._dict(item) for item in all_items)
 
         for item in items:
             self._validate_new_item(counter, item)
@@ -153,8 +154,8 @@ _T = TypeVar("_T")
 
 def delete_empty_items(self: object, items_field: str):
     """Delete items that have zero quantity."""
-    items: list[_AnyItem] = getattr(self, items_field)
-    new_items: list[_AnyItem] = []
+    items: list[AnyChildItem] = getattr(self, items_field)
+    new_items: list[AnyChildItem] = []
     for item in items:
         if item.qty != 0:
             new_items.append(item)
@@ -163,7 +164,7 @@ def delete_empty_items(self: object, items_field: str):
 
 def merge_same_items(items: list[_T]) -> list[_T]:
     """Merge items that have same Item Code."""
-    counter = count_quantity(items)
+    counter = count_qty(items)
     new_items: list[SalesOrderItem] = []
     for item_code, cur_items in group_by_attr(items).items():
         cur_items[0].qty = counter[item_code]

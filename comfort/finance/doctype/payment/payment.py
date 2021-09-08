@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 import frappe
-from comfort import OrderTypes, ValidationError
+from comfort import ValidationError
 from comfort.finance import cancel_gl_entries_for, create_gl_entry, get_account
+from comfort.transactions import OrderTypes
 from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
 from frappe import _
 from frappe.model.document import Document

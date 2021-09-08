@@ -4,7 +4,7 @@ import re
 from collections import Counter
 
 import frappe
-from comfort import ValidationError, count_quantity
+from comfort import ValidationError, count_qty
 from frappe import _
 from frappe.model.document import Document
 
@@ -46,7 +46,7 @@ class ItemMethods:
             fields=("item_code", "weight"),
             filters={"item_code": ("in", (d.item_code for d in self.child_items))},
         )
-        weight_map: Counter[str] = count_quantity(items, "item_code", "weight")
+        weight_map: Counter[str] = count_qty(items, "item_code", "weight")
         self.weight = 0
         for d in self.child_items:
             self.weight += weight_map[d.item_code] * d.qty

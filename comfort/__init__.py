@@ -2,18 +2,16 @@ from __future__ import annotations
 
 import json
 from collections import Counter, defaultdict
-from typing import Any, Iterable, Literal, TypeVar
+from typing import Any, Iterable, TypeVar
 
 import frappe
 
 __version__ = "0.2.0"
 
-OrderTypes = Literal["Sales Order", "Purchase Order"]  # pragma: no cover
-
 _T = TypeVar("_T")
 
 
-def count_quantity(
+def count_qty(
     data: Iterable[Any], key_attr: str = "item_code", value_attr: str = "qty"
 ):
     """Count something (most often item quantity) in list of objects."""
@@ -23,7 +21,7 @@ def count_quantity(
     return counter
 
 
-def are_same_counters(first: Counter[str], second: Counter[str]):
+def counters_are_same(first: Counter[str], second: Counter[str]):
     return len(set(first.items()).symmetric_difference(set(second.items()))) == 0
 
 

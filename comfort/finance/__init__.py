@@ -3,7 +3,8 @@ from __future__ import annotations
 from typing import Any, Literal
 
 import frappe
-from comfort import OrderTypes, ValidationError
+from comfort import ValidationError
+from comfort.transactions import OrderTypes
 from frappe import _
 from frappe.model.document import Document
 

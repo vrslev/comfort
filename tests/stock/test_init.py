@@ -5,7 +5,7 @@ from collections import Counter
 import pytest
 
 import frappe
-from comfort import are_same_counters, count_quantity
+from comfort import count_qty, counters_are_same
 from comfort.stock import (
     cancel_stock_entries_for,
     create_checkout,
@@ -62,7 +62,7 @@ def test_create_stock_entry(
     items_obj = sales_order._get_items_with_splitted_combinations()
     items = [
         frappe._dict({"item_code": item_code, "qty": qty})
-        for item_code, qty in count_quantity(items_obj).items()
+        for item_code, qty in count_qty(items_obj).items()
     ]
     create_stock_entry(
         receipt_sales.doctype, receipt_sales.name, stock_type, items, reverse_qty
@@ -78,11 +78,11 @@ def test_create_stock_entry(
     assert entry_name is not None
 
     doc: StockEntry = frappe.get_doc("Stock Entry", entry_name)
-    exp_items = count_quantity(items_obj)
+    exp_items = count_qty(items_obj)
     if reverse_qty:
         exp_items = reverse_qtys(exp_items)
 
-    assert are_same_counters(count_quantity(doc.items), exp_items)
+    assert counters_are_same(count_qty(doc.items), exp_items)
     assert doc.docstatus == 1
     assert doc.stock_type == stock_type
 

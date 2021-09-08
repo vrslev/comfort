@@ -23,27 +23,31 @@ Stock Entry: Reserved Actual -> None
 
 """
 
-# TODO: Modify Purchase Order's items to sell
 from __future__ import annotations
 
 from collections import defaultdict
 
 import frappe
-from comfort import ValidationError, count_quantity, group_by_attr
+from comfort import ValidationError, count_qty, group_by_attr
 from comfort.entities.doctype.child_item.child_item import ChildItem
 from comfort.entities.doctype.item.item import Item
 from comfort.finance import create_gl_entry, get_account
 from comfort.stock import create_stock_entry
-from comfort.transactions import Return, _AnyItem, delete_empty_items, merge_same_items
-from comfort.transactions.doctype.purchase_order_item_to_sell.purchase_order_item_to_sell import (
-    PurchaseOrderItemToSell,
+from comfort.transactions import (
+    AnyChildItem,
+    Return,
+    delete_empty_items,
+    merge_same_items,
 )
-from comfort.transactions.doctype.sales_return.sales_return import SalesReturn
 from frappe import _
 
 from ..purchase_order.purchase_order import PurchaseOrder
+from ..purchase_order_item_to_sell.purchase_order_item_to_sell import (
+    PurchaseOrderItemToSell,
+)
 from ..purchase_return_item.purchase_return_item import PurchaseReturnItem
 from ..sales_order.sales_order import SalesOrder
+from ..sales_return.sales_return import SalesReturn
 
 
 class PurchaseReturn(Return):
@@ -74,7 +78,7 @@ class PurchaseReturn(Return):
             raise ValidationError(_("Status should be To Receive or Completed"))
 
     def _get_all_items(self):
-        items: list[_AnyItem] = []
+        items: list[AnyChildItem] = []
         items += self._voucher._get_items_to_sell(True)
         for sales_order in self._voucher.sales_orders:
             doc: SalesOrder = frappe.get_doc(
@@ -84,9 +88,9 @@ class PurchaseReturn(Return):
         return items
 
     def _allocate_items(self):
-        orders_to_items: defaultdict[str | None, list[_AnyItem]] = defaultdict(list)
+        orders_to_items: defaultdict[str | None, list[AnyChildItem]] = defaultdict(list)
 
-        def append_item(item: _AnyItem):
+        def append_item(item: AnyChildItem):
             item_dict = {
                 "item_code": item.item_code,
                 "item_name": item.item_name,
@@ -102,7 +106,7 @@ class PurchaseReturn(Return):
         all_items = self._get_all_items()
         self._add_missing_fields_to_items(all_items)
         grouped_items = group_by_attr(all_items)
-        for item_code, qty in count_quantity(self.items).items():
+        for item_code, qty in count_qty(self.items).items():
             for item in grouped_items[item_code]:
                 if item.qty >= qty:
                     item.qty = qty
@@ -148,9 +152,11 @@ class PurchaseReturn(Return):
         self._voucher.items_to_sell = []
         self._voucher.extend("items_to_sell", items)
 
-    def _modify_voucher(self, orders_to_items: defaultdict[str | None, list[_AnyItem]]):
+    def _modify_voucher(
+        self, orders_to_items: defaultdict[str | None, list[AnyChildItem]]
+    ):
         self._split_combinations_in_voucher()
-        qty_counter = count_quantity(
+        qty_counter = count_qty(
             frappe._dict(i) for i in orders_to_items[None]
         )  # TODO: Qty counter should be for items to sell, not global
         for item in self._voucher.items_to_sell:
@@ -167,7 +173,7 @@ class PurchaseReturn(Return):
         self._voucher.save()
 
     def _make_sales_returns(
-        self, orders_to_items: defaultdict[str | None, list[_AnyItem]]
+        self, orders_to_items: defaultdict[str | None, list[AnyChildItem]]
     ):
         for order_name, items in orders_to_items.items():
             if order_name is None:

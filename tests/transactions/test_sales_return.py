@@ -5,7 +5,7 @@ from copy import copy
 import pytest
 
 import frappe
-from comfort import count_quantity
+from comfort import count_qty
 from comfort.finance import create_payment, get_account
 from comfort.finance.doctype.gl_entry.gl_entry import GLEntry
 from comfort.stock.doctype.stock_entry.stock_entry import StockEntry
@@ -18,6 +18,25 @@ from tests.stock.test_init import reverse_qtys
 def test_sales_return_voucher_property(sales_return: SalesReturn):
     assert type(sales_return._voucher) == SalesOrder
     assert sales_return._voucher.name == sales_return.sales_order
+
+
+@pytest.mark.parametrize(
+    ("paid_amount", "exp_returned_paid_amount"),
+    (
+        (27370, 2150),  # Fully paid
+        (0, 0),  # Not paid
+        (100, 0),  # Partially paid but not enough to return
+        (26000, 780),
+    ),  # Partially paid need to return some
+)
+def test_calculate_returned_paid_amount(
+    sales_return: SalesReturn, paid_amount: int, exp_returned_paid_amount: int
+):
+    sales_return._voucher._set_paid_and_pending_per_amount()
+    if paid_amount > 0:
+        sales_return._voucher.add_payment(paid_amount, True)
+    sales_return._calculate_returned_paid_amount()
+    assert sales_return.returned_paid_amount == exp_returned_paid_amount
 
 
 def test_validate_voucher_statuses_docstatus_not_raises(sales_return: SalesReturn):
@@ -58,25 +77,6 @@ def test_validate_voucher_statuses_delivery_status_raises(
         sales_return._validate_voucher_statuses()
 
 
-@pytest.mark.parametrize(
-    ("paid_amount", "exp_returned_paid_amount"),
-    (
-        (27370, 2150),  # Fully paid
-        (0, 0),  # Not paid
-        (100, 0),  # Partially paid but not enough to return
-        (26000, 780),
-    ),  # Partially paid need to return some
-)
-def test_calculate_returned_paid_amount(
-    sales_return: SalesReturn, paid_amount: int, exp_returned_paid_amount: int
-):
-    sales_return._voucher._set_paid_and_pending_per_amount()
-    if paid_amount > 0:
-        sales_return._voucher.add_payment(paid_amount, True)
-    sales_return._calculate_returned_paid_amount()
-    assert sales_return.returned_paid_amount == exp_returned_paid_amount
-
-
 def generate_items_from_counter(counter: dict[str, int]):
     return [{"item_code": item_code, "qty": qty} for item_code, qty in counter.items()]
 
@@ -113,9 +113,9 @@ def test_split_combinations_in_voucher_not_needed(
     )
     sales_return.extend("items", generate_items_from_counter(sales_return_counter))
 
-    prev_qty_counter = count_quantity(sales_return._voucher.items)
+    prev_qty_counter = count_qty(sales_return._voucher.items)
     sales_return._split_combinations_in_voucher()
-    new_qty_counter = count_quantity(sales_return._voucher.items)
+    new_qty_counter = count_qty(sales_return._voucher.items)
     assert prev_qty_counter == new_qty_counter
 
 
@@ -142,11 +142,11 @@ def test_split_combinations_in_voucher_needed(
     sales_return._voucher.items = merge_same_items(sales_return._voucher.items)
     sales_return._voucher.set_child_items()
 
-    counter_before = count_quantity(
+    counter_before = count_qty(
         sales_return._voucher._get_items_with_splitted_combinations()
     )
     sales_return._split_combinations_in_voucher()
-    counter_after = count_quantity(sales_return._voucher.items)
+    counter_after = count_qty(sales_return._voucher.items)
     assert counter_before == counter_after
 
 
@@ -167,11 +167,11 @@ def test_add_missing_info_to_items_in_voucher(sales_return: SalesReturn):
 
 
 def test_modify_voucher(sales_return: SalesReturn):
-    prev_qty_counter = count_quantity(
+    prev_qty_counter = count_qty(
         sales_return._voucher._get_items_with_splitted_combinations()
     )
     sales_return._modify_voucher()
-    new_qty_counter = count_quantity(
+    new_qty_counter = count_qty(
         sales_return._voucher._get_items_with_splitted_combinations()
     )
 
@@ -181,7 +181,7 @@ def test_modify_voucher(sales_return: SalesReturn):
         if diff[item_code] == 0:
             del diff[item_code]
 
-    assert diff == count_quantity(sales_return.items)
+    assert diff == count_qty(sales_return.items)
 
 
 def test_modify_and_save_voucher(sales_return: SalesReturn):
@@ -254,7 +254,7 @@ def test_make_stock_entries_create(
         )
     ]
     assert len(entry_names) == 2
-    return_counter = count_quantity(sales_return.items)
+    return_counter = count_qty(sales_return.items)
     entry_with_first_type, entry_with_second_type = False, False
 
     for name in entry_names:
@@ -265,7 +265,7 @@ def test_make_stock_entries_create(
             entry_with_first_type = True
         elif doc.stock_type == exp_stock_types[1]:
             entry_with_second_type = True
-        assert count_quantity(doc.items) == expected_counter
+        assert count_qty(doc.items) == expected_counter
 
     assert entry_with_first_type
     assert entry_with_second_type

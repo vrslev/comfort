@@ -7,7 +7,7 @@ import ikea_api_wrapped
 import pytest
 
 import frappe
-from comfort import count_quantity, group_by_attr
+from comfort import count_qty, group_by_attr
 from comfort.entities.doctype.child_item.child_item import ChildItem
 from comfort.transactions.doctype.purchase_order.purchase_order import PurchaseOrder
 from comfort.transactions.doctype.sales_order_child_item.sales_order_child_item import (
@@ -255,7 +255,7 @@ def test_get_templated_items_for_api(
 ):
     items_for_api = purchase_order._get_templated_items_for_api(split_combinations)
     assert (
-        count_quantity(
+        count_qty(
             purchase_order._get_items_to_sell(split_combinations)  # type: ignore
             + purchase_order._get_items_in_sales_orders(split_combinations)
         )

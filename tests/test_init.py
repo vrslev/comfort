@@ -4,7 +4,7 @@ import pytest
 
 import comfort
 import frappe
-from comfort import are_same_counters, count_quantity, group_by_attr, maybe_json
+from comfort import count_qty, counters_are_same, group_by_attr, maybe_json
 
 
 @dataclass
@@ -24,7 +24,7 @@ def test_count_quantity():
     new_data = data.copy()
     new_data.append(MockItem(item_code="3", qty=None))
     expected = (("1", 7), ("2", 5), ("3", 0))
-    for pair in count_quantity(data).items():
+    for pair in count_qty(data).items():
         assert pair in expected
 
 
@@ -34,7 +34,7 @@ def test_are_same_counters_true():
         MockItem(item_code="1", qty=4),
         MockItem(item_code="1", qty=3),
     ]
-    assert are_same_counters(count_quantity(data), count_quantity(second_data))
+    assert counters_are_same(count_qty(data), count_qty(second_data))
 
 
 def test_are_same_counters_not_true():
@@ -44,7 +44,7 @@ def test_are_same_counters_not_true():
         MockItem(item_code="1", qty=3),
         MockItem(item_code="3", qty=1),
     ]
-    assert not are_same_counters(count_quantity(data), count_quantity(second_data))
+    assert not counters_are_same(count_qty(data), count_qty(second_data))
 
 
 def test_group_by_attr():

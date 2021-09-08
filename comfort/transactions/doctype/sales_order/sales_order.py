@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Iterable, Literal
 
 import frappe
-from comfort import ValidationError, count_quantity, group_by_attr
+from comfort import ValidationError, count_qty, group_by_attr
 from comfort.comfort_core.doctype.commission_settings.commission_settings import (
     CommissionSettings,
 )
@@ -65,7 +65,7 @@ class SalesOrderMethods(Document):
             filters={"parent": ("in", (d.item_code for d in self.items))},
         )
 
-        item_codes_to_qty = count_quantity(self.items)
+        item_codes_to_qty = count_qty(self.items)
         for d in child_items:
             d.qty = d.qty * item_codes_to_qty[d.parent_item_code]  # type: ignore
 
@@ -270,7 +270,7 @@ class SalesOrder(SalesOrderStatuses):
         for item in items_to_remove:
             self.items.remove(item)
 
-        parent_item_codes_to_qty = count_quantity(removed_combos)
+        parent_item_codes_to_qty = count_qty(removed_combos)
 
         child_items: list[ChildItem] = frappe.get_all(
             "Child Item",

@@ -3,7 +3,7 @@ from __future__ import annotations
 from copy import copy
 
 import frappe
-from comfort import ValidationError, count_quantity
+from comfort import ValidationError, count_qty
 from comfort.finance import create_gl_entry, get_account
 from comfort.stock import create_stock_entry
 from comfort.transactions import Return, delete_empty_items, merge_same_items
@@ -53,8 +53,8 @@ class SalesReturn(Return):
         return self._voucher._get_items_with_splitted_combinations()
 
     def _split_combinations_in_voucher(self):
-        return_qty_counter = count_quantity(self.items)
-        items_no_children_qty_counter = count_quantity(self._voucher.items)
+        return_qty_counter = count_qty(self.items)
+        items_no_children_qty_counter = count_qty(self._voucher.items)
         parent_item_codes_to_modify: list[str] = []
 
         for c in self._voucher.child_items:
@@ -93,7 +93,7 @@ class SalesReturn(Return):
     def _modify_voucher(self):
         self._split_combinations_in_voucher()
 
-        qty_counter = count_quantity(self.items)
+        qty_counter = count_qty(self.items)
         for item in self._voucher.items:
             if item.item_code in qty_counter:
                 item.qty -= qty_counter[item.item_code]

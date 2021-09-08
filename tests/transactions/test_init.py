@@ -3,7 +3,7 @@ from collections import Counter
 import pytest
 
 import frappe
-from comfort import count_quantity, group_by_attr
+from comfort import count_qty, group_by_attr
 from comfort.transactions import delete_empty_items, merge_same_items
 from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
 from comfort.transactions.doctype.sales_return.sales_return import SalesReturn
@@ -37,8 +37,8 @@ def test_return_calculate_item_values(sales_return: SalesReturn):
 
 def test_return_get_remaining_qtys(sales_return: SalesReturn):
     items_in_order = sales_return._voucher._get_items_with_splitted_combinations()
-    in_order = count_quantity(items_in_order)
-    in_return = count_quantity(sales_return.items)
+    in_order = count_qty(items_in_order)
+    in_return = count_qty(sales_return.items)
 
     for item_code, qty in sales_return._get_remaining_qtys(items_in_order):
         assert qty > 0
@@ -67,7 +67,7 @@ def test_return_add_items_raises_on_invalid_item(
     sales_return: SalesReturn, item_code: str, qty: int
 ):
     all_items = sales_return.get_items_available_to_add()
-    counter = count_quantity(frappe._dict(d) for d in all_items)
+    counter = count_qty(frappe._dict(d) for d in all_items)
 
     with pytest.raises(
         frappe.ValidationError,

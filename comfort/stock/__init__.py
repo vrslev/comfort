@@ -3,8 +3,9 @@ from __future__ import annotations
 from typing import Literal
 
 import frappe
-from comfort import OrderTypes, count_quantity
+from comfort import count_qty
 from comfort.stock.doctype.stock_entry_item.stock_entry_item import StockEntryItem
+from comfort.transactions import OrderTypes
 from frappe.model.document import Document
 
 StockTypes = Literal[
@@ -43,7 +44,7 @@ def create_stock_entry(
             "stock_type": stock_type,
             "items": [
                 {"item_code": item_code, "qty": -qty if reverse_qty else qty}
-                for item_code, qty in count_quantity(items).items()
+                for item_code, qty in count_qty(items).items()
             ],
         }
     )
@@ -75,7 +76,7 @@ def get_stock_balance(stock_type: StockTypes) -> dict[str, int]:
     )
 
     res: dict[str, int] = {}
-    for item_code, qty in count_quantity(items).items():
+    for item_code, qty in count_qty(items).items():
         if qty != 0:
             res[item_code] = qty
     return res

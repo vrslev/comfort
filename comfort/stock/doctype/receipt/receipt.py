@@ -3,10 +3,11 @@ from __future__ import annotations
 from typing import Any
 
 import frappe
-from comfort import OrderTypes, count_quantity
+from comfort import count_qty
 from comfort.entities.doctype.child_item.child_item import ChildItem
 from comfort.finance import cancel_gl_entries_for, create_gl_entry, get_account
 from comfort.stock import cancel_stock_entries_for, create_stock_entry
+from comfort.transactions import OrderTypes
 from comfort.transactions.doctype.purchase_order.purchase_order import PurchaseOrder
 from comfort.transactions.doctype.purchase_order_item_to_sell.purchase_order_item_to_sell import (
     PurchaseOrderItemToSell,
@@ -73,7 +74,7 @@ class Receipt(Document):
         ] = self._voucher._get_items_with_splitted_combinations()
         items = [
             frappe._dict({"item_code": item_code, "qty": -qty})
-            for item_code, qty in count_quantity(items_obj).items()
+            for item_code, qty in count_qty(items_obj).items()
         ]
         self._new_stock_entry("Reserved Actual", items)
 

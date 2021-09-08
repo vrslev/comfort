@@ -9,12 +9,12 @@ from ikea_api_wrapped.parsers.order_capture import DeliveryOptionDict
 from ikea_api_wrapped.wrappers import PurchaseInfoDict
 
 import frappe
-from comfort import ValidationError, count_quantity, group_by_attr, maybe_json
+from comfort import ValidationError, count_qty, group_by_attr, maybe_json
 from comfort.comfort_core.ikea import add_items_to_cart, get_delivery_services
 from comfort.entities.doctype.child_item.child_item import ChildItem
 from comfort.finance import create_payment
 from comfort.stock import create_checkout, create_receipt
-from comfort.transactions import _AnyItem, delete_empty_items, merge_same_items
+from comfort.transactions import AnyChildItem, delete_empty_items, merge_same_items
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils.data import add_to_date, getdate, now_datetime, today
@@ -170,10 +170,10 @@ class PurchaseOrderMethods(Document):
         return items
 
     def _get_templated_items_for_api(self, split_combinations: bool):
-        items: list[_AnyItem] = self._get_items_to_sell(
+        items: list[AnyChildItem] = self._get_items_to_sell(
             split_combinations
         ) + self._get_items_in_sales_orders(split_combinations)
-        return count_quantity(items)
+        return count_qty(items)
 
     def _clear_delivery_options(self):
         for option in self.delivery_options:
@@ -310,7 +310,7 @@ class PurchaseOrder(PurchaseOrderMethods):
     def get_unavailable_items_in_cart_by_orders(  # TODO: It renders with duplicates
         self, unavailable_items: list[dict[str, str | int]]
     ):  # pragma: no cover
-        all_items: list[_AnyItem] = []
+        all_items: list[AnyChildItem] = []
         for order in self.sales_orders:
             doc: SalesOrder = frappe.get_doc("Sales Order", order.sales_order_name)
             all_items += doc._get_items_with_splitted_combinations()
@@ -319,7 +319,7 @@ class PurchaseOrder(PurchaseOrderMethods):
             item.parent = self.name
         all_items += items_to_sell
 
-        counter = count_quantity(
+        counter = count_qty(
             (frappe._dict(i) for i in maybe_json(unavailable_items)),
             value_attr="available_qty",
         )
