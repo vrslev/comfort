@@ -1,6 +1,10 @@
 // TODO: Make generic Return controller
 frappe.ui.form.on("Purchase Return", {
   refresh(frm) {
+    frm.custom_make_buttons = {
+      "Sales Return": "Sales Return",
+    };
+
     frm.fields_dict.items.grid.grid_buttons
       .find(".grid-add-row")
       .unbind("click")
