@@ -28,11 +28,11 @@ class Receipt(Document):
     voucher_type: OrderTypes
     voucher_no: str
 
-    __voucher: SalesOrder | PurchaseOrder
+    __voucher: SalesOrder | PurchaseOrder | None = None
 
     @property
     def _voucher(self) -> SalesOrder | PurchaseOrder:
-        if not hasattr(self, "__voucher"):
+        if not self.__voucher:
             self.__voucher = frappe.get_doc(self.voucher_type, self.voucher_no)
         return self.__voucher
 

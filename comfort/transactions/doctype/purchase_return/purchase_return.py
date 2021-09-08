@@ -55,11 +55,11 @@ class PurchaseReturn(Return):
     returned_paid_amount: int
     items: list[PurchaseReturnItem]
 
-    __voucher: PurchaseOrder
+    __voucher: PurchaseOrder | None = None
 
     @property
     def _voucher(self) -> PurchaseOrder:
-        if not hasattr(self, "__voucher"):
+        if not self.__voucher:
             self.__voucher: PurchaseOrder = frappe.get_doc(
                 "Purchase Order", self.purchase_order
             )
