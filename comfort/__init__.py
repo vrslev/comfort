@@ -36,7 +36,7 @@ def group_by_attr(data: Iterable[_T], attr: str = "item_code") -> dict[Any, list
 def maybe_json(value: _T) -> _T:
     """Normalize payload from frontend without messing type hints."""
     try:
-        return json.loads(value)  # type: ignore
+        return json.loads(value)
     except (json.JSONDecodeError, TypeError):
         return value
 

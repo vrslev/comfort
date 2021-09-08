@@ -1,9 +1,8 @@
 from __future__ import annotations
 
-from pytest import Item
-
 import frappe
 from comfort import group_by_attr
+from comfort.entities.doctype.item.item import Item
 from comfort.stock import get_stock_balance
 
 
@@ -32,14 +31,12 @@ def get_columns():  # pragma: no cover
 
 def get_data(filters: dict[str, str]) -> dict[str, str | int]:
     balance = get_stock_balance(filters["stock_type"])
-
     items_with_names: list[Item] = frappe.get_all(
         "Item",
         fields=("item_code", "item_name"),
         filters={"item_code": ("in", balance.keys())},
     )
     names_map = group_by_attr(items_with_names)
-
     return [
         {
             "item_code": item_code,

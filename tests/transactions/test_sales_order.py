@@ -50,8 +50,8 @@ def test_set_child_items(sales_order: SalesOrder, item: Item):
     # -        self.child_items = []
     # +        self.child_items = None
     # TODO
-    # -            d.qty = d.qty * item_codes_to_qty[d.parent_item_code]  # type: ignore
-    # +            d.qty = d.qty / item_codes_to_qty[d.parent_item_code]  # type: ignore
+    # -            d.qty = d.qty * item_codes_to_qty[d.parent_item_code]
+    # +            d.qty = d.qty / item_codes_to_qty[d.parent_item_code]
     # TODO
     # -        base_margin = self.items_cost * self.commission / 100
     # +        base_margin = self.items_cost * self.commission / 101

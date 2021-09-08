@@ -91,7 +91,7 @@ class PurchaseOrderMethods(Document):
 
     @frappe.whitelist()
     def _calculate_total_weight(self):
-        res: list[float] = frappe.get_all(
+        res: list[list[float]] = frappe.get_all(
             "Sales Order Item",
             fields="SUM(total_weight) AS total_weight",
             filters={
@@ -143,8 +143,9 @@ class PurchaseOrderMethods(Document):
         return items_to_sell + child_items
 
     def _get_items_in_sales_orders(self, split_combinations: bool):
+        items: list[SalesOrderItem | SalesOrderChildItem] = []
         if not self.sales_orders:
-            return []
+            return items
 
         sales_order_names = [ord.sales_order_name for ord in self.sales_orders]
         so_items: list[SalesOrderItem] = frappe.get_all(
@@ -152,8 +153,6 @@ class PurchaseOrderMethods(Document):
             fields=("item_code", "qty"),
             filters={"parent": ("in", sales_order_names)},
         )
-
-        items: list[SalesOrderItem | SalesOrderChildItem] = []
 
         if split_combinations:
             child_items: list[SalesOrderChildItem] = frappe.get_all(
@@ -248,7 +247,7 @@ class PurchaseOrder(PurchaseOrderMethods):
 
         new_cart_number: int = 1
         if carts_in_this_month:
-            matches = re.findall(r"-(\d+)", carts_in_this_month[0][0])
+            matches: list[str] = re.findall(r"-(\d+)", carts_in_this_month[0][0])
             latest_cart_number: str | int = matches[0] if matches else 0
             new_cart_number = int(latest_cart_number) + 1
 
@@ -353,7 +352,7 @@ def sales_order_query(
     start: str,
     page_len: str,
     filters: dict[str, Any],
-) -> dict[str, Any]:
+):
     ignore_orders: list[str] = [
         s.sales_order_name
         for s in frappe.get_all(
@@ -372,7 +371,7 @@ def sales_order_query(
     if searchfield:
         searchfields = " or ".join(field + " LIKE %(txt)s" for field in searchfields)
 
-    orders: list[tuple[Any, ...]] = frappe.db.sql(  # nosec
+    orders: list[list[str | int]] = frappe.db.sql(  # nosec
         """
         SELECT name, customer, total_amount from `tabSales Order`
         WHERE {ignore_orders_cond}

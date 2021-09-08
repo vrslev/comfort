@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
+from typing import Any
 
 import pytest
 
@@ -10,7 +13,7 @@ from comfort import count_qty, counters_are_same, group_by_attr, maybe_json
 @dataclass
 class MockItem:
     item_code: str
-    qty: int
+    qty: int | None
 
 
 data = [
@@ -58,7 +61,8 @@ def test_group_by_attr():
 
 def test_maybe_json():
     assert maybe_json("[]") == []
-    assert maybe_json([]) == []  # type: ignore
+    l: list[Any] = []
+    assert maybe_json(l) == []
     assert maybe_json("[") == "["
 
 

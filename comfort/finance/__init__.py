@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Literal
+from typing import Any, Generator, Literal
 
 import frappe
 from comfort import ValidationError
@@ -29,7 +29,7 @@ def get_received_amount(doc: Document) -> int:
     payments: list[Document] = frappe.get_all(
         "Payment", {"voucher_type": doc.doctype, "voucher_no": doc.name}
     )
-    payment_names = (p.name for p in payments)
+    payment_names: Generator[str, None, None] = (p.name for p in payments)
 
     balances: list[Any] = frappe.get_all(
         "GL Entry",

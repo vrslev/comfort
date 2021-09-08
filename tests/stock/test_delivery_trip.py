@@ -89,7 +89,7 @@ def test_add_receipts_to_sales_orders(
     assert frappe.db.exists({"doctype": "Receipt", "voucher_no": new_doc.name})
 
 
-def test_validate_orders_have_services_raises_on_no_delivery(
+def test_validate_orders_have_services_raises_on_no_installation(
     delivery_trip: DeliveryTrip, sales_order: SalesOrder
 ):
     sales_order.services = []

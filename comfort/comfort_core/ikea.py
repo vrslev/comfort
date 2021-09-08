@@ -127,7 +127,7 @@ def _get_items_to_fetch(item_codes: list[str | int] | int | str, force_update: b
 
 
 def _create_item_categories(items: list[ParsedItem]):
-    categories: set[tuple[str, str]] = set()
+    categories: set[tuple[str | None, str | None]] = set()
     for item in items:
         categories.add((item["category_name"], item["category_url"]))
     for category in categories:

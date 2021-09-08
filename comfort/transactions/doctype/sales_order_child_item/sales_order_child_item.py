@@ -6,3 +6,4 @@ class SalesOrderChildItem(Document):
     item_code: str
     item_name: str
     qty: int
+    parent: str

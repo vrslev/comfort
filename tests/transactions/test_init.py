@@ -47,7 +47,7 @@ def test_return_get_remaining_qtys(sales_return: SalesReturn):
 
 
 def test_return_get_items_available_to_add(sales_return: SalesReturn):
-    available_item_and_qty = dict(
+    available_item_and_qty: dict[str, int] = dict(
         sales_return._get_remaining_qtys(
             sales_return._voucher._get_items_with_splitted_combinations()
         )

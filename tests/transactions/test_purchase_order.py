@@ -9,6 +9,7 @@ import pytest
 import frappe
 from comfort import count_qty, group_by_attr
 from comfort.entities.doctype.child_item.child_item import ChildItem
+from comfort.transactions import AnyChildItem
 from comfort.transactions.doctype.purchase_order.purchase_order import PurchaseOrder
 from comfort.transactions.doctype.sales_order_child_item.sales_order_child_item import (
     SalesOrderChildItem,
@@ -50,11 +51,10 @@ def test_update_sales_orders_from_db(purchase_order: PurchaseOrder):
 
     purchase_order.update_sales_orders_from_db()
     for order in purchase_order.sales_orders:
-        customer, total_amount = frappe.get_value(
+        values: tuple[str, int] = frappe.get_value(
             "Sales Order", order.sales_order_name, ("customer", "total_amount")
         )
-        customer: str
-        total_amount: int
+        customer, total_amount = values
         assert order.customer == customer
         assert order.total_amount == total_amount
 
@@ -94,7 +94,7 @@ def test_calculate_items_to_sell_cost_if_no_items_to_sell(
 
 def test_calculate_sales_orders_cost(purchase_order: PurchaseOrder):
     purchase_order._calculate_sales_orders_cost()
-    res: list[int] = frappe.get_all(
+    res: list[list[int]] = frappe.get_all(
         "Sales Order Item",
         fields="SUM(qty * rate) AS sales_orders_cost",
         filters={
@@ -136,7 +136,7 @@ def test_calculate_total_weight(
     purchase_order.update_items_to_sell_from_db()
     purchase_order._calculate_total_weight()
 
-    res: list[float] = frappe.get_all(
+    res: list[list[float]] = frappe.get_all(
         "Sales Order Item",
         fields="SUM(total_weight) AS total_weight",
         filters={
@@ -244,7 +244,9 @@ def test_get_items_in_sales_orders_split_combinations(purchase_order: PurchaseOr
         filters={"parent": ("in", sales_order_names)},
     )
     parents = [i.parent_item_code for i in child_items]
-    exp_items = child_items + [i for i in so_items if i.item_code not in parents]
+    exp_items: list[SalesOrderItem | SalesOrderChildItem] = child_items + [
+        i for i in so_items if i.item_code not in parents
+    ]
     items = purchase_order._get_items_in_sales_orders(split_combinations=True)
     assert items == exp_items
 
@@ -254,13 +256,10 @@ def test_get_templated_items_for_api(
     purchase_order: PurchaseOrder, split_combinations: bool
 ):
     items_for_api = purchase_order._get_templated_items_for_api(split_combinations)
-    assert (
-        count_qty(
-            purchase_order._get_items_to_sell(split_combinations)  # type: ignore
-            + purchase_order._get_items_in_sales_orders(split_combinations)
-        )
-        == items_for_api
-    )
+    all_items: list[AnyChildItem] = purchase_order._get_items_to_sell(
+        split_combinations
+    ) + purchase_order._get_items_in_sales_orders(split_combinations)
+    assert count_qty(all_items) == items_for_api
 
 
 @pytest.mark.usefixtures("ikea_settings")

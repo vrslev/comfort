@@ -46,7 +46,7 @@ def test_new_stock_entry(receipt_sales: Receipt, item_no_children: Item):
     receipt_sales.db_insert()
     receipt_sales._new_stock_entry(stock_type, items)
 
-    entry_name = frappe.get_value(
+    entry_name: str = frappe.get_value(
         "Stock Entry",
         filters={
             "voucher_type": receipt_sales.doctype,

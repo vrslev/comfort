@@ -8,3 +8,4 @@ class PurchaseOrderItemToSell(Document):
     rate: int
     amount: int
     weight: float
+    parent: str

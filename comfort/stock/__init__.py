@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Literal
+from typing import Any, Literal
 
 import frappe
 from comfort import count_qty
@@ -33,7 +33,7 @@ def create_stock_entry(
     doctype: Literal["Receipt", "Checkout", "Sales Return", "Purchase Return"],
     name: str,
     stock_type: StockTypes,
-    items: list[object],
+    items: list[Any],
     reverse_qty: bool = False,
 ):
     doc: Document = frappe.get_doc(

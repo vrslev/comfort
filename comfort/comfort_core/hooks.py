@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from configparser import ConfigParser
 from pathlib import Path
-from typing import Any, Callable, Iterable
+from typing import Any, Iterable
 
 import frappe
 import frappe.defaults
@@ -54,7 +54,7 @@ def _format_sales_order_query(d: list[Any]):  # pragma: no cover
         d[3] = _format_money(d[3])
 
 
-_QUERY_FORMATTERS: dict[str, Callable[[list[Any]], Any]] = {  # pragma: no cover
+_QUERY_FORMATTERS = {  # pragma: no cover
     "Item": _format_item_query,
     "Purchase Order": _format_purchase_order_query,
     "Sales Order": _format_sales_order_query,
@@ -71,7 +71,7 @@ def _get_fields(
     search_fields: list[Any] = meta.get_search_fields()
     fields.extend(search_fields)
 
-    title_field: str | None = meta.get("title_field")  # type: ignore
+    title_field: str | None = meta.get("title_field")
     if title_field and not title_field.strip() in fields:
         fields.insert(1, title_field.strip())
 
@@ -91,7 +91,7 @@ def default_query(
     conditions = []
     fields = _get_fields(doctype, ["name"])
 
-    query: list[tuple[Any]] = frappe.db.sql(
+    query: list[list[Any]] = frappe.db.sql(
         f"""
         SELECT {", ".join(fields)} FROM `tab{doctype}`
         WHERE {searchfield} LIKE %(txt)s

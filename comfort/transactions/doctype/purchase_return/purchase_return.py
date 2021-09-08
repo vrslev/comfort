@@ -55,11 +55,11 @@ class PurchaseReturn(Return):
     returned_paid_amount: int
     items: list[PurchaseReturnItem]
 
-    __voucher: PurchaseOrder | None = None
+    __voucher: PurchaseOrder
 
     @property
     def _voucher(self) -> PurchaseOrder:
-        if not self.__voucher:
+        if not hasattr(self, "__voucher"):
             self.__voucher: PurchaseOrder = frappe.get_doc(
                 "Purchase Order", self.purchase_order
             )
@@ -91,7 +91,7 @@ class PurchaseReturn(Return):
         orders_to_items: defaultdict[str | None, list[AnyChildItem]] = defaultdict(list)
 
         def append_item(item: AnyChildItem):
-            item_dict = {
+            item_dict: dict[str, str | int] = {
                 "item_code": item.item_code,
                 "item_name": item.item_name,
                 "qty": item.qty,

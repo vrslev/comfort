@@ -16,7 +16,7 @@ class TelegramSettings(Document):
 
 
 def get_bot():
-    token = frappe.get_value("Telegram Settings", None, "bot_token")
+    token: str | None = frappe.get_value("Telegram Settings", None, "bot_token")
     if token is None:
         raise ValidationError(_("Enter Bot Token first"))
     return telegram.Bot(token)
@@ -35,7 +35,7 @@ def get_chats():
 
 def send_message(*args: Any, **kwargs: Any):
     bot = get_bot()
-    chat_id = frappe.get_value("Telegram Settings", None, "chat_id")
+    chat_id: str | None = frappe.get_value("Telegram Settings", None, "chat_id")
     if chat_id is None:
         raise ValidationError(_("Get Chat ID first"))
     return bot.send_message(*args, chat_id=chat_id, **kwargs)

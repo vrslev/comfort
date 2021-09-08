@@ -85,7 +85,7 @@ class Payment(Document):
 
     def create_purchase_gl_entries(self):
         cash_or_bank = self._resolve_cash_or_bank()
-        prepaid_inventory, purchase_delivery = frappe.get_value(
+        values: tuple[int, int] = frappe.get_value(
             self.voucher_type,
             self.voucher_no,
             fieldname=(
@@ -93,8 +93,7 @@ class Payment(Document):
                 "delivery_cost as purchase_delivery",
             ),
         )
-        prepaid_inventory: int
-        purchase_delivery: int
+        prepaid_inventory, purchase_delivery = values
 
         self._new_gl_entry(cash_or_bank, 0, prepaid_inventory)
         self._new_gl_entry("prepaid_inventory", prepaid_inventory, 0)

@@ -30,10 +30,10 @@ def test_gl_validate_filters_passes():
 
 def insert_gl_entries_with_wrong_conditions(gl_entry: GLEntry):
     gl_entry.db_insert()
-    new_doc = frappe.copy_doc(gl_entry)
+    new_doc: GLEntry = frappe.copy_doc(gl_entry)
     new_doc.docstatus = 2
     new_doc.db_insert()
-    new_doc2 = frappe.copy_doc(gl_entry)
+    new_doc2: GLEntry = frappe.copy_doc(gl_entry)
     new_doc2.creation = add_to_date(None, days=-50)
     new_doc2.db_insert()
 

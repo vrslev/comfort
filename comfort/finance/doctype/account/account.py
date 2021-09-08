@@ -23,7 +23,7 @@ def get_children(doctype: str, parent: str = "", is_root: bool = False):
     )
     for account in accounts:
         if not account.expandable:
-            v = frappe.get_all(
+            v: list[Any] = frappe.get_all(
                 "GL Entry",
                 fields="SUM(debit) - SUM(credit) as balance",
                 filters={"account": account.value, "docstatus": ("!=", 2)},

@@ -59,15 +59,15 @@ class SalesOrderMethods(Document):
         if not self.items:
             return
 
-        child_items: list[ChildItem] = frappe.get_all(
+        child_items: list[SalesOrderChildItem] = frappe.get_all(
             "Child Item",
             fields=("parent as parent_item_code", "item_code", "item_name", "qty"),
             filters={"parent": ("in", (d.item_code for d in self.items))},
         )
 
         item_codes_to_qty = count_qty(self.items)
-        for d in child_items:
-            d.qty = d.qty * item_codes_to_qty[d.parent_item_code]  # type: ignore
+        for item in child_items:
+            item.qty = item.qty * item_codes_to_qty[item.parent_item_code]
 
         self.extend("child_items", child_items)
 
@@ -148,7 +148,7 @@ class SalesOrderStatuses(SalesOrderMethods):
         else:
             status = "Unpaid"
 
-        self.payment_status = status  # type: ignore
+        self.payment_status = status
 
     def _set_delivery_status(self):
         if self.docstatus == 2:
@@ -159,7 +159,6 @@ class SalesOrderStatuses(SalesOrderMethods):
         ):
             status = "Delivered"
         else:
-            purchase_order_name: str | None
             if purchase_order_name := frappe.get_value(
                 "Purchase Order Sales Order",
                 fieldname="parent",
@@ -179,7 +178,7 @@ class SalesOrderStatuses(SalesOrderMethods):
             else:
                 status = "To Purchase"
 
-        self.delivery_status = status  # type: ignore
+        self.delivery_status = status
 
     def _set_document_status(self):
         """Set Document Status. Depends on `docstatus`, `payment_status` and `delivery_status`."""
@@ -193,7 +192,7 @@ class SalesOrderStatuses(SalesOrderMethods):
         else:
             status = "Cancelled"
 
-        self.status = status  # type: ignore
+        self.status = status
 
     def set_statuses(self):  # pragma: no cover
         """Set statuses according to current Sales Order and linked Purchase Order states."""

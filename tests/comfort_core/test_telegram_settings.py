@@ -28,7 +28,7 @@ def test_get_chats():
 def test_send_message(monkeypatch: MonkeyPatch, telegram_settings: TelegramSettings):
     class FakeFakeBot(FakeBot):
         def send_message(self, *args: Any, **kwargs: Any):
-            assert int(kwargs.get("chat_id")) == telegram_settings.chat_id
+            assert int(kwargs.get("chat_id", 0)) == telegram_settings.chat_id
             return super().send_message()
 
     monkeypatch.setattr("telegram.Bot", FakeFakeBot)

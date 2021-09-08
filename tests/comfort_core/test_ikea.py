@@ -40,19 +40,17 @@ def test_make_item_category_no_name(parsed_item: ParsedItem):
 
 def test_make_items_from_child_items_if_not_exist(parsed_item: ParsedItem):
     _make_items_from_child_items_if_not_exist(parsed_item)
+    items_in_db: set[str] = {
+        item.item_code for item in frappe.get_all("Item", "item_code")
+    }
     assert (
-        len(
-            {item["item_code"] for item in parsed_item["child_items"]}  # type: ignore
-            ^ {item.item_code for item in frappe.get_all("Item", "item_code")}
-        )
+        len({item["item_code"] for item in parsed_item["child_items"]} ^ items_in_db)
         == 0
     )
     _make_items_from_child_items_if_not_exist(parsed_item)  # test if not exists block
+    items_in_db = {item.item_code for item in frappe.get_all("Item", "item_code")}
     assert (
-        len(
-            {item["item_code"] for item in parsed_item["child_items"]}  # type: ignore
-            ^ {item.item_code for item in frappe.get_all("Item", "item_code")}
-        )
+        len({item["item_code"] for item in parsed_item["child_items"]} ^ items_in_db)
         == 0
     )
 
@@ -167,13 +165,8 @@ def test_create_item_categories(parsed_item: ParsedItem):
     new_category = "New Category Name"
     items[1]["category_name"] = new_category
     _create_item_categories(items)
-    assert (
-        len(
-            {new_category, parsed_item["category_name"]}  # type: ignore
-            ^ {c.name for c in frappe.get_all("Item Category")}
-        )
-        == 0
-    )
+    categories_in_db: set[str] = {c.name for c in frappe.get_all("Item Category")}
+    assert len({new_category, parsed_item["category_name"]} ^ categories_in_db) == 0
 
 
 # TODO: Test and make translatable

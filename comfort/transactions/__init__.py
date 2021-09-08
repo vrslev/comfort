@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from collections import Counter
-from copy import copy
 from typing import Callable, Literal, TypeVar, Union
 
 import frappe
@@ -47,11 +46,7 @@ class Return(Document):
     def delete_empty_items(self):
         if not hasattr(self, "items") or self.items is None:
             self.items = []
-        items = copy(self.items)
-        self.items = []
-        for item in items:
-            if item.qty != 0:
-                self.items.append(item)
+        delete_empty_items(self, "items")
 
     def _calculate_item_values(self):
         for item in self.items:
@@ -92,7 +87,7 @@ class Return(Document):
         available_item_and_qty = self._get_remaining_qtys(items)
         grouped_items = group_by_attr(items)
 
-        res: dict[str, str | int] = [
+        res: list[dict[str, str | int]] = [
             {
                 "item_code": item_code,
                 "item_name": grouped_items[item_code][0].item_name,
@@ -101,7 +96,7 @@ class Return(Document):
             }
             for item_code, qty in available_item_and_qty
         ]
-        sort_by: Callable[[res], str] = lambda i: i["item_name"]
+        sort_by: Callable[[dict[str, str | int]], str] = lambda i: i["item_name"]
         res.sort(key=sort_by)
         return res
 

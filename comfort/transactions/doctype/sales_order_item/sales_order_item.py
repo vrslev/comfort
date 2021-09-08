@@ -9,3 +9,4 @@ class SalesOrderItem(Document):
     amount: int
     weight: float
     total_weight: float
+    parent: str

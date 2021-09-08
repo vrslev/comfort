@@ -84,9 +84,11 @@ class SalesReturn(Return):
     def _add_missing_info_to_items_in_voucher(self):
         for item in self._voucher.items:
             if not item.rate or not item.weight:
-                item.item_name, item.rate, item.weight = frappe.get_value(
+                item_values: tuple[str, int, float] = frappe.get_value(
                     "Item", item.item_code, ("item_name", "rate", "weight")
                 )
+                item.item_name, item.rate, item.weight = item_values
+
                 item.amount = item.qty * item.rate
                 item.total_weight = item.qty * item.weight
 
