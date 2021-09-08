@@ -34,7 +34,7 @@ from comfort.entities.doctype.child_item.child_item import ChildItem
 from comfort.entities.doctype.item.item import Item
 from comfort.finance import create_gl_entry, get_account
 from comfort.stock import create_stock_entry
-from comfort.transactions import Return, _AnyItem, merge_items
+from comfort.transactions import Return, _AnyItem, delete_empty_items, merge_same_items
 from comfort.transactions.doctype.purchase_order_item_to_sell.purchase_order_item_to_sell import (
     PurchaseOrderItemToSell,
 )
@@ -112,7 +112,7 @@ class PurchaseReturn(Return):
                     append_item(item)
                     qty -= item.qty
 
-        return orders_to_items.items()
+        return orders_to_items
 
     def _add_missing_field_to_items_to_sell(
         self, items: list[PurchaseOrderItemToSell | ChildItem]
@@ -143,29 +143,33 @@ class PurchaseReturn(Return):
             item.amount = item.qty * item.rate
 
     def _split_combinations_in_voucher(self):
-        items = merge_items(self._voucher._get_items_to_sell(True))
+        items = merge_same_items(self._voucher._get_items_to_sell(True))
         self._add_missing_field_to_items_to_sell(items)
         self._voucher.items_to_sell = []
         self._voucher.extend("items_to_sell", items)
 
-    def _modify_voucher(self):
+    def _modify_voucher(self, orders_to_items: defaultdict[str | None, list[_AnyItem]]):
         self._split_combinations_in_voucher()
-
-        qty_counter = count_quantity(self.items)
+        qty_counter = count_quantity(
+            frappe._dict(i) for i in orders_to_items[None]
+        )  # TODO: Qty counter should be for items to sell, not global
         for item in self._voucher.items_to_sell:
             if item.item_code in qty_counter:
                 item.qty -= qty_counter[item.item_code]
                 del qty_counter[item.item_code]
 
-        self._voucher.delete_empty_items()
+        delete_empty_items(self._voucher, "items_to_sell")
+        self._voucher.items_to_sell = merge_same_items(self._voucher.items_to_sell)
         # NOTE: Never use `update_items_to_sell_from_db`
         self._voucher.update_sales_orders_from_db()
         self._voucher.calculate()
         self._voucher.flags.ignore_validate_update_after_submit = True
         self._voucher.save()
 
-    def _make_sales_returns(self):
-        for order_name, items in self._allocate_items():
+    def _make_sales_returns(
+        self, orders_to_items: defaultdict[str | None, list[_AnyItem]]
+    ):
+        for order_name, items in orders_to_items.items():
             if order_name is None:
                 continue
             doc: SalesReturn = frappe.new_doc("Sales Return")
@@ -220,7 +224,8 @@ class PurchaseReturn(Return):
         )
 
     def before_submit(self):  # pragma: no cover
-        self._make_sales_returns()
-        self._modify_voucher()
+        orders_to_items = self._allocate_items()
+        self._make_sales_returns(orders_to_items)
+        self._modify_voucher(orders_to_items)
         self._make_gl_entries()
         self._make_stock_entries()
