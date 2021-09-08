@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from copy import copy
 from typing import Iterable, Literal
 
 import frappe
@@ -12,6 +11,7 @@ from comfort.entities.doctype.child_item.child_item import ChildItem
 from comfort.entities.doctype.item.item import Item
 from comfort.finance import create_payment, get_received_amount
 from comfort.stock import create_receipt
+from comfort.transactions import delete_empty_items, merge_same_items
 from frappe import _
 from frappe.model.document import Document
 
@@ -40,30 +40,6 @@ class SalesOrderMethods(Document):
     payment_status: Literal["", "Unpaid", "Partially Paid", "Paid", "Overpaid"]
     per_paid: float
     delivery_status: Literal["", "To Purchase", "Purchased", "To Deliver", "Delivered"]
-
-    def merge_same_items(self):
-        """Merge items that have same Item Code."""
-        items_grouped_by_item_code: Iterable[list[SalesOrderItem]] = group_by_attr(
-            self.items
-        ).values()
-        final_items: list[SalesOrderItem] = []
-
-        for cur_items in items_grouped_by_item_code:
-            if len(cur_items) > 1:
-                full_qty = list(count_quantity(cur_items).values())[0]
-                cur_items[0].qty = full_qty
-
-            final_items.append(cur_items[0])
-
-        self.items = final_items
-
-    def delete_empty_items(self):
-        """Delete items that have zero quantity."""
-        items = copy(self.items)
-        self.items = []
-        for item in items:
-            if item.qty != 0:
-                self.items.append(item)
 
     def update_items_from_db(self):
         """Load item properties from database and calculate Amount and Total Weight."""
@@ -229,8 +205,8 @@ class SalesOrderStatuses(SalesOrderMethods):
 
 class SalesOrder(SalesOrderStatuses):
     def validate(self):  # pragma: no cover
-        self.delete_empty_items()
-        self.merge_same_items()
+        delete_empty_items(self, "items")
+        self.items = merge_same_items(self.items)
         self.update_items_from_db()
         self.set_child_items()
 

@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from collections import Counter
 from copy import deepcopy
 
 import pytest
@@ -24,46 +23,6 @@ from frappe import ValidationError
 #############################
 #     SalesOrderMethods     #
 #############################
-
-
-def test_merge_same_items(sales_order: SalesOrder):
-    # TODO: test not messed up
-    # TODO
-    # @@ -49,7 +49,7 @@
-    # -            if len(cur_items) > 1:
-    # +            if len(cur_items) >= 1:
-    # +            if len(cur_items) > 2:
-    # -                full_qty = list(count_quantity(cur_items).values())[0]
-    # +                full_qty = None
-    # -                cur_items[0].qty = full_qty
-    # +                cur_items[1].qty = full_qty
-    # +                cur_items[1].qty = None
-
-    item = sales_order.items[0].as_dict().copy()
-    item.qty = 4
-    second_item = sales_order.items[1].as_dict().copy()
-    second_item.qty = 2
-    sales_order.extend("items", [item, second_item])
-
-    sales_order.merge_same_items()
-    c: Counter[str] = Counter()
-    for item in sales_order.items:
-        c[item.item_code] += 1
-
-    assert len(sales_order.items) == 2
-    assert all(c == 1 for c in c.values())
-
-
-def test_delete_empty_items(sales_order: SalesOrder):
-    sales_order.append("items", {"qty": 0})
-    sales_order.delete_empty_items()
-
-    c: Counter[str] = Counter()
-    for i in sales_order.items:
-        c[i.item_code] += i.qty
-
-    for qty in c.values():
-        assert qty > 0
 
 
 def test_update_items_from_db(sales_order: SalesOrder):

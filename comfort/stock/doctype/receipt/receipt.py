@@ -62,8 +62,6 @@ class Receipt(Document):
         cancel_stock_entries_for(self.doctype, self.name)
         self.set_status_in_sales_order()
 
-    # Sales Order
-
     def create_sales_gl_entries(self):
         items_cost: int = self._voucher.items_cost
         self._new_gl_entry("inventory", 0, items_cost)
@@ -79,8 +77,6 @@ class Receipt(Document):
         ]
         self._new_stock_entry("Reserved Actual", items)
 
-    # Purchase Order
-
     def create_purchase_gl_entries(self):
         items_amount: int = frappe.get_value(
             self.voucher_type,
@@ -89,10 +85,6 @@ class Receipt(Document):
         )
         self._new_gl_entry("prepaid_inventory", 0, items_amount)
         self._new_gl_entry("inventory", items_amount, 0)
-
-    def create_purchase_stock_entries(self):  # pragma: no cover
-        self._create_purchase_stock_entries_for_sales_orders()
-        self._create_purchase_stock_entries_for_items_to_sell()
 
     def _create_purchase_stock_entries_for_sales_orders(self):
         items_obj: list[
@@ -119,6 +111,10 @@ class Receipt(Document):
         ]
         self._new_stock_entry("Available Purchased", items, reverse_qty=True)
         self._new_stock_entry("Available Actual", items)
+
+    def create_purchase_stock_entries(self):  # pragma: no cover
+        self._create_purchase_stock_entries_for_sales_orders()
+        self._create_purchase_stock_entries_for_items_to_sell()
 
     def set_status_in_sales_order(self):
         if self.voucher_type == "Sales Order":

@@ -14,9 +14,7 @@ from comfort.transactions.doctype.purchase_order_item_to_sell.purchase_order_ite
 from frappe import _
 from frappe.model.document import Document
 
-from .doctype.purchase_order.purchase_order import PurchaseOrder
 from .doctype.purchase_return_item.purchase_return_item import PurchaseReturnItem
-from .doctype.sales_order.sales_order import SalesOrder
 from .doctype.sales_order_child_item.sales_order_child_item import SalesOrderChildItem
 from .doctype.sales_order_item.sales_order_item import SalesOrderItem
 from .doctype.sales_return_item.sales_return_item import SalesReturnItem
@@ -31,7 +29,7 @@ class Return(Document):
     items: list[SalesReturnItem] | list[PurchaseReturnItem]
 
     @property
-    def _voucher(self) -> SalesOrder | PurchaseOrder:
+    def _voucher(self) -> Document:
         pass
 
     def _calculate_returned_paid_amount(self):
@@ -88,7 +86,7 @@ class Return(Document):
     @frappe.whitelist()
     def get_items_available_to_add(self):
         self.delete_empty_items()
-        items = merge_items(self._get_all_items())
+        items = merge_same_items(self._get_all_items())
         self._add_missing_fields_to_items(items)
         available_item_and_qty = self._get_remaining_qtys(items)
         grouped_items = group_by_attr(items)
@@ -153,11 +151,21 @@ class Return(Document):
 _T = TypeVar("_T")
 
 
-def merge_items(items: list[_T]) -> list[_T]:  # TODO: Cover
-    counter = count_quantity(items)
-    merged_items: list[_T] = []
+def delete_empty_items(self: object, items_field: str):
+    """Delete items that have zero quantity."""
+    items: list[_AnyItem] = getattr(self, items_field)
+    new_items: list[_AnyItem] = []
+    for item in items:
+        if item.qty != 0:
+            new_items.append(item)
+    setattr(self, items_field, new_items)
 
+
+def merge_same_items(items: list[_T]) -> list[_T]:
+    """Merge items that have same Item Code."""
+    counter = count_quantity(items)
+    new_items: list[SalesOrderItem] = []
     for item_code, cur_items in group_by_attr(items).items():
         cur_items[0].qty = counter[item_code]
-        merged_items.append(cur_items[0])
-    return merged_items
+        new_items.append(cur_items[0])
+    return new_items

@@ -365,6 +365,7 @@ def test_purchase_order_before_save(purchase_order: PurchaseOrder):
     purchase_order.delivery_options.append("somevalue")
     purchase_order.before_save()
     assert len(purchase_order.delivery_options) == 0
+    assert purchase_order.cannot_add_items is None
 
 
 def test_purchase_order_before_insert(purchase_order: PurchaseOrder):

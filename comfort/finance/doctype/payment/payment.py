@@ -16,10 +16,7 @@ class Payment(Document):
     amount: int
     paid_with_cash: bool
 
-    def validate(self):  # pragma: no cover
-        self.validate_amount_more_than_zero()
-
-    def validate_amount_more_than_zero(self):
+    def validate(self):
         if self.amount <= 0:
             raise ValidationError(_("Amount should be more that zero"))
 

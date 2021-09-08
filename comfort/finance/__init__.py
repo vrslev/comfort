@@ -25,7 +25,7 @@ def get_received_amount(doc: Document) -> int:
     """Get balance from all GL Entries associated with given Transaction and default Cash or Bank accounts."""
     accounts = get_account("cash"), get_account("bank")
 
-    payments: list[Any] = frappe.get_all(
+    payments: list[Document] = frappe.get_all(
         "Payment", {"voucher_type": doc.doctype, "voucher_no": doc.name}
     )
     payment_names = (p.name for p in payments)
@@ -65,7 +65,7 @@ def create_gl_entry(
 
 
 def cancel_gl_entries_for(doctype: str, name: str):
-    gl_entries: list[Any] = frappe.get_all(
+    gl_entries: list[Document] = frappe.get_all(
         "GL Entry",
         {"voucher_type": doctype, "voucher_no": name, "docstatus": ("!=", 2)},
     )

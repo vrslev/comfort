@@ -73,8 +73,8 @@ def get_columns():  # pragma: no cover
     ]
 
 
-def get_data(filters: dict[str, str]):
-    entries: list[Any] = frappe.get_all(
+def get_data(filters: dict[str, str]) -> list[Any]:
+    return frappe.get_all(
         "GL Entry",
         fields=(
             "name as gl_entry",
@@ -84,6 +84,7 @@ def get_data(filters: dict[str, str]):
             "voucher_no",
             "debit",
             "credit",
+            "(debit - credit) as balance",
         ),
         filters=(
             ("docstatus", "!=", 2),
@@ -91,6 +92,3 @@ def get_data(filters: dict[str, str]):
         ),
         order_by="creation",
     )
-    for entry in entries:
-        entry.balance = entry.debit - entry.credit
-    return entries

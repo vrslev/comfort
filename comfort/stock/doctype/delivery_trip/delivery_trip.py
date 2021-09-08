@@ -12,7 +12,6 @@ from comfort import ValidationError, maybe_json
 from comfort.comfort_core.doctype.telegram_settings.telegram_settings import (
     send_message,
 )
-from comfort.stock.doctype.delivery_stop.delivery_stop import DeliveryStop
 from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
 from comfort.transactions.doctype.sales_order_service.sales_order_service import (
     SalesOrderService,
@@ -20,6 +19,8 @@ from comfort.transactions.doctype.sales_order_service.sales_order_service import
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import get_url_to_form
+
+from ..delivery_stop.delivery_stop import DeliveryStop
 
 
 class DeliveryTrip(Document):
@@ -51,7 +52,7 @@ class DeliveryTrip(Document):
         for stop in self.stops:
             res = get_delivery_and_installation_for_order(stop.sales_order)
             if res["delivery_type"] is None:
-                raise ValidationError(  # pragma: no cover ???
+                raise ValidationError(
                     _("Sales Order {} has no delivery service").format(stop.sales_order)
                 )
             if stop.installation and not res["installation"]:
@@ -128,18 +129,18 @@ def _get_items_for_order(sales_order_name: str):  # pragma: no cover
     doc: SalesOrder = frappe.get_doc("Sales Order", sales_order_name)
     return [
         {
-            "item_code": format_item_code(i.item_code),
-            "qty": i.qty,
-            "item_name": i.item_name,
+            "item_code": format_item_code(item.item_code),
+            "qty": item.qty,
+            "item_name": item.item_name,
         }
-        for i in doc._get_items_with_splitted_combinations()
+        for item in doc._get_items_with_splitted_combinations()
     ]
 
 
 @frappe.whitelist()
 def get_delivery_and_installation_for_order(sales_order_name: str):
     services: list[SalesOrderService] = frappe.get_all(
-        "Sales Order Service", filters={"parent": sales_order_name}, fields="type"
+        "Sales Order Service", fields="type", filters={"parent": sales_order_name}
     )
     res = {"delivery_type": None, "installation": False}
     for service in services:
@@ -153,7 +154,8 @@ def get_delivery_and_installation_for_order(sales_order_name: str):
 
 
 def _prepare_message_for_telegram(message: str):
-    message = message.replace("\n", "").replace("<br>", "\n")
+    message = message.replace("\n", "")
+    message = message.replace("<br>", "\n")
     message = re.sub(r" +", " ", message)
     message = message.replace("&nbsp;&nbsp;&nbsp;", "   ")
     return message

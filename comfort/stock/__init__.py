@@ -73,7 +73,8 @@ def get_stock_balance(stock_type: StockTypes) -> dict[str, int]:
         fields=("item_code", "qty"),
         filters={"parent": ("in", stock_entries)},
     )
-    res = {}
+
+    res: dict[str, int] = {}
     for item_code, qty in count_quantity(items).items():
         if qty != 0:
             res[item_code] = qty

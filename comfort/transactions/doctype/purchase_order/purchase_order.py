@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import re
 from datetime import datetime
-from typing import Any, Literal, ValuesView
+from typing import Any, Literal
 
 from ikea_api_wrapped.parsers.order_capture import DeliveryOptionDict
 from ikea_api_wrapped.wrappers import PurchaseInfoDict
@@ -14,6 +14,7 @@ from comfort.comfort_core.ikea import add_items_to_cart, get_delivery_services
 from comfort.entities.doctype.child_item.child_item import ChildItem
 from comfort.finance import create_payment
 from comfort.stock import create_checkout, create_receipt
+from comfort.transactions import _AnyItem, delete_empty_items, merge_same_items
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils.data import add_to_date, getdate, now_datetime, today
@@ -54,21 +55,17 @@ class PurchaseOrderMethods(Document):
             raise ValidationError(_("Add Sales Orders or Items to Sell"))
 
     def delete_sales_order_duplicates(self):
-        sales_orders_grouped_by_name: ValuesView[
-            list[PurchaseOrderSalesOrder]
-        ] = group_by_attr(self.sales_orders, "sales_order_name").values()
-        final_orders: list[PurchaseOrderSalesOrder] = []
-        for orders in sales_orders_grouped_by_name:
-            final_orders.append(orders[0])
-
-        self.sales_orders = final_orders
+        sales_orders_grouped_by_name = group_by_attr(
+            self.sales_orders, "sales_order_name"
+        ).values()
+        self.sales_orders = [orders[0] for orders in sales_orders_grouped_by_name]
 
     def update_sales_orders_from_db(self):
         for order in self.sales_orders:
-            customer_and_total_amount: tuple[str, int] = frappe.get_value(
+            order_values: tuple[str, int] = frappe.get_value(
                 "Sales Order", order.sales_order_name, ("customer", "total_amount")
             )
-            order.customer, order.total_amount = customer_and_total_amount
+            order.customer, order.total_amount = order_values
 
     def update_items_to_sell_from_db(self):
         for item in self.items_to_sell:
@@ -137,20 +134,17 @@ class PurchaseOrderMethods(Document):
         child_items: list[ChildItem] = frappe.get_all(
             "Child Item",
             fields=("parent", "item_code", "qty"),
-            filters={"parent": ("in", (item.item_code for item in self.items_to_sell))},
+            filters={"parent": ("in", (i.item_code for i in self.items_to_sell))},
         )
         parents = [child.parent for child in child_items]
         items_to_sell = [
             item for item in self.items_to_sell if item.item_code not in parents
         ]
-
         return items_to_sell + child_items
 
     def _get_items_in_sales_orders(self, split_combinations: bool):
         if not self.sales_orders:
             return []
-
-        items: list[SalesOrderItem | SalesOrderChildItem] = []
 
         sales_order_names = [ord.sales_order_name for ord in self.sales_orders]
         so_items: list[SalesOrderItem] = frappe.get_all(
@@ -158,6 +152,8 @@ class PurchaseOrderMethods(Document):
             fields=("item_code", "qty"),
             filters={"parent": ("in", sales_order_names)},
         )
+
+        items: list[SalesOrderItem | SalesOrderChildItem] = []
 
         if split_combinations:
             child_items: list[SalesOrderChildItem] = frappe.get_all(
@@ -174,14 +170,9 @@ class PurchaseOrderMethods(Document):
         return items
 
     def _get_templated_items_for_api(self, split_combinations: bool):
-        items: list[
-            PurchaseOrderItemToSell | ChildItem | SalesOrderItem | SalesOrderChildItem
-        ] = self._get_items_to_sell(
+        items: list[_AnyItem] = self._get_items_to_sell(
             split_combinations
-        ) + self._get_items_in_sales_orders(
-            split_combinations
-        )
-
+        ) + self._get_items_in_sales_orders(split_combinations)
         return count_quantity(items)
 
     def _clear_delivery_options(self):
@@ -214,14 +205,14 @@ class PurchaseOrderMethods(Document):
         self.db_update_all()
 
     def submit_sales_orders_and_update_statuses(self):  # pragma: no cover
-        for s in self.sales_orders:
-            doc: SalesOrder = frappe.get_doc("Sales Order", s.sales_order_name)
+        for ord in self.sales_orders:
+            doc: SalesOrder = frappe.get_doc("Sales Order", ord.sales_order_name)
             doc.set_statuses()
             doc.flags.ignore_validate_update_after_submit = True
             doc.submit()
 
     def create_payment(self):
-        create_payment(self.doctype, self.name, self.total_amount, paid_with_cash=True)
+        create_payment(self.doctype, self.name, self.total_amount, paid_with_cash=False)
 
     def create_checkout(self):  # pragma: no cover
         create_checkout(self.name)
@@ -266,6 +257,8 @@ class PurchaseOrder(PurchaseOrderMethods):
     def validate(self):  # pragma: no cover
         self.validate_not_empty()
         self.delete_sales_order_duplicates()
+        delete_empty_items(self, "items_to_sell")
+        self.items_to_sell = merge_same_items(self.items_to_sell)
         self.update_sales_orders_from_db()
         self.update_items_to_sell_from_db()
         self.calculate()
@@ -275,6 +268,7 @@ class PurchaseOrder(PurchaseOrderMethods):
 
     def before_save(self):
         self.delivery_options = []
+        self.cannot_add_items = None
 
     def before_submit(self):
         self.delivery_options = []
@@ -291,24 +285,19 @@ class PurchaseOrder(PurchaseOrderMethods):
 
     @frappe.whitelist()
     def add_purchase_info_and_submit(
-        self,
-        purchase_id: str,
-        purchase_info: PurchaseInfoDict,
+        self, purchase_id: str, purchase_info: PurchaseInfoDict
     ):
-        self.schedule_date: datetime = getdate(
+        self.schedule_date = getdate(
             purchase_info.get("delivery_date", add_to_date(None, weeks=2))
         )
-        self.posting_date: datetime = getdate(
-            purchase_info.get("purchase_date", today())
-        )
+        self.posting_date = getdate(purchase_info.get("purchase_date", today()))
         self.delivery_cost = int(purchase_info["delivery_cost"])
         self.order_confirmation_no = purchase_id
         self.submit()
 
     @frappe.whitelist()
     def checkout(self):  # pragma: no cover
-        items = self._get_templated_items_for_api(False)
-        add_items_to_cart(items, authorize=True)
+        add_items_to_cart(self._get_templated_items_for_api(False), authorize=True)
 
     @frappe.whitelist()
     def add_receipt(self):  # pragma: no cover
@@ -321,10 +310,7 @@ class PurchaseOrder(PurchaseOrderMethods):
     def get_unavailable_items_in_cart_by_orders(  # TODO: It renders with duplicates
         self, unavailable_items: list[dict[str, str | int]]
     ):  # pragma: no cover
-
-        all_items: list[
-            PurchaseOrderItemToSell | ChildItem | SalesOrderItem | SalesOrderChildItem
-        ] = []
+        all_items: list[_AnyItem] = []
         for order in self.sales_orders:
             doc: SalesOrder = frappe.get_doc("Sales Order", order.sales_order_name)
             all_items += doc._get_items_with_splitted_combinations()
@@ -340,8 +326,8 @@ class PurchaseOrder(PurchaseOrderMethods):
         grouped_items = group_by_attr(i for i in all_items if i.item_code in counter)
 
         res: list[dict[str, str | int | None]] = []
-        for items in grouped_items.values():
-            for idx, item in enumerate(items):
+        for cur_items in grouped_items.values():
+            for idx, item in enumerate(cur_items):
                 if item.item_name is None:
                     item.item_name = frappe.get_cached_value(
                         "Item", item.item_code, "item_name"

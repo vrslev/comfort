@@ -4,6 +4,7 @@ import pytest
 
 import frappe
 from comfort import count_quantity, group_by_attr
+from comfort.transactions import delete_empty_items, merge_same_items
 from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
 from comfort.transactions.doctype.sales_return.sales_return import SalesReturn
 
@@ -28,13 +29,13 @@ def test_return_delete_empty_items_attr_is_none(sales_return: SalesReturn):
     sales_return.delete_empty_items()
 
 
-def test_calculate_item_values(sales_return: SalesReturn):
+def test_return_calculate_item_values(sales_return: SalesReturn):
     sales_return._calculate_item_values()
     for item in sales_return.items:
         assert item.amount == item.qty * item.rate
 
 
-def test_get_remaining_qtys(sales_return: SalesReturn):
+def test_return_get_remaining_qtys(sales_return: SalesReturn):
     items_in_order = sales_return._voucher._get_items_with_splitted_combinations()
     in_order = count_quantity(items_in_order)
     in_return = count_quantity(sales_return.items)
@@ -45,7 +46,7 @@ def test_get_remaining_qtys(sales_return: SalesReturn):
             assert qty == in_order[item_code] - in_return.get(item_code, 0)
 
 
-def test_get_items_available_to_add(sales_return: SalesReturn):
+def test_return_get_items_available_to_add(sales_return: SalesReturn):
     available_item_and_qty = dict(
         sales_return._get_remaining_qtys(
             sales_return._voucher._get_items_with_splitted_combinations()
@@ -62,7 +63,7 @@ def test_get_items_available_to_add(sales_return: SalesReturn):
     ("item_code", "qty"),
     (("invalid_item_code", 10), ("40366634", 0), ("40366634", 3)),
 )
-def test_add_items_raises_on_invalid_item(
+def test_return_add_items_raises_on_invalid_item(
     sales_return: SalesReturn, item_code: str, qty: int
 ):
     all_items = sales_return.get_items_available_to_add()
@@ -85,7 +86,7 @@ def test_add_items_raises_on_invalid_item(
         )
 
 
-def test_add_items_not_raises(sales_return: SalesReturn):
+def test_return_add_items_not_raises(sales_return: SalesReturn):
     expected_item_amount = 2000
     test_item = {
         "item_code": "40366634",
@@ -110,7 +111,7 @@ def test_add_items_not_raises(sales_return: SalesReturn):
     assert item_amount == expected_item_amount
 
 
-def test_add_missing_fields_to_items(
+def test_return_add_missing_fields_to_items(
     sales_return: SalesReturn, sales_order: SalesOrder
 ):
     grouped_order_items = group_by_attr(sales_order.items, attr="name")
@@ -124,16 +125,56 @@ def test_add_missing_fields_to_items(
             assert item.rate == frappe.get_value("Item", item.item_code, "rate")
 
 
-def test_validate_not_all_items_returned_not_raises(sales_return: SalesReturn):
+def test_return_validate_not_all_items_returned_not_raises(sales_return: SalesReturn):
     sales_return._validate_not_all_items_returned()
 
 
-def test_validate_not_all_items_returned_raises(sales_return: SalesReturn):
+def test_return_validate_not_all_items_returned_raises(sales_return: SalesReturn):
     sales_return.add_items(sales_return.get_items_available_to_add())
     with pytest.raises(frappe.ValidationError, match="Can't return all items"):
         sales_return._validate_not_all_items_returned()
 
 
-def test_before_cancel(sales_return: SalesReturn):
+def test_return_before_cancel(sales_return: SalesReturn):
     with pytest.raises(frappe.ValidationError, match="Not allowed to cancel Return"):
         sales_return.before_cancel()
+
+
+def test_delete_empty_items(sales_order: SalesOrder):
+    sales_order.append("items", {"qty": 0})
+    delete_empty_items(sales_order, "items")
+
+    c: Counter[str] = Counter()
+    for i in sales_order.items:
+        c[i.item_code] += i.qty
+
+    for qty in c.values():
+        assert qty > 0
+
+
+def test_merge_same_items(sales_order: SalesOrder):
+    # TODO: test not messed up
+    # TODO
+    # @@ -49,7 +49,7 @@
+    # -            if len(cur_items) > 1:
+    # +            if len(cur_items) >= 1:
+    # +            if len(cur_items) > 2:
+    # -                full_qty = list(count_quantity(cur_items).values())[0]
+    # +                full_qty = None
+    # -                cur_items[0].qty = full_qty
+    # +                cur_items[1].qty = full_qty
+    # +                cur_items[1].qty = None
+
+    item = sales_order.items[0].as_dict().copy()
+    item.qty = 4
+    second_item = sales_order.items[1].as_dict().copy()
+    second_item.qty = 2
+    sales_order.extend("items", [item, second_item])
+
+    sales_order.items = merge_same_items(sales_order.items)
+    c: Counter[str] = Counter()
+    for item in sales_order.items:
+        c[item.item_code] += 1
+
+    assert len(sales_order.items) == 2
+    assert all(c == 1 for c in c.values())

@@ -9,13 +9,13 @@ from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
 from frappe import ValidationError
 
 
-def test_validate_amount_more_than_zero_raises_on_zero_amount(payment_sales: Payment):
+def test_payment_validate(payment_sales: Payment):
     # TODO
     # -        if self.amount <= 0:
     # +        if self.amount <= 1:
     payment_sales.amount = 0
     with pytest.raises(ValidationError, match="Amount should be more that zero"):
-        payment_sales.validate_amount_more_than_zero()
+        payment_sales.validate()
 
 
 def test_new_gl_entry(payment_sales: Payment):
