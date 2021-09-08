@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections import Counter
 from copy import copy
-from typing import Callable, Union
+from typing import Callable, TypeVar, Union
 
 import frappe
 from comfort import ValidationError, count_quantity, group_by_attr
@@ -71,14 +71,14 @@ class Return(Document):
         return (item for item in in_voucher.items() if item[1] > 0)
 
     def _add_missing_fields_to_items(self, items: list[_AnyItem]):
-        items_with_rates: list[Item] = frappe.get_all(
+        items_with_missing_fields: list[Item] = frappe.get_all(
             "Item",
             fields=("item_code", "item_name", "rate"),
             filters={
                 "item_code": ("in", (i.item_code for i in items if not i.get("rate")))
             },
         )
-        grouped_items = group_by_attr(items_with_rates)
+        grouped_items = group_by_attr(items_with_missing_fields)
 
         for item in items:
             if not item.get("rate"):
@@ -150,9 +150,12 @@ class Return(Document):
         raise ValidationError(_("Not allowed to cancel Return"))
 
 
-def merge_items(items: list[_AnyItem]):  # TODO: Cover
+_T = TypeVar("_T")
+
+
+def merge_items(items: list[_T]) -> list[_T]:  # TODO: Cover
     counter = count_quantity(items)
-    merged_items: list[_AnyItem] = []
+    merged_items: list[_T] = []
 
     for item_code, cur_items in group_by_attr(items).items():
         cur_items[0].qty = counter[item_code]
