@@ -147,7 +147,7 @@ def _make_items():
         },
         {
             "item_code": "29128569",
-            "item_name": "ПАКС Гардероб, 175x58x236 см, белый",
+            "item_name": "ПАКС, Гардероб, 175x58x236 см, белый",
             "url": "https://www.ikea.com/ru/ru/p/-s29128569",
             "rate": 17950,
             "doctype": "Item",
@@ -204,7 +204,7 @@ def _make_sales_order():
                 {
                     "item_code": "29128569",
                     "qty": 1,
-                    "item_name": "ПАКС Гардероб, 175x58x236 см, белый",
+                    "item_name": "ПАКС, Гардероб, 175x58x236 см, белый",
                 }
             ],
             "services": [

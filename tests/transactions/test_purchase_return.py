@@ -7,8 +7,8 @@ def test_purchase_return_voucher_property(purchase_return: PurchaseReturn):
     assert purchase_return._voucher.name == purchase_return.purchase_order
 
 
-def test_purchase_return_calculate_returned_paid_amount(
-    purchase_return: PurchaseReturn,
-):
-    purchase_return._calculate_returned_paid_amount()
-    raise Exception(purchase_return.returned_paid_amount)
+# def test_purchase_return_calculate_returned_paid_amount(
+#     purchase_return: PurchaseReturn,
+# ):
+#     purchase_return._calculate_returned_paid_amount()
+#     raise Exception(purchase_return.returned_paid_amount)
