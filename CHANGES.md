@@ -1,5 +1,29 @@
 # Day to day changes
 
+## 8 Sep
+
+- Purchase Return (WIP)
+- Several fixes
+- Improved tests performance
+
+## 7 Sep
+
+- Refactoring
+- Purchase Return (WIP)
+
+## 6 Sep
+
+## 5 Sep
+
+## 4 Sep
+
+- Sales Return (WIP)
+- Several fixes
+
+## 3 Sep
+
+- Sales Return (WIP)
+
 ## 2 Sep
 
 - Sales Return (WIP)
