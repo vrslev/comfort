@@ -23,15 +23,21 @@ Stock Entry: Reserved Actual -> None
 
 """
 
+# TODO: Modify Purchase Order's items to sell
 from __future__ import annotations
 
 from collections import defaultdict
 
 import frappe
 from comfort import ValidationError, count_quantity, group_by_attr
+from comfort.entities.doctype.child_item.child_item import ChildItem
+from comfort.entities.doctype.item.item import Item
 from comfort.finance import create_gl_entry, get_account
 from comfort.stock import create_stock_entry
-from comfort.transactions import Return, _AnyItem
+from comfort.transactions import Return, _AnyItem, merge_items
+from comfort.transactions.doctype.purchase_order_item_to_sell.purchase_order_item_to_sell import (
+    PurchaseOrderItemToSell,
+)
 from comfort.transactions.doctype.sales_return.sales_return import SalesReturn
 from frappe import _
 
@@ -108,6 +114,45 @@ class PurchaseReturn(Return):
 
         return orders_to_items.items()
 
+    def _add_missing_field_to_items_to_sell(
+        self, items: list[PurchaseOrderItemToSell | ChildItem]
+    ):
+        def include(item: PurchaseOrderItemToSell | ChildItem):
+            if (
+                not item.get("rate")
+                or not item.get("weight")
+                or not item.get("item_name")
+                or not item.get("amount")
+            ):
+                return True
+            return False
+
+        items_with_missing_fields: list[Item] = frappe.get_all(
+            "Item",
+            fields=("item_code", "item_name", "rate", "weight"),
+            filters={"item_code": ("in", (i.item_code for i in items if include(i)))},
+        )
+        grouped_items = group_by_attr(items_with_missing_fields)
+
+        for item in items:
+            if item.item_code in grouped_items:
+                grouped_item = grouped_items[item.item_code][0]
+                item.item_name = grouped_item.item_name
+                item.rate = grouped_item.rate
+                item.weight = grouped_item.weight
+            item.amount = item.qty * item.rate
+
+    def _modify_voucher(self):
+        items = merge_items(self._voucher._get_items_to_sell(True))
+        self._add_missing_field_to_items_to_sell(items)
+        self._voucher.items_to_sell = []
+        self._voucher.extend("items_to_sell", items)
+        # NOTE: Never use `update_items_to_sell_from_db`
+        self._voucher.update_sales_orders_from_db()
+        self._voucher.calculate()
+        self._voucher.flags.ignore_validate_update_after_submit = True
+        self._voucher.save()
+
     def _make_sales_returns(self):
         for order_name, items in self._allocate_items():
             if order_name is None:
@@ -115,7 +160,7 @@ class PurchaseReturn(Return):
             doc: SalesReturn = frappe.new_doc("Sales Return")
             doc.sales_order = order_name
             doc.extend("items", items)
-            doc.save()
+            doc.insert()
             doc.submit()
 
     def _make_gl_entries(self):
@@ -150,7 +195,10 @@ class PurchaseReturn(Return):
         create_gl_entry(self.doctype, self.name, asset_account, amt, 0)
 
     def _make_stock_entries(self):
-        """Return items to supplier."""
+        """Return items to supplier.
+
+        Since Sales Returns make Stock Entries (Reserved -> Available), making only (Available -> None)
+        """
         stock_type = {
             "To Receive": "Available Purchased",
             "Completed": "Available Actual",
@@ -161,5 +209,6 @@ class PurchaseReturn(Return):
 
     def before_submit(self):  # pragma: no cover
         self._make_sales_returns()
+        self._modify_voucher()
         self._make_gl_entries()
         self._make_stock_entries()
