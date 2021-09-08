@@ -308,14 +308,14 @@ def test_create_payment(purchase_order: PurchaseOrder):
 
     res: tuple[int, bool] = frappe.get_value(
         "Payment",
-        fieldname=["amount", "paid_with_cash"],
+        fieldname=("amount", "paid_with_cash"),
         filters={
             "voucher_type": purchase_order.doctype,
             "voucher_no": purchase_order.name,
         },
     )
     assert res[0] == amount
-    assert res[1]
+    assert not res[1]
 
 
 #############################
