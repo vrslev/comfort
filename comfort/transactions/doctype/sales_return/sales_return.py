@@ -6,7 +6,7 @@ import frappe
 from comfort import ValidationError, count_quantity
 from comfort.finance import create_gl_entry, get_account
 from comfort.stock import create_stock_entry
-from comfort.transactions import Return
+from comfort.transactions import Return, delete_empty_items, merge_same_items
 from frappe import _
 
 from ..sales_order.sales_order import SalesOrder
@@ -101,8 +101,8 @@ class SalesReturn(Return):
 
         self._voucher.edit_commission = True
         # NOTE: Never use `update_items_from_db`
-        self._voucher.delete_empty_items()
-        self._voucher.merge_same_items()
+        delete_empty_items(self._voucher, "items")
+        self._voucher.items = merge_same_items(self._voucher.items)
         self._voucher.set_child_items()
         self._add_missing_info_to_items_in_voucher()
         self._voucher.calculate()

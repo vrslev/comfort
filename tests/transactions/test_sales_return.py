@@ -9,6 +9,7 @@ from comfort import count_quantity
 from comfort.finance import create_payment, get_account
 from comfort.finance.doctype.gl_entry.gl_entry import GLEntry
 from comfort.stock.doctype.stock_entry.stock_entry import StockEntry
+from comfort.transactions import merge_same_items
 from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
 from comfort.transactions.doctype.sales_return.sales_return import SalesReturn
 from tests.stock.test_init import reverse_qtys
@@ -138,7 +139,7 @@ def test_split_combinations_in_voucher_needed(
 
     sales_return._voucher.items = []
     sales_return._voucher.extend("items", generate_items_from_counter(items_counter))
-    sales_return._voucher.merge_same_items()
+    sales_return._voucher.items = merge_same_items(sales_return._voucher.items)
     sales_return._voucher.set_child_items()
 
     counter_before = count_quantity(
