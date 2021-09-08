@@ -17,6 +17,7 @@ class SalesReturn(Return):
     sales_order: str
     returned_paid_amount: int
     items: list[SalesReturnItem]
+    from_purchase_return: str
 
     __voucher: SalesOrder | None = None
 

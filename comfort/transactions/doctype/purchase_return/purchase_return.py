@@ -142,11 +142,22 @@ class PurchaseReturn(Return):
                 item.weight = grouped_item.weight
             item.amount = item.qty * item.rate
 
-    def _modify_voucher(self):
+    def _split_combinations_in_voucher(self):
         items = merge_items(self._voucher._get_items_to_sell(True))
         self._add_missing_field_to_items_to_sell(items)
         self._voucher.items_to_sell = []
         self._voucher.extend("items_to_sell", items)
+
+    def _modify_voucher(self):
+        self._split_combinations_in_voucher()
+
+        qty_counter = count_quantity(self.items)
+        for item in self._voucher.items_to_sell:
+            if item.item_code in qty_counter:
+                item.qty -= qty_counter[item.item_code]
+                del qty_counter[item.item_code]
+
+        self._voucher.delete_empty_items()
         # NOTE: Never use `update_items_to_sell_from_db`
         self._voucher.update_sales_orders_from_db()
         self._voucher.calculate()
@@ -159,6 +170,7 @@ class PurchaseReturn(Return):
                 continue
             doc: SalesReturn = frappe.new_doc("Sales Return")
             doc.sales_order = order_name
+            doc.from_purchase_return = self.name
             doc.extend("items", items)
             doc.insert()
             doc.submit()
