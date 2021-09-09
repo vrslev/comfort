@@ -112,7 +112,7 @@ class SalesReturn(Return):
     def _modify_and_save_voucher(self):
         self._modify_voucher()
         self._voucher.flags.ignore_validate_update_after_submit = True
-        self._voucher.save()
+        self._voucher.db_update_all()
 
     def _make_delivery_gl_entries(self):
         """Transfer cost of returned items from "Cost of Goods Sold" to "Inventory" account if Sales Order is delivered.
