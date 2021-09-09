@@ -62,33 +62,6 @@ def test_validate_orders_have_services_raises_on_no_delivery(
         delivery_trip._validate_orders_have_services()
 
 
-@pytest.mark.parametrize("insert_receipt_before", (True, False))
-def test_add_receipts_to_sales_orders(
-    delivery_trip: DeliveryTrip,
-    sales_order: SalesOrder,
-    item_no_children: Item,
-    insert_receipt_before: bool,
-):
-    sales_order.delivery_status = "To Deliver"
-    sales_order.db_update()
-    new_doc: SalesOrder = frappe.new_doc("Sales Order")
-    new_doc.name = "SO-2021-0002"
-    new_doc.customer = sales_order.customer
-    new_doc.append("items", {"item_code": item_no_children.item_code, "qty": 1})
-    new_doc.services = []
-    new_doc.validate()
-    new_doc.delivery_status = "To Deliver"
-    new_doc.db_insert()
-    new_doc.db_update_all()
-    if insert_receipt_before:
-        new_doc.add_receipt()
-
-    delivery_trip.append("stops", {"sales_order": new_doc.name})
-    delivery_trip._add_receipts_to_sales_orders()
-    assert frappe.db.exists({"doctype": "Receipt", "voucher_no": sales_order.name})
-    assert frappe.db.exists({"doctype": "Receipt", "voucher_no": new_doc.name})
-
-
 def test_validate_orders_have_services_raises_on_no_installation(
     delivery_trip: DeliveryTrip, sales_order: SalesOrder
 ):
@@ -132,6 +105,43 @@ def test_get_template_context(delivery_trip: DeliveryTrip):
 def test_render_telegram_message(delivery_trip: DeliveryTrip):
     delivery_trip.set_new_name()
     delivery_trip.render_telegram_message()
+
+
+@pytest.mark.parametrize("insert_receipt_before", (True, False))
+def test_add_receipts_to_sales_orders(
+    delivery_trip: DeliveryTrip,
+    sales_order: SalesOrder,
+    item_no_children: Item,
+    insert_receipt_before: bool,
+):
+    sales_order.delivery_status = "To Deliver"
+    sales_order.db_update()
+    new_doc: SalesOrder = frappe.new_doc("Sales Order")
+    new_doc.name = "SO-2021-0002"
+    new_doc.customer = sales_order.customer
+    new_doc.append("items", {"item_code": item_no_children.item_code, "qty": 1})
+    new_doc.services = []
+    new_doc.validate()
+    new_doc.delivery_status = "To Deliver"
+    new_doc.db_insert()
+    new_doc.db_update_all()
+    if insert_receipt_before:
+        new_doc.add_receipt()
+
+    delivery_trip.append("stops", {"sales_order": new_doc.name})
+    delivery_trip._add_receipts_to_sales_orders()
+    assert frappe.db.exists({"doctype": "Receipt", "voucher_no": sales_order.name})
+    assert frappe.db.exists({"doctype": "Receipt", "voucher_no": new_doc.name})
+
+
+def test_set_completed_status(delivery_trip: DeliveryTrip):
+    delivery_trip.status = "Draft"
+    for stop in delivery_trip.stops:
+        frappe.db.set_value(
+            "Sales Order", stop.sales_order, "delivery_status", "To Deliver"
+        )
+    delivery_trip.set_completed_status()
+    assert delivery_trip.status == "Completed"
 
 
 def test_make_route_url(delivery_trip: DeliveryTrip):
