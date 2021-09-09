@@ -29,18 +29,20 @@ class Return(Document):
     items: list[SalesReturnItem] | list[PurchaseReturnItem]
 
     @property
-    def _voucher(self) -> Document:
+    def _voucher(self) -> Document:  # pragma: no cover
         pass
 
-    def _calculate_returned_paid_amount(self):
+    def _calculate_returned_paid_amount(self):  # pragma: no cover
         pass
 
-    def _validate_voucher_statuses(self):
+    def _validate_voucher_statuses(self):  # pragma: no cover
         pass
 
     def _get_all_items(
         self,
-    ) -> list[AnyChildItem] | list[SalesOrderChildItem | SalesOrderItem]:
+    ) -> list[AnyChildItem] | list[
+        SalesOrderChildItem | SalesOrderItem
+    ]:  # pragma: no cover
         pass
 
     def delete_empty_items(self):

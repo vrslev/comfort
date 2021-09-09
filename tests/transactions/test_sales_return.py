@@ -29,7 +29,7 @@ def test_sales_return_voucher_property(sales_return: SalesReturn):
         (26000, 780),
     ),  # Partially paid need to return some
 )
-def test_calculate_returned_paid_amount(
+def test_sales_return_calculate_returned_paid_amount(
     sales_return: SalesReturn, paid_amount: int, exp_returned_paid_amount: int
 ):
     sales_return._voucher._set_paid_and_pending_per_amount()
@@ -166,7 +166,7 @@ def test_add_missing_info_to_items_in_voucher(sales_return: SalesReturn):
         assert item.weight == res[2]
 
 
-def test_modify_voucher(sales_return: SalesReturn):
+def test_sales_return_modify_voucher(sales_return: SalesReturn):
     prev_qty_counter = count_qty(
         sales_return._voucher._get_items_with_splitted_combinations()
     )
@@ -190,7 +190,7 @@ def test_modify_and_save_voucher(sales_return: SalesReturn):
     sales_return._modify_and_save_voucher()
 
 
-def test_make_delivery_gl_entries_create(sales_return: SalesReturn):
+def test_sales_return_make_delivery_gl_entries_create(sales_return: SalesReturn):
     sales_return._voucher.delivery_status = "Delivered"
     sales_return.db_insert()
     sales_return._make_delivery_gl_entries()
@@ -218,7 +218,7 @@ def test_make_delivery_gl_entries_create(sales_return: SalesReturn):
             assert entry.credit == 0
 
 
-def test_make_delivery_gl_entries_not_create(sales_return: SalesReturn):
+def test_sales_return_make_delivery_gl_entries_not_create(sales_return: SalesReturn):
     sales_return._voucher.delivery_status = "Random Delivery Status"
     sales_return.db_insert()
     sales_return._make_delivery_gl_entries()
@@ -236,7 +236,7 @@ def test_make_delivery_gl_entries_not_create(sales_return: SalesReturn):
         ("Delivered", ("Reserved Actual", "Available Actual")),
     ),
 )
-def test_make_stock_entries_create(
+def test_sales_return_make_stock_entries_create(
     sales_return: SalesReturn, delivery_status: str, exp_stock_types: tuple[str, str]
 ):
     sales_return._voucher.delivery_status = delivery_status
@@ -271,7 +271,7 @@ def test_make_stock_entries_create(
     assert entry_with_second_type
 
 
-def test_make_stock_entries_not_create(sales_return: SalesReturn):
+def test_sales_return_make_stock_entries_not_create(sales_return: SalesReturn):
     sales_return._voucher.delivery_status = "Some Random Delivery Status"
     sales_return.db_insert()
     with pytest.raises(KeyError):
@@ -282,7 +282,7 @@ def test_make_stock_entries_not_create(sales_return: SalesReturn):
     ("paid_with_cash", "exp_asset_account"),
     ((True, "cash"), (False, "bank"), (None, "bank")),
 )
-def test_make_payment_gl_entries_create(
+def test_sales_return_make_payment_gl_entries_create(
     sales_return: SalesReturn, paid_with_cash: bool | None, exp_asset_account: str
 ):
     sales_return.returned_paid_amount = 1000
@@ -310,7 +310,7 @@ def test_make_payment_gl_entries_create(
             assert entry.credit == 0
 
 
-def test_make_payment_gl_entries_not_create(sales_return: SalesReturn):
+def test_sales_return_make_payment_gl_entries_not_create(sales_return: SalesReturn):
     sales_return.returned_paid_amount = 0
     sales_return.db_insert()
     sales_return._make_payment_gl_entries()

@@ -46,6 +46,20 @@ def test_return_get_remaining_qtys(sales_return: SalesReturn):
             assert qty == in_order[item_code] - in_return.get(item_code, 0)
 
 
+def test_return_add_missing_fields_to_items(
+    sales_return: SalesReturn, sales_order: SalesOrder
+):
+    grouped_order_items = group_by_attr(sales_order.items, attr="name")
+    items = sales_order._get_items_with_splitted_combinations()
+    sales_return._add_missing_fields_to_items(items)
+
+    for item in items:
+        if item.doctype == "Sales Order Item":
+            assert item.rate == grouped_order_items[item.name][0].rate
+        elif item.doctype == "Sales Order Child Item":
+            assert item.rate == frappe.get_value("Item", item.item_code, "rate")
+
+
 def test_return_get_items_available_to_add(sales_return: SalesReturn):
     available_item_and_qty: dict[str, int] = dict(
         sales_return._get_remaining_qtys(
@@ -63,9 +77,7 @@ def test_return_get_items_available_to_add(sales_return: SalesReturn):
     ("item_code", "qty"),
     (("invalid_item_code", 10), ("40366634", 0), ("40366634", 3)),
 )
-def test_return_add_items_raises_on_invalid_item(
-    sales_return: SalesReturn, item_code: str, qty: int
-):
+def test_return_validate_new_item(sales_return: SalesReturn, item_code: str, qty: int):
     all_items = sales_return.get_items_available_to_add()
     counter = count_qty(frappe._dict(d) for d in all_items)
 
@@ -74,19 +86,18 @@ def test_return_add_items_raises_on_invalid_item(
         match=f"Insufficient quantity {qty} for Item {item_code}: expected not "
         + f"more than {counter.get(item_code, 0)}.",
     ):
-        sales_return.add_items(
-            [
-                {
-                    "item_code": item_code,
-                    "item_name": "random_name",
-                    "qty": qty,
-                    "rate": 1000,
-                }
-            ]
+        sales_return._validate_new_item(
+            counter,
+            {
+                "item_code": item_code,
+                "item_name": "random_name",
+                "qty": qty,
+                "rate": 1000,
+            },
         )
 
 
-def test_return_add_items_not_raises(sales_return: SalesReturn):
+def test_return_add_items(sales_return: SalesReturn):
     expected_item_amount = 2000
     test_item = {
         "item_code": "40366634",
@@ -111,20 +122,6 @@ def test_return_add_items_not_raises(sales_return: SalesReturn):
     assert item_amount == expected_item_amount
 
 
-def test_return_add_missing_fields_to_items(
-    sales_return: SalesReturn, sales_order: SalesOrder
-):
-    grouped_order_items = group_by_attr(sales_order.items, attr="name")
-    items = sales_order._get_items_with_splitted_combinations()
-    sales_return._add_missing_fields_to_items(items)
-
-    for item in items:
-        if item.doctype == "Sales Order Item":
-            assert item.rate == grouped_order_items[item.name][0].rate
-        elif item.doctype == "Sales Order Child Item":
-            assert item.rate == frappe.get_value("Item", item.item_code, "rate")
-
-
 def test_return_validate_not_all_items_returned_not_raises(sales_return: SalesReturn):
     sales_return._validate_not_all_items_returned()
 
@@ -143,7 +140,6 @@ def test_return_before_cancel(sales_return: SalesReturn):
 def test_delete_empty_items(sales_order: SalesOrder):
     sales_order.append("items", {"qty": 0})
     delete_empty_items(sales_order, "items")
-
     c: Counter[str] = Counter()
     for i in sales_order.items:
         c[i.item_code] += i.qty
@@ -153,18 +149,6 @@ def test_delete_empty_items(sales_order: SalesOrder):
 
 
 def test_merge_same_items(sales_order: SalesOrder):
-    # TODO: test not messed up
-    # TODO
-    # @@ -49,7 +49,7 @@
-    # -            if len(cur_items) > 1:
-    # +            if len(cur_items) >= 1:
-    # +            if len(cur_items) > 2:
-    # -                full_qty = list(count_quantity(cur_items).values())[0]
-    # +                full_qty = None
-    # -                cur_items[0].qty = full_qty
-    # +                cur_items[1].qty = full_qty
-    # +                cur_items[1].qty = None
-
     item = sales_order.items[0].as_dict().copy()
     item.qty = 4
     second_item = sales_order.items[1].as_dict().copy()
