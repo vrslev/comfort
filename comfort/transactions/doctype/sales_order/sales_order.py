@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Iterable, Literal
+from typing import TYPE_CHECKING, Iterable, Literal
 
 import frappe
 from comfort import ValidationError, count_qty, group_by_attr
@@ -21,6 +21,9 @@ from frappe.model.document import Document
 from ..sales_order_child_item.sales_order_child_item import SalesOrderChildItem
 from ..sales_order_item.sales_order_item import SalesOrderItem
 from ..sales_order_service.sales_order_service import SalesOrderService
+
+if TYPE_CHECKING:
+    from comfort.finance.doctype.payment.payment import Payment
 
 
 class SalesOrderMethods(Document):
@@ -250,18 +253,11 @@ class SalesOrder(SalesOrderStatuses):
     def on_cancel(self):  # TODO: Cover
         self.ignore_linked_doctypes = ["Purchase Order", "Sales Return", "Payment"]
 
-        payments: list[Document] = frappe.get_all(
+        payments: list[Payment] = frappe.get_all(
             "Payment", {"voucher_type": self.doctype, "voucher_no": self.name}
         )
         for payment in payments:
-            frappe.get_doc("Payment", payment.name).cancel()
-
-        returns: list[Document] = frappe.get_all(
-            "Sales Return", {"sales_order": self.name}
-        )
-        for return_ in returns:
-            doc = frappe.get_doc("Sales Return", return_.name)
-            doc.flags.from_sales_order = True
+            doc: Payment = frappe.get_doc("Payment", payment.name)
             doc.cancel()
 
     def before_update_after_submit(self):  # pragma: no cover

@@ -167,16 +167,21 @@ class SalesReturn(Return):
 
     def before_submit(self):
         self._modify_voucher()
-        if len(self._voucher.items) == 0:
+
+        return_all_items = len(self._voucher.items) == 0
+        if return_all_items:
             self._voucher.reload()
-            self._voucher.ignore_linked_doctypes = ["Purchase Order"]
-            self._voucher.cancel()
         else:
             self._voucher.db_update()
             self._voucher.update_children()
-            self._make_delivery_gl_entries()
-            self._make_stock_entries()
-            self._make_payment_gl_entries()
+
+        self._make_delivery_gl_entries()
+        self._make_stock_entries()
+        self._make_payment_gl_entries()
+
+        if return_all_items:
+            self._voucher.ignore_linked_doctypes = ["Purchase Order"]
+            self._voucher.cancel()
 
     def before_cancel(self):  # type: ignore
         if self.flags.from_sales_order:
