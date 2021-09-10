@@ -1,3 +1,29 @@
+frappe.listview_settings["Delivery Trip"] = {
+  add_fields: ["status"],
+  get_indicator: (doc) => {
+    if (["Cancelled", "Draft"].includes(doc.status)) {
+      return [__(doc.status), "red"];
+    } else if (doc.status == "In Progress") {
+      return [__(doc.status), "orange"];
+    } else if (doc.status === "Completed") {
+      return [__(doc.status), "green"];
+    }
+  },
+};
+
+frappe.listview_settings["Purchase Order"] = {
+  add_fields: ["status"],
+  get_indicator: (doc) => {
+    if (["Cancelled", "Draft"].includes(doc.status)) {
+      return [__(doc.status), "red"];
+    } else if (doc.status == "To Receive") {
+      return [__(doc.status), "orange"];
+    } else if (doc.status === "Completed") {
+      return [__(doc.status), "green"];
+    }
+  },
+};
+
 frappe.listview_settings["Sales Order"] = {
   add_fields: ["status"],
   get_indicator: (doc) => {
@@ -50,30 +76,34 @@ function add_not_in_po_check(list) {
   clear_not_in_po_filter();
   list.filter_area.filter_list.apply();
 
+  async function change() {
+    clear_not_in_po_filter();
+
+    if (check.get_value() == 1) {
+      await frappe.call({
+        method:
+          "comfort.transactions.doctype.sales_order.sales_order.get_sales_orders_not_in_purchase_order",
+        callback: (r) => {
+          list.filter_area.filter_list.add_filter(
+            "Sales Order",
+            "name",
+            "in",
+            r.message,
+            true
+          );
+        },
+      });
+    }
+    list.filter_area.filter_list.on_change();
+  }
+
   var check = list.page.add_field(
     {
       label: __("Not in Purchase Order"),
       fieldname: "not_in_po",
       fieldtype: "Check",
-      async change() {
-        clear_not_in_po_filter();
-
-        if (check.get_value() == 1) {
-          await frappe.call({
-            method:
-              "comfort.transactions.doctype.sales_order.sales_order_list.get_sales_orders_not_in_purchase_order",
-            callback: (r) => {
-              list.filter_area.filter_list.add_filter(
-                "Sales Order",
-                "name",
-                "in",
-                r.message,
-                true
-              );
-            },
-          });
-        }
-        list.filter_area.filter_list.on_change();
+      change() {
+        change();
       },
     },
     list.filter_area.standard_filters_wrapper
@@ -82,3 +112,11 @@ function add_not_in_po_check(list) {
   check.$input.unbind("input"); // To avoid duplicate calls
   delete list.page.fields_dict["not_in_po"]; // To skip main call for all items
 }
+
+frappe.listview_settings["Customer"] = {
+  hide_name_column: true,
+};
+
+frappe.listview_settings["Item"] = {
+  hide_name_column: true,
+};

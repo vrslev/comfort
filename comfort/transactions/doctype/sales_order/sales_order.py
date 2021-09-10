@@ -12,6 +12,9 @@ from comfort.entities.doctype.item.item import Item
 from comfort.finance import create_payment, get_account
 from comfort.stock import create_receipt
 from comfort.transactions import delete_empty_items, merge_same_items
+from comfort.transactions.doctype.purchase_order_sales_order.purchase_order_sales_order import (
+    PurchaseOrderSalesOrder,
+)
 from frappe import _
 from frappe.model.document import Document
 
@@ -342,3 +345,17 @@ def has_linked_delivery_trip(sales_order_name: str):
         )
         else False
     )
+
+
+@frappe.whitelist()
+def get_sales_orders_not_in_purchase_order() -> list[str]:
+    po_sales_orders: list[PurchaseOrderSalesOrder] = frappe.get_all(
+        "Purchase Order Sales Order", "sales_order_name"
+    )
+    return [
+        s.name
+        for s in frappe.get_all(
+            "Sales Order",
+            {"name": ("not in", (s.sales_order_name for s in po_sales_orders))},
+        )
+    ]

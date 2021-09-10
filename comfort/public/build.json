@@ -1,3 +1,7 @@
 {
-  "js/comfort.min.js": ["public/js/index.js", "public/js/returns.js"]
+  "js/comfort.min.js": [
+    "public/js/index.js",
+    "public/js/returns.js",
+    "public/js/listviews.js"
+  ]
 }
