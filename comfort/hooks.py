@@ -15,6 +15,6 @@ after_install = "comfort.comfort_core.hooks.after_install"
 boot_session = "comfort.comfort_core.hooks.extend_boot_session"
 override_doctype_class = {"DocType": "comfort.comfort_core.hooks.CustomDocType"}
 
-app_include_js = "/assets/comfort/js/index.js"
+app_include_js = "/assets/js/comfort.min.js"
 
 treeviews = ["Account"]
