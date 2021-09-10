@@ -1,4 +1,13 @@
 comfort.SalesOrderController = frappe.ui.form.Controller.extend({
+  onload() {
+    this.frm.ignore_doctypes_on_cancel_all = [
+      "Purchase Return",
+      "Sales Return",
+      "Checkout",
+      "Payment",
+      "Purchase Order",
+    ];
+  },
   setup() {
     this.frm.show_submit_message = () => {};
     this.patch_toolbar_set_page_actions();

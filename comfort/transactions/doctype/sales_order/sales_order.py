@@ -41,6 +41,8 @@ class SalesOrderMethods(Document):
     per_paid: float
     delivery_status: Literal["", "To Purchase", "Purchased", "To Deliver", "Delivered"]
 
+    ignore_linked_doctypes: list[str]
+
     def update_items_from_db(self):
         """Load item properties from database and calculate Amount and Total Weight."""
         for item in self.items:
@@ -241,6 +243,23 @@ class SalesOrder(SalesOrderStatuses):
 
     def before_cancel(self):  # pragma: no cover
         self.set_statuses()
+
+    def on_cancel(self):  # TODO: Cover
+        self.ignore_linked_doctypes = ["Purchase Order", "Sales Return", "Payment"]
+
+        payments: list[Document] = frappe.get_all(
+            "Payment", {"voucher_type": self.doctype, "voucher_no": self.name}
+        )
+        for payment in payments:
+            frappe.get_doc("Payment", payment.name).cancel()
+
+        returns: list[Document] = frappe.get_all(
+            "Sales Return", {"sales_order": self.name}
+        )
+        for return_ in returns:
+            doc = frappe.get_doc("Sales Return", return_.name)
+            doc.flags.from_sales_order = True
+            doc.cancel()
 
     def before_update_after_submit(self):  # pragma: no cover
         self.calculate()

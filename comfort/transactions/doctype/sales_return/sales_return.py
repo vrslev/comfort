@@ -4,8 +4,8 @@ from copy import copy
 
 import frappe
 from comfort import ValidationError, count_qty
-from comfort.finance import create_gl_entry, get_account
-from comfort.stock import create_stock_entry
+from comfort.finance import cancel_gl_entries_for, create_gl_entry, get_account
+from comfort.stock import cancel_stock_entries_for, create_stock_entry
 from comfort.transactions import Return, delete_empty_items, merge_same_items
 from frappe import _
 
@@ -177,3 +177,10 @@ class SalesReturn(Return):
             self._make_delivery_gl_entries()
             self._make_stock_entries()
             self._make_payment_gl_entries()
+
+    def before_cancel(self):  # type: ignore
+        if self.flags.from_sales_order:
+            cancel_gl_entries_for(self.doctype, self.name)
+            cancel_stock_entries_for(self.doctype, self.name)
+            return
+        super().before_cancel()
