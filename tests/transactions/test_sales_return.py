@@ -201,12 +201,6 @@ def test_sales_return_modify_voucher(sales_return: SalesReturn):
     assert diff == count_qty(sales_return.items)
 
 
-def test_modify_and_save_voucher(sales_return: SalesReturn):
-    sales_return._voucher.docstatus = 1
-    sales_return._voucher.db_update_all()
-    sales_return._modify_and_save_voucher()
-
-
 def test_sales_return_make_delivery_gl_entries_create(sales_return: SalesReturn):
     sales_return._voucher.delivery_status = "Delivered"
     sales_return.db_insert()
