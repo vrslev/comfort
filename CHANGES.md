@@ -1,5 +1,15 @@
 # Day to day changes
 
+## 10 Sep
+
+- Purchase Return
+- Refactoring
+
+## 9 Sep
+
+- Purchase Return (tests)
+- Several fixes
+
 ## 8 Sep
 
 - Purchase Return (WIP)
