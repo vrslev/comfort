@@ -49,6 +49,11 @@ class SalesReturn(Return):
                 _("Delivery Status should be Purchased, To Deliver or Delivered")
             )
 
+    def _validate_not_all_items_returned(self):
+        if self.doctype == "Sales Return" and self.from_purchase_return:
+            return
+        super()._validate_not_all_items_returned()
+
     def _get_all_items(self):
         return self._voucher._get_items_with_splitted_combinations()
 
@@ -109,10 +114,6 @@ class SalesReturn(Return):
         self._add_missing_info_to_items_in_voucher()
         self._voucher.calculate()
 
-    def _modify_and_save_voucher(self):
-        self._modify_voucher()
-        self._voucher.db_update_all()
-
     def _make_delivery_gl_entries(self):
         """Transfer cost of returned items from "Cost of Goods Sold" to "Inventory" account if Sales Order is delivered.
         Changes Sales Receipt behavior."""
@@ -160,12 +161,19 @@ class SalesReturn(Return):
             filters={"voucher_type": "Sales Order", "voucher_no": self.sales_order},
         )
         amt = self.returned_paid_amount
-        asset_account = get_account("cash") if paid_with_cash else get_account("bank")
-        create_gl_entry(self.doctype, self.name, asset_account, 0, amt)
+        asset_account = "cash" if paid_with_cash else "bank"
+        create_gl_entry(self.doctype, self.name, get_account(asset_account), 0, amt)
         create_gl_entry(self.doctype, self.name, get_account("sales"), amt, 0)
 
-    def before_submit(self):  # pragma: no cover
-        self._modify_and_save_voucher()
-        self._make_delivery_gl_entries()
-        self._make_stock_entries()
-        self._make_payment_gl_entries()
+    def before_submit(self):
+        self._modify_voucher()
+        if len(self._voucher.items) == 0:
+            self._voucher.reload()
+            self._voucher.ignore_linked_doctypes = ["Purchase Order"]
+            self._voucher.cancel()
+        else:
+            self._voucher.db_update()
+            self._voucher.update_children()
+            self._make_delivery_gl_entries()
+            self._make_stock_entries()
+            self._make_payment_gl_entries()

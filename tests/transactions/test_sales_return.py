@@ -77,6 +77,23 @@ def test_validate_voucher_statuses_delivery_status_raises(
         sales_return._validate_voucher_statuses()
 
 
+def test_validate_not_all_items_returned_from_purchase_return_not_raises_on_all_items(
+    sales_return: SalesReturn,
+):
+    sales_return.from_purchase_return = "Any value"
+    sales_return.add_items(sales_return.get_items_available_to_add())
+    sales_return._validate_not_all_items_returned()
+
+
+def test_validate_not_all_items_returned_from_purchase_return_raises_on_all_items(
+    sales_return: SalesReturn,
+):
+    sales_return.from_purchase_return = None
+    sales_return.add_items(sales_return.get_items_available_to_add())
+    with pytest.raises(frappe.ValidationError, match="Can't return all items"):
+        sales_return._validate_not_all_items_returned()
+
+
 def generate_items_from_counter(counter: dict[str, int]):
     return [{"item_code": item_code, "qty": qty} for item_code, qty in counter.items()]
 
@@ -318,3 +335,42 @@ def test_sales_return_make_payment_gl_entries_not_create(sales_return: SalesRetu
         "GL Entry",
         {"voucher_type": sales_return.doctype, "voucher_no": sales_return.name},
     )
+
+
+@pytest.mark.parametrize("return_all_items", (True, False))
+def test_sales_return_before_submit(sales_return: SalesReturn, return_all_items: bool):
+    item = sales_return.get_items_available_to_add()[0]
+    sales_return._voucher.items = []
+    sales_return._voucher.child_items = []
+
+    if return_all_items:
+        sales_return._voucher.append("items", item)
+    else:
+        sales_return._voucher.append("items", {**item, "qty": item["qty"] + 1})
+
+    sales_return._voucher.docstatus = 1
+    sales_return._voucher.delivery_status = "Purchased"
+    sales_return._voucher.db_update_all()
+
+    frappe.get_doc(
+        {
+            "doctype": "Purchase Order Sales Order",
+            "docstatus": 1,
+            "sales_order_name": sales_return._voucher.name,
+            "parent": "Some Parent",
+            "parenttype": "Purchase Order",
+        }
+    ).insert()
+
+    sales_return.items = []
+    sales_return.append("items", item)
+
+    if return_all_items:
+        with pytest.raises(frappe.ValidationError, match="Can't return all items"):
+            sales_return.save()
+    else:
+        sales_return.save()
+        sales_return._voucher.ignore_linked_doctypes = ["Purchase Order"]
+        sales_return.submit()
+        sales_return._voucher.reload()
+        assert sales_return._voucher.items[0].qty == 1

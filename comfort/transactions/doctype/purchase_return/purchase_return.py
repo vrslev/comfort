@@ -20,6 +20,9 @@ from ..purchase_order.purchase_order import PurchaseOrder
 from ..purchase_order_item_to_sell.purchase_order_item_to_sell import (
     PurchaseOrderItemToSell,
 )
+from ..purchase_order_sales_order.purchase_order_sales_order import (
+    PurchaseOrderSalesOrder,
+)
 from ..purchase_return_item.purchase_return_item import PurchaseReturnItem
 from ..sales_order.sales_order import SalesOrder
 from ..sales_return.sales_return import SalesReturn
@@ -97,6 +100,7 @@ class PurchaseReturn(Return):
     def _make_sales_returns(
         self, orders_to_items: defaultdict[str | None, list[AnyChildItem]]
     ):
+        to_remove: list[PurchaseOrderSalesOrder] = []
         for order_name, items in orders_to_items.items():
             if order_name is None:
                 continue
@@ -106,6 +110,14 @@ class PurchaseReturn(Return):
             doc.extend("items", items)
             doc.insert()
             doc.submit()
+
+            if doc._voucher.docstatus == 2:
+                for order in self._voucher.sales_orders:
+                    if order.sales_order_name == doc._voucher.name:
+                        to_remove.append(order)
+
+        for order in to_remove:
+            self._voucher.sales_orders.remove(order)
 
     def _add_missing_field_to_voucher_items_to_sell(
         self, items: list[PurchaseOrderItemToSell | ChildItem]
@@ -155,7 +167,8 @@ class PurchaseReturn(Return):
         # NOTE: Never use `update_items_to_sell_from_db`
         self._voucher.update_sales_orders_from_db()
         self._voucher.calculate()
-        self._voucher.db_update_all()
+        self._voucher.db_update()
+        self._voucher.update_children()
 
     def _make_gl_entries(self):
         """Return `returned_paid_amount` to "Cash" or "Bank"."""

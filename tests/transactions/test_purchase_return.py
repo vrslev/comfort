@@ -115,7 +115,9 @@ def test_allocate_items(purchase_return: PurchaseReturn):
             assert item["rate"] == grouped_item.rate
 
 
-def test_make_sales_returns(purchase_return: PurchaseReturn, sales_order: SalesOrder):
+def test_make_sales_returns_creation(
+    purchase_return: PurchaseReturn, sales_order: SalesOrder
+):
     sales_order.db_set("docstatus", 1)
     sales_order.db_set("delivery_status", "Purchased")
     sales_order.reload()
@@ -151,6 +153,54 @@ def test_make_sales_returns(purchase_return: PurchaseReturn, sales_order: SalesO
             build_shorten_item(frappe._dict(i)) for i in cur_items
         ]
         assert doc.docstatus == 1
+
+
+def test_make_sales_returns_docstatus_all_items_returns(
+    purchase_return: PurchaseReturn,
+):
+    purchase_return._voucher.items_to_sell = []
+    purchase_return._voucher.append(
+        "items_to_sell", {"item_code": "10014030", "qty": 2}
+    )
+
+    sales_order: SalesOrder = frappe.get_doc(
+        "Sales Order", purchase_return._voucher.sales_orders[0].sales_order_name
+    )
+    sales_order.items = []
+    sales_order.append("items", {"item_code": "10366598", "qty": 1})
+    sales_order.submit()
+    sales_order.db_set("delivery_status", "Purchased")
+
+    items = purchase_return._voucher._get_items_in_sales_orders(True)
+    purchase_return._add_missing_fields_to_items(items)
+    purchase_return.items = []
+    purchase_return.add_items([dict(i) for i in items])
+    purchase_return.db_insert()
+    purchase_return.update_children()
+
+    purchase_return._make_sales_returns(purchase_return._allocate_items())
+
+    assert sales_order.db_get("docstatus") == 2
+    assert sales_order.name not in (
+        o.sales_order_name for o in purchase_return._voucher.sales_orders
+    )
+
+
+def test_make_sales_returns_docstatus_not_all_items_returns(
+    purchase_return: PurchaseReturn,
+):
+    sales_order: SalesOrder = frappe.get_doc(
+        "Sales Order",
+        purchase_return._voucher.sales_orders[0].sales_order_name,
+    )
+    sales_order.docstatus = 1
+    sales_order.delivery_status = "Purchased"
+    sales_order.db_update()
+    purchase_return._make_sales_returns(purchase_return._allocate_items())
+    assert sales_order.db_get("docstatus") == 1
+    assert sales_order.name in (
+        o.sales_order_name for o in purchase_return._voucher.sales_orders
+    )
 
 
 @pytest.mark.parametrize(
