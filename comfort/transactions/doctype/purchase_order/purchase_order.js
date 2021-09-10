@@ -1,4 +1,4 @@
-comfort.IkeaCartController = frappe.ui.form.Controller.extend({
+comfort.PurchaseOrderController = frappe.ui.form.Controller.extend({
   setup() {
     this.frm.show_submit_message = () => {};
     this.setup_sales_order_query();
@@ -520,4 +520,7 @@ function calculate_items_to_sell_cost() {
   cur_frm.set_value("items_to_sell_cost", items_to_sell);
 }
 
-$.extend(cur_frm.cscript, new comfort.IkeaCartController({ frm: cur_frm }));
+$.extend(
+  cur_frm.cscript,
+  new comfort.PurchaseOrderController({ frm: cur_frm })
+);
