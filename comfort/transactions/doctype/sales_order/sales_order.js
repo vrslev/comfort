@@ -23,6 +23,9 @@ comfort.SalesOrderController = frappe.ui.form.Controller.extend({
       "Purchase Order": "Purchase Order",
       "Delivery Trip": "Delivery Trip",
     };
+    if (this.frm.doc.docstatus == 2) {
+      this.frm.custom_make_buttons["Sales Return"] = "Sales Return";
+    }
   },
 
   onload_post_render() {
