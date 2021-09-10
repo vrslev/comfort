@@ -18,6 +18,7 @@ from comfort.transactions.doctype.sales_order.sales_order import (
     SalesOrder,
     has_linked_delivery_trip,
 )
+from comfort.transactions.doctype.sales_return.sales_return import SalesReturn
 from frappe import ValidationError
 
 #############################
@@ -151,6 +152,25 @@ def test_calculate_total_amount(sales_order: SalesOrder):
 #############################
 #    SalesOrderStatuses     #
 #############################
+
+
+def test_get_paid_amount(sales_order: SalesOrder):
+    sales_order.db_insert()
+    create_payment(sales_order.doctype, sales_order.name, 300, paid_with_cash=True)
+    assert sales_order._get_paid_amount() == 300
+
+
+def test_get_paid_amount_with_returns(sales_return: SalesReturn):
+    sales_order = sales_return._voucher
+    sales_order.add_payment(sales_order.total_amount, cash=True)
+    sales_return.db_insert()
+    sales_return._calculate_returned_paid_amount()
+    assert sales_return.returned_paid_amount > 0
+
+    exp_amount = sales_order.total_amount - sales_return.returned_paid_amount
+    sales_order.delivery_status = "To Deliver"
+    sales_return.before_submit()
+    assert sales_order._get_paid_amount() == exp_amount
 
 
 @pytest.mark.parametrize(

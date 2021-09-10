@@ -9,7 +9,7 @@ from comfort.comfort_core.doctype.commission_settings.commission_settings import
 )
 from comfort.entities.doctype.child_item.child_item import ChildItem
 from comfort.entities.doctype.item.item import Item
-from comfort.finance import create_payment, get_received_amount
+from comfort.finance import create_payment, get_account
 from comfort.stock import create_receipt
 from comfort.transactions import delete_empty_items, merge_same_items
 from frappe import _
@@ -126,8 +126,32 @@ class SalesOrderMethods(Document):
 
 
 class SalesOrderStatuses(SalesOrderMethods):
+    def _get_paid_amount(self):
+        payments: list[str] = [
+            p.name
+            for p in frappe.get_all(
+                "Payment", {"voucher_type": self.doctype, "voucher_no": self.name}
+            )
+        ]
+        returns: list[str] = [
+            r.name for r in frappe.get_all("Sales Return", {"sales_order": self.name})
+        ]
+
+        balances: list[tuple[int]] = frappe.get_all(
+            "GL Entry",
+            fields="SUM(debit - credit) as balance",
+            filters={
+                "account": ("in", (get_account("cash"), get_account("bank"))),
+                "voucher_type": ("in", ("Payment", "Sales Return")),
+                "voucher_no": ("in", payments + returns),
+                "docstatus": ("!=", 2),
+            },
+            as_list=True,
+        )
+        return sum(b[0] or 0 for b in balances)
+
     def _set_paid_and_pending_per_amount(self):
-        self.paid_amount = get_received_amount(self)
+        self.paid_amount = self._get_paid_amount()
 
         if self.total_amount == 0:
             self.per_paid = 100

@@ -8,7 +8,6 @@ from comfort.finance import (
     create_gl_entry,
     create_payment,
     get_account,
-    get_received_amount,
 )
 from comfort.finance.chart_of_accounts import DEFAULT_ACCOUNT_SETTINGS
 from comfort.finance.doctype.gl_entry.gl_entry import GLEntry
@@ -31,12 +30,6 @@ def test_get_account_raises_on_wrong_name():
         match=f'Finance Settings has no field "{account_name}_account"',
     ):
         get_account(account_name)
-
-
-def test_get_received_amount(sales_order: SalesOrder):
-    sales_order.db_insert()
-    create_payment(sales_order.doctype, sales_order.name, 300, paid_with_cash=True)
-    assert get_received_amount(sales_order) == 300
 
 
 def test_create_gl_entry(payment_sales: Payment):

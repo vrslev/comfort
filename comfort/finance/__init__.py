@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Generator, Literal
+from typing import Literal
 
 import frappe
 from comfort import ValidationError
@@ -20,28 +20,6 @@ def get_account(field_name: str) -> str:
             _('Finance Settings has no field "{}"').format(actual_field_name)
         )
     return account
-
-
-def get_received_amount(doc: Document) -> int:
-    """Get balance from all GL Entries associated with given Transaction and default Cash or Bank accounts."""
-    accounts = get_account("cash"), get_account("bank")
-
-    payments: list[Document] = frappe.get_all(
-        "Payment", {"voucher_type": doc.doctype, "voucher_no": doc.name}
-    )
-    payment_names: Generator[str, None, None] = (p.name for p in payments)
-
-    balances: list[Any] = frappe.get_all(
-        "GL Entry",
-        fields="SUM(debit - credit) as balance",
-        filters={
-            "account": ("in", accounts),
-            "voucher_type": "Payment",
-            "voucher_no": ("in", payment_names),
-            "docstatus": ("!=", 2),
-        },
-    )
-    return sum(b.balance or 0 for b in balances)
 
 
 def create_gl_entry(
