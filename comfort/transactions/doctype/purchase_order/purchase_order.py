@@ -82,9 +82,7 @@ class PurchaseOrderMethods(Document):
         res: list[int] = frappe.get_all(
             "Sales Order Item",
             fields="SUM(qty * rate) AS sales_orders_cost",
-            filters={
-                "parent": ("in", (ord.sales_order_name for ord in self.sales_orders))
-            },
+            filters={"parent": ("in", (o.sales_order_name for o in self.sales_orders))},
             as_list=True,
         )
         self.sales_orders_cost = res[0][0] or 0
@@ -94,9 +92,7 @@ class PurchaseOrderMethods(Document):
         res: list[list[float]] = frappe.get_all(
             "Sales Order Item",
             fields="SUM(total_weight) AS total_weight",
-            filters={
-                "parent": ("in", (ord.sales_order_name for ord in self.sales_orders))
-            },
+            filters={"parent": ("in", (o.sales_order_name for o in self.sales_orders))},
             as_list=True,
         )
         sales_orders_weight = res[0][0] or 0.0
@@ -147,7 +143,7 @@ class PurchaseOrderMethods(Document):
         if not self.sales_orders:
             return items
 
-        sales_order_names = [ord.sales_order_name for ord in self.sales_orders]
+        sales_order_names = [o.sales_order_name for o in self.sales_orders]
         so_items: list[SalesOrderItem] = frappe.get_all(
             "Sales Order Item",
             fields=("item_code", "qty"),
@@ -204,8 +200,8 @@ class PurchaseOrderMethods(Document):
         self.db_update_all()
 
     def submit_sales_orders_and_update_statuses(self):  # pragma: no cover
-        for ord in self.sales_orders:
-            doc: SalesOrder = frappe.get_doc("Sales Order", ord.sales_order_name)
+        for o in self.sales_orders:
+            doc: SalesOrder = frappe.get_doc("Sales Order", o.sales_order_name)
             doc.set_statuses()
             doc.flags.ignore_validate_update_after_submit = True
             doc.submit()

@@ -100,7 +100,7 @@ def test_calculate_sales_orders_cost(purchase_order: PurchaseOrder):
         filters={
             "parent": (
                 "in",
-                (ord.sales_order_name for ord in purchase_order.sales_orders),
+                (o.sales_order_name for o in purchase_order.sales_orders),
             )
         },
         as_list=True,
@@ -142,7 +142,7 @@ def test_calculate_total_weight(
         filters={
             "parent": (
                 "in",
-                (ord.sales_order_name for ord in purchase_order.sales_orders),
+                (o.sales_order_name for o in purchase_order.sales_orders),
             )
         },
         as_list=True,
@@ -223,7 +223,7 @@ def test_get_items_in_sales_orders_no_split_combinations(purchase_order: Purchas
         filters={
             "parent": (
                 "in",
-                (ord.sales_order_name for ord in purchase_order.sales_orders),
+                (o.sales_order_name for o in purchase_order.sales_orders),
             )
         },
     )
@@ -232,7 +232,7 @@ def test_get_items_in_sales_orders_no_split_combinations(purchase_order: Purchas
 
 
 def test_get_items_in_sales_orders_split_combinations(purchase_order: PurchaseOrder):
-    sales_order_names = [ord.sales_order_name for ord in purchase_order.sales_orders]
+    sales_order_names = [o.sales_order_name for o in purchase_order.sales_orders]
     so_items: list[SalesOrderItem] = frappe.get_all(
         "Sales Order Item",
         fields=("item_code", "qty"),
