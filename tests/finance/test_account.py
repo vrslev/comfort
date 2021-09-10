@@ -3,6 +3,7 @@ import pytest
 import frappe
 from comfort.finance import create_gl_entry
 from comfort.finance.doctype.account.account import add_node, get_children
+from comfort.finance.doctype.gl_entry.gl_entry import GLEntry
 
 
 @pytest.mark.usefixtures("accounts")
@@ -34,7 +35,9 @@ def test_get_children_not_root_all_entries_present():
 def test_get_children_not_root_balance():
     create_gl_entry(None, None, "Sales", 0, 300)
     create_gl_entry(None, None, "Sales", 0, 500)
-    doc = frappe.get_doc("GL Entry", frappe.get_value("GL Entry", {"account": "Sales"}))
+    doc: GLEntry = frappe.get_doc(
+        "GL Entry", frappe.get_value("GL Entry", {"account": "Sales"})
+    )
     doc.docstatus = 2
     doc.db_update()
 

@@ -1,13 +1,16 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import frappe
 from comfort import ValidationError
 from comfort.finance import cancel_gl_entries_for, create_gl_entry, get_account
 from comfort.transactions import OrderTypes
-from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
 from frappe import _
 from frappe.model.document import Document
 
+if TYPE_CHECKING:
+    from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
 # TODO: Allow to change Cash/Bank after submit
 
 

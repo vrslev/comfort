@@ -1,12 +1,15 @@
 from __future__ import annotations
 
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
 
 import frappe
 from comfort import ValidationError
 from comfort.transactions import OrderTypes
 from frappe import _
-from frappe.model.document import Document
+
+if TYPE_CHECKING:
+    from comfort.finance.doctype.gl_entry.gl_entry import GLEntry
+    from comfort.finance.doctype.payment.payment import Payment
 
 
 def get_account(field_name: str) -> str:
@@ -29,7 +32,7 @@ def create_gl_entry(
     debit: int,
     credit: int,
 ):
-    doc: Document = frappe.get_doc(
+    doc: GLEntry = frappe.get_doc(
         {
             "doctype": "GL Entry",
             "account": account,
@@ -44,19 +47,19 @@ def create_gl_entry(
 
 
 def cancel_gl_entries_for(doctype: str, name: str):
-    gl_entries: list[Document] = frappe.get_all(
+    gl_entries: list[GLEntry] = frappe.get_all(
         "GL Entry",
         {"voucher_type": doctype, "voucher_no": name, "docstatus": ("!=", 2)},
     )
     for entry in gl_entries:
-        doc: Document = frappe.get_doc("GL Entry", entry.name)
+        doc: GLEntry = frappe.get_doc("GL Entry", entry.name)
         doc.cancel()
 
 
 def create_payment(
     doctype: OrderTypes, name: str, amount: int, paid_with_cash: bool
 ):  # TODO: For consistency, pass whole doc to capture real state of the doc
-    doc: Document = frappe.get_doc(
+    doc: Payment = frappe.get_doc(
         {
             "doctype": "Payment",
             "voucher_type": doctype,

@@ -147,7 +147,7 @@ def child_items() -> list[Item]:
 
     res: list[Item] = []
     for i in test_data:
-        doc = frappe.get_doc(i)
+        doc: Item = frappe.get_doc(i)
         doc.db_insert()
         res.append(doc)
     return res

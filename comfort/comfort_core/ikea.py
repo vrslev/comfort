@@ -95,7 +95,7 @@ def _create_item(parsed_item: ParsedItem):
         doc.save()
 
     else:
-        doc = frappe.new_doc("Item")
+        doc: Item = frappe.new_doc("Item")
         doc.item_code = parsed_item["item_code"]
         doc.item_name = parsed_item["name"]
         doc.url = parsed_item["url"]

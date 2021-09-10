@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Literal
+from typing import TYPE_CHECKING, Any, Literal
 
 import frappe
 from comfort import count_qty
@@ -8,13 +8,18 @@ from comfort.stock.doctype.stock_entry_item.stock_entry_item import StockEntryIt
 from comfort.transactions import OrderTypes
 from frappe.model.document import Document
 
+if TYPE_CHECKING:
+    from comfort.stock.doctype.checkout.checkout import Checkout
+    from comfort.stock.doctype.receipt.receipt import Receipt
+    from comfort.stock.doctype.stock_entry.stock_entry import StockEntry
+
 StockTypes = Literal[
     "Reserved Actual", "Available Actual", "Reserved Purchased", "Available Purchased"
 ]
 
 
 def create_receipt(doctype: OrderTypes, name: str):
-    doc: Document = frappe.get_doc(
+    doc: Receipt = frappe.get_doc(
         {"doctype": "Receipt", "voucher_type": doctype, "voucher_no": name}
     )
     doc.insert()
@@ -22,7 +27,7 @@ def create_receipt(doctype: OrderTypes, name: str):
 
 
 def create_checkout(purchase_order: str):
-    doc: Document = frappe.get_doc(
+    doc: Checkout = frappe.get_doc(
         {"doctype": "Checkout", "purchase_order": purchase_order}
     )
     doc.insert()
@@ -36,7 +41,7 @@ def create_stock_entry(
     items: list[Any],
     reverse_qty: bool = False,
 ):
-    doc: Document = frappe.get_doc(
+    doc: StockEntry = frappe.get_doc(
         {
             "doctype": "Stock Entry",
             "voucher_type": doctype,
@@ -58,7 +63,7 @@ def cancel_stock_entries_for(doctype: Literal["Checkout", "Receipt"], name: str)
         {"voucher_type": doctype, "voucher_no": name, "docstatus": ("!=", 2)},
     )
     for entry in entries:
-        doc: Document = frappe.get_doc("Stock Entry", entry.name)
+        doc: StockEntry = frappe.get_doc("Stock Entry", entry.name)
         doc.cancel()
 
 

@@ -22,6 +22,7 @@ reportMissingTypeStubs = false
 reportPrivateUsage = false
 reportUnknownVariableType = false
 reportUnknownMemberType = false
+reportImportCycles = false
 
 
 # Rules that are not in "strict" mode:
