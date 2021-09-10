@@ -93,6 +93,10 @@ comfort.SalesOrderController = frappe.ui.form.Controller.extend({
               doc: this.frm.doc,
               method: "add_receipt",
               callback: () => {
+                frappe.show_alert({
+                  message: __("Receipt added!"),
+                  indicator: "green",
+                });
                 this.frm.refresh();
               },
             });
