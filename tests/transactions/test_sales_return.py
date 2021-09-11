@@ -5,13 +5,15 @@ from copy import copy
 import pytest
 
 import frappe
-from comfort import count_qty
+from comfort import count_qty, counters_are_same
 from comfort.finance import create_payment, get_account
 from comfort.finance.doctype.gl_entry.gl_entry import GLEntry
 from comfort.stock.doctype.stock_entry.stock_entry import StockEntry
 from comfort.transactions import merge_same_items
+from comfort.transactions.doctype.purchase_order.purchase_order import PurchaseOrder
 from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
 from comfort.transactions.doctype.sales_return.sales_return import SalesReturn
+from frappe.model.document import Document
 from tests.stock.test_init import reverse_qtys
 
 
@@ -45,6 +47,14 @@ def test_validate_voucher_statuses_docstatus_not_raises(sales_return: SalesRetur
     sales_return._validate_voucher_statuses()
 
 
+def test_validate_voucher_statuses_docstatus_not_executed_on_sales_order_cancel(
+    sales_return: SalesReturn,
+):
+    sales_return._voucher.docstatus = 2
+    sales_return.flags.sales_order_on_cancel = True
+    sales_return._validate_voucher_statuses()
+
+
 @pytest.mark.parametrize("docstatus", (0, 2))
 def test_validate_voucher_statuses_docstatus_raises(
     sales_return: SalesReturn, docstatus: int
@@ -75,23 +85,6 @@ def test_validate_voucher_statuses_delivery_status_raises(
         match="Delivery Status should be Purchased, To Deliver or Delivered",
     ):
         sales_return._validate_voucher_statuses()
-
-
-def test_validate_not_all_items_returned_from_purchase_return_not_raises_on_all_items(
-    sales_return: SalesReturn,
-):
-    sales_return.from_purchase_return = "Any value"
-    sales_return.add_items(sales_return.get_items_available_to_add())
-    sales_return._validate_not_all_items_returned()
-
-
-def test_validate_not_all_items_returned_from_purchase_return_raises_on_all_items(
-    sales_return: SalesReturn,
-):
-    sales_return.from_purchase_return = None
-    sales_return.add_items(sales_return.get_items_available_to_add())
-    with pytest.raises(frappe.ValidationError, match="Can't return all items"):
-        sales_return._validate_not_all_items_returned()
 
 
 def generate_items_from_counter(counter: dict[str, int]):
@@ -199,6 +192,53 @@ def test_sales_return_modify_voucher(sales_return: SalesReturn):
             del diff[item_code]
 
     assert diff == count_qty(sales_return.items)
+
+
+@pytest.mark.parametrize(
+    ("weight_before", "weight_should_change"), ((None, True), (10, False))
+)
+def test_add_missing_info_to_items_in_items_to_sell_weight(
+    sales_return: SalesReturn,
+    purchase_order: PurchaseOrder,
+    weight_before: int | None,
+    weight_should_change: bool,
+):
+    item = purchase_order.items_to_sell[0]
+    item.rate = 0
+    item.weight = weight_before
+    sales_return._add_missing_info_to_items_in_items_to_sell(
+        purchase_order.items_to_sell
+    )
+    if weight_should_change:
+        assert item.weight == frappe.get_value("Item", item.item_code, "weight")
+    else:
+        assert item.weight == weight_before
+
+
+def test_add_missing_info_to_items_in_items_to_sell_amount(
+    sales_return: SalesReturn, purchase_order: PurchaseOrder
+):
+    item = purchase_order.items_to_sell[0]
+    item.rate = 100
+    item.qty = 2
+    sales_return._add_missing_info_to_items_in_items_to_sell(
+        purchase_order.items_to_sell
+    )
+    assert item.amount == 200
+
+
+def test_add_items_to_sell_to_linked_purchase_order(
+    sales_return: SalesReturn, purchase_order: PurchaseOrder
+):
+    purchase_order.db_insert()
+    purchase_order.update_children()
+    in_return = count_qty(sales_return.items)
+    in_order_before = count_qty(purchase_order.items_to_sell)
+    sales_return._add_items_to_sell_to_linked_purchase_order()
+    purchase_order.reload()
+    in_order_after = count_qty(purchase_order.items_to_sell)
+
+    assert counters_are_same((in_return + in_order_before), in_order_after)
 
 
 def test_sales_return_make_delivery_gl_entries_create(sales_return: SalesReturn):
@@ -332,8 +372,11 @@ def test_sales_return_make_payment_gl_entries_not_create(sales_return: SalesRetu
 
 
 @pytest.mark.parametrize("return_all_items", (True, False))
-def test_sales_return_before_submit(sales_return: SalesReturn, return_all_items: bool):
+def test_sales_return_before_submit(
+    sales_return: SalesReturn, purchase_order: PurchaseOrder, return_all_items: bool
+):
     item = sales_return.get_items_available_to_add()[0]
+
     sales_return._voucher.items = []
     sales_return._voucher.child_items = []
 
@@ -346,25 +389,50 @@ def test_sales_return_before_submit(sales_return: SalesReturn, return_all_items:
     sales_return._voucher.delivery_status = "Purchased"
     sales_return._voucher.db_update_all()
 
-    frappe.get_doc(
-        {
-            "doctype": "Purchase Order Sales Order",
-            "docstatus": 1,
-            "sales_order_name": sales_return._voucher.name,
-            "parent": "Some Parent",
-            "parenttype": "Purchase Order",
-        }
-    ).insert()
+    purchase_order.db_insert()
+    purchase_order.update_children()
 
     sales_return.items = []
     sales_return.append("items", item)
+    sales_return._voucher.update_children()
 
     if return_all_items:
-        with pytest.raises(frappe.ValidationError, match="Can't return all items"):
-            sales_return.save()
+        counter_before = count_qty(sales_return._voucher.items)
+        sales_return.save()
+        sales_return.flags.ignore_links = True
+        sales_return.submit()
+        counter_after = count_qty(sales_return._voucher.items)
+        assert counters_are_same(counter_before, counter_after)
     else:
         sales_return.save()
         sales_return._voucher.ignore_linked_doctypes = ["Purchase Order"]
         sales_return.submit()
         sales_return._voucher.reload()
         assert sales_return._voucher.items[0].qty == 1
+
+
+def test_sales_return_before_cancel_not_raises(sales_return: SalesReturn):
+    sales_return.flags.from_purchase_return = True
+    sales_return.before_cancel()
+
+
+def test_sales_return_before_cancel_raises(sales_return: SalesReturn):
+    sales_return.flags.from_purchase_return = False
+    with pytest.raises(
+        frappe.ValidationError, match="Not allowed to cancel Sales Return"
+    ):
+        sales_return.before_cancel()
+
+
+def test_sales_return_on_cancel_linked_docs_cancelled(sales_return: SalesReturn):
+    sales_return._voucher.docstatus = 1
+    sales_return._voucher.delivery_status = "Purchased"
+    sales_return._voucher.db_update()
+    sales_return._make_payment_gl_entries()
+    sales_return._make_delivery_gl_entries()
+    sales_return._make_stock_entries()
+
+    sales_return.on_cancel()
+    for doctype in ("GL Entry", "Stock Entry"):
+        docs: list[Document] = frappe.get_all(doctype, "docstatus")
+        assert all(doc.docstatus == 2 for doc in docs)

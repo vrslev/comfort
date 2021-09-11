@@ -142,9 +142,6 @@ class Return(Document):
         self._validate_not_all_items_returned()
         self.calculate()
 
-    def before_cancel(self):
-        raise ValidationError(_("Not allowed to cancel Return"))
-
 
 _T = TypeVar("_T")
 

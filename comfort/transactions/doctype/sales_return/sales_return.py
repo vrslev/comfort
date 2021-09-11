@@ -3,10 +3,15 @@ from __future__ import annotations
 from copy import copy
 
 import frappe
-from comfort import ValidationError, count_qty
+from comfort import ValidationError, count_qty, group_by_attr
+from comfort.entities.doctype.item.item import Item
 from comfort.finance import cancel_gl_entries_for, create_gl_entry, get_account
 from comfort.stock import cancel_stock_entries_for, create_stock_entry
 from comfort.transactions import Return, delete_empty_items, merge_same_items
+from comfort.transactions.doctype.purchase_order.purchase_order import PurchaseOrder
+from comfort.transactions.doctype.purchase_order_item_to_sell.purchase_order_item_to_sell import (
+    PurchaseOrderItemToSell,
+)
 from frappe import _
 
 from ..sales_order.sales_order import SalesOrder
@@ -38,6 +43,9 @@ class SalesReturn(Return):
         self._voucher.reload()
 
     def _validate_voucher_statuses(self):
+        if self.flags.sales_order_on_cancel:
+            return
+
         if self._voucher.docstatus != 1:
             raise ValidationError(_("Sales Order should be submitted"))
         elif self._voucher.delivery_status not in (
@@ -50,9 +58,7 @@ class SalesReturn(Return):
             )
 
     def _validate_not_all_items_returned(self):
-        if self.doctype == "Sales Return" and self.from_purchase_return:
-            return
-        super()._validate_not_all_items_returned()
+        pass
 
     def _get_all_items(self):
         return self._voucher._get_items_with_splitted_combinations()
@@ -113,6 +119,45 @@ class SalesReturn(Return):
         self._voucher.set_child_items()
         self._add_missing_info_to_items_in_voucher()
         self._voucher.calculate()
+
+    def _add_missing_info_to_items_in_items_to_sell(
+        self, items: list[PurchaseOrderItemToSell]
+    ):
+        items_with_weight: list[Item] = frappe.get_all(
+            "Item",
+            fields=("item_code", "weight"),
+            filters={"item_code": ("in", (i.item_code for i in items if not i.weight))},
+        )
+        grouped_items = group_by_attr(items_with_weight)
+        for item in items:
+            if item.item_code in grouped_items:
+                item.weight = grouped_items[item.item_code][0].weight
+            item.amount = item.rate * item.qty
+
+    def _add_items_to_sell_to_linked_purchase_order(self):
+        purchase_order_name: str = frappe.get_value(
+            "Purchase Order Sales Order",
+            {"sales_order_name": self._voucher.name},
+            "parent",
+        )
+        doc: PurchaseOrder = frappe.get_doc("Purchase Order", purchase_order_name)
+        doc.extend(
+            "items_to_sell",
+            [
+                {
+                    "item_code": i.item_code,
+                    "item_name": i.item_name,
+                    "qty": i.qty,
+                    "rate": i.rate,
+                }
+                for i in self.items
+            ],
+        )
+        doc.items_to_sell = merge_same_items(doc.items_to_sell)
+        self._add_missing_info_to_items_in_items_to_sell(doc.items_to_sell)
+        doc.flags.ignore_validate_update_after_submit = True
+        doc.flags.ignore_links = True
+        doc.save()
 
     def _make_delivery_gl_entries(self):
         """Transfer cost of returned items from "Cost of Goods Sold" to "Inventory" account if Sales Order is delivered.
@@ -179,13 +224,15 @@ class SalesReturn(Return):
         self._make_stock_entries()
         self._make_payment_gl_entries()
 
-        if return_all_items:
-            self._voucher.ignore_linked_doctypes = ["Purchase Order"]
+        if return_all_items and not self.flags.sales_order_on_cancel:
             self._voucher.cancel()
 
-    def before_cancel(self):  # type: ignore
-        if self.flags.from_sales_order:
-            cancel_gl_entries_for(self.doctype, self.name)
-            cancel_stock_entries_for(self.doctype, self.name)
-            return
-        super().before_cancel()
+        self._add_items_to_sell_to_linked_purchase_order()
+
+    def before_cancel(self):
+        if not self.flags.from_purchase_return:
+            raise ValidationError(_("Not allowed to cancel Sales Return"))
+
+    def on_cancel(self):
+        cancel_gl_entries_for(self.doctype, self.name)
+        cancel_stock_entries_for(self.doctype, self.name)

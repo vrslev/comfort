@@ -132,11 +132,6 @@ def test_return_validate_not_all_items_returned_raises(sales_return: SalesReturn
         sales_return._validate_not_all_items_returned()
 
 
-def test_return_before_cancel(sales_return: SalesReturn):
-    with pytest.raises(frappe.ValidationError, match="Not allowed to cancel Return"):
-        sales_return.before_cancel()
-
-
 def test_delete_empty_items(sales_order: SalesOrder):
     sales_order.append("items", {"qty": 0})
     delete_empty_items(sales_order, "items")
