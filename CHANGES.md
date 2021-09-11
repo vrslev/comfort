@@ -1,5 +1,12 @@
 # Day to day changes
 
+## 11 Sep
+
+- Improved Sales Return
+- Improved Sales Order cancellation
+- Several fixes
+- Refactoring
+
 ## 10 Sep
 
 - Purchase Return
