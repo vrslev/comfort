@@ -1,43 +1,28 @@
-STOCK CYCLE
+# Purchase Order
 
-Purchased SUPPLIER -> available_purchased
--> reserved_purchased
-Received reserved_purchased -> reserved_actual
-available_purchased -> available_actual
+- To Receive (purchased)
+  -> available_purchased and reserved_purchased
 
-- Client ordered available_actual -> reserved_actual
-  something from
-  Actual Stock
+- Completed
+  available_purchased and reserved_purchased -> available_actual and reserved_actual
 
-  Delivered reserved_actual -> CUSTOMER
+- Purchase Return
+  available_purchased or available_actual ->
 
-? Client ordered something while items not received yet
-Instead of Select field `source`, the best way to implement injecting Sales Orders
-into Purchase Order would be button inside this Purchase Order with prompt to
-choose items and create Sales Order.
-This way no double links would be created, and it is much clearer.
+- Cancelled
+  Allowed only if status is To Receive
+  Cancel all linked docs except Sales Orders—this will do.
 
-    When Purchase Order completed,
-    it's time to forget about it. But when it is pending, the hard way should be
-    chosen: move items to sell to new Sales Order
+# Sales Order
 
-    The only problem is that system can't force user to submit new Sales Order.
+- Delivered
+  reserved_actual ->
 
-    So, there should be `from_actual_stock` check.
+- Sales Return
+  reserved_purchased or reserved_actual -> available_purchased or available_actual
+  if all items: create nothing
 
-    1. If new Sales Order (will purchase specially for customer): nothing new
-    2. If from Items To Sell:
-        - if not received yet: add this Sales Order from Purchase Order
-            (using button in Items To Sell grid)
-        - else, if Purchase Order received, just create Sales Order normal way.
-
-    To make this work:
-    - [ ] Change `source` Select field to `from_actual_stock` check
-    - [ ] Change functions related to this fields
-    - [ ] Add mechanism to create Sales Order from Purchase Order that is
-            not received yet
-
-? Cancelled
-
-What if someone bought something while items not received yet?
-Sales Order added this way should appear in Purchase order
+- Cancelled
+  create Sales Return for remaining items
+  - Cancel Receipt
+    -> reserved_actual
