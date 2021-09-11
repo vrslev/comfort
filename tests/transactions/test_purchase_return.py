@@ -382,11 +382,7 @@ def test_purchase_return_on_cancel_not_raises_on_valid_status(
     purchase_return: PurchaseReturn,
 ):
     purchase_return._voucher.status = "To Receive"
-    with pytest.raises(
-        frappe.ValidationError,
-        match="Allowed to cancel Purchase Return only if status of Order is To Receive",
-    ):
-        purchase_return.on_cancel()
+    purchase_return.on_cancel()
 
 
 def test_purchase_return_on_cancel_linked_docs_cancelled(
