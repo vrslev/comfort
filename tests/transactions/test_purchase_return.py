@@ -28,6 +28,7 @@ from comfort.transactions.doctype.sales_return.sales_return import SalesReturn
 from comfort.transactions.doctype.sales_return_item.sales_return_item import (
     SalesReturnItem,
 )
+from frappe.model.document import Document
 
 
 def test_purchase_return_voucher_property(purchase_return: PurchaseReturn):
@@ -364,3 +365,45 @@ def test_purchase_return_make_stock_entries_create(
     doc: StockEntry = frappe.get_doc("Stock Entry", entry_name)
     assert count_qty(doc.items) == counter
     assert doc.stock_type == exp_stock_type
+
+
+def test_purchase_return_on_cancel_raises_on_invalid_status(
+    purchase_return: PurchaseReturn,
+):
+    purchase_return._voucher.status = "Completed"
+    with pytest.raises(
+        frappe.ValidationError,
+        match="Allowed to cancel Purchase Return only if status of Order is To Receive",
+    ):
+        purchase_return.on_cancel()
+
+
+def test_purchase_return_on_cancel_not_raises_on_valid_status(
+    purchase_return: PurchaseReturn,
+):
+    purchase_return._voucher.status = "To Receive"
+    with pytest.raises(
+        frappe.ValidationError,
+        match="Allowed to cancel Purchase Return only if status of Order is To Receive",
+    ):
+        purchase_return.on_cancel()
+
+
+def test_purchase_return_on_cancel_linked_docs_cancelled(
+    purchase_return: PurchaseReturn, sales_order: SalesOrder
+):
+    purchase_return._voucher.status = "To Receive"
+    purchase_return.db_insert()
+
+    sales_order.db_set("docstatus", 1)
+    sales_order.db_set("delivery_status", "Purchased")
+    sales_order.reload()
+    orders_to_items = purchase_return._allocate_items()
+    purchase_return._make_sales_returns(orders_to_items)
+    purchase_return.before_submit()
+    purchase_return.on_cancel()
+
+    docs = frappe.get_all("Sales Return")
+    for doctype in ("Sales Return", "GL Entry", "Stock Entry"):
+        docs: list[Document] = frappe.get_all(doctype, "docstatus")
+        assert all(doc.docstatus == 2 for doc in docs)

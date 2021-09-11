@@ -6,8 +6,8 @@ import frappe
 from comfort import ValidationError, count_qty, group_by_attr
 from comfort.entities.doctype.child_item.child_item import ChildItem
 from comfort.entities.doctype.item.item import Item
-from comfort.finance import create_gl_entry, get_account
-from comfort.stock import create_stock_entry
+from comfort.finance import cancel_gl_entries_for, create_gl_entry, get_account
+from comfort.stock import cancel_stock_entries_for, create_stock_entry
 from comfort.transactions import (
     AnyChildItem,
     Return,
@@ -200,3 +200,22 @@ class PurchaseReturn(Return):
         self._modify_voucher(orders_to_items)
         self._make_gl_entries()
         self._make_stock_entries()
+
+    def on_cancel(self):
+        if self._voucher.status != "To Receive":
+            raise ValidationError(
+                _(
+                    "Allowed to cancel Purchase Return only if status of Order is To Receive"
+                )
+            )
+
+        sales_returns: list[SalesReturn] = frappe.get_all(
+            "Sales Return", {"from_purchase_return": self.name}
+        )
+        for return_ in sales_returns:
+            doc: SalesReturn = frappe.get_doc("Sales Return", return_.name)
+            doc.flags.from_purchase_return = True
+            doc.cancel()
+
+        cancel_gl_entries_for(self.doctype, self.name)
+        cancel_stock_entries_for(self.doctype, self.name)
