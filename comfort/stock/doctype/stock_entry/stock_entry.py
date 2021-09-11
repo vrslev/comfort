@@ -13,13 +13,3 @@ class StockEntry(Document):
     voucher_type: Literal["Receipt", "Checkout", "Sales Return", "Purchase Return"]
     voucher_no: str
     items: list[StockEntryItem]
-
-    # TODO: If Sales Order, then create stock entries for Items To Sell
-    # if self.delivery_status == "To Purchase":
-    #     ...  # do nothing
-    # elif self.delivery_status == "Purchased":
-    #     ...  # reserved_purchased -> available_purchased
-    # elif self.delivery_status == "To Deliver":
-    #     ...  # remove from reserved_actual
-    # elif self.delivery_status == "Delivered":
-    #     ...  # add to available_actual

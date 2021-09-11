@@ -470,8 +470,9 @@ def purchase_order(
 ) -> PurchaseOrder:
 
     sales_order.set_child_items()
-    sales_order.db_insert()
-    sales_order.db_update_all()
+    if not frappe.db.exists(sales_order.doctype, sales_order.name):
+        sales_order.db_insert()
+        sales_order.db_update_all()
 
     patch_get_delivery_services(monkeypatch)
 

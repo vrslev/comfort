@@ -6,6 +6,9 @@ comfort.SalesOrderController = frappe.ui.form.Controller.extend({
       "Checkout",
       "Payment",
       "Purchase Order",
+      "Stock Entry",
+      "GL Entry",
+      "Receipt",
     ];
   },
   setup() {

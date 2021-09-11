@@ -5,7 +5,7 @@ from copy import deepcopy
 import pytest
 
 import frappe
-from comfort import count_qty
+from comfort import count_qty, counters_are_same
 from comfort.comfort_core.doctype.commission_settings.commission_settings import (
     CommissionSettings,
 )
@@ -321,6 +321,63 @@ def test_get_sales_order_items_with_splitted_combinations(sales_order: SalesOrde
             assert i not in items
         else:
             assert i in items
+
+
+def test_create_cancel_sales_return_without_return_before(
+    purchase_order: PurchaseOrder, sales_order: SalesOrder
+):
+    purchase_order.db_insert()
+    purchase_order.update_children()
+    sales_order.docstatus = 1
+    sales_order.db_update()
+    sales_order.update_children()
+    sales_order.db_set("delivery_status", "Purchased")
+    sales_order.docstatus = 2
+    sales_order.validate()
+    sales_order.load_doc_before_save()
+    sales_order._create_cancel_sales_return()
+
+    return_name: str = frappe.get_value(
+        "Sales Return", {"sales_order": sales_order.name}
+    )
+    cancel_return: SalesReturn = frappe.get_doc("Sales Return", return_name)
+    assert cancel_return.sales_order == sales_order.name
+    assert counters_are_same(
+        count_qty(sales_order._get_items_with_splitted_combinations()),
+        count_qty(cancel_return.items),
+    )
+
+
+def test_create_cancel_sales_return_with_return_before(
+    sales_return: SalesReturn, purchase_order: PurchaseOrder
+):
+    purchase_order.db_insert()
+    purchase_order.update_children()
+    sales_order = sales_return._voucher
+    prev_counter = count_qty(sales_order._get_items_with_splitted_combinations())
+    sales_order.docstatus = 1
+    sales_order.db_update()
+    sales_order.update_children()
+    sales_order.db_set("delivery_status", "Purchased")
+
+    sales_return.insert()
+    prev_return_counter = count_qty(sales_return.items)
+    sales_return.submit()
+
+    sales_order.docstatus = 2
+    sales_order.validate()
+    sales_order.load_doc_before_save()
+    sales_order._create_cancel_sales_return()
+
+    return_name: str = frappe.get_value(
+        "Sales Return", {"sales_order": sales_order.name}
+    )
+    cancel_return: SalesReturn = frappe.get_doc("Sales Return", return_name)
+    new_counter = count_qty(sales_order._get_items_with_splitted_combinations())
+
+    assert cancel_return.sales_order == sales_order.name
+    assert counters_are_same(new_counter, count_qty(cancel_return.items))
+    assert counters_are_same(prev_counter, new_counter + prev_return_counter)
 
 
 #############################

@@ -403,7 +403,6 @@ def test_purchase_return_on_cancel_linked_docs_cancelled(
     purchase_return.before_submit()
     purchase_return.on_cancel()
 
-    docs = frappe.get_all("Sales Return")
     for doctype in ("Sales Return", "GL Entry", "Stock Entry"):
         docs: list[Document] = frappe.get_all(doctype, "docstatus")
         assert all(doc.docstatus == 2 for doc in docs)

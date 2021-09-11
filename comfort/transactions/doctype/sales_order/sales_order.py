@@ -12,18 +12,21 @@ from comfort.entities.doctype.item.item import Item
 from comfort.finance import create_payment, get_account
 from comfort.stock import create_receipt
 from comfort.transactions import delete_empty_items, merge_same_items
-from comfort.transactions.doctype.purchase_order_sales_order.purchase_order_sales_order import (
-    PurchaseOrderSalesOrder,
-)
 from frappe import _
 from frappe.model.document import Document
 
+from ..purchase_order_sales_order.purchase_order_sales_order import (
+    PurchaseOrderSalesOrder,
+)
 from ..sales_order_child_item.sales_order_child_item import SalesOrderChildItem
 from ..sales_order_item.sales_order_item import SalesOrderItem
 from ..sales_order_service.sales_order_service import SalesOrderService
 
 if TYPE_CHECKING:
     from comfort.finance.doctype.payment.payment import Payment
+    from comfort.stock.doctype.receipt.receipt import Receipt
+
+    from ..sales_return.sales_return import SalesReturn
 
 
 class SalesOrderMethods(Document):
@@ -131,6 +134,16 @@ class SalesOrderMethods(Document):
         return self.child_items + [
             item for item in self.items if item.item_code not in parents
         ]
+
+    def _create_cancel_sales_return(self):
+        sales_return: SalesReturn = frappe.new_doc("Sales Return")
+        sales_return.sales_order = self.name
+        sales_return.__voucher = self._doc_before_save
+        sales_return.add_items(sales_return.get_items_available_to_add())
+        sales_return.flags.sales_order_on_cancel = True
+        sales_return.flags.ignore_links = True
+        sales_return.save()
+        sales_return.submit()
 
 
 class SalesOrderStatuses(SalesOrderMethods):
@@ -249,6 +262,7 @@ class SalesOrder(SalesOrderStatuses):
 
     def before_cancel(self):  # pragma: no cover
         self.set_statuses()
+        self._create_cancel_sales_return()
 
     def on_cancel(self):  # TODO: Cover
         self.ignore_linked_doctypes = ["Purchase Order", "Sales Return", "Payment"]
@@ -257,8 +271,14 @@ class SalesOrder(SalesOrderStatuses):
             "Payment", {"voucher_type": self.doctype, "voucher_no": self.name}
         )
         for payment in payments:
-            doc: Payment = frappe.get_doc("Payment", payment.name)
-            doc.cancel()
+            payment: Payment = frappe.get_doc("Payment", payment.name)
+            payment.cancel()
+        receipts: list[Receipt] = frappe.get_all(
+            "Receipt", {"voucher_type": self.doctype, "voucher_no": self.name}
+        )
+        for receipt in receipts:
+            receipt: Payment = frappe.get_doc("Receipt", receipt.name)
+            receipt.cancel()
 
     def before_update_after_submit(self):  # pragma: no cover
         self.calculate()
