@@ -21,6 +21,7 @@ from comfort.transactions.doctype.sales_order.sales_order import (
 )
 from comfort.transactions.doctype.sales_return.sales_return import SalesReturn
 from frappe import ValidationError
+from frappe.model.document import Document
 
 #############################
 #     SalesOrderMethods     #
@@ -150,6 +151,78 @@ def test_calculate_total_amount(sales_order: SalesOrder):
     assert sales_order.total_amount == exp_total_amount
 
 
+def test_get_sales_order_items_with_splitted_combinations(sales_order: SalesOrder):
+    sales_order.set_child_items()
+    items = sales_order._get_items_with_splitted_combinations()
+    parents: set[str] = set()
+    for child in sales_order.child_items:
+        assert child in items
+        parents.add(child.parent_item_code)
+
+    for i in sales_order.items:
+        if i.item_code in parents:
+            assert i not in items
+        else:
+            assert i in items
+
+
+def test_create_cancel_sales_return_without_return_before(
+    purchase_order: PurchaseOrder, sales_order: SalesOrder
+):
+    purchase_order.db_insert()
+    purchase_order.update_children()
+    sales_order.docstatus = 1
+    sales_order.db_update()
+    sales_order.update_children()
+    sales_order.db_set("delivery_status", "Purchased")
+    sales_order.docstatus = 2
+    sales_order.validate()
+    sales_order.load_doc_before_save()
+    sales_order._create_cancel_sales_return()
+
+    return_name: str = frappe.get_value(
+        "Sales Return", {"sales_order": sales_order.name}
+    )
+    cancel_return: SalesReturn = frappe.get_doc("Sales Return", return_name)
+    assert cancel_return.sales_order == sales_order.name
+    assert counters_are_same(
+        count_qty(sales_order._get_items_with_splitted_combinations()),
+        count_qty(cancel_return.items),
+    )
+
+
+def test_create_cancel_sales_return_with_return_before(
+    sales_return: SalesReturn, purchase_order: PurchaseOrder
+):
+    purchase_order.db_insert()
+    purchase_order.update_children()
+    sales_order = sales_return._voucher
+    prev_counter = count_qty(sales_order._get_items_with_splitted_combinations())
+    sales_order.docstatus = 1
+    sales_order.db_update()
+    sales_order.update_children()
+    sales_order.db_set("delivery_status", "Purchased")
+
+    sales_return.insert()
+    prev_return_counter = count_qty(sales_return.items)
+    sales_return.submit()
+
+    sales_order.docstatus = 2
+    sales_order.validate()
+    sales_order.load_doc_before_save()
+    sales_order._create_cancel_sales_return()
+
+    return_name: str = frappe.get_value(
+        "Sales Return", {"sales_order": sales_order.name}
+    )
+    cancel_return: SalesReturn = frappe.get_doc("Sales Return", return_name)
+    new_counter = count_qty(sales_order._get_items_with_splitted_combinations())
+
+    assert cancel_return.sales_order == sales_order.name
+    assert counters_are_same(new_counter, count_qty(cancel_return.items))
+    assert counters_are_same(prev_counter, new_counter + prev_return_counter)
+
+
 #############################
 #    SalesOrderStatuses     #
 #############################
@@ -170,7 +243,8 @@ def test_get_paid_amount_with_returns(sales_return: SalesReturn):
 
     exp_amount = sales_order.total_amount - sales_return.returned_paid_amount
     sales_order.delivery_status = "To Deliver"
-    sales_return.before_submit()
+    sales_return._make_payment_gl_entries()
+    sales_return._make_delivery_gl_entries()
     assert sales_order._get_paid_amount() == exp_amount
 
 
@@ -308,81 +382,28 @@ def test_set_document_status(
     assert sales_order.status == expected_status
 
 
-def test_get_sales_order_items_with_splitted_combinations(sales_order: SalesOrder):
-    sales_order.set_child_items()
-    items = sales_order._get_items_with_splitted_combinations()
-    parents: set[str] = set()
-    for child in sales_order.child_items:
-        assert child in items
-        parents.add(child.parent_item_code)
-
-    for i in sales_order.items:
-        if i.item_code in parents:
-            assert i not in items
-        else:
-            assert i in items
-
-
-def test_create_cancel_sales_return_without_return_before(
-    purchase_order: PurchaseOrder, sales_order: SalesOrder
-):
-    purchase_order.db_insert()
-    purchase_order.update_children()
-    sales_order.docstatus = 1
-    sales_order.db_update()
-    sales_order.update_children()
-    sales_order.db_set("delivery_status", "Purchased")
-    sales_order.docstatus = 2
-    sales_order.validate()
-    sales_order.load_doc_before_save()
-    sales_order._create_cancel_sales_return()
-
-    return_name: str = frappe.get_value(
-        "Sales Return", {"sales_order": sales_order.name}
-    )
-    cancel_return: SalesReturn = frappe.get_doc("Sales Return", return_name)
-    assert cancel_return.sales_order == sales_order.name
-    assert counters_are_same(
-        count_qty(sales_order._get_items_with_splitted_combinations()),
-        count_qty(cancel_return.items),
-    )
-
-
-def test_create_cancel_sales_return_with_return_before(
-    sales_return: SalesReturn, purchase_order: PurchaseOrder
-):
-    purchase_order.db_insert()
-    purchase_order.update_children()
-    sales_order = sales_return._voucher
-    prev_counter = count_qty(sales_order._get_items_with_splitted_combinations())
-    sales_order.docstatus = 1
-    sales_order.db_update()
-    sales_order.update_children()
-    sales_order.db_set("delivery_status", "Purchased")
-
-    sales_return.insert()
-    prev_return_counter = count_qty(sales_return.items)
-    sales_return.submit()
-
-    sales_order.docstatus = 2
-    sales_order.validate()
-    sales_order.load_doc_before_save()
-    sales_order._create_cancel_sales_return()
-
-    return_name: str = frappe.get_value(
-        "Sales Return", {"sales_order": sales_order.name}
-    )
-    cancel_return: SalesReturn = frappe.get_doc("Sales Return", return_name)
-    new_counter = count_qty(sales_order._get_items_with_splitted_combinations())
-
-    assert cancel_return.sales_order == sales_order.name
-    assert counters_are_same(new_counter, count_qty(cancel_return.items))
-    assert counters_are_same(prev_counter, new_counter + prev_return_counter)
-
-
 #############################
 #        SalesOrder         #
 #############################
+
+
+def test_sales_order_on_cancel(sales_order: SalesOrder):
+    sales_order.update_items_from_db()
+    sales_order.calculate()
+    sales_order.db_insert()
+    sales_order.update_children()
+    sales_order.add_payment(100, cash=True)
+    sales_order.db_set("delivery_status", "To Deliver")
+    sales_order.add_receipt()
+
+    sales_order.on_cancel()
+    for doctype in ("Payment", "Receipt"):
+        docs: list[Document] = frappe.get_all(
+            doctype,
+            {"voucher_type": sales_order.doctype, "voucher_no": sales_order.name},
+            "docstatus",
+        )
+        assert all(doc.docstatus == 2 for doc in docs)
 
 
 def test_add_payment_raises_on_cancelled(sales_order: SalesOrder):
