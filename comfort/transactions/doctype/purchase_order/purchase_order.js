@@ -59,6 +59,9 @@ comfort.PurchaseOrderController = frappe.ui.form.Controller.extend({
       Checkout: "Checkout",
       Receipt: "Receipt",
     };
+    if (this.frm.doc.docstatus == 2) {
+      this.frm.custom_make_buttons["Purchase Return"] = "Purchase Return";
+    }
   },
 
   setup_buttons() {
