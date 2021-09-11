@@ -94,6 +94,20 @@ def test_calculate_items_to_sell_cost_if_no_items_to_sell(
 
 def test_calculate_sales_orders_cost(purchase_order: PurchaseOrder):
     purchase_order._calculate_sales_orders_cost()
+    doc = frappe.get_doc(
+        {
+            "doctype": "Sales Order Item",
+            "parent": purchase_order.sales_orders[0].sales_order_name,
+            "parenttype": "Sales Order",
+            "item_code": "Some Item Code",
+            "qty": 1,
+            "rate": 100,
+        }
+    )
+    doc.flags.ignore_links = True
+    doc.insert()
+    doc.db_set("docstatus", 2)
+
     res: list[list[int]] = frappe.get_all(
         "Sales Order Item",
         fields="SUM(qty * rate) AS sales_orders_cost",
@@ -101,7 +115,8 @@ def test_calculate_sales_orders_cost(purchase_order: PurchaseOrder):
             "parent": (
                 "in",
                 (o.sales_order_name for o in purchase_order.sales_orders),
-            )
+            ),
+            "docstatus": ("!=", 2),
         },
         as_list=True,
     )
@@ -386,6 +401,12 @@ def test_purchase_order_before_submit(purchase_order: PurchaseOrder):
     assert not purchase_order.delivery_options
     assert not purchase_order.cannot_add_items
     assert purchase_order.status == "To Receive"
+
+
+def test_purchase_order_before_cancel(purchase_order: PurchaseOrder):
+    purchase_order.status = "Draft"
+    purchase_order.before_cancel()
+    assert purchase_order.status == "Cancelled"
 
 
 def test_add_purchase_info_and_submit_info_loaded(purchase_order: PurchaseOrder):

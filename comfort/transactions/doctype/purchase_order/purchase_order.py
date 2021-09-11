@@ -82,7 +82,10 @@ class PurchaseOrderMethods(Document):
         res: list[int] = frappe.get_all(
             "Sales Order Item",
             fields="SUM(qty * rate) AS sales_orders_cost",
-            filters={"parent": ("in", (o.sales_order_name for o in self.sales_orders))},
+            filters={
+                "parent": ("in", (o.sales_order_name for o in self.sales_orders)),
+                "docstatus": ("!=", 2),
+            },
             as_list=True,
         )
         self.sales_orders_cost = res[0][0] or 0
@@ -274,6 +277,9 @@ class PurchaseOrder(PurchaseOrderMethods):
         self.create_payment()
         self.create_checkout()
         self.submit_sales_orders_and_update_statuses()
+
+    def before_cancel(self):
+        self.status = "Cancelled"
 
     def on_cancel(self):  # pragma: no cover
         self.submit_sales_orders_and_update_statuses()
