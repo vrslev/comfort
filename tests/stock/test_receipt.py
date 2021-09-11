@@ -39,12 +39,15 @@ def test_new_gl_entry(receipt_sales: Receipt):
     assert credit == values[2]
 
 
-def test_new_stock_entry(receipt_sales: Receipt, item_no_children: Item):
+@pytest.mark.parametrize("reverse_qty", (True, False, None))
+def test_new_stock_entry(
+    receipt_sales: Receipt, item_no_children: Item, reverse_qty: bool
+):
     stock_type, items = "Reserved Actual", [
         frappe._dict({"item_code": item_no_children.item_code, "qty": 5})
     ]
     receipt_sales.db_insert()
-    receipt_sales._new_stock_entry(stock_type, items)
+    receipt_sales._new_stock_entry(stock_type, items, reverse_qty=reverse_qty)
 
     entry_name: str = frappe.get_value(
         "Stock Entry",
@@ -57,7 +60,7 @@ def test_new_stock_entry(receipt_sales: Receipt, item_no_children: Item):
     entry: StockEntry = frappe.get_doc("Stock Entry", entry_name)
 
     assert entry.items[0].item_code == items[0]["item_code"]
-    assert entry.items[0].qty == items[0]["qty"]
+    assert entry.items[0].qty == -items[0]["qty"] if reverse_qty else items[0]["qty"]
 
 
 def test_create_sales_gl_entries(receipt_sales: Receipt, sales_order: SalesOrder):

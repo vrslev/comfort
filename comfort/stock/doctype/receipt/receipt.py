@@ -3,7 +3,6 @@ from __future__ import annotations
 from typing import Any
 
 import frappe
-from comfort import count_qty
 from comfort.entities.doctype.child_item.child_item import ChildItem
 from comfort.finance import cancel_gl_entries_for, create_gl_entry, get_account
 from comfort.stock import cancel_stock_entries_for, create_stock_entry
@@ -45,7 +44,7 @@ class Receipt(Document):
         self,
         stock_type: StockTypes,
         items: list[Any],
-        reverse_qty: bool = False,  # TODO: Cover
+        reverse_qty: bool = False,
     ):
         create_stock_entry(self.doctype, self.name, stock_type, items, reverse_qty)
 
@@ -58,7 +57,6 @@ class Receipt(Document):
             self.create_purchase_stock_entries()
 
     def on_cancel(self):  # pragma: no cover
-        # TODO: Need to transfer items to available if Sales Order is cancelled
         cancel_gl_entries_for(self.doctype, self.name)
         cancel_stock_entries_for(self.doctype, self.name)
         self.set_status_in_sales_order()
@@ -69,14 +67,10 @@ class Receipt(Document):
         self._new_gl_entry("cost_of_goods_sold", items_cost, 0)
 
     def create_sales_stock_entries(self):
-        items_obj: list[
+        items: list[
             SalesOrderItem | SalesOrderChildItem
         ] = self._voucher._get_items_with_splitted_combinations()
-        items = [
-            frappe._dict({"item_code": item_code, "qty": -qty})
-            for item_code, qty in count_qty(items_obj).items()
-        ]
-        self._new_stock_entry("Reserved Actual", items)
+        self._new_stock_entry("Reserved Actual", items, reverse_qty=True)
 
     def create_purchase_gl_entries(self):
         items_amount: int = frappe.get_value(
@@ -88,28 +82,20 @@ class Receipt(Document):
         self._new_gl_entry("inventory", items_amount, 0)
 
     def _create_purchase_stock_entries_for_sales_orders(self):
-        items_obj: list[
+        items: list[
             SalesOrderItem | SalesOrderChildItem
         ] = self._voucher._get_items_in_sales_orders(split_combinations=True)
-        if not items_obj:
+        if not items:
             return
-
-        items = [
-            frappe._dict({"item_code": i.item_code, "qty": i.qty}) for i in items_obj
-        ]
         self._new_stock_entry("Reserved Purchased", items, reverse_qty=True)
         self._new_stock_entry("Reserved Actual", items)
 
     def _create_purchase_stock_entries_for_items_to_sell(self):
-        items_obj: list[
+        items: list[
             PurchaseOrderItemToSell | ChildItem
         ] = self._voucher._get_items_to_sell(split_combinations=True)
-        if not items_obj:
+        if not items:
             return
-
-        items: dict[str, str | int] = [  # TODO: is this necessary?
-            frappe._dict({"item_code": i.item_code, "qty": i.qty}) for i in items_obj
-        ]
         self._new_stock_entry("Available Purchased", items, reverse_qty=True)
         self._new_stock_entry("Available Actual", items)
 
