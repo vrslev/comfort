@@ -5,6 +5,7 @@ import pytest
 import frappe
 from comfort import count_qty, group_by_attr
 from comfort.transactions import delete_empty_items, merge_same_items
+from comfort.transactions.doctype.purchase_return.purchase_return import PurchaseReturn
 from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
 from comfort.transactions.doctype.sales_return.sales_return import SalesReturn
 
@@ -122,14 +123,16 @@ def test_return_add_items(sales_return: SalesReturn):
     assert item_amount == expected_item_amount
 
 
-def test_return_validate_not_all_items_returned_not_raises(sales_return: SalesReturn):
-    sales_return._validate_not_all_items_returned()
+def test_return_validate_not_all_items_returned_not_raises(
+    purchase_return: PurchaseReturn,
+):
+    purchase_return._validate_not_all_items_returned()
 
 
-def test_return_validate_not_all_items_returned_raises(sales_return: SalesReturn):
-    sales_return.add_items(sales_return.get_items_available_to_add())
+def test_return_validate_not_all_items_returned_raises(purchase_return: PurchaseReturn):
+    purchase_return.add_items(purchase_return.get_items_available_to_add())
     with pytest.raises(frappe.ValidationError, match="Can't return all items"):
-        sales_return._validate_not_all_items_returned()
+        purchase_return._validate_not_all_items_returned()
 
 
 def test_delete_empty_items(sales_order: SalesOrder):
