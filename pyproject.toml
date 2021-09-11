@@ -24,7 +24,6 @@ reportUnknownVariableType = false
 reportUnknownMemberType = false
 reportImportCycles = false
 
-
 # Rules that are not in "strict" mode:
 reportUninitializedInstanceVariable = "warning"
 reportCallInDefaultInitializer = "warning"
@@ -78,7 +77,6 @@ reportImplicitStringConcatenation = "warning"
 # reportUnsupportedDunderAll
 # reportUnusedCoroutine
 
-
 [tool.semantic_release]
 branch = "main"
 version_variable = "comfort/__init__.py:__version__"
@@ -111,7 +109,8 @@ exclude_lines = [
     "@overload",
     "def __repr__",
     "if __name__ == .__main__.:",
-    "= TypeVar"
+    "= TypeVar",
+    "if TYPE_CHECKING:",
 ]
 
 [build-system]
