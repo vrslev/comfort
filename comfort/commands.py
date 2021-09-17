@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+import csv
 from typing import Any
 
 import click
@@ -7,6 +10,7 @@ from comfort.comfort_core.hooks import after_install
 from comfort.hooks import app_name
 from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
 from frappe.commands import get_site, pass_context
+from frappe.translate import get_full_dict, get_messages_for_app
 from frappe.utils.fixtures import sync_fixtures
 
 
@@ -265,4 +269,32 @@ def reset(context: Any):
     _cleanup()
 
 
-commands = [demo, reset]
+@click.command("write-translations")
+@click.argument("untranslated_file", type=str, required=False)
+@click.argument("lang", default="ru")
+@pass_context
+def write_translations(context: Any, untranslated_file: str | None, lang: str):
+    "Get untranslated strings for language"
+    if untranslated_file is None:
+        untranslated_file = frappe.get_app_path(app_name, "translations", "ru.csv")
+    connect(context)
+    messages: list[tuple[str, ...]] = get_messages_for_app(app_name)
+    full_dict: dict[Any, Any] = get_full_dict(lang)
+
+    if untranslated := [m[1] for m in messages if m[1] not in full_dict]:
+        print(f"{len(untranslated)} of {len(messages)} translations missing")
+
+        # in_file: list[str] = []
+        # if os.path.exists(untranslated_file):
+        #     with open(untranslated_file, "r") as f:
+
+        with open(untranslated_file, "a+") as f:
+            in_file = [m[0] for m in csv.reader(f)]
+            to_write = [[m] for m in untranslated if m not in in_file]
+            print(f"Writing {len(to_write)} new translations")
+            csv.writer(f).writerows(to_write)
+    else:
+        print("All translated!")
+
+
+commands = [demo, reset, write_translations]
