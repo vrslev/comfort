@@ -1,0 +1,189 @@
+version: "3"
+
+services:
+  traefik:
+    image: traefik:2.5
+    command:
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --entrypoints.web.address=:80
+      - --entrypoints.web.http.redirections.entrypoint.to=websecure
+      - --entrypoints.web.http.redirections.entrypoint.scheme=https
+      - --entrypoints.websecure.address=:443
+      - --certificatesResolvers.myResolver.acme.httpChallenge=true
+      - --certificatesResolvers.myResolver.acme.httpChallenge.entrypoint=web
+      - --certificatesResolvers.myResolver.acme.email=${LETSENCRYPT_EMAIL}
+      - --certificatesResolvers.myResolver.acme.storage=/letsencrypt/acme.json
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - cert-vol:/letsencrypt
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    userns_mode: "host"
+
+  nginx:
+    image: cr.yandex/crpdmuh1072ntg30t18g/comfort-nginx
+    restart: on-failure
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.nginx
+      args:
+        FRAPPE_VERSION: ${FRAPPE_VERSION}
+    environment:
+      FRAPPE_PY: app
+      FRAPPE_SOCKETIO: socketio
+    labels:
+      - traefik.enable=true
+      # SITE_NAME and SITES variables from frappe_docker should be for Nginx config.
+      # Also it should be main name users will access the site. So, better merge them.
+      # https://github.com/frappe/frappe_docker/issues/182#issuecomment-609899924
+      - traefik.http.routers.nginx.rule=Host(`${DOMAIN}`)
+      - traefik.http.routers.nginx.entrypoints=websecure
+      - traefik.http.routers.nginx.tls.certresolver=myResolver
+      - traefik.http.services.nginx.loadbalancer.server.port=80
+    volumes:
+      - sites-vol:/var/www/html/sites:rw
+      - assets-vol:/assets:rw
+
+  mariadb:
+    image: mariadb:10.6
+    restart: on-failure
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --skip-character-set-client-handshake
+      - --skip-innodb-read-only-compressed # Temporary fix for MariaDB 10.6
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      # Sometimes db initialization takes longer than 10 seconds and site-creator goes away.
+      # Frappe doesn't use CONVERT_TZ() function that requires time zone info, so we can just skip it.
+      MYSQL_INITDB_SKIP_TZINFO: 1
+    volumes:
+      - mariadb-vol:/var/lib/mysql
+
+  site-creator:
+    # TODO: Specify version after Continuous Deployment is set up
+    image: cr.yandex/crpdmuh1072ntg30t18g/comfort-worker
+    command: new
+    environment:
+      SITE_NAME: ${DOMAIN}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      INSTALL_APPS: comfort
+    depends_on:
+      - mariadb
+      - redis-cache
+      - redis-queue
+    volumes:
+      - sites-vol:/home/frappe/frappe-bench/sites:rw
+      - logs-vol:/home/frappe/frappe-bench/logs:rw
+
+  app:
+    image: cr.yandex/crpdmuh1072ntg30t18g/comfort-worker
+    restart: on-failure
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.worker
+      args:
+        FRAPPE_VERSION: ${FRAPPE_VERSION}
+    environment:
+      - MARIADB_HOST=mariadb
+      - REDIS_CACHE=redis-cache:6379
+      - REDIS_QUEUE=redis-queue:6379
+      - REDIS_SOCKETIO=redis-socketio:6379
+      - SOCKETIO_PORT=9000
+      - WORKERS=${WORKERS}
+    volumes:
+      - sites-vol:/home/frappe/frappe-bench/sites:rw
+      - assets-vol:/home/frappe/frappe-bench/sites/assets:rw
+      - logs-vol:/home/frappe/frappe-bench/logs:rw
+
+  redis-socketio:
+    image: redis:alpine
+    restart: on-failure
+    volumes:
+      - redis-socketio-vol:/data
+
+  socketio:
+    image: frappe/frappe-socketio:${FRAPPE_VERSION}
+    restart: on-failure
+    depends_on:
+      - redis-socketio
+    volumes:
+      - sites-vol:/home/frappe/frappe-bench/sites:rw
+      - logs-vol:/home/frappe/frappe-bench/logs:rw
+
+  redis-cache:
+    image: redis:alpine
+    command:
+      - --save ""
+    restart: on-failure
+    volumes:
+      - redis-cache-vol:/data
+
+  redis-queue:
+    image: redis:alpine
+    restart: on-failure
+    volumes:
+      - redis-queue-vol:/data
+
+  worker-default:
+    image: cr.yandex/crpdmuh1072ntg30t18g/comfort-worker
+    restart: on-failure
+    command: worker
+    environment:
+      WORKER_TYPE: default
+    depends_on:
+      - redis-queue
+      - redis-cache
+    volumes:
+      - sites-vol:/home/frappe/frappe-bench/sites:rw
+      - logs-vol:/home/frappe/frappe-bench/logs:rw
+
+  worker-short:
+    image: cr.yandex/crpdmuh1072ntg30t18g/comfort-worker
+    restart: on-failure
+    command: worker
+    environment:
+      WORKER_TYPE: short
+    depends_on:
+      - redis-queue
+      - redis-cache
+    volumes:
+      - sites-vol:/home/frappe/frappe-bench/sites:rw
+      - logs-vol:/home/frappe/frappe-bench/logs:rw
+
+  worker-long:
+    image: cr.yandex/crpdmuh1072ntg30t18g/comfort-worker
+    restart: on-failure
+    command: worker
+    environment:
+      WORKER_TYPE: long
+    depends_on:
+      - redis-queue
+      - redis-cache
+    volumes:
+      - sites-vol:/home/frappe/frappe-bench/sites:rw
+      - logs-vol:/home/frappe/frappe-bench/logs:rw
+
+  schedule:
+    image: cr.yandex/crpdmuh1072ntg30t18g/comfort-worker
+    restart: on-failure
+    command: schedule
+    depends_on:
+      - redis-queue
+      - redis-cache
+    volumes:
+      - sites-vol:/home/frappe/frappe-bench/sites:rw
+      - logs-vol:/home/frappe/frappe-bench/logs:rw
+
+volumes:
+  mariadb-vol:
+  redis-cache-vol:
+  redis-queue-vol:
+  redis-socketio-vol:
+  assets-vol:
+  sites-vol:
+  logs-vol:
+  cert-vol:

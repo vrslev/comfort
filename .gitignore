@@ -1,28 +1,18 @@
-#### macos ####
-# General
 *.DS_Store
 
-
-#### python ####
-# Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
 
-# Distribution / packaging
 dist/
 *.egg-info/
 *.egg
 
-# Jupyter Notebook
 .ipynb_checkpoints/
 
-# Tests
 tests/.cache/
 
-
-#### js ####
 node_modules
 
-
 TODO.md
+docker/.env
