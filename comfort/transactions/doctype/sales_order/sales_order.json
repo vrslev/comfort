@@ -36,7 +36,9 @@
     "per_paid",
     "column_break_5",
     "delivery_status",
-    "amended_from"
+    "amended_from",
+    "from_available_stock",
+    "from_purchase_order"
   ],
   "fields": [
     {
@@ -242,12 +244,23 @@
     {
       "fieldname": "column_break_5",
       "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "from_purchase_order",
+      "fieldtype": "Link",
+      "label": "From Purchase Order",
+      "options": "Purchase Order"
+    },
+    {
+      "fieldname": "from_available_stock",
+      "fieldtype": "Data",
+      "label": "From Available Stock"
     }
   ],
   "index_web_pages_for_search": 1,
   "is_submittable": 1,
   "links": [],
-  "modified": "2021-08-31 22:17:10.732050",
+  "modified": "2021-09-11 15:37:01.245435",
   "modified_by": "Administrator",
   "module": "Transactions",
   "name": "Sales Order",

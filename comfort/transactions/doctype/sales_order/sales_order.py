@@ -1,16 +1,17 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Iterable, Literal
+from typing import TYPE_CHECKING, Any, Iterable, Literal
 
 import frappe
 from comfort import ValidationError, count_qty, group_by_attr
 from comfort.comfort_core.doctype.commission_settings.commission_settings import (
     CommissionSettings,
 )
+from comfort.comfort_core.hooks import default_query
 from comfort.entities.doctype.child_item.child_item import ChildItem
 from comfort.entities.doctype.item.item import Item
 from comfort.finance import create_payment, get_account
-from comfort.stock import create_receipt
+from comfort.stock import create_receipt, create_stock_entry, get_stock_balance
 from comfort.transactions import delete_empty_items, merge_same_items
 from frappe import _
 from frappe.model.document import Document
@@ -26,6 +27,9 @@ if TYPE_CHECKING:
     from comfort.finance.doctype.payment.payment import Payment
     from comfort.stock.doctype.receipt.receipt import Receipt
 
+    from ..purchase_order_item_to_sell.purchase_order_item_to_sell import (
+        PurchaseOrderItemToSell,
+    )
     from ..sales_return.sales_return import SalesReturn
 
 
@@ -49,6 +53,10 @@ class SalesOrderMethods(Document):
     payment_status: Literal["", "Unpaid", "Partially Paid", "Paid", "Overpaid"]
     per_paid: float
     delivery_status: Literal["", "To Purchase", "Purchased", "To Deliver", "Delivered"]
+    from_available_stock: Literal[
+        "Available Purchased", "Available Actual"
+    ] | None = None
+    from_purchase_order: str | None = None
 
     ignore_linked_doctypes: list[str]
 
@@ -81,6 +89,30 @@ class SalesOrderMethods(Document):
             item.qty = item.qty * item_codes_to_qty[item.parent_item_code]
 
         self.extend("child_items", child_items)
+
+    def _validate_from_available_stock(self):
+        if not self.from_available_stock:
+            return
+        validate_from_available_stock_params(
+            self.from_available_stock, self.from_purchase_order
+        )
+        order_counter = count_qty(self._get_items_with_splitted_combinations())
+
+        if self.from_available_stock == "Available Actual":
+            stock_counter = get_stock_balance(self.from_available_stock)
+        else:
+            items_to_sell: list[PurchaseOrderItemToSell] = frappe.get_all(
+                "Purchase Order Item To Sell",
+                fields=("item_code", "qty"),
+                filters={"parent": ("in", self.from_purchase_order)},
+            )
+            stock_counter = count_qty(items_to_sell)
+
+        for item_code, qty in order_counter.items():
+            if stock_counter[item_code] < qty:
+                raise ValidationError(
+                    _("Insufficient stock for Item {}").format(item_code)
+                )
 
     def _calculate_item_totals(self):
         """Calculate global Total Quantity, Weight and Items Cost."""
@@ -144,6 +176,25 @@ class SalesOrderMethods(Document):
         sales_return.flags.ignore_links = True
         sales_return.save()
         sales_return.submit()
+
+    def _make_stock_entries_for_from_available_stock(self):
+        if self.from_available_stock == "Available Actual":
+            checkout_name = frappe.get_value(
+                "Checkout", {"purchase_order": self.from_purchase_order}
+            )
+            items = self._get_items_with_splitted_combinations()
+            create_stock_entry(
+                "Checkout",
+                checkout_name,
+                self.from_available_stock,
+                items,
+                reverse_qty=True,
+            )
+            create_stock_entry("Checkout", checkout_name, "Reserved Actual", items)
+        elif self.from_available_stock == "Available Purchased":
+            ...
+        else:
+            pass
 
 
 class SalesOrderStatuses(SalesOrderMethods):
@@ -253,12 +304,14 @@ class SalesOrder(SalesOrderStatuses):
         self.items = merge_same_items(self.items)
         self.update_items_from_db()
         self.set_child_items()
+        self._validate_from_available_stock()
 
         self.calculate()
         self.set_statuses()
 
     def before_submit(self):
         self.edit_commission = True
+        self._make_stock_entries_for_from_available_stock()
 
     def before_cancel(self):  # pragma: no cover
         self.set_statuses()
@@ -365,6 +418,7 @@ def has_linked_delivery_trip(sales_order_name: str):
 
 @frappe.whitelist()
 def get_sales_orders_not_in_purchase_order() -> list[str]:
+    # TODO: Validate status so completed orders from actual stock are good
     po_sales_orders: list[PurchaseOrderSalesOrder] = frappe.get_all(
         "Purchase Order Sales Order", "sales_order_name"
     )
@@ -375,3 +429,63 @@ def get_sales_orders_not_in_purchase_order() -> list[str]:
             {"name": ("not in", (s.sales_order_name for s in po_sales_orders))},
         )
     ]
+
+
+@frappe.whitelist()
+def validate_from_available_stock_params(
+    from_available_stock: Literal["Available Purchased", "Available Actual"] | None,
+    from_purchase_order: str | None = None,
+):
+    if from_available_stock == "Available Purchased":
+        if not from_purchase_order:
+            raise ValidationError(
+                _(
+                    "If From Available Stock is Available Purchased, From Purchase Order should be set"
+                )
+            )
+        status: str = frappe.get_value("Purchase Order", from_purchase_order, "status")
+        if status != "To Receive":
+            raise ValidationError(_("Status of Purchase Order should be To Receive"))
+
+
+@frappe.whitelist()
+def item_query(
+    doctype: str,
+    txt: str,
+    searchfield: str,
+    start: int,
+    page_len: int,
+    filters: dict[str, Any],
+):
+    from_available_stock: Literal[
+        "Available Purchased", "Available Actual"
+    ] | None = filters.get("from_available_stock")
+    from_purchase_order: str = filters.get("from_purchase_order")
+    validate_from_available_stock_params(from_available_stock, from_purchase_order)
+
+    acceptable_item_codes: list[str] | None = None
+
+    if from_available_stock == "Available Actual":
+        stock_balance = get_stock_balance(from_available_stock)
+        acceptable_item_codes = stock_balance.keys()
+    elif from_available_stock == "Available Purchased":
+        items_to_sell: list[PurchaseOrderItemToSell] = frappe.get_all(
+            "Purchase Order Item To Sell",
+            fields="item_code",
+            filters={"parent": ("in", from_purchase_order)},
+        )
+        acceptable_item_codes = (d.item_code for d in items_to_sell)
+
+    if acceptable_item_codes is None:
+        filters = {}
+    else:
+        filters = {"item_code": ("in", acceptable_item_codes)}
+
+    return default_query(
+        doctype=doctype,
+        txt=txt,
+        searchfield=searchfield,
+        start=start,
+        page_len=page_len,
+        filters=filters,
+    )

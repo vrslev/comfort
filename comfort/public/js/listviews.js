@@ -39,6 +39,57 @@ frappe.listview_settings["Sales Order"] = {
     substitute_status_colours();
     add_not_in_po_check(list);
     list.page.sidebar.remove();
+    list.page.set_secondary_action(
+      __("Add Sales Order from Available Stock"),
+      () => {
+        frappe.prompt(
+          {
+            label: __("Stock Type"),
+            fieldname: "stock_type",
+            fieldtype: "Select",
+            options: "Available Purchased\nAvailable Actual",
+            reqd: 1,
+            default: "Available Purchased",
+          },
+          ({ stock_type }) => {
+            function create_doc(purchase_order) {
+              let data = { from_available_stock: stock_type };
+              if (purchase_order) {
+                data.from_purchase_order = purchase_order;
+              }
+              frappe
+                .call({
+                  method:
+                    "comfort.transactions.doctype.sales_order.sales_order.validate_from_available_stock_params",
+                  args: data,
+                })
+                .then(() => {
+                  frappe.new_doc("Sales Order", data);
+                });
+            }
+
+            if (stock_type == "Available Purchased") {
+              frappe.prompt(
+                {
+                  label: __("Purchase Order"),
+                  fieldname: "purchase_order",
+                  fieldtype: "Link",
+                  options: "Purchase Order",
+                  reqd: 1,
+                  only_select: 1,
+                },
+                ({ purchase_order }) => create_doc(purchase_order),
+                __("Choose Purchase Order")
+              );
+            } else {
+              create_doc();
+            }
+          },
+          __("Choose Stock Type")
+        );
+      },
+      "small-add"
+    );
   },
 };
 

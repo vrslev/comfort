@@ -11,6 +11,7 @@ comfort.SalesOrderController = frappe.ui.form.Controller.extend({
       "Receipt",
     ];
   },
+
   setup() {
     this.frm.show_submit_message = () => {};
     this.patch_toolbar_set_page_actions();
@@ -38,6 +39,20 @@ comfort.SalesOrderController = frappe.ui.form.Controller.extend({
     if (this.frm.doc.docstatus == 2) {
       this.frm.custom_make_buttons["Sales Return"] = "Sales Return";
     }
+    this.setup_item_query();
+  },
+
+  setup_item_query() {
+    this.frm.set_query("item_code", "items", () => {
+      return {
+        query:
+          "comfort.transactions.doctype.sales_order.sales_order.item_query",
+        filters: {
+          from_available_stock: this.frm.doc.from_available_stock,
+          from_purchase_order: this.frm.doc.from_purchase_order,
+        },
+      };
+    });
   },
 
   onload_post_render() {
