@@ -5,109 +5,87 @@ on:
   workflow_dispatch:
   push:
     branches:
-      # - main
-      - ci-cd
+      - dev
 
 jobs:
   tests:
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
-    env:
-      FRAPPE_BRANCH: version-13
-
     services:
-      # Try to install redis too
       mariadb:
         image: mariadb:10.6
         env:
           MYSQL_ROOT_PASSWORD: 123
-
-      redis-cache:
-        image: redis:alpine
-
-      redis-queue:
-        image: redis:alpine
-
-      redis-socketio:
-        image: redis:alpine
+        ports:
+          - 3306:3306
 
     steps:
       - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 14
+          cache: "yarn"
       - uses: actions/setup-python@v2
         with:
           python-version: 3.9
 
-      - name: Cache Pip
+      - name: Cache pip
         uses: actions/cache@v2
         with:
           path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('setup.cfg') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-            ${{ runner.os }}-
+          key: pip-${{ hashFiles('**/setup.cfg') }}
 
-      - name: Setup Node
-        uses: actions/setup-node@v2
-        with:
-          node-version: 14
-          cache: "yarn"
-
-      - name: Install Dependencies
+      - name: Install dependencies
         run: |
-          # sudo apt-get install redis-server
-          pip install wheel -U frappe-bench
+          sudo apt-get install redis-server
+          pip install -U frappe-bench
 
       - name: Configure MariaDB
         run: |
           mysql --host 127.0.0.1 --port 3306 -u root -p123 \
             -e "SET GLOBAL character_set_server = 'utf8mb4';
-                SET GLOBAL collation_server = 'utf8mb4_unicode_ci'"
+                SET GLOBAL collation_server = 'utf8mb4_unicode_ci';
+                SET GLOBAL innodb_read_only_compressed = OFF"
 
-      - name: Initialize frappe-bench
+      - name: Initialize bench
         run: |
-          bench init frappe-bench --skip-assets --no-backups --frappe-branch $FRAPPE_BRANCH
-          cd frappe-bench
+          FRAPPE_VERSION=$(awk -F '"' '/reqd_frappe_version/{print $2}' comfort/hooks.py)
+          bench init ~/frappe-bench \
+            --skip-assets \
+            --no-backups \
+            --frappe-branch $FRAPPE_VERSION \
+            --verbose
+
+          cd ~/frappe-bench
 
           sed -i 's/watch:/# watch:/g' Procfile
           sed -i 's/schedule:/# schedule:/g' Procfile
           sed -i 's/socketio:/# socketio:/g' Procfile
           sed -i 's/redis_socketio:/# redis_socketio:/g' Procfile
-
           bench set-config -g developer_mode 1
-
-          bench set-mariadb-host mariadb
-          bench set-redis-cache-host redis-cache:6379
-          bench set-redis-queue-host redis-queue:6379
-          bench set-redis-socketio-host redis-socketio:6379
 
       - name: Install Comfort
         run: |
-          cd frappe-bench
-          bench get-app --skip-assets $GITHUB_WORKSPACE
-          env/bin/pip install -U -e ./apps/comfort[dev]
+          cd ~/frappe-bench
+          bench get-app $GITHUB_WORKSPACE --skip-assets
+          env/bin/pip install -U -e apps/comfort[dev]
 
-      - name: Create Site
+      - name: Create site
         run: |
-          cd frappe-bench
+          cd ~/frappe-bench
           bench new-site tests \
             --mariadb-root-password 123 \
             --no-mariadb-socket \
             --admin-password admin \
-            --install-app comfort
+            --install-app comfort \
+            --verbose
 
-      - name: Run Tests
+      - name: Run tests
         run: |
-          cd frappe-bench
-          bench start &
-          echo "REUIORUWIO"
-          echo "REUIORUWIO"
-          echo "REUIORUWIO"
-          echo "REUIORUWIO"
-          echo "REUIORUWIO"
-          echo "REUIORUWIO"
-          echo "REUIORUWIO"
-          echo "REUIORUWIO"
+          cd ~/frappe-bench
+          bench start > /dev/null 2>&1 &
+
           source env/bin/activate
-          cd apps/comfort
-          pytest
+          pytest -v --color=yes
+          exit
