@@ -6,7 +6,7 @@ from typing import Any, Iterable, TypeVar
 
 import frappe
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 
 _T = TypeVar("_T")
 
