@@ -17,10 +17,9 @@ jobs:
       FRAPPE_BRANCH: version-13
 
     services:
-      mysql:
+      mariadb:
         image: mariadb:10.3
         env:
-          MYSQL_USER: root
           MYSQL_ROOT_PASSWORD: 123
         ports:
           - 3306:3306
@@ -35,7 +34,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt', '**/setup.cfg') }}
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/setup.cfg') }}
           restore-keys: |
             ${{ runner.os }}-pip-
             ${{ runner.os }}-
@@ -46,22 +45,24 @@ jobs:
           node-version: 14
           cache: "yarn"
 
+      - name: Configure MariaDB
+        run: |
+          # mysql --host 127.0.0.1 --port 3306 -u root -p123 \
+          mysql -u root -p123 \
+            -e "SET GLOBAL character_set_server = 'utf8mb4';
+                SET GLOBAL collation_server = 'utf8mb4_unicode_ci'"
+
       - name: Install Dependencies
         run: |
           pip cache dir
 
-          # sudo apt-get install libcups2-dev redis-server
           sudo apt-get install redis-server
 
           pip install wheel -U frappe-bench
-          git clone --branch $FRAPPE_BRANCH --single-branch --depth 1 https://github.com/frappe/frappe
+          git clone --depth 1 -b $FRAPPE_BRANCH https://github.com/frappe/frappe
 
       - name: Initialize Frappe-Bench
         run: |
-          mysql --host 127.0.0.1 --port 3306 -u root -p123 \
-            -e "SET GLOBAL character_set_server = 'utf8mb4';
-                SET GLOBAL collation_server = 'utf8mb4_unicode_ci'"
-
           bench init frappe-bench --skip-assets --no-backups --frappe-path frappe
           cd frappe-bench
 
