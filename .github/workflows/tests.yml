@@ -34,7 +34,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/setup.cfg') }}
+          key: ${{ runner.os }}-pip-${{ hashFiles('setup.cfg') }}
           restore-keys: |
             ${{ runner.os }}-pip-
             ${{ runner.os }}-
@@ -47,15 +47,12 @@ jobs:
 
       - name: Configure MariaDB
         run: |
-          # mysql --host 127.0.0.1 --port 3306 -u root -p123 \
-          mysql -u root -p123 \
+          mysql --host 127.0.0.1 --port 3306 -u root -p123 \
             -e "SET GLOBAL character_set_server = 'utf8mb4';
                 SET GLOBAL collation_server = 'utf8mb4_unicode_ci'"
 
       - name: Install Dependencies
         run: |
-          pip cache dir
-
           sudo apt-get install redis-server
 
           pip install wheel -U frappe-bench
