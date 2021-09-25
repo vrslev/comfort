@@ -17,6 +17,7 @@ jobs:
       FRAPPE_BRANCH: version-13
 
     services:
+      # Try to install redis too
       mariadb:
         image: mariadb:10.3
         env:
@@ -48,51 +49,39 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt-get install redis-server
-
           pip install wheel -U frappe-bench
-          git clone --depth 1 -b $FRAPPE_BRANCH https://github.com/frappe/frappe
 
       - name: Configure MariaDB
         run: |
           mysql --host 127.0.0.1 --port 3306 -u root -p123 \
             -e "SET GLOBAL character_set_server = 'utf8mb4';
                 SET GLOBAL collation_server = 'utf8mb4_unicode_ci'"
+
       - name: Initialize Frappe-Bench
         run: |
-          bench init frappe-bench --skip-assets --no-backups --frappe-path frappe
+          bench init frappe-bench --skip-assets --no-backups --frappe-branch $FRAPPE_BRANCH
           cd frappe-bench
 
+          bench set-config -g developer_mode 1
           sed -i 's/watch:/# watch:/g' Procfile
           sed -i 's/schedule:/# schedule:/g' Procfile
           sed -i 's/socketio:/# socketio:/g' Procfile
           sed -i 's/redis_socketio:/# redis_socketio:/g' Procfile
 
       - name: Install App
-        env:
-          PERSONAL_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
-          REPOSITORY_OWNER: ${{ github.repository_owner }}
         run: |
-          git config --global url."https://$REPOSITORY_OWNER:$PERSONAL_TOKEN@github".insteadOf ssh://github
-          git config --global url."https://$REPOSITORY_OWNER:$PERSONAL_TOKEN@github".insteadOf https://github
-
           cd frappe-bench
-          GIT_TRACE=1 bench get-app --skip-assets $GITHUB_WORKSPACE
-          source env/bin/activate
-
-          cd apps/comfort
-          pip install -U -e .[dev]
+          bench get-app --skip-assets $GITHUB_WORKSPACE
+          env/bin/pip install -U -e ./apps/comfort[dev]
 
       - name: Create Site
         run: |
           cd frappe-bench
           bench new-site tests \
             --mariadb-root-password 123 \
-            --admin-password admin \
             --no-mariadb-socket \
+            --admin-password admin \
             --install-app comfort
-
-          bench set-config developer_mode 1
-          bench clear-cache
 
       - name: Run Tests
         run: |
@@ -102,4 +91,3 @@ jobs:
           source env/bin/activate
           cd apps/comfort
           pytest
-          exit
