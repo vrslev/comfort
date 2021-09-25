@@ -18,3 +18,5 @@ override_doctype_class = {"DocType": "comfort.comfort_core.hooks.CustomDocType"}
 app_include_js = "/assets/js/comfort.min.js"
 
 treeviews = ["Account"]
+
+reqd_frappe_version = "v13.11.0"

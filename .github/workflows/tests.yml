@@ -5,122 +5,87 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - main
+      - dev
 
 jobs:
-  test:
-    name: Python Unit Tests
-    runs-on: ubuntu-18.04
-    timeout-minutes: 60
-    env:
-      FRAPPE_APP_NAME: comfort
-      FRAPPE_BRANCH: version-13
+  tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     services:
-      mysql:
-        image: mariadb:10.3
+      mariadb:
+        image: mariadb:10.6
         env:
-          MYSQL_USER: root
           MYSQL_ROOT_PASSWORD: 123
         ports:
           - 3306:3306
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Setup Python
-        uses: actions/setup-python@v2
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 14
+          cache: "yarn"
+      - uses: actions/setup-python@v2
         with:
           python-version: 3.9
 
-      - name: Cache Pip
+      - name: Cache pip
         uses: actions/cache@v2
         with:
           path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt', '**/setup.cfg') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-            ${{ runner.os }}-
+          key: pip-${{ hashFiles('**/setup.cfg') }}
 
-      - name: Setup Node
-        uses: actions/setup-node@v2
-        with:
-          node-version: 14
-
-      - name: Get Yarn Cache Path
-        id: yarn-cache-dir-path
-        run: echo "::set-output name=dir::$(yarn cache dir)"
-
-      - name: Cache Yarn
-        uses: actions/cache@v2
-        with:
-          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-
-
-      - name: Install Dependencies
+      - name: Install dependencies
         run: |
-          # Install patched wkhtmltopdf
-          wget -q -O /tmp/wkhtmltox.tar.xz \
-            https://github.com/frappe/wkhtmltopdf/raw/master/wkhtmltox-0.12.3_linux-generic-amd64.tar.xz
-          tar -xf /tmp/wkhtmltox.tar.xz -C /tmp
-          sudo mv /tmp/wkhtmltox/bin/wkhtmltopdf /usr/local/bin/wkhtmltopdf
-          sudo chmod o+x /usr/local/bin/wkhtmltopdf
+          sudo apt-get install redis-server
+          pip install -U frappe-bench
 
-          sudo apt-get install libcups2-dev redis-server
-
-          pip install wheel -U frappe-bench
-          git clone --branch $FRAPPE_BRANCH --single-branch --depth 1 https://github.com/frappe/frappe
-
-      - name: Initialize Frappe-Bench
+      - name: Configure MariaDB
         run: |
           mysql --host 127.0.0.1 --port 3306 -u root -p123 \
             -e "SET GLOBAL character_set_server = 'utf8mb4';
-                SET GLOBAL collation_server = 'utf8mb4_unicode_ci'"
+                SET GLOBAL collation_server = 'utf8mb4_unicode_ci';
+                SET GLOBAL innodb_read_only_compressed = OFF"
 
-          bench init frappe-bench --skip-assets --no-backups --frappe-path frappe
-          cd frappe-bench
+      - name: Initialize bench
+        run: |
+          FRAPPE_VERSION=$(awk -F '"' '/reqd_frappe_version/{print $2}' comfort/hooks.py)
+          bench init ~/frappe-bench \
+            --skip-assets \
+            --no-backups \
+            --frappe-branch $FRAPPE_VERSION \
+            --verbose
+
+          cd ~/frappe-bench
 
           sed -i 's/watch:/# watch:/g' Procfile
           sed -i 's/schedule:/# schedule:/g' Procfile
           sed -i 's/socketio:/# socketio:/g' Procfile
           sed -i 's/redis_socketio:/# redis_socketio:/g' Procfile
+          bench set-config -g developer_mode 1
 
-      - name: Install App
-        env:
-          PERSONAL_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
-          REPOSITORY_OWNER: ${{ github.repository_owner }}
+      - name: Install Comfort
         run: |
-          git config --global url."https://$REPOSITORY_OWNER:$PERSONAL_TOKEN@github".insteadOf ssh://github
-          git config --global url."https://$REPOSITORY_OWNER:$PERSONAL_TOKEN@github".insteadOf https://github
+          cd ~/frappe-bench
+          bench get-app $GITHUB_WORKSPACE --skip-assets
+          env/bin/pip install -U -e apps/comfort[dev]
 
-          cd frappe-bench
-          GIT_TRACE=1 bench get-app --skip-assets $GITHUB_WORKSPACE
-          source env/bin/activate
-
-          cd apps/$FRAPPE_APP_NAME
-          pip install -U -e .[dev]
-
-      - name: Create Site
+      - name: Create site
         run: |
-          cd frappe-bench
+          cd ~/frappe-bench
           bench new-site tests \
             --mariadb-root-password 123 \
-            --admin-password admin \
             --no-mariadb-socket \
-            --install-app $FRAPPE_APP_NAME
+            --admin-password admin \
+            --install-app comfort \
+            --verbose
 
-          bench set-config developer_mode 1
-          bench clear-cache
-
-      - name: Run Tests
+      - name: Run tests
         run: |
-          cd frappe-bench
-          bench start &
+          cd ~/frappe-bench
+          bench start > /dev/null 2>&1 &
 
           source env/bin/activate
-          cd apps/$FRAPPE_APP_NAME
-          pytest
+          pytest -v --color=yes
           exit

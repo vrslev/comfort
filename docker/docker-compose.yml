@@ -23,11 +23,11 @@ services:
     userns_mode: "host"
 
   nginx:
-    image: cr.yandex/crpdmuh1072ntg30t18g/comfort-nginx
+    image: cr.yandex/crpdmuh1072ntg30t18g/comfort-nginx:${COMFORT_VERSION}
     restart: on-failure
     build:
       context: ..
-      dockerfile: docker/Dockerfile.nginx
+      dockerfile: docker/nginx.Dockerfile
       args:
         FRAPPE_VERSION: ${FRAPPE_VERSION}
     environment:
@@ -63,8 +63,7 @@ services:
       - mariadb-vol:/var/lib/mysql
 
   site-creator:
-    # TODO: Specify version after Continuous Deployment is set up
-    image: cr.yandex/crpdmuh1072ntg30t18g/comfort-worker
+    image: cr.yandex/crpdmuh1072ntg30t18g/comfort-worker:${COMFORT_VERSION}
     command: new
     environment:
       SITE_NAME: ${DOMAIN}
@@ -80,11 +79,11 @@ services:
       - logs-vol:/home/frappe/frappe-bench/logs:rw
 
   app:
-    image: cr.yandex/crpdmuh1072ntg30t18g/comfort-worker
+    image: cr.yandex/crpdmuh1072ntg30t18g/comfort-worker:${COMFORT_VERSION}
     restart: on-failure
     build:
       context: ..
-      dockerfile: docker/Dockerfile.worker
+      dockerfile: docker/worker.Dockerfile
       args:
         FRAPPE_VERSION: ${FRAPPE_VERSION}
     environment:
@@ -93,7 +92,7 @@ services:
       - REDIS_QUEUE=redis-queue:6379
       - REDIS_SOCKETIO=redis-socketio:6379
       - SOCKETIO_PORT=9000
-      - WORKERS=${WORKERS}
+      - WORKERS=2
     volumes:
       - sites-vol:/home/frappe/frappe-bench/sites:rw
       - assets-vol:/home/frappe/frappe-bench/sites/assets:rw
@@ -129,7 +128,7 @@ services:
       - redis-queue-vol:/data
 
   worker-default:
-    image: cr.yandex/crpdmuh1072ntg30t18g/comfort-worker
+    image: cr.yandex/crpdmuh1072ntg30t18g/comfort-worker:${COMFORT_VERSION}
     restart: on-failure
     command: worker
     environment:
@@ -142,7 +141,7 @@ services:
       - logs-vol:/home/frappe/frappe-bench/logs:rw
 
   worker-short:
-    image: cr.yandex/crpdmuh1072ntg30t18g/comfort-worker
+    image: cr.yandex/crpdmuh1072ntg30t18g/comfort-worker:${COMFORT_VERSION}
     restart: on-failure
     command: worker
     environment:
@@ -155,7 +154,7 @@ services:
       - logs-vol:/home/frappe/frappe-bench/logs:rw
 
   worker-long:
-    image: cr.yandex/crpdmuh1072ntg30t18g/comfort-worker
+    image: cr.yandex/crpdmuh1072ntg30t18g/comfort-worker:${COMFORT_VERSION}
     restart: on-failure
     command: worker
     environment:
@@ -168,7 +167,7 @@ services:
       - logs-vol:/home/frappe/frappe-bench/logs:rw
 
   schedule:
-    image: cr.yandex/crpdmuh1072ntg30t18g/comfort-worker
+    image: cr.yandex/crpdmuh1072ntg30t18g/comfort-worker:${COMFORT_VERSION}
     restart: on-failure
     command: schedule
     depends_on:

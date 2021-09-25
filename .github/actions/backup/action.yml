@@ -1,0 +1,69 @@
+name: "Backup"
+description: "Backup Frappe sites and push to S3 storate"
+inputs:
+  host:
+    description: "Server host"
+    required: true
+  username:
+    description: "Server username"
+    required: true
+  port:
+    description: "Server port"
+    required: true
+  key:
+    description: "Server ssh key"
+    required: true
+  bucket_name:
+    description: "Server ssh key"
+    required: true
+  region:
+    description: "S3 region"
+    required: true
+  access_key_id:
+    description: "S3 access key id"
+    required: true
+  secret_access_key:
+    description: "S3 secret access key"
+    required: true
+  endpoint_url:
+    description: "S3 endpoint url"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Copy files
+      uses: appleboy/scp-action@v0.1.1
+      with:
+        host: ${{ inputs.host }}
+        username: ${{ inputs.username }}
+        port: ${{ inputs.port }}
+        key: ${{ inputs.key }}
+        source: docker/scripts/backup.sh
+        target: comfort
+        strip_components: 1
+
+    - name: Deploy
+      uses: appleboy/ssh-action@v0.1.4
+      with:
+        host: ${{ inputs.host }}
+        username: ${{ inputs.username }}
+        port: ${{ inputs.port }}
+        key: ${{ inputs.key }}
+        envs: BUCKET_NAME,REGION,ACCESS_KEY_ID,SECRET_ACCESS_KEY,ENDPOINT_URL
+        script_stop: true
+        script: |
+          cd comfort
+          BUCKET_NAME=$BUCKET_NAME \
+            REGION=$REGION \
+            ACCESS_KEY_ID=$ACCESS_KEY_ID \
+            SECRET_ACCESS_KEY=$SECRET_ACCESS_KEY \
+            ENDPOINT_URL=$ENDPOINT_URL \
+            bash scripts/backup.sh
+          rm -rf scripts/backup.sh
+      env:
+        BUCKET_NAME: ${{ inputs.bucket_name }}
+        REGION: ${{ inputs.region }}
+        ACCESS_KEY_ID: ${{ inputs.access_key_id }}
+        SECRET_ACCESS_KEY: ${{ inputs.secret_access_key }}
+        ENDPOINT_URL: ${{ inputs.endpoint_url }}

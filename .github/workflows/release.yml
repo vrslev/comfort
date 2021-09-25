@@ -1,4 +1,4 @@
-name: Semantic Release
+name: Release
 
 on:
   push:
@@ -15,7 +15,19 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Python Semantic Release
-        uses: relekang/python-semantic-release@master
+      - uses: actions/setup-python@v2
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          python-version: 3.9
+
+      - name: Install python-semantic-release
+        run: pip install python-semantic-release
+
+      - name: Setup git config
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "action@github.com"
+
+      - name: Release
+        run: semantic-release publish -D commit_author="github-actions <action@github.com>"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
