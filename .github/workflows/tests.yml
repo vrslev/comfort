@@ -27,7 +27,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-
       - uses: actions/setup-python@v2
         with:
           python-version: 3.9
@@ -49,7 +48,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          whoami
+          pip cache dir
 
           # sudo apt-get install libcups2-dev redis-server
           sudo apt-get install redis-server
