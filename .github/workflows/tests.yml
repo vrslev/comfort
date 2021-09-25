@@ -9,12 +9,11 @@ on:
       - ci-cd
 
 jobs:
-  test:
-    name: Python Unit Tests
-    runs-on: ubuntu-18.04
-    timeout-minutes: 60
+  tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
     env:
-      FRAPPE_APP_NAME: comfort
       FRAPPE_BRANCH: version-13
 
     services:
@@ -27,11 +26,9 @@ jobs:
           - 3306:3306
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-      - name: Setup Python
-        uses: actions/setup-python@v2
+      - uses: actions/setup-python@v2
         with:
           python-version: 3.9
 
@@ -48,29 +45,14 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: 14
-
-      - name: Get Yarn Cache Path
-        id: yarn-cache-dir-path
-        run: echo "::set-output name=dir::$(yarn cache dir)"
-
-      - name: Cache Yarn
-        uses: actions/cache@v2
-        with:
-          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-
+          cache: "yarn"
 
       - name: Install Dependencies
         run: |
-          # Install patched wkhtmltopdf
-          wget -q -O /tmp/wkhtmltox.tar.xz \
-            https://github.com/frappe/wkhtmltopdf/raw/master/wkhtmltox-0.12.3_linux-generic-amd64.tar.xz
-          tar -xf /tmp/wkhtmltox.tar.xz -C /tmp
-          sudo mv /tmp/wkhtmltox/bin/wkhtmltopdf /usr/local/bin/wkhtmltopdf
-          sudo chmod o+x /usr/local/bin/wkhtmltopdf
+          whoami
 
-          sudo apt-get install libcups2-dev redis-server
+          # sudo apt-get install libcups2-dev redis-server
+          sudo apt-get install redis-server
 
           pip install wheel -U frappe-bench
           git clone --branch $FRAPPE_BRANCH --single-branch --depth 1 https://github.com/frappe/frappe
@@ -101,7 +83,7 @@ jobs:
           GIT_TRACE=1 bench get-app --skip-assets $GITHUB_WORKSPACE
           source env/bin/activate
 
-          cd apps/$FRAPPE_APP_NAME
+          cd apps/comfort
           pip install -U -e .[dev]
 
       - name: Create Site
@@ -111,7 +93,7 @@ jobs:
             --mariadb-root-password 123 \
             --admin-password admin \
             --no-mariadb-socket \
-            --install-app $FRAPPE_APP_NAME
+            --install-app comfort
 
           bench set-config developer_mode 1
           bench clear-cache
@@ -122,6 +104,6 @@ jobs:
           bench start &
 
           source env/bin/activate
-          cd apps/$FRAPPE_APP_NAME
+          cd apps/comfort
           pytest
           exit
