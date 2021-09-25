@@ -19,11 +19,18 @@ jobs:
     services:
       # Try to install redis too
       mariadb:
-        image: mariadb:10.3
+        image: mariadb:10.6
         env:
           MYSQL_ROOT_PASSWORD: 123
-        ports:
-          - 3306:3306
+
+      redis-cache:
+        image: redis:alpine
+
+      redis-queue:
+        image: redis:alpine
+
+      redis-socketio:
+        image: redis:alpine
 
     steps:
       - uses: actions/checkout@v2
@@ -48,7 +55,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          sudo apt-get install redis-server
+          # sudo apt-get install redis-server
           pip install wheel -U frappe-bench
 
       - name: Configure MariaDB
@@ -57,18 +64,24 @@ jobs:
             -e "SET GLOBAL character_set_server = 'utf8mb4';
                 SET GLOBAL collation_server = 'utf8mb4_unicode_ci'"
 
-      - name: Initialize Frappe-Bench
+      - name: Initialize frappe-bench
         run: |
           bench init frappe-bench --skip-assets --no-backups --frappe-branch $FRAPPE_BRANCH
           cd frappe-bench
 
-          bench set-config -g developer_mode 1
           sed -i 's/watch:/# watch:/g' Procfile
           sed -i 's/schedule:/# schedule:/g' Procfile
           sed -i 's/socketio:/# socketio:/g' Procfile
           sed -i 's/redis_socketio:/# redis_socketio:/g' Procfile
 
-      - name: Install App
+          bench set-config -g developer_mode 1
+
+          bench set-mariadb-host mariadb
+          bench set-redis-cache-host redis-cache:6379
+          bench set-redis-queue-host redis-queue:6379
+          bench set-redis-socketio-host redis-socketio:6379
+
+      - name: Install Comfort
         run: |
           cd frappe-bench
           bench get-app --skip-assets $GITHUB_WORKSPACE
