@@ -99,5 +99,6 @@ jobs:
           bench start > /dev/null 2>&1 &
 
           source env/bin/activate
+          cd appe/comfort
           pytest -v --color=yes
           exit
