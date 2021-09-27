@@ -30,6 +30,7 @@ RUN apt-get update && \
   # For psycopg2
   libpq-dev \
   # For arm64 python wheel builds
+  # TODO: If ARM after installing gcc and g++ purge it
   && if [ "$(uname -m)" = "aarch64" ]; then apt-get install --no-install-recommends -y gcc g++; fi \
   # Detect arch, download and install wkhtmltox
   && if [ "$(uname -m)" = "aarch64" ]; then export ARCH=arm64; fi \

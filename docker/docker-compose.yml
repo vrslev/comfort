@@ -47,6 +47,7 @@ services:
       - assets-vol:/assets:rw
 
   mariadb:
+    # TODO: Healthchecks: https://docs.github.com/en/actions/using-containerized-services/creating-postgresql-service-containers
     image: mariadb:10.6
     restart: on-failure
     command:
