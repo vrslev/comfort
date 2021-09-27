@@ -164,3 +164,45 @@ class CustomDocType(DocType):  # pragma: no cover
     def make_controller_template(self):
         """Do not madly create dt.js, test_dt.py files"""
         make_boilerplate("controller._py", self)
+
+
+def get_global_search_doctypes():  # pragma: no cover
+    _doctypes_in_global_search = [
+        #
+        # Major doctypes
+        #
+        "Sales Order",
+        "Purchase Order",
+        "Sales Return",
+        "Purchase Return",
+        "Delivery Trip",
+        #
+        # Semi major doctypes
+        #
+        "Payment",
+        "Checkout",
+        "Receipt",
+        #
+        # Various entities
+        #
+        "Customer",
+        "Item",
+        "Account",
+        "Customer Group",
+        "Item Category",
+        # "GL Entry",
+        # "Stock Entry",
+        #
+        # Settings
+        #
+        "Commission Settings",
+        "Ikea Settings",
+        "Telegram Settings",
+        "Finance Settings",
+    ]
+    return {
+        "Default": [
+            {"doctype": doctype, "index": idx}
+            for idx, doctype in enumerate(_doctypes_in_global_search)
+        ]
+    }

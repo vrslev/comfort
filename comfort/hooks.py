@@ -1,3 +1,6 @@
+from comfort.comfort_core.hooks import (
+    get_global_search_doctypes as _get_global_search_doctypes,
+)
 from comfort.comfort_core.hooks import get_standard_queries as _get_standard_queries
 from comfort.comfort_core.hooks import load_metadata as _load_metadata
 
@@ -18,5 +21,7 @@ override_doctype_class = {"DocType": "comfort.comfort_core.hooks.CustomDocType"}
 app_include_js = "/assets/js/comfort.min.js"
 
 treeviews = ["Account"]
+
+global_search_doctypes = _get_global_search_doctypes()
 
 reqd_frappe_version = "v13.11.0"
