@@ -8,4 +8,13 @@ setup(
         "python-telegram-bot==13.7",
         "vk-api==11.9.2",
     ],
+    extras_require={
+        "dev": [
+            "black==21.8b0",
+            "pre_commit==2.15.0",
+            "pytest==6.2.5",
+            "pytest-cov==2.12.1",
+            "pytest-randomly==3.10.1",
+        ]
+    },
 )
