@@ -1,0 +1,23 @@
+name: Autoupdate pre-commit hooks
+
+on:
+  schedule:
+    - cron: 0 7 * * 1
+  workflow_dispatch:
+
+jobs:
+  pre-commit-autoupdate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - uses: vrslev/pre-commit-autoupdate@v1.0.0
+      - uses: peter-evans/create-pull-request@v3
+        with:
+          branch: pre-commit-autoupdate
+          title: "chore(deps): Update pre-commit hooks"
+          commit-message: "chore(deps): Update pre-commit hooks"
+          body: Update pre-commit hooks
+          labels: dependencies,github_actions
+          delete-branch: True
