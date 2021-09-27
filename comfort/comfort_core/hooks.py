@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-from configparser import ConfigParser
-from pathlib import Path
+from importlib.metadata import distribution
 from typing import Any, Iterable
 
 import frappe
@@ -17,14 +16,12 @@ from frappe.utils import unique
 
 def load_metadata():
     """Load required metadata from setup.cfg"""
-    path = Path(__file__).parent.parent.parent.joinpath("setup.cfg")
-    config = ConfigParser()
-    config.read(path)
+    meta = distribution("comfort").metadata
 
-    meta = config["metadata"]
-    app_name, app_description = meta["name"], meta["description"]
-    app_title = app_name.capitalize()
-    app_publisher = f"{meta['author']} <{meta['author_email']}>"
+    app_name: str = meta["Name"]
+    app_title: str = app_name.capitalize()
+    app_description: str = meta["Summary"]
+    app_publisher = f"{meta['Author']} <{meta['Author-email']}>"
 
     return app_name, app_title, app_description, app_publisher
 
