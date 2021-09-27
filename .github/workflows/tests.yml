@@ -2,10 +2,22 @@ name: Tests
 
 on:
   pull_request:
+    paths-ignore:
+      - "**.js"
+      - "**.md"
+      - .github/**
+      - .vscode/**
+      - docker/**
   workflow_dispatch:
   push:
     branches:
       - main
+    paths-ignore:
+      - "**.js"
+      - "**.md"
+      - .github/**
+      - .vscode/**
+      - docker/**
 
 jobs:
   tests:
