@@ -1,3 +1,4 @@
+<!-- prettier-ignore-start -->
 # Changelog
 
 <!--next-version-placeholder-->
@@ -53,3 +54,5 @@
 * **Item:** Check if bin exists before deleting it ([`2ca564e`](https://github.com/vrslev/comfort/commit/2ca564e45dcd2dab41790a1c3f18564d3693bcae))
 * **Item Category:** Url template in validating ([`570ffcb`](https://github.com/vrslev/comfort/commit/570ffcbdcaadc02bda2461752fced36040cdf625))
 * **Bin:** No-attr error ([`f12ea1c`](https://github.com/vrslev/comfort/commit/f12ea1c13f1799fcaee0bf3873386a656409ed69))
+
+<!-- prettier-ignore-end -->
