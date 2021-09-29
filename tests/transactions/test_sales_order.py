@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from copy import deepcopy
+from typing import Callable
 
 import pytest
 
@@ -18,6 +19,7 @@ from comfort.transactions.doctype.sales_order.sales_order import (
     SalesOrder,
     get_sales_orders_not_in_purchase_order,
     has_linked_delivery_trip,
+    validate_from_available_stock_params,
 )
 from comfort.transactions.doctype.sales_return.sales_return import SalesReturn
 from frappe import ValidationError
@@ -38,13 +40,13 @@ def test_update_items_from_db(sales_order: SalesOrder):
         assert i.weight == doc.weight
 
 
-def test_set_child_items_not_set_if_no_items(sales_order: SalesOrder):
+def test_set_child_items_no_items_set(sales_order: SalesOrder):
     sales_order.items = []
     sales_order.set_child_items()
     assert not sales_order.child_items
 
 
-def test_set_child_items(sales_order: SalesOrder, item: Item):
+def test_set_child_items_items_set(sales_order: SalesOrder, item: Item):
     sales_order.set_child_items()
 
     item_code_qty_pairs = count_qty(sales_order.child_items).items()
@@ -60,6 +62,73 @@ def test_set_child_items(sales_order: SalesOrder, item: Item):
     # +        base_margin = self.items_cost * self.commission / 101
     for p in exp_item_code_qty_pairs:
         assert p in item_code_qty_pairs
+
+
+def patch_get_stock_balance(monkeypatch: pytest.MonkeyPatch, result: dict[str, int]):
+    import comfort.transactions.doctype.sales_order.sales_order
+
+    mock_get_stock_balance: Callable[[str], dict[str, int]] = lambda stock_type: result
+    monkeypatch.setattr(
+        comfort.transactions.doctype.sales_order.sales_order,
+        "get_stock_balance",
+        mock_get_stock_balance,
+    )
+
+
+def test_validate_from_available_stock_not_from_available_stock(
+    sales_order: SalesOrder,
+):
+    sales_order.from_available_stock = None
+    sales_order._validate_from_available_stock()
+
+
+def test_validate_from_available_stock_available_actual_raises(
+    monkeypatch: pytest.MonkeyPatch, sales_order: SalesOrder
+):
+    sales_order.from_available_stock = "Available Actual"
+    sales_order.set_child_items()
+    mock_stock_counter = count_qty(sales_order._get_items_with_splitted_combinations())
+    item_code = list(mock_stock_counter.keys())[0]
+    mock_stock_counter[item_code] -= 1
+    patch_get_stock_balance(monkeypatch, mock_stock_counter)
+    with pytest.raises(
+        ValidationError, match=f"Insufficient stock for Item {item_code}"
+    ):
+        sales_order._validate_from_available_stock()
+
+
+def test_validate_from_available_stock_available_actual_not_raises(
+    monkeypatch: pytest.MonkeyPatch, sales_order: SalesOrder
+):
+    sales_order.from_available_stock = "Available Actual"
+    sales_order.set_child_items()
+    mock_stock_counter = count_qty(sales_order._get_items_with_splitted_combinations())
+    patch_get_stock_balance(monkeypatch, mock_stock_counter)
+    sales_order._validate_from_available_stock()
+
+
+def test_validate_from_available_stock_available_purchased_raises(
+    sales_order: SalesOrder, purchase_order: PurchaseOrder
+):
+    purchase_order.status = "To Receive"
+    purchase_order.db_insert()
+    purchase_order.update_children()
+    sales_order.from_available_stock = "Available Purchased"
+    sales_order.from_purchase_order = purchase_order.name
+    sales_order.items = []
+    sales_order.child_items = []
+    sales_order.append(
+        "items",
+        {
+            "item_code": purchase_order.items_to_sell[0].item_code,
+            "qty": purchase_order.items_to_sell[0].qty + 1,
+        },
+    )
+    with pytest.raises(
+        ValidationError,
+        match=f"Insufficient stock for Item {purchase_order.items_to_sell[0].item_code}",
+    ):
+        sales_order._validate_from_available_stock()
 
 
 def test_calculate_item_totals(sales_order: SalesOrder):
@@ -357,6 +426,18 @@ def test_set_delivery_status_with_cancelled_status(sales_order: SalesOrder):
 
 
 @pytest.mark.parametrize(
+    ("docstatus", "exp_delivery_status"), ((0, "To Purchase"), (1, "To Deliver"))
+)
+def test_set_delivery_status_from_available_actual_stock(
+    sales_order: SalesOrder, docstatus: int, exp_delivery_status: str
+):
+    sales_order.docstatus = docstatus
+    sales_order.from_available_stock = "Available Actual"
+    sales_order._set_delivery_status()
+    assert sales_order.delivery_status == exp_delivery_status
+
+
+@pytest.mark.parametrize(
     "docstatus,payment_status,delivery_status,expected_status",
     (
         (0, None, None, "Draft"),
@@ -502,3 +583,65 @@ def test_get_sales_orders_not_in_purchase_order(
     res = get_sales_orders_not_in_purchase_order()
     assert sales_order.name not in res
     assert new_sales_order.name in res
+
+
+def test_validate_from_available_stock_params_not_from_available_stock(
+    sales_order: SalesOrder,
+):
+    sales_order.from_available_stock = sales_order.from_purchase_order = None
+    validate_from_available_stock_params(
+        sales_order.from_available_stock, sales_order.from_purchase_order
+    )
+
+
+def test_validate_from_available_stock_params_available_purchased_raises_on_no_from_purchase_order():
+    with pytest.raises(
+        ValidationError,
+        match="If From Available Stock is Available Purchased, From Purchase Order should be set",
+    ):
+        validate_from_available_stock_params("Available Purchased", None)
+
+
+@pytest.mark.parametrize("status", ("Draft", "Completed", "Cancelled"))
+def test_validate_from_available_stock_params_available_purchased_raises_on_wrong_po_status(
+    purchase_order: PurchaseOrder, status: str
+):
+    purchase_order.status = status
+    purchase_order.set_new_name()
+    purchase_order.db_insert()
+    with pytest.raises(
+        ValidationError, match="Status of Purchase Order should be To Receive"
+    ):
+        validate_from_available_stock_params("Available Purchased", purchase_order.name)
+
+
+def test_validate_from_available_stock_params_available_purchased_raises_on_no_items_to_sell(
+    purchase_order: PurchaseOrder,
+):
+    purchase_order.status = "To Receive"
+    purchase_order.items_to_sell = []
+    purchase_order.db_insert()
+    purchase_order.update_children()
+    with pytest.raises(ValidationError, match="No Items To Sell in Purchase Order"):
+        validate_from_available_stock_params("Available Purchased", purchase_order.name)
+
+
+def test_validate_from_available_stock_params_available_purchased_passes(
+    purchase_order: PurchaseOrder,
+):
+    purchase_order.status = "To Receive"
+    purchase_order.db_insert()
+    purchase_order.update_children()
+    validate_from_available_stock_params("Available Purchased", purchase_order.name)
+
+
+def test_validate_from_available_stock_params_available_actual_raises_on_no_stock_balance():
+    with pytest.raises(ValidationError, match="No Items in Available Actual stock"):
+        validate_from_available_stock_params("Available Actual", None)
+
+
+def test_validate_from_available_stock_params_available_actual_passes(
+    monkeypatch: pytest.MonkeyPatch,
+):
+    patch_get_stock_balance(monkeypatch, {"10014030": 1})
+    validate_from_available_stock_params("Available Actual", None)

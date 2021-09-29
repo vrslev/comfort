@@ -135,11 +135,16 @@ class SalesReturn(Return):
             item.amount = item.rate * item.qty
 
     def _add_items_to_sell_to_linked_purchase_order(self):
-        purchase_order_name: str = frappe.get_value(
+        purchase_order_name: str | None = frappe.get_value(
             "Purchase Order Sales Order",
             {"sales_order_name": self._voucher.name},
             "parent",
         )
+        if purchase_order_name is None:
+            # If Sales Order is from Available Actual stock
+            # then it is not linked to any Purchase Order
+            # TODO: Cover
+            return
         doc: PurchaseOrder = frappe.get_doc("Purchase Order", purchase_order_name)
         doc.extend(
             "items_to_sell",

@@ -22,7 +22,10 @@ comfort.SalesOrderController = frappe.ui.form.Controller.extend({
     let old_func = cur_frm.toolbar.set_page_actions;
     cur_frm.toolbar.set_page_actions = (status) => {
       old_func.call(cur_frm.toolbar, status);
-      if (cur_frm.toolbar.current_status == "Submit") {
+      if (
+        cur_frm.toolbar.current_status == "Submit" &&
+        !cur_frm.doc.from_available_stock
+      ) {
         cur_frm.toolbar.page.clear_primary_action();
       }
     };

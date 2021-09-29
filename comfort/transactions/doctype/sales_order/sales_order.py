@@ -27,6 +27,7 @@ if TYPE_CHECKING:
     from comfort.finance.doctype.payment.payment import Payment
     from comfort.stock.doctype.receipt.receipt import Receipt
 
+    from ..purchase_order.purchase_order import PurchaseOrder
     from ..purchase_order_item_to_sell.purchase_order_item_to_sell import (
         PurchaseOrderItemToSell,
     )
@@ -177,24 +178,96 @@ class SalesOrderMethods(Document):
         sales_return.save()
         sales_return.submit()
 
+    def _modify_purchase_order_for_from_available_stock(self):
+        if self.from_available_stock != "Available Purchased":
+            return
+
+        doc: PurchaseOrder = frappe.get_doc("Purchase Order", self.from_purchase_order)
+
+        # Remove items to sell
+        qty_counter = count_qty(self.items)
+        for item in doc.items_to_sell:
+            if item.item_code in qty_counter:
+                item.qty -= qty_counter[item.item_code]
+                del qty_counter[item.item_code]
+
+        # Add Purchase Order Sales Order
+        doc.append(
+            "sales_orders",
+            {
+                "sales_order_name": self.name,
+                "customer": self.customer,
+                "total_amount": self.total_amount,
+            },
+        )
+
+        delete_empty_items(doc, "items_to_sell")
+        doc.calculate()
+        doc.db_update()
+        doc.update_children()
+
     def _make_stock_entries_for_from_available_stock(self):
-        if self.from_available_stock == "Available Actual":
-            checkout_name = frappe.get_value(
-                "Checkout", {"purchase_order": self.from_purchase_order}
+        """
+        If from Available Purchased:
+            via Checkout
+            Available Purchased -> Reserved Purchased
+        If from Available Actual:
+            via Receipt
+            Available Actual -> Reserved Actual
+
+        After making this stock entries Sales Order becomes regular Sales Order i. e. everything else is as usual
+        Are GL Entries required? No!
+
+        # TODO: Set statuses
+            solution: by modifying Purchase Order
+        # TODO: Modify Purchase Order
+        On cancel:
+            On cancel Sales Return is being created which handles items transfer from Reserved to Available
+
+        # TODO: Is adding items from multiple Purchase orders allowed in case of actual stock?
+
+
+        If we don't change Purchase Order's items to sell, Purchase Return might work!
+        But then it is not that comfy
+
+
+        If Sales Order is from Available Actual stock then it goes out of Purchase Order print format which I was worried about.
+
+        So,
+        If Available Purchased:
+            modify Purchase Order (items to sell -> purchase order sales order)
+            make Stock Entries
+
+        If Available Actual:
+            make Stock Entries # TODO: Which entries to make? How to reverse it on cancel? How change statuses?
+
+        Possibly better way to make sales order from actual stock is to change stock type in Sales Receipt
+
+        """
+        if not self.from_available_stock:
+            return
+
+        stock_types = {
+            "Available Purchased": ("Available Purchased", "Reserved Purchased"),
+            "Available Actual": ("Available Actual", "Reserved Actual"),
+        }[self.from_available_stock]
+        ref_doctype = {
+            "Available Purchased": "Checkout",
+            "Available Actual": "Sales Order",
+        }[self.from_available_stock]
+
+        if self.from_available_stock == "Available Purchased":
+            ref_name = frappe.get_value(
+                ref_doctype, {"purchase_order": self.from_purchase_order}
             )
-            items = self._get_items_with_splitted_combinations()
-            create_stock_entry(
-                "Checkout",
-                checkout_name,
-                self.from_available_stock,
-                items,
-                reverse_qty=True,
-            )
-            create_stock_entry("Checkout", checkout_name, "Reserved Actual", items)
-        elif self.from_available_stock == "Available Purchased":
-            ...
         else:
-            pass
+            ref_name = self.name
+
+        items = self._get_items_with_splitted_combinations()
+        create_stock_entry(
+            ref_doctype, ref_name, stock_types[0], items, reverse_qty=True
+        )
+        create_stock_entry(ref_doctype, ref_name, stock_types[1], items)
 
 
 class SalesOrderStatuses(SalesOrderMethods):
@@ -249,6 +322,11 @@ class SalesOrderStatuses(SalesOrderMethods):
     def _set_delivery_status(self):
         if self.docstatus == 2:
             status = ""
+        elif self.from_available_stock == "Available Actual":
+            if self.docstatus == 0:
+                status = "To Purchase"
+            else:
+                status = "To Deliver"
         elif frappe.db.exists(
             "Receipt",
             {"voucher_type": self.doctype, "voucher_no": self.name, "docstatus": 1},
@@ -311,6 +389,7 @@ class SalesOrder(SalesOrderStatuses):
 
     def before_submit(self):
         self.edit_commission = True
+        self._modify_purchase_order_for_from_available_stock()
         self._make_stock_entries_for_from_available_stock()
 
     def before_cancel(self):  # pragma: no cover
@@ -318,8 +397,16 @@ class SalesOrder(SalesOrderStatuses):
         self._create_cancel_sales_return()
 
     def on_cancel(self):  # TODO: Cover
-        self.ignore_linked_doctypes = ["Purchase Order", "Sales Return", "Payment"]
+        self.ignore_linked_doctypes = [
+            "Purchase Order",
+            "Sales Return",
+            "Payment",
+            # Stock Entry shouldn't be cancelled because
+            # we create Stock Entry in on-cancel Sales Return
+            "Stock Entry",
+        ]
 
+        # TODO: Make (of find) generic `cancel_for` function
         payments: list[Payment] = frappe.get_all(
             "Payment", {"voucher_type": self.doctype, "voucher_no": self.name}
         )
@@ -447,6 +534,17 @@ def validate_from_available_stock_params(
         if status != "To Receive":
             raise ValidationError(_("Status of Purchase Order should be To Receive"))
 
+        items_to_sell: list[PurchaseOrderItemToSell] = frappe.get_all(
+            "Purchase Order Item To Sell",
+            fields="item_code",
+            filters={"parent": ("in", from_purchase_order)},
+        )
+        if not items_to_sell:
+            raise ValidationError(_("No Items To Sell in Purchase Order"))
+    elif from_available_stock == "Available Actual":
+        if not get_stock_balance(from_available_stock):
+            raise ValidationError(_("No Items in Available Actual stock"))
+
 
 @frappe.whitelist()
 def item_query(
@@ -460,14 +558,14 @@ def item_query(
     from_available_stock: Literal[
         "Available Purchased", "Available Actual"
     ] | None = filters.get("from_available_stock")
-    from_purchase_order: str = filters.get("from_purchase_order")
+    from_purchase_order: str | None = filters.get("from_purchase_order")
+
     validate_from_available_stock_params(from_available_stock, from_purchase_order)
 
-    acceptable_item_codes: list[str] | None = None
+    acceptable_item_codes: Iterable[str] | None = None
 
     if from_available_stock == "Available Actual":
-        stock_balance = get_stock_balance(from_available_stock)
-        acceptable_item_codes = stock_balance.keys()
+        acceptable_item_codes = get_stock_balance(from_available_stock).keys()
     elif from_available_stock == "Available Purchased":
         items_to_sell: list[PurchaseOrderItemToSell] = frappe.get_all(
             "Purchase Order Item To Sell",
