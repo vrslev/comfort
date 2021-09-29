@@ -290,7 +290,7 @@ def write_translations(context: Any, untranslated_file: str | None, lang: str):
 
         with open(untranslated_file, "a+") as f:
             in_file = [m[0] for m in csv.reader(f)]
-            to_write = [[m] for m in untranslated if m not in in_file]
+            to_write = [[m, ""] for m in untranslated if m not in in_file]
             print(f"Writing {len(to_write)} new translations")
             csv.writer(f).writerows(to_write)
     else:
