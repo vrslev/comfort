@@ -2,6 +2,7 @@
   "git.autoRepositoryDetection": false,
   "javascript.validate.enable": false,
   "python.analysis.extraPaths": ["../frappe"],
+  "python.analysis.diagnosticMode": "workspace",
   "python.formatting.provider": "black",
   "python.pythonPath": "../../env/bin/python",
   "python.linting.banditEnabled": true,
