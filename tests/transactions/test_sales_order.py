@@ -15,11 +15,20 @@ from comfort.entities.doctype.item.item import Item
 from comfort.finance import create_payment
 from comfort.stock.doctype.receipt.receipt import Receipt
 from comfort.transactions.doctype.purchase_order.purchase_order import PurchaseOrder
+from comfort.transactions.doctype.purchase_order_item_to_sell.purchase_order_item_to_sell import (
+    PurchaseOrderItemToSell,
+)
 from comfort.transactions.doctype.sales_order.sales_order import (
     SalesOrder,
     get_sales_orders_not_in_purchase_order,
     has_linked_delivery_trip,
     validate_from_available_stock_params,
+)
+from comfort.transactions.doctype.sales_order_child_item.sales_order_child_item import (
+    SalesOrderChildItem,
+)
+from comfort.transactions.doctype.sales_order_item.sales_order_item import (
+    SalesOrderItem,
 )
 from comfort.transactions.doctype.sales_return.sales_return import SalesReturn
 from frappe import ValidationError
@@ -290,6 +299,57 @@ def test_create_cancel_sales_return_with_return_before(
     assert cancel_return.sales_order == sales_order.name
     assert counters_are_same(new_counter, count_qty(cancel_return.items))
     assert counters_are_same(prev_counter, new_counter + prev_return_counter)
+
+
+def test_modify_purchase_order_for_from_available_stock_not_available_purchased(
+    sales_order: SalesOrder,
+):
+    sales_order.from_available_stock = "Available Actual"
+    sales_order._modify_purchase_order_for_from_available_stock()
+
+
+def test_modify_purchase_order_for_from_available_stock_available_purchased(
+    sales_order: SalesOrder, purchase_order: PurchaseOrder
+):
+    purchase_order.sales_orders = []
+    purchase_order.db_insert()
+    purchase_order.update_children()
+    sales_order.items = []
+    sales_order.child_items = []
+    sales_order.append(
+        "items",
+        {
+            "item_code": purchase_order.items_to_sell[0].item_code,
+            "qty": purchase_order.items_to_sell[0].qty,
+        },
+    )
+    sales_order.set_child_items()
+    sales_order.from_available_stock = "Available Purchased"
+    sales_order.from_purchase_order = purchase_order.name
+
+    def get_po_counter(
+        purchase_order: PurchaseOrder,
+    ) -> list[
+        SalesOrderItem | SalesOrderChildItem | PurchaseOrderItemToSell | ChildItem
+    ]:
+        items: list[
+            SalesOrderItem | SalesOrderChildItem | PurchaseOrderItemToSell | ChildItem
+        ] = purchase_order._get_items_in_sales_orders(
+            True
+        ) + purchase_order._get_items_to_sell(
+            True
+        )
+        print(count_qty(purchase_order._get_items_to_sell(True)))
+        print(count_qty(purchase_order._get_items_in_sales_orders(True)))
+        return count_qty(items)
+
+    prev_counter = get_po_counter(purchase_order)
+    sales_order._modify_purchase_order_for_from_available_stock()
+
+    sales_order.db_update()
+    sales_order.update_children()
+    purchase_order.reload()
+    assert counters_are_same(prev_counter, get_po_counter(purchase_order))
 
 
 #############################
