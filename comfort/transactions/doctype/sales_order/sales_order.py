@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Iterable, Literal
 
 import frappe
-from comfort import ValidationError, count_qty, group_by_attr
+from comfort import ValidationError, _, count_qty, group_by_attr
 from comfort.comfort_core.doctype.commission_settings.commission_settings import (
     CommissionSettings,
 )
@@ -13,7 +13,6 @@ from comfort.entities.doctype.item.item import Item
 from comfort.finance import create_payment, get_account
 from comfort.stock import create_receipt, create_stock_entry, get_stock_balance
 from comfort.transactions import delete_empty_items, merge_same_items
-from frappe import _
 from frappe.model.document import Document
 
 from ..purchase_order_sales_order.purchase_order_sales_order import (

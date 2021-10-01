@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections import defaultdict
 
 import frappe
-from comfort import ValidationError, count_qty, group_by_attr
+from comfort import ValidationError, _, count_qty, group_by_attr
 from comfort.entities.doctype.child_item.child_item import ChildItem
 from comfort.entities.doctype.item.item import Item
 from comfort.finance import cancel_gl_entries_for, create_gl_entry, get_account
@@ -14,7 +14,6 @@ from comfort.transactions import (
     delete_empty_items,
     merge_same_items,
 )
-from frappe import _
 
 from ..purchase_order.purchase_order import PurchaseOrder
 from ..purchase_order_item_to_sell.purchase_order_item_to_sell import (

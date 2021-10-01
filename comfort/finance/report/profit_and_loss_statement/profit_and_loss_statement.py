@@ -4,9 +4,8 @@ from collections import defaultdict
 from typing import Any
 
 import frappe
-from comfort import group_by_attr
+from comfort import _, group_by_attr
 from comfort.finance.doctype.account.account import Account
-from frappe import _
 
 
 def execute(filters: dict[str, str]):  # pragma: no cover
@@ -39,10 +38,16 @@ def get_columns():  # pragma: no cover
     ]
 
 
-def _get_parent_children_accounts_map() -> dict[str | None, list[Account]]:
-    accounts: list[Account] = frappe.get_all("Account", ("name", "parent_account"))
+class AccountWithTotal(Account):
+    total: int
+
+
+def _get_parent_children_accounts_map() -> dict[str | None, list[AccountWithTotal]]:
+    accounts: list[AccountWithTotal] = frappe.get_all(
+        "Account", ("name", "parent_account")
+    )
     acceptable_parents = (_("Income"), _("Expense"))
-    to_remove: list[Account] = []
+    to_remove: list[AccountWithTotal] = []
     for account in accounts:
         if account.parent_account is None and account.name not in acceptable_parents:
             to_remove.append(account)
@@ -51,8 +56,8 @@ def _get_parent_children_accounts_map() -> dict[str | None, list[Account]]:
     return group_by_attr(accounts, "parent_account")
 
 
-def _filter_accounts(parent_children_map: dict[str | None, list[Account]]):
-    filtered_accounts: list[Account] = []
+def _filter_accounts(parent_children_map: dict[str | None, list[AccountWithTotal]]):
+    filtered_accounts: list[AccountWithTotal] = []
 
     def add_to_list(parent: str | None, level: int):
         for child in parent_children_map.get(parent, []):
@@ -82,8 +87,8 @@ def _get_account_balance_map(filters: dict[str, str]):
 
 def _calculate_total_in_parent_accounts(
     account_balance_map: defaultdict[str, int],
-    parent_children_map: dict[str | None, list[Account]],
-    accounts: list[Account],
+    parent_children_map: dict[str | None, list[AccountWithTotal]],
+    accounts: list[AccountWithTotal],
 ):
     for account in reversed(accounts):
         account.total = account_balance_map[account.name]
@@ -104,7 +109,7 @@ def get_data(filters: dict[str, str]):  # pragma: no cover
     return accounts
 
 
-def get_income_expense_profit_loss_totals(data: list[Account]):
+def get_income_expense_profit_loss_totals(data: list[AccountWithTotal]):
     income: int = 0
     expense: int = 0
     for account in data:

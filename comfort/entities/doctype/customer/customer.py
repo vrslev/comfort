@@ -3,8 +3,7 @@ from __future__ import annotations
 from typing import Literal
 from urllib.parse import parse_qs, urlparse
 
-from comfort import ValidationError
-from frappe import _
+from comfort import ValidationError, _
 from frappe.model.document import Document
 
 # TODO: Validate phone number

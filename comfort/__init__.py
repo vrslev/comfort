@@ -1,12 +1,20 @@
 from __future__ import annotations
 
 import json
+import re
 from collections import Counter, defaultdict
 from typing import Any, Iterable, TypeVar
 
 import frappe
+from frappe.model.document import Document
 
 _T = TypeVar("_T")
+
+from frappe import _ as _gettext
+
+
+def _(msg: Any, lang: str | None = None, context: str | None = None) -> str:
+    return _gettext(msg, lang, context)
 
 
 def count_qty(
@@ -34,7 +42,7 @@ def group_by_attr(data: Iterable[_T], attr: str = "item_code") -> dict[Any, list
 def maybe_json(value: _T) -> _T:
     """Normalize payload from frontend without messing type hints."""
     try:
-        return json.loads(value)
+        return json.loads(value)  # type: ignore
     except (json.JSONDecodeError, TypeError):
         return value
 
@@ -59,3 +67,32 @@ class ValidationError(Exception):
             wide=wide,
             as_list=as_list,
         )
+
+
+class TypedDocument(Document):
+    name: str | None
+    doctype: str
+
+    def get(
+        self,
+        key: dict[Any, Any] | str | None = None,
+        filters: dict[Any, Any] | str | None = None,
+        limit: int | None = None,
+        default: dict[Any, Any] | str | None = None,
+    ) -> str | Document | dict[str, Any] | None:
+        return super().get(key=key, filters=filters, limit=limit, default=default)
+
+    def get_password(
+        self, fieldname: str = "password", raise_exception: bool = True
+    ) -> str | None:
+        return super().get_password(
+            fieldname=fieldname, raise_exception=raise_exception
+        )
+
+
+# _T_c = TypeVar("_T_c", bound=Document)
+
+
+# def get_doc(cls: type[_T_c], *args: Any, **kwargs: Any) -> _T_c:
+#     doctype = " ".join(re.findall("[A-Z][a-z]*", cls.__name__))
+#     return frappe.get_doc(doctype, *args, **kwargs)

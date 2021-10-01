@@ -8,7 +8,7 @@ import telegram
 from ikea_api_wrapped import format_item_code
 
 import frappe
-from comfort import ValidationError, maybe_json
+from comfort import TypedDocument, ValidationError, _, maybe_json
 from comfort.comfort_core.doctype.telegram_settings.telegram_settings import (
     send_message,
 )
@@ -16,14 +16,12 @@ from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
 from comfort.transactions.doctype.sales_order_service.sales_order_service import (
     SalesOrderService,
 )
-from frappe import _
-from frappe.model.document import Document
 from frappe.utils import get_url_to_form
 
 from ..delivery_stop.delivery_stop import DeliveryStop
 
 
-class DeliveryTrip(Document):
+class DeliveryTrip(TypedDocument):
     stops: list[DeliveryStop]
     status: Literal["Draft", "In Progress", "Completed", "Cancelled"]
 
@@ -63,15 +61,17 @@ class DeliveryTrip(Document):
                 )
 
     def _get_template_context(self):
-        context: dict[str, str | list[dict[str, Any]]] = {
-            "form_url": get_url_to_form("Delivery Trip", self.name),
-            "doctype": _("Delivery Trip"),
+        form_url: str = get_url_to_form("Delivery Trip", self.name)
+        context: dict[str, str | None | list[dict[str, Any]]] = {
+            "form_url": form_url,
+            "doctype": _(self.doctype),
             "docname": self.name,
             "stops": [],
         }
 
+        stops: list[dict[str, Any]] = []
         for stop in self.stops:
-            context["stops"].append(
+            stops.append(
                 {
                     "customer": stop.customer,
                     "delivery_type": stop.delivery_type,
@@ -83,6 +83,7 @@ class DeliveryTrip(Document):
                     "items_": _get_items_for_order(stop.sales_order),
                 }
             )
+        context["stops"] = stops
         return context
 
     @frappe.whitelist()
@@ -119,10 +120,13 @@ class DeliveryTrip(Document):
         self._add_receipts_to_sales_orders()
 
 
-def _make_route_url(city: str, address: str):
-    url = "https://yandex.ru/maps/10849/severodvinsk/?"
-    params = {"text": city + " " + address}
-    return url + urlencode(params)
+def _make_route_url(
+    city: str | None, address: str | None
+):  # TODO: Test with None values
+    if city or address:
+        url = "https://yandex.ru/maps/10849/severodvinsk/?"
+        params = {"text": f"{city} {address}"}
+        return url + urlencode(params)
 
 
 def _get_items_for_order(sales_order_name: str):  # pragma: no cover
@@ -142,15 +146,16 @@ def get_delivery_and_installation_for_order(sales_order_name: str):
     services: list[SalesOrderService] = frappe.get_all(
         "Sales Order Service", fields="type", filters={"parent": sales_order_name}
     )
-    res = {"delivery_type": None, "installation": False}
+    delivery_type: str | None = None
+    installation = False
     for service in services:
         if service.type == "Delivery to Apartment":
-            res["delivery_type"] = "To Apartment"
+            delivery_type = "To Apartment"
         if service.type == "Delivery to Entrance":
-            res["delivery_type"] = "To Entrance"
+            delivery_type = "To Entrance"
         elif service.type == "Installation":
-            res["installation"] = True
-    return res
+            installation = True
+    return {"delivery_type": delivery_type, "installation": installation}
 
 
 def _prepare_message_for_telegram(message: str):

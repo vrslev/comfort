@@ -30,6 +30,7 @@ from comfort.transactions.doctype.purchase_return.purchase_return import Purchas
 from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
 from comfort.transactions.doctype.sales_return.sales_return import SalesReturn
 from frappe.database.mariadb.database import MariaDBDatabase
+from frappe.model.document import Document
 
 TEST_SITE_NAME = "tests"
 
@@ -313,7 +314,8 @@ def sales_order(
     item.set_new_name(set_child_names=True)
     item.set_parent_in_children()
     item.db_insert()
-    for child in item.get_all_children():  # type: ignore
+    all_children: list[Document] = item.get_all_children()
+    for child in all_children:
         child.db_insert()
     commission_settings.insert()
     doc: SalesOrder = frappe.get_doc(

@@ -4,13 +4,12 @@ from collections import Counter
 from typing import Callable, Literal, TypeVar, Union
 
 import frappe
-from comfort import ValidationError, count_qty, group_by_attr
+from comfort import ValidationError, _, count_qty, group_by_attr
 from comfort.entities.doctype.child_item.child_item import ChildItem
 from comfort.entities.doctype.item.item import Item
 from comfort.transactions.doctype.purchase_order_item_to_sell.purchase_order_item_to_sell import (
     PurchaseOrderItemToSell,
 )
-from frappe import _
 from frappe.model.document import Document
 
 from .doctype.purchase_return_item.purchase_return_item import PurchaseReturnItem

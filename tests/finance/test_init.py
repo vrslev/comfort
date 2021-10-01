@@ -29,7 +29,7 @@ def test_get_account_raises_on_wrong_name():
         frappe.ValidationError,
         match=f'Finance Settings has no field "{account_name}_account"',
     ):
-        get_account(account_name)
+        return get_account(account_name)
 
 
 def test_create_gl_entry(payment_sales: Payment):

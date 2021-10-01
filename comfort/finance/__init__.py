@@ -3,9 +3,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Literal
 
 import frappe
-from comfort import ValidationError
+from comfort import ValidationError, _
 from comfort.transactions import OrderTypes
-from frappe import _
 
 if TYPE_CHECKING:
     from comfort.finance.doctype.gl_entry.gl_entry import GLEntry

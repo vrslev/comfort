@@ -1,23 +1,23 @@
+from __future__ import annotations
+
 from datetime import datetime
 
 import ikea_api
 import ikea_api.auth
 
 import frappe
-from comfort import ValidationError
-from frappe import _
-from frappe.model.document import Document
+from comfort import TypedDocument, ValidationError, _
 from frappe.utils import add_to_date, get_datetime, now_datetime
 
 
-class IkeaSettings(Document):
+class IkeaSettings(TypedDocument):
     username: str
     password: str
     zip_code: str
     authorized_token: str
-    authorized_token_expiration: datetime
+    authorized_token_expiration: datetime | str
     guest_token: str
-    guest_token_expiration: datetime
+    guest_token_expiration: datetime | str
 
     def on_change(self):
         self.clear_cache()
@@ -43,7 +43,7 @@ def get_guest_api():
 
 def get_authorized_api():
     doc: IkeaSettings = frappe.get_cached_doc("Ikea Settings", "Ikea Settings")
-    password: str = doc.get_password(raise_exception=False)
+    password = doc.get_password(raise_exception=False)
     if (
         doc.authorized_token is None
         or doc.authorized_token_expiration is None

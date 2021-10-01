@@ -1,8 +1,7 @@
 from __future__ import annotations
 
 import frappe
-from comfort import ValidationError
-from frappe import _
+from comfort import ValidationError, _
 from frappe.model.document import Document
 
 from ..commission_range.commission_range import CommissionRange

@@ -4,8 +4,7 @@ import re
 from collections import Counter
 
 import frappe
-from comfort import ValidationError, count_qty
-from frappe import _
+from comfort import ValidationError, _, count_qty
 from frappe.model.document import Document
 
 from ..child_item.child_item import ChildItem

@@ -2,8 +2,7 @@ from __future__ import annotations
 
 import re
 
-from comfort import ValidationError
-from frappe import _
+from comfort import ValidationError, _
 from frappe.model.document import Document
 
 

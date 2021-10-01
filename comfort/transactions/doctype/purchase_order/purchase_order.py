@@ -9,13 +9,12 @@ from ikea_api_wrapped.parsers.order_capture import DeliveryOptionDict
 from ikea_api_wrapped.wrappers import PurchaseInfoDict
 
 import frappe
-from comfort import ValidationError, count_qty, group_by_attr, maybe_json
+from comfort import ValidationError, _, count_qty, group_by_attr, maybe_json
 from comfort.comfort_core.ikea import add_items_to_cart, get_delivery_services
 from comfort.entities.doctype.child_item.child_item import ChildItem
 from comfort.finance import create_payment
 from comfort.stock import create_checkout, create_receipt
 from comfort.transactions import AnyChildItem, delete_empty_items, merge_same_items
-from frappe import _
 from frappe.model.document import Document
 from frappe.utils.data import add_to_date, getdate, now_datetime, today
 

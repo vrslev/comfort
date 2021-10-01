@@ -5,8 +5,7 @@ from typing import Any
 import telegram
 
 import frappe
-from comfort import ValidationError
-from frappe import _
+from comfort import ValidationError, _
 from frappe.model.document import Document
 
 

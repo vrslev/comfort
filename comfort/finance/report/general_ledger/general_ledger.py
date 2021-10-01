@@ -3,8 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 import frappe
-from comfort import ValidationError
-from frappe import _
+from comfort import ValidationError, _
 
 
 def execute(filters: dict[str, str]):  # pragma: no cover

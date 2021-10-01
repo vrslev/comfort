@@ -11,6 +11,7 @@ class Account(NestedSet):
     account_name: str
     is_group: bool
     parent_account: str
+    indent: int
 
 
 @frappe.whitelist()

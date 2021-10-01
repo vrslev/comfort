@@ -28,7 +28,7 @@ def check_service(host: str, port: str | int):
         print(f"Attempt {i + 1} to connect to {host}:{port}")
         if _port_is_open(host, port):
             print(f"Connected to {host}:{port}")
-            return True
+            return
         time.sleep(DELAY)
     print(f"Connection to {host}:{port} timed out")
     raise SystemExit(1)

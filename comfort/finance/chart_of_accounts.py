@@ -3,8 +3,8 @@ from __future__ import annotations
 from typing import Any
 
 import frappe
+from comfort import _
 from comfort.finance.doctype.finance_settings.finance_settings import FinanceSettings
-from frappe import _
 from frappe.utils.nestedset import rebuild_tree
 
 ACCOUNTS: dict[str, dict[str, Any]] = {
