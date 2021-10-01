@@ -6,6 +6,7 @@ import pytest
 
 import frappe
 from comfort.finance.chart_of_accounts import ACCOUNTS
+from comfort.finance.doctype.account.account import Account
 
 
 def get_accounts_from_schema():
@@ -24,9 +25,8 @@ def get_accounts_from_schema():
 @pytest.mark.usefixtures("accounts")
 def test_create_accounts_from_schema():
     accounts_from_schema = get_accounts_from_schema()
-    created_accounts: list[dict[str, str | None]] = [
-        dict(a) for a in frappe.get_all("Account", ("name", "parent_account"))
-    ]
+    accounts: list[Account] = frappe.get_all("Account", ("name", "parent_account"))
+    created_accounts: list[dict[str, str | None]] = [dict(a) for a in accounts]
 
     not_matching_accounts: list[dict[str, str | None]] = [
         acc

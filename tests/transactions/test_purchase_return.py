@@ -175,7 +175,8 @@ def test_make_sales_returns_docstatus_all_items_returns(
     items = purchase_return._voucher._get_items_in_sales_orders(True)
     purchase_return._add_missing_fields_to_items(items)
     purchase_return.items = []
-    purchase_return.add_items([dict(i) for i in items])
+    payload: list[dict[str, str | int]] = [dict(i) for i in items]
+    purchase_return.add_items(payload)
     purchase_return.db_insert()
     purchase_return.update_children()
 
