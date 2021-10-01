@@ -25,7 +25,7 @@ from tests.conftest import mock_delivery_services, mock_purchase_info
 def test_validate_not_empty(purchase_order: PurchaseOrder):
     purchase_order.sales_orders = purchase_order.items_to_sell = []
     with pytest.raises(ValidationError, match="Add Sales Orders or Items to Sell"):
-        purchase_order.validate_not_empty()
+        purchase_order._validate_not_empty()
 
 
 def test_delete_sales_order_duplicates(purchase_order: PurchaseOrder):
@@ -33,7 +33,7 @@ def test_delete_sales_order_duplicates(purchase_order: PurchaseOrder):
         purchase_order.sales_orders[0],
         purchase_order.sales_orders[0],
     ]
-    purchase_order.delete_sales_order_duplicates()
+    purchase_order._delete_sales_order_duplicates()
 
     for orders in group_by_attr(
         purchase_order.sales_orders, "sales_order_name"
@@ -314,7 +314,7 @@ def test_create_payment(purchase_order: PurchaseOrder):
     amount = 5000
     purchase_order.total_amount = amount
     purchase_order.db_insert()
-    purchase_order.create_payment()
+    purchase_order._create_payment()
 
     res: tuple[int, bool] = frappe.get_value(
         "Payment",

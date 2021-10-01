@@ -94,9 +94,9 @@ class PurchaseOrder(Document):
         self._delete_sales_order_duplicates()
         delete_empty_items(self, "items_to_sell")
         self.items_to_sell = merge_same_items(self.items_to_sell)
-        self._update_sales_orders_from_db()
-        self._update_items_to_sell_from_db()
-        self._calculate()
+        self.update_sales_orders_from_db()
+        self.update_items_to_sell_from_db()
+        self.calculate()
 
     def before_insert(self):
         self.status = "Draft"
@@ -135,14 +135,14 @@ class PurchaseOrder(Document):
         ).values()
         self.sales_orders = [orders[0] for orders in sales_orders_grouped_by_name]
 
-    def _update_sales_orders_from_db(self):
+    def update_sales_orders_from_db(self):
         for order in self.sales_orders:
             order_values: tuple[str, int] = frappe.get_value(
                 "Sales Order", order.sales_order_name, ("customer", "total_amount")
             )
             order.customer, order.total_amount = order_values
 
-    def _update_items_to_sell_from_db(self):
+    def update_items_to_sell_from_db(self):
         for item in self.items_to_sell:
             item_values: tuple[str, int, float] = frappe.get_value(
                 "Item", item.item_code, ("item_name", "rate", "weight")
@@ -191,7 +191,7 @@ class PurchaseOrder(Document):
             self.sales_orders_cost + self.items_to_sell_cost + self.delivery_cost
         )
 
-    def _calculate(self):  # pragma: no cover
+    def calculate(self):  # pragma: no cover
         self._calculate_items_to_sell_cost()
         self._calculate_sales_orders_cost()
         self._calculate_total_weight()
