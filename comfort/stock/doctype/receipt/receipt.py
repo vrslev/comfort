@@ -69,7 +69,7 @@ class Receipt(Document):
     def create_sales_stock_entries(self):
         items: list[
             SalesOrderItem | SalesOrderChildItem
-        ] = self._voucher._get_items_with_splitted_combinations()
+        ] = self._voucher.get_items_with_splitted_combinations()
         self._new_stock_entry("Reserved Actual", items, reverse_qty=True)
 
     def create_purchase_gl_entries(self):

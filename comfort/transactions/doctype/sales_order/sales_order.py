@@ -34,7 +34,7 @@ if TYPE_CHECKING:
     from ..sales_return.sales_return import SalesReturn
 
 
-class SalesOrderMethods(Document):
+class SalesOrder(Document):
     customer: str
     items: list[SalesOrderItem]
     services: list[SalesOrderService]
@@ -60,6 +60,62 @@ class SalesOrderMethods(Document):
     from_purchase_order: str | None = None
 
     ignore_linked_doctypes: list[str]
+
+    #########
+    # Hooks #
+    #########
+
+    def validate(self):  # pragma: no cover
+        self._validate_from_available_stock()
+
+        delete_empty_items(self, "items")
+        self.items = merge_same_items(self.items)
+        self.update_items_from_db()
+        self.set_child_items()
+
+        self.calculate()
+        self.set_statuses()
+
+    def before_submit(self):
+        self.edit_commission = True
+        self._modify_purchase_order_for_from_available_stock()
+        self._make_stock_entries_for_from_available_stock()
+
+    def before_cancel(self):  # pragma: no cover
+        self.set_statuses()
+        self._create_cancel_sales_return()
+
+    def on_cancel(self):  # TODO: Cover
+        self.ignore_linked_doctypes = [
+            "Purchase Order",
+            "Sales Return",
+            "Payment",
+            # Stock Entry shouldn't be cancelled because
+            # we create Stock Entry in on-cancel Sales Return
+            "Stock Entry",
+        ]
+
+        # TODO: Make (of find) generic `cancel_for` function
+        payments: list[Payment] = frappe.get_all(
+            "Payment", {"voucher_type": self.doctype, "voucher_no": self.name}
+        )
+        for payment in payments:
+            payment: Payment = frappe.get_doc("Payment", payment.name)
+            payment.cancel()
+        receipts: list[Receipt] = frappe.get_all(
+            "Receipt", {"voucher_type": self.doctype, "voucher_no": self.name}
+        )
+        for receipt in receipts:
+            receipt: Payment = frappe.get_doc("Receipt", receipt.name)
+            receipt.cancel()
+
+    def before_update_after_submit(self):  # pragma: no cover
+        self.calculate()
+        self.set_statuses()
+
+    ################
+    # End of hooks #
+    ################
 
     def update_items_from_db(self):
         """Load item properties from database and calculate Amount and Total Weight."""
@@ -94,10 +150,10 @@ class SalesOrderMethods(Document):
     def _validate_from_available_stock(self):
         if not self.from_available_stock:
             return
-        validate_from_available_stock_params(
+        validate_params_from_available_stock(
             self.from_available_stock, self.from_purchase_order
         )
-        order_counter = count_qty(self._get_items_with_splitted_combinations())
+        order_counter = count_qty(self.get_items_with_splitted_combinations())
 
         if self.from_available_stock == "Available Actual":
             stock_counter = get_stock_balance(self.from_available_stock)
@@ -160,7 +216,7 @@ class SalesOrderMethods(Document):
         self._calculate_margin()
         self._calculate_total_amount()
 
-    def _get_items_with_splitted_combinations(
+    def get_items_with_splitted_combinations(
         self,
     ) -> list[SalesOrderChildItem | SalesOrderItem]:
         parents = [child.parent_item_code for child in self.child_items]
@@ -263,14 +319,12 @@ class SalesOrderMethods(Document):
         else:
             ref_name = self.name
 
-        items = self._get_items_with_splitted_combinations()
+        items = self.get_items_with_splitted_combinations()
         create_stock_entry(
             ref_doctype, ref_name, stock_types[0], items, reverse_qty=True
         )
         create_stock_entry(ref_doctype, ref_name, stock_types[1], items)
 
-
-class SalesOrderStatuses(SalesOrderMethods):
     def _get_paid_amount(self):
         payments: list[str] = [
             p.name
@@ -295,7 +349,7 @@ class SalesOrderStatuses(SalesOrderMethods):
         )
         return sum(b[0] or 0 for b in balances)
 
-    def _set_paid_and_pending_per_amount(self):
+    def set_paid_and_pending_per_amount(self):
         self.paid_amount = self._get_paid_amount()
 
         if self.total_amount == 0:
@@ -370,59 +424,10 @@ class SalesOrderStatuses(SalesOrderMethods):
 
     def set_statuses(self):  # pragma: no cover
         """Set statuses according to current Sales Order and linked Purchase Order states."""
-        self._set_paid_and_pending_per_amount()
+        self.set_paid_and_pending_per_amount()
         self._set_payment_status()
         self._set_delivery_status()
         self._set_document_status()
-
-
-class SalesOrder(SalesOrderStatuses):
-    def validate(self):  # pragma: no cover
-        delete_empty_items(self, "items")
-        self.items = merge_same_items(self.items)
-        self.update_items_from_db()
-        self.set_child_items()
-        self._validate_from_available_stock()
-
-        self.calculate()
-        self.set_statuses()
-
-    def before_submit(self):
-        self.edit_commission = True
-        self._modify_purchase_order_for_from_available_stock()
-        self._make_stock_entries_for_from_available_stock()
-
-    def before_cancel(self):  # pragma: no cover
-        self.set_statuses()
-        self._create_cancel_sales_return()
-
-    def on_cancel(self):  # TODO: Cover
-        self.ignore_linked_doctypes = [
-            "Purchase Order",
-            "Sales Return",
-            "Payment",
-            # Stock Entry shouldn't be cancelled because
-            # we create Stock Entry in on-cancel Sales Return
-            "Stock Entry",
-        ]
-
-        # TODO: Make (of find) generic `cancel_for` function
-        payments: list[Payment] = frappe.get_all(
-            "Payment", {"voucher_type": self.doctype, "voucher_no": self.name}
-        )
-        for payment in payments:
-            payment: Payment = frappe.get_doc("Payment", payment.name)
-            payment.cancel()
-        receipts: list[Receipt] = frappe.get_all(
-            "Receipt", {"voucher_type": self.doctype, "voucher_no": self.name}
-        )
-        for receipt in receipts:
-            receipt: Payment = frappe.get_doc("Receipt", receipt.name)
-            receipt.cancel()
-
-    def before_update_after_submit(self):  # pragma: no cover
-        self.calculate()
-        self.set_statuses()
 
     @frappe.whitelist()
     def calculate_commission_and_margin(self):  # pragma: no cover
@@ -516,7 +521,7 @@ def get_sales_orders_not_in_purchase_order() -> list[str]:
 
 
 @frappe.whitelist()
-def validate_from_available_stock_params(
+def validate_params_from_available_stock(
     from_available_stock: Literal["Available Purchased", "Available Actual"] | None,
     from_purchase_order: str | None = None,
 ):
@@ -557,7 +562,7 @@ def item_query(
     ] | None = filters.get("from_available_stock")
     from_purchase_order: str | None = filters.get("from_purchase_order")
 
-    validate_from_available_stock_params(from_available_stock, from_purchase_order)
+    validate_params_from_available_stock(from_available_stock, from_purchase_order)
 
     acceptable_item_codes: Iterable[str] | None = None
 

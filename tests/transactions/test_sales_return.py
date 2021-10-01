@@ -34,7 +34,7 @@ def test_sales_return_voucher_property(sales_return: SalesReturn):
 def test_sales_return_calculate_returned_paid_amount(
     sales_return: SalesReturn, paid_amount: int, exp_returned_paid_amount: int
 ):
-    sales_return._voucher._set_paid_and_pending_per_amount()
+    sales_return._voucher.set_paid_and_pending_per_amount()
     if paid_amount > 0:
         sales_return._voucher.add_payment(paid_amount, True)
     sales_return._calculate_returned_paid_amount()
@@ -153,7 +153,7 @@ def test_split_combinations_in_voucher_needed(
     sales_return._voucher.set_child_items()
 
     counter_before = count_qty(
-        sales_return._voucher._get_items_with_splitted_combinations()
+        sales_return._voucher.get_items_with_splitted_combinations()
     )
     sales_return._split_combinations_in_voucher()
     counter_after = count_qty(sales_return._voucher.items)
@@ -178,11 +178,11 @@ def test_add_missing_info_to_items_in_voucher(sales_return: SalesReturn):
 
 def test_sales_return_modify_voucher(sales_return: SalesReturn):
     prev_qty_counter = count_qty(
-        sales_return._voucher._get_items_with_splitted_combinations()
+        sales_return._voucher.get_items_with_splitted_combinations()
     )
     sales_return._modify_voucher()
     new_qty_counter = count_qty(
-        sales_return._voucher._get_items_with_splitted_combinations()
+        sales_return._voucher.get_items_with_splitted_combinations()
     )
 
     diff = prev_qty_counter.copy()

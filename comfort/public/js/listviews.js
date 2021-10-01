@@ -60,7 +60,7 @@ frappe.listview_settings["Sales Order"] = {
               frappe
                 .call({
                   method:
-                    "comfort.transactions.doctype.sales_order.sales_order.validate_from_available_stock_params",
+                    "comfort.transactions.doctype.sales_order.sales_order.validate_params_from_available_stock",
                   args: data,
                 })
                 .then(() => {

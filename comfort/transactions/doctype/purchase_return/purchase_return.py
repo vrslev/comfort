@@ -62,7 +62,7 @@ class PurchaseReturn(Return):
             doc: SalesOrder = frappe.get_doc(
                 "Sales Order", sales_order.sales_order_name
             )
-            items += doc._get_items_with_splitted_combinations()
+            items += doc.get_items_with_splitted_combinations()
         return items
 
     def _allocate_items(self):

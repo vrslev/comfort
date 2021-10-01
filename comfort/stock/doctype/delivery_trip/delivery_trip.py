@@ -133,7 +133,7 @@ def _get_items_for_order(sales_order_name: str):  # pragma: no cover
             "qty": item.qty,
             "item_name": item.item_name,
         }
-        for item in doc._get_items_with_splitted_combinations()
+        for item in doc.get_items_with_splitted_combinations()
     ]
 
 

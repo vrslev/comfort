@@ -34,7 +34,7 @@ class SalesReturn(Return):
 
     def _calculate_returned_paid_amount(self):  # TODO: Why is this not used?
         self._modify_voucher()
-        self._voucher._set_paid_and_pending_per_amount()
+        self._voucher.set_paid_and_pending_per_amount()
         self.returned_paid_amount = (
             -copy(self._voucher.pending_amount)
             if self._voucher.pending_amount < 0
@@ -61,7 +61,7 @@ class SalesReturn(Return):
         pass
 
     def _get_all_items(self):
-        return self._voucher._get_items_with_splitted_combinations()
+        return self._voucher.get_items_with_splitted_combinations()
 
     def _split_combinations_in_voucher(self):
         return_qty_counter = count_qty(self.items)

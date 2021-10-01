@@ -35,7 +35,7 @@ from ..sales_order_item.sales_order_item import SalesOrderItem
 # TODO: Validate that this Purchase Order is the only one that contains current Sales Orders
 
 
-class PurchaseOrderMethods(Document):
+class PurchaseOrder(Document):
     delivery_options: list[PurchaseOrderDeliveryOption]
     cannot_add_items: str | None
     posting_date: datetime
@@ -50,24 +50,99 @@ class PurchaseOrderMethods(Document):
     items_to_sell: list[PurchaseOrderItemToSell]
     status: Literal["Draft", "To Receive", "Completed", "Cancelled"]
 
-    def validate_not_empty(self):
+    #########
+    # Hooks #
+    #########
+
+    def autoname(self):
+        months_number_to_name = {
+            1: "Январь",
+            2: "Февраль",
+            3: "Март",
+            4: "Апрель",
+            5: "Май",
+            6: "Июнь",
+            7: "Июль",
+            8: "Август",
+            9: "Сентябрь",
+            10: "Октябрь",
+            11: "Ноябрь",
+            12: "Декабрь",
+        }
+        this_month = months_number_to_name[now_datetime().month]
+
+        carts_in_this_month: tuple[tuple[str | None]] = frappe.db.sql(
+            """
+            SELECT name from `tabPurchase Order`
+            WHERE name LIKE CONCAT(%s, '-%%')
+            ORDER BY CAST(REGEXP_SUBSTR(name, '[0-9]+$') as int) DESC
+            LIMIT 1
+            """,
+            values=(this_month,),
+        )
+
+        new_cart_number: int = 1
+        if carts_in_this_month:
+            matches: list[str] = re.findall(r"-(\d+)", carts_in_this_month[0][0])
+            latest_cart_number: str | int = matches[0] if matches else 0
+            new_cart_number = int(latest_cart_number) + 1
+
+        self.name = f"{this_month}-{new_cart_number}"
+
+    def validate(self):  # pragma: no cover
+        self._validate_not_empty()
+        self._delete_sales_order_duplicates()
+        delete_empty_items(self, "items_to_sell")
+        self.items_to_sell = merge_same_items(self.items_to_sell)
+        self._update_sales_orders_from_db()
+        self._update_items_to_sell_from_db()
+        self._calculate()
+
+    def before_insert(self):
+        self.status = "Draft"
+
+    def before_save(self):
+        self.delivery_options = []
+        self.cannot_add_items = None
+
+    def before_submit(self):
+        self.delivery_options = []
+        self.cannot_add_items = None
+        self.status = "To Receive"
+
+    def on_submit(self):  # pragma: no cover
+        self._create_payment()
+        self._create_checkout()
+        self._submit_sales_orders_and_update_statuses()
+
+    def before_cancel(self):
+        self.status = "Cancelled"
+
+    def on_cancel(self):  # pragma: no cover
+        self._submit_sales_orders_and_update_statuses()
+
+    ################
+    # End of hooks #
+    ################
+
+    def _validate_not_empty(self):
         if not (self.sales_orders or self.items_to_sell):
             raise ValidationError(_("Add Sales Orders or Items to Sell"))
 
-    def delete_sales_order_duplicates(self):
+    def _delete_sales_order_duplicates(self):
         sales_orders_grouped_by_name = group_by_attr(
             self.sales_orders, "sales_order_name"
         ).values()
         self.sales_orders = [orders[0] for orders in sales_orders_grouped_by_name]
 
-    def update_sales_orders_from_db(self):
+    def _update_sales_orders_from_db(self):
         for order in self.sales_orders:
             order_values: tuple[str, int] = frappe.get_value(
                 "Sales Order", order.sales_order_name, ("customer", "total_amount")
             )
             order.customer, order.total_amount = order_values
 
-    def update_items_to_sell_from_db(self):
+    def _update_items_to_sell_from_db(self):
         for item in self.items_to_sell:
             item_values: tuple[str, int, float] = frappe.get_value(
                 "Item", item.item_code, ("item_name", "rate", "weight")
@@ -116,7 +191,7 @@ class PurchaseOrderMethods(Document):
             self.sales_orders_cost + self.items_to_sell_cost + self.delivery_cost
         )
 
-    def calculate(self):  # pragma: no cover
+    def _calculate(self):  # pragma: no cover
         self._calculate_items_to_sell_cost()
         self._calculate_sales_orders_cost()
         self._calculate_total_weight()
@@ -202,87 +277,18 @@ class PurchaseOrderMethods(Document):
             )
         self.db_update_all()
 
-    def submit_sales_orders_and_update_statuses(self):  # pragma: no cover
+    def _submit_sales_orders_and_update_statuses(self):  # pragma: no cover
         for o in self.sales_orders:
             doc: SalesOrder = frappe.get_doc("Sales Order", o.sales_order_name)
             doc.set_statuses()
             doc.flags.ignore_validate_update_after_submit = True
             doc.submit()
 
-    def create_payment(self):
+    def _create_payment(self):
         create_payment(self.doctype, self.name, self.total_amount, paid_with_cash=False)
 
-    def create_checkout(self):  # pragma: no cover
+    def _create_checkout(self):  # pragma: no cover
         create_checkout(self.name)
-
-
-class PurchaseOrder(PurchaseOrderMethods):
-    def autoname(self):
-        months_number_to_name = {
-            1: "Январь",
-            2: "Февраль",
-            3: "Март",
-            4: "Апрель",
-            5: "Май",
-            6: "Июнь",
-            7: "Июль",
-            8: "Август",
-            9: "Сентябрь",
-            10: "Октябрь",
-            11: "Ноябрь",
-            12: "Декабрь",
-        }
-        this_month = months_number_to_name[now_datetime().month]
-
-        carts_in_this_month: tuple[tuple[str | None]] = frappe.db.sql(
-            """
-            SELECT name from `tabPurchase Order`
-            WHERE name LIKE CONCAT(%s, '-%%')
-            ORDER BY CAST(REGEXP_SUBSTR(name, '[0-9]+$') as int) DESC
-            LIMIT 1
-            """,
-            values=(this_month,),
-        )
-
-        new_cart_number: int = 1
-        if carts_in_this_month:
-            matches: list[str] = re.findall(r"-(\d+)", carts_in_this_month[0][0])
-            latest_cart_number: str | int = matches[0] if matches else 0
-            new_cart_number = int(latest_cart_number) + 1
-
-        self.name = f"{this_month}-{new_cart_number}"
-
-    def validate(self):  # pragma: no cover
-        self.validate_not_empty()
-        self.delete_sales_order_duplicates()
-        delete_empty_items(self, "items_to_sell")
-        self.items_to_sell = merge_same_items(self.items_to_sell)
-        self.update_sales_orders_from_db()
-        self.update_items_to_sell_from_db()
-        self.calculate()
-
-    def before_insert(self):
-        self.status = "Draft"
-
-    def before_save(self):
-        self.delivery_options = []
-        self.cannot_add_items = None
-
-    def before_submit(self):
-        self.delivery_options = []
-        self.cannot_add_items = None
-        self.status = "To Receive"
-
-    def on_submit(self):  # pragma: no cover
-        self.create_payment()
-        self.create_checkout()
-        self.submit_sales_orders_and_update_statuses()
-
-    def before_cancel(self):
-        self.status = "Cancelled"
-
-    def on_cancel(self):  # pragma: no cover
-        self.submit_sales_orders_and_update_statuses()
 
     @frappe.whitelist()
     def add_purchase_info_and_submit(
@@ -305,7 +311,7 @@ class PurchaseOrder(PurchaseOrderMethods):
         create_receipt(self.doctype, self.name)
         self.status = "Completed"
         self.db_update()
-        self.submit_sales_orders_and_update_statuses()
+        self._submit_sales_orders_and_update_statuses()
 
     @frappe.whitelist()
     def get_unavailable_items_in_cart_by_orders(  # TODO: It renders with duplicates
@@ -314,7 +320,7 @@ class PurchaseOrder(PurchaseOrderMethods):
         all_items: list[AnyChildItem] = []
         for order in self.sales_orders:
             doc: SalesOrder = frappe.get_doc("Sales Order", order.sales_order_name)
-            all_items += doc._get_items_with_splitted_combinations()
+            all_items += doc.get_items_with_splitted_combinations()
         items_to_sell = self._get_items_to_sell(split_combinations=True)
         for item in items_to_sell:
             item.parent = self.name

@@ -37,7 +37,7 @@ def test_return_calculate_item_values(sales_return: SalesReturn):
 
 
 def test_return_get_remaining_qtys(sales_return: SalesReturn):
-    items_in_order = sales_return._voucher._get_items_with_splitted_combinations()
+    items_in_order = sales_return._voucher.get_items_with_splitted_combinations()
     in_order = count_qty(items_in_order)
     in_return = count_qty(sales_return.items)
 
@@ -51,7 +51,7 @@ def test_return_add_missing_fields_to_items(
     sales_return: SalesReturn, sales_order: SalesOrder
 ):
     grouped_order_items = group_by_attr(sales_order.items, attr="name")
-    items = sales_order._get_items_with_splitted_combinations()
+    items = sales_order.get_items_with_splitted_combinations()
     sales_return._add_missing_fields_to_items(items)
 
     for item in items:
@@ -64,7 +64,7 @@ def test_return_add_missing_fields_to_items(
 def test_return_get_items_available_to_add(sales_return: SalesReturn):
     available_item_and_qty: dict[str, int] = dict(
         sales_return._get_remaining_qtys(
-            sales_return._voucher._get_items_with_splitted_combinations()
+            sales_return._voucher.get_items_with_splitted_combinations()
         )
     )
     for item in sales_return.get_items_available_to_add():

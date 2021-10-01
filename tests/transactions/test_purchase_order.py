@@ -21,10 +21,6 @@ from frappe import ValidationError
 from frappe.utils.data import add_to_date, getdate, now_datetime, today
 from tests.conftest import mock_delivery_services, mock_purchase_info
 
-#############################
-#   PurchaseOrderMethods    #
-#############################
-
 
 def test_validate_not_empty(purchase_order: PurchaseOrder):
     purchase_order.sales_orders = purchase_order.items_to_sell = []
@@ -330,11 +326,6 @@ def test_create_payment(purchase_order: PurchaseOrder):
     )
     assert res[0] == amount
     assert not res[1]
-
-
-#############################
-#       PurchaseOrder       #
-#############################
 
 
 def get_this_month_ru_name():

@@ -22,7 +22,7 @@ from comfort.transactions.doctype.sales_order.sales_order import (
     SalesOrder,
     get_sales_orders_not_in_purchase_order,
     has_linked_delivery_trip,
-    validate_from_available_stock_params,
+    validate_params_from_available_stock,
 )
 from comfort.transactions.doctype.sales_order_child_item.sales_order_child_item import (
     SalesOrderChildItem,
@@ -33,10 +33,6 @@ from comfort.transactions.doctype.sales_order_item.sales_order_item import (
 from comfort.transactions.doctype.sales_return.sales_return import SalesReturn
 from frappe import ValidationError
 from frappe.model.document import Document
-
-#############################
-#     SalesOrderMethods     #
-#############################
 
 
 def test_update_items_from_db(sales_order: SalesOrder):
@@ -96,7 +92,7 @@ def test_validate_from_available_stock_available_actual_raises(
 ):
     sales_order.from_available_stock = "Available Actual"
     sales_order.set_child_items()
-    mock_stock_counter = count_qty(sales_order._get_items_with_splitted_combinations())
+    mock_stock_counter = count_qty(sales_order.get_items_with_splitted_combinations())
     item_code = list(mock_stock_counter.keys())[0]
     mock_stock_counter[item_code] -= 1
     patch_get_stock_balance(monkeypatch, mock_stock_counter)
@@ -111,7 +107,7 @@ def test_validate_from_available_stock_available_actual_not_raises(
 ):
     sales_order.from_available_stock = "Available Actual"
     sales_order.set_child_items()
-    mock_stock_counter = count_qty(sales_order._get_items_with_splitted_combinations())
+    mock_stock_counter = count_qty(sales_order.get_items_with_splitted_combinations())
     patch_get_stock_balance(monkeypatch, mock_stock_counter)
     sales_order._validate_from_available_stock()
 
@@ -231,7 +227,7 @@ def test_calculate_total_amount(sales_order: SalesOrder):
 
 def test_get_sales_order_items_with_splitted_combinations(sales_order: SalesOrder):
     sales_order.set_child_items()
-    items = sales_order._get_items_with_splitted_combinations()
+    items = sales_order.get_items_with_splitted_combinations()
     parents: set[str] = set()
     for child in sales_order.child_items:
         assert child in items
@@ -264,7 +260,7 @@ def test_create_cancel_sales_return_without_return_before(
     cancel_return: SalesReturn = frappe.get_doc("Sales Return", return_name)
     assert cancel_return.sales_order == sales_order.name
     assert counters_are_same(
-        count_qty(sales_order._get_items_with_splitted_combinations()),
+        count_qty(sales_order.get_items_with_splitted_combinations()),
         count_qty(cancel_return.items),
     )
 
@@ -275,7 +271,7 @@ def test_create_cancel_sales_return_with_return_before(
     purchase_order.db_insert()
     purchase_order.update_children()
     sales_order = sales_return._voucher
-    prev_counter = count_qty(sales_order._get_items_with_splitted_combinations())
+    prev_counter = count_qty(sales_order.get_items_with_splitted_combinations())
     sales_order.docstatus = 1
     sales_order.db_update()
     sales_order.update_children()
@@ -294,7 +290,7 @@ def test_create_cancel_sales_return_with_return_before(
         "Sales Return", {"sales_order": sales_order.name}
     )
     cancel_return: SalesReturn = frappe.get_doc("Sales Return", return_name)
-    new_counter = count_qty(sales_order._get_items_with_splitted_combinations())
+    new_counter = count_qty(sales_order.get_items_with_splitted_combinations())
 
     assert cancel_return.sales_order == sales_order.name
     assert counters_are_same(new_counter, count_qty(cancel_return.items))
@@ -352,11 +348,6 @@ def test_modify_purchase_order_for_from_available_stock_available_purchased(
     assert counters_are_same(prev_counter, get_po_counter(purchase_order))
 
 
-#############################
-#    SalesOrderStatuses     #
-#############################
-
-
 def test_get_paid_amount(sales_order: SalesOrder):
     sales_order.db_insert()
     create_payment(sales_order.doctype, sales_order.name, 300, paid_with_cash=True)
@@ -392,7 +383,7 @@ def test_set_paid_and_pending_per_amount(
     create_payment(sales_order.doctype, sales_order.name, paid_amount, True)
 
     sales_order.total_amount = total_amount
-    sales_order._set_paid_and_pending_per_amount()
+    sales_order.set_paid_and_pending_per_amount()
 
     assert sales_order.paid_amount == paid_amount
     assert sales_order.per_paid == exp_per_paid
@@ -403,7 +394,7 @@ def test_set_paid_and_pending_per_amount_with_zero_total_amount(
     sales_order: SalesOrder,
 ):
     sales_order.total_amount = 0
-    sales_order._set_paid_and_pending_per_amount()
+    sales_order.set_paid_and_pending_per_amount()
 
     assert sales_order.paid_amount == 0
     assert sales_order.per_paid == 100
@@ -523,11 +514,6 @@ def test_set_document_status(
     assert sales_order.status == expected_status
 
 
-#############################
-#        SalesOrder         #
-#############################
-
-
 def test_sales_order_on_cancel(sales_order: SalesOrder):
     sales_order.update_items_from_db()
     sales_order.calculate()
@@ -645,25 +631,25 @@ def test_get_sales_orders_not_in_purchase_order(
     assert new_sales_order.name in res
 
 
-def test_validate_from_available_stock_params_not_from_available_stock(
+def test_params_validate_from_available_stock_not_from_available_stock(
     sales_order: SalesOrder,
 ):
     sales_order.from_available_stock = sales_order.from_purchase_order = None
-    validate_from_available_stock_params(
+    validate_params_from_available_stock(
         sales_order.from_available_stock, sales_order.from_purchase_order
     )
 
 
-def test_validate_from_available_stock_params_available_purchased_raises_on_no_from_purchase_order():
+def test_params_validate_from_available_stock_available_purchased_raises_on_no_from_purchase_order():
     with pytest.raises(
         ValidationError,
         match="If From Available Stock is Available Purchased, From Purchase Order should be set",
     ):
-        validate_from_available_stock_params("Available Purchased", None)
+        validate_params_from_available_stock("Available Purchased", None)
 
 
 @pytest.mark.parametrize("status", ("Draft", "Completed", "Cancelled"))
-def test_validate_from_available_stock_params_available_purchased_raises_on_wrong_po_status(
+def test_params_validate_from_available_stock_available_purchased_raises_on_wrong_po_status(
     purchase_order: PurchaseOrder, status: str
 ):
     purchase_order.status = status
@@ -672,10 +658,10 @@ def test_validate_from_available_stock_params_available_purchased_raises_on_wron
     with pytest.raises(
         ValidationError, match="Status of Purchase Order should be To Receive"
     ):
-        validate_from_available_stock_params("Available Purchased", purchase_order.name)
+        validate_params_from_available_stock("Available Purchased", purchase_order.name)
 
 
-def test_validate_from_available_stock_params_available_purchased_raises_on_no_items_to_sell(
+def test_params_validate_from_available_stock_available_purchased_raises_on_no_items_to_sell(
     purchase_order: PurchaseOrder,
 ):
     purchase_order.status = "To Receive"
@@ -683,25 +669,25 @@ def test_validate_from_available_stock_params_available_purchased_raises_on_no_i
     purchase_order.db_insert()
     purchase_order.update_children()
     with pytest.raises(ValidationError, match="No Items To Sell in Purchase Order"):
-        validate_from_available_stock_params("Available Purchased", purchase_order.name)
+        validate_params_from_available_stock("Available Purchased", purchase_order.name)
 
 
-def test_validate_from_available_stock_params_available_purchased_passes(
+def test_params_validate_from_available_stock_available_purchased_passes(
     purchase_order: PurchaseOrder,
 ):
     purchase_order.status = "To Receive"
     purchase_order.db_insert()
     purchase_order.update_children()
-    validate_from_available_stock_params("Available Purchased", purchase_order.name)
+    validate_params_from_available_stock("Available Purchased", purchase_order.name)
 
 
-def test_validate_from_available_stock_params_available_actual_raises_on_no_stock_balance():
+def test_params_validate_from_available_stock_available_actual_raises_on_no_stock_balance():
     with pytest.raises(ValidationError, match="No Items in Available Actual stock"):
-        validate_from_available_stock_params("Available Actual", None)
+        validate_params_from_available_stock("Available Actual", None)
 
 
-def test_validate_from_available_stock_params_available_actual_passes(
+def test_params_validate_from_available_stock_available_actual_passes(
     monkeypatch: pytest.MonkeyPatch,
 ):
     patch_get_stock_balance(monkeypatch, {"10014030": 1})
-    validate_from_available_stock_params("Available Actual", None)
+    validate_params_from_available_stock("Available Actual", None)
