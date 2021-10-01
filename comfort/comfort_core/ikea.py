@@ -32,7 +32,7 @@ def get_delivery_services(items: dict[str, int]):  # pragma: no cover
 
 def add_items_to_cart(items: dict[str, int], authorize: bool):  # pragma: no cover
     api = get_authorized_api() if authorize else get_guest_api()
-    return ikea_api_wrapped.add_items_to_cart(api, items)
+    ikea_api_wrapped.add_items_to_cart(api, items)
 
 
 @frappe.whitelist()
@@ -111,7 +111,7 @@ def _create_item(parsed_item: ParsedItem):
         doc.insert()
 
 
-def _get_items_to_fetch(item_codes: list[str | int] | int | str, force_update: bool):
+def _get_items_to_fetch(item_codes: str, force_update: bool):
     parsed_item_codes = ikea_api_wrapped.get_item_codes(item_codes)
 
     if force_update:
@@ -207,7 +207,7 @@ class FetchItemsResult(TypedDict):  # pragma: no cover
 
 
 def fetch_items(
-    item_codes: list[str | int] | int | str, force_update: bool
+    item_codes: str, force_update: bool
 ) -> FetchItemsResult:  # pragma: no cover
     items_to_fetch = _get_items_to_fetch(item_codes, force_update)
     if not items_to_fetch:
