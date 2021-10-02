@@ -85,8 +85,12 @@ commit_subject = "сhore: Update version to {version}"
 upload_to_pypi = false
 
 [tool.pytest.ini_options]
-filterwarnings = "ignore:bleach-whitelist has been renamed bleach-allowlist|the imp module is deprecated in favour of importlib:DeprecationWarning"
+filterwarnings = [
+  "ignore:bleach-whitelist has been renamed bleach-allowlist",
+  "ignore:the imp module is deprecated in favour of importlib:DeprecationWarning"
+]
 cache_dir = "tests/.cache"
+testpaths = ["tests"]
 
 [tool.coverage.run]
 source = ["comfort"]
