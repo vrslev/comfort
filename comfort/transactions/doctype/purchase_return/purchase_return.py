@@ -4,7 +4,6 @@ from collections import defaultdict
 from types import SimpleNamespace
 from typing import Literal
 
-import frappe
 from comfort import (
     ValidationError,
     _,
@@ -215,9 +214,7 @@ class PurchaseReturn(Return):
                 )
             )
 
-        sales_returns: list[SalesReturn] = frappe.get_all(
-            "Sales Return", {"from_purchase_return": self.name}
-        )
+        sales_returns = get_all(SalesReturn, {"from_purchase_return": self.name})
         for return_ in sales_returns:
             doc = get_doc(SalesReturn, return_.name)
             doc.flags.from_purchase_return = True

@@ -520,9 +520,7 @@ def has_linked_delivery_trip(sales_order_name: str):
 @frappe.whitelist()
 def get_sales_orders_not_in_purchase_order():
     # TODO: Validate status so completed orders from actual stock are good
-    po_sales_orders: list[PurchaseOrderSalesOrder] = frappe.get_all(
-        "Purchase Order Sales Order", "sales_order_name"
-    )
+    po_sales_orders = get_all(PurchaseOrderSalesOrder, "sales_order_name")
     return [
         s.name
         for s in get_all(
@@ -581,8 +579,8 @@ def item_query(
     if from_available_stock == "Available Actual":
         acceptable_item_codes = get_stock_balance(from_available_stock).keys()
     elif from_available_stock == "Available Purchased":
-        items_to_sell: list[PurchaseOrderItemToSell] = frappe.get_all(
-            "Purchase Order Item To Sell",
+        items_to_sell = get_all(
+            PurchaseOrderItemToSell,
             fields="item_code",
             filters={"parent": ("in", from_purchase_order)},
         )
