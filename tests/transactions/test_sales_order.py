@@ -136,6 +136,26 @@ def test_validate_from_available_stock_available_purchased_raises(
         sales_order._validate_from_available_stock()
 
 
+def test_validate_from_available_stock_available_purchased_not_raises(
+    sales_order: SalesOrder, purchase_order: PurchaseOrder
+):
+    purchase_order.status = "To Receive"
+    purchase_order.db_insert()
+    purchase_order.update_children()
+    sales_order.from_available_stock = "Available Purchased"
+    sales_order.from_purchase_order = purchase_order.name
+    sales_order.items = []
+    sales_order.child_items = []
+    sales_order.append(
+        "items",
+        {
+            "item_code": purchase_order.items_to_sell[0].item_code,
+            "qty": purchase_order.items_to_sell[0].qty,
+        },
+    )
+    sales_order._validate_from_available_stock()
+
+
 def test_calculate_item_totals(sales_order: SalesOrder):
     sales_order.update_items_from_db()
 
