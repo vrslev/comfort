@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 from collections import Counter
+from types import SimpleNamespace
 
 import pytest
 
-import frappe
 from comfort import count_qty, counters_are_same, get_all, get_doc, get_value
 from comfort.stock import (
     cancel_stock_entries_for,
@@ -61,7 +61,7 @@ def test_create_stock_entry(
     stock_type = "Reserved Actual"
     items_obj = sales_order.get_items_with_splitted_combinations()
     items = [
-        frappe._dict({"item_code": item_code, "qty": qty})
+        SimpleNamespace(item_code=item_code, qty=qty)
         for item_code, qty in count_qty(items_obj).items()
     ]
     create_stock_entry(

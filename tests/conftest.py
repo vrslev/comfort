@@ -1,4 +1,5 @@
 from datetime import date
+from types import SimpleNamespace
 from typing import Any, Callable
 from unittest.mock import MagicMock
 
@@ -610,14 +611,14 @@ class FakeBot(MagicMock):
 
     def get_updates(self):
         return [
-            frappe._dict(
-                {
-                    "my_chat_member": frappe._dict(
-                        {
+            SimpleNamespace(
+                **{
+                    "my_chat_member": SimpleNamespace(
+                        **{
                             "old_chat_member": {
                                 "status": "left",
-                                "user": frappe._dict(
-                                    {
+                                "user": SimpleNamespace(
+                                    **{
                                         "id": 428190844,
                                         "username": "some_random_test_bot_name_bot",
                                         "is_bot": True,
@@ -626,8 +627,8 @@ class FakeBot(MagicMock):
                                 ),
                                 "until_date": None,
                             },
-                            "new_chat_member": frappe._dict(
-                                {
+                            "new_chat_member": SimpleNamespace(
+                                **{
                                     "can_be_edited": False,
                                     "can_change_info": True,
                                     "is_anonymous": False,
@@ -636,8 +637,8 @@ class FakeBot(MagicMock):
                                     "can_manage_chat": True,
                                     "status": "administrator",
                                     "can_restrict_members": True,
-                                    "user": frappe._dict(
-                                        {
+                                    "user": SimpleNamespace(
+                                        **{
                                             "id": 428190844,
                                             "username": "some_random_test_bot_name_bot",
                                             "is_bot": True,
@@ -651,16 +652,16 @@ class FakeBot(MagicMock):
                                     "until_date": None,
                                 }
                             ),
-                            "chat": frappe._dict(
-                                {
+                            "chat": SimpleNamespace(
+                                **{
                                     "id": -249104912890,
                                     "title": "Test Channel",
                                     "type": "channel",
                                 }
                             ),
                             "date": 1630059515,
-                            "from": frappe._dict(
-                                {
+                            "from": SimpleNamespace(
+                                **{
                                     "language_code": "en",
                                     "id": 248091841,
                                     "username": "some_random_username",

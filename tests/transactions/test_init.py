@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections import Counter
+from types import SimpleNamespace
 
 import pytest
 
@@ -86,7 +87,7 @@ def test_return_get_items_available_to_add(sales_return: SalesReturn):
 )
 def test_return_validate_new_item(sales_return: SalesReturn, item_code: str, qty: int):
     all_items = sales_return.get_items_available_to_add()
-    counter = count_qty(frappe._dict(d) for d in all_items)
+    counter = count_qty(SimpleNamespace(**i) for i in all_items)
 
     with pytest.raises(
         frappe.ValidationError,

@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import re
 from datetime import datetime
+from types import SimpleNamespace
 from typing import Any, Literal
 
 from ikea_api_wrapped.parsers.order_capture import DeliveryOptionDict
@@ -338,7 +339,7 @@ class PurchaseOrder(TypedDocument):
         all_items += items_to_sell
 
         counter = count_qty(
-            (frappe._dict(i) for i in maybe_json(unavailable_items)),
+            (SimpleNamespace(**i) for i in maybe_json(unavailable_items)),
             value_attr="available_qty",
         )
         grouped_items = group_by_attr(i for i in all_items if i.item_code in counter)

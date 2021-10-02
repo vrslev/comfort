@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections import defaultdict
+from types import SimpleNamespace
 from typing import Literal
 
 import frappe
@@ -158,7 +159,7 @@ class PurchaseReturn(Return):
     ):
         self._split_combinations_in_voucher()
 
-        qty_counter = count_qty(frappe._dict(i) for i in orders_to_items[None])  # type: ignore
+        qty_counter = count_qty(SimpleNamespace(**i) for i in orders_to_items[None])  # type: ignore
         for item in self._voucher.items_to_sell:
             if item.item_code in qty_counter:
                 item.qty -= qty_counter[item.item_code]

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections import Counter
+from types import SimpleNamespace
 from typing import Generator, Literal
 
 import pytest
@@ -109,7 +110,10 @@ def test_allocate_items(purchase_return: PurchaseReturn):
     grouped_items = group_by_attr(all_items)
     order_names_with_items = purchase_return._allocate_items().items()
     for order_name, cur_items in order_names_with_items:
-        assert count_qty(frappe._dict(i) for i in cur_items) == exp_counters[order_name]
+        assert (
+            count_qty(SimpleNamespace(**i) for i in cur_items)
+            == exp_counters[order_name]
+        )
         for item in cur_items:
             grouped_item = grouped_items[item["item_code"]][0]
             assert item["item_name"] == grouped_item.item_name
@@ -132,7 +136,7 @@ def test_make_sales_returns_creation(
     )  # There's None for items to sell
 
     def build_shorten_item(
-        item: SalesOrderItem | SalesOrderChildItem | SalesReturnItem | frappe._dict,
+        item: SalesOrderItem | SalesOrderChildItem | SalesReturnItem | SimpleNamespace,
     ) -> dict[str, str | int | None]:
         return {
             "item_code": item.item_code,
@@ -147,7 +151,7 @@ def test_make_sales_returns_creation(
         doc = get_doc(SalesReturn, grouped_sales_returns[order_name][0].name)
         assert doc.from_purchase_return == purchase_return.name
         assert [build_shorten_item(i) for i in doc.items] == [
-            build_shorten_item(frappe._dict(i)) for i in cur_items
+            build_shorten_item(SimpleNamespace(**i)) for i in cur_items
         ]
         assert doc.docstatus == 1
 
@@ -285,7 +289,7 @@ def test_purchase_return_modify_voucher(
         if diff[item_code] == 0:
             del diff[item_code]
 
-    assert diff == count_qty(frappe._dict(i) for i in orders_to_items[None])
+    assert diff == count_qty(SimpleNamespace(**i) for i in orders_to_items[None])
 
 
 @pytest.mark.parametrize("status", ("Draft", "Cancelled", "Random Status"))

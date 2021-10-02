@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from types import SimpleNamespace
 from typing import Any, Iterable, Literal
 
 import frappe
@@ -476,12 +477,12 @@ class SalesOrder(TypedDocument):
         combos_docnames = list(set(combos_docnames))
 
         items_to_remove: list[SalesOrderItem] = []
-        removed_combos: list[dict[str, str | int]] = []
+        removed_combos: list[SimpleNamespace] = []
         for item in self.items:
             if item.name in combos_docnames:
                 items_to_remove.append(item)
                 removed_combos.append(
-                    frappe._dict(item_code=item.item_code, qty=item.qty)
+                    SimpleNamespace(item_code=item.item_code, qty=item.qty)
                 )
 
         for item in items_to_remove:

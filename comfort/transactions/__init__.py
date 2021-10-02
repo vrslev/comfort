@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections import Counter
+from types import SimpleNamespace
 from typing import Any, Callable, Literal, TypedDict, TypeVar, Union
 
 import frappe
@@ -125,7 +126,7 @@ class Return(TypedDocument):
     @frappe.whitelist()
     def add_items(self, items: list[_ReturnAddItemsPayloadItem]):
         all_items = self.get_items_available_to_add()
-        counter = count_qty(frappe._dict(item) for item in all_items)
+        counter = count_qty(SimpleNamespace(**item) for item in all_items)
 
         for item in items:
             self._validate_new_item(counter, item)

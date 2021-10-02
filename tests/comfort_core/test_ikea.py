@@ -1,6 +1,7 @@
+from types import SimpleNamespace
+
 from ikea_api_wrapped.parsers.item import ParsedItem
 
-import frappe
 from comfort import count_qty, counters_are_same, get_all, get_doc
 from comfort.comfort_core.ikea import (
     _child_items_are_same,
@@ -80,7 +81,7 @@ def test_create_item_exists(parsed_item: ParsedItem):
     assert counters_are_same(
         count_qty(doc.child_items),
         count_qty(
-            frappe._dict(item_code=i["item_code"], qty=i["qty"])
+            SimpleNamespace(item_code=i["item_code"], qty=i["qty"])
             for i in parsed_item["child_items"]
         ),
     )
@@ -99,7 +100,7 @@ def test_create_item_exists_child_items_changed(parsed_item: ParsedItem):
     assert counters_are_same(
         count_qty(doc.child_items),
         count_qty(
-            frappe._dict(item_code=i["item_code"], qty=i["qty"])
+            SimpleNamespace(item_code=i["item_code"], qty=i["qty"])
             for i in parsed_item["child_items"]
         ),
     )
@@ -118,7 +119,7 @@ def test_create_item_not_exists(parsed_item: ParsedItem):
     assert counters_are_same(
         count_qty(doc.child_items),
         count_qty(
-            frappe._dict(item_code=i["item_code"], qty=i["qty"])
+            SimpleNamespace(item_code=i["item_code"], qty=i["qty"])
             for i in parsed_item["child_items"]
         ),
     )

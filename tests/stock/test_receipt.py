@@ -1,8 +1,9 @@
 from __future__ import annotations
 
+from types import SimpleNamespace
+
 import pytest
 
-import frappe
 from comfort import get_all, get_doc, get_value
 from comfort.entities.doctype.item.item import Item
 from comfort.finance import get_account
@@ -44,7 +45,7 @@ def test_new_stock_entry(
     receipt_sales: Receipt, item_no_children: Item, reverse_qty: bool
 ):
     stock_type, items = "Reserved Actual", [
-        frappe._dict({"item_code": item_no_children.item_code, "qty": 5})
+        SimpleNamespace(item_code=item_no_children.item_code, qty=5)
     ]
     receipt_sales.db_insert()
     receipt_sales._new_stock_entry(stock_type, items, reverse_qty=reverse_qty)
@@ -58,8 +59,8 @@ def test_new_stock_entry(
     )
     entry = get_doc(StockEntry, entry_name)
 
-    assert entry.items[0].item_code == items[0]["item_code"]
-    assert entry.items[0].qty == -items[0]["qty"] if reverse_qty else items[0]["qty"]
+    assert entry.items[0].item_code == items[0].item_code
+    assert entry.items[0].qty == -items[0].qty if reverse_qty else items[0].qty
 
 
 def test_create_sales_gl_entries(receipt_sales: Receipt, sales_order: SalesOrder):

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+from types import SimpleNamespace
 from typing import Any, TypedDict
 
 import aiohttp
@@ -74,7 +75,7 @@ def _make_items_from_child_items_if_not_exist(parsed_item: ParsedItem):
 
 def _child_items_are_same(old_child_items: list[ChildItem], new_child_items: list[Any]):
     counted_new_child_items = count_qty(
-        frappe._dict(item_code=item["item_code"], qty=item["qty"])
+        SimpleNamespace(item_code=item["item_code"], qty=item["qty"])
         for item in new_child_items
     )
     counted_old_child_items = count_qty(old_child_items)
