@@ -87,8 +87,10 @@ class SalesOrder(TypedDocument):
 
     def before_submit(self):
         self.edit_commission = True
-        self._modify_purchase_order_for_from_available_stock()
-        self._make_stock_entries_for_from_available_stock()
+        if self.from_available_stock:
+            self._modify_purchase_order_for_from_available_stock()
+            self._make_stock_entries_for_from_available_stock()
+            self.set_statuses()
 
     def before_cancel(self):  # pragma: no cover
         self.set_statuses()
@@ -267,6 +269,7 @@ class SalesOrder(TypedDocument):
                 "sales_order_name": self.name,
                 "customer": self.customer,
                 "total_amount": self.total_amount,
+                "docstatus": 1,
             },
         )
 

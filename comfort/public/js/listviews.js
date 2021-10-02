@@ -71,7 +71,7 @@ frappe.listview_settings["Sales Order"] = {
             if (stock_type == "Available Purchased") {
               frappe.prompt(
                 {
-                  label: __("Purchase Order"),
+                  label: __("Purchase Order"), // TODO: Add query for Purchase Order
                   fieldname: "purchase_order",
                   fieldtype: "Link",
                   options: "Purchase Order",
