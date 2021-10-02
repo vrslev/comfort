@@ -5,6 +5,7 @@ from typing import Callable, Literal
 
 import pytest
 
+import frappe
 from comfort import count_qty, counters_are_same, get_all, get_doc, get_value
 from comfort.comfort_core.doctype.commission_settings.commission_settings import (
     CommissionSettings,
@@ -36,6 +37,9 @@ from frappe import ValidationError
 
 
 def test_update_items_from_db(sales_order: SalesOrder):
+    for i in sales_order.items:
+        frappe.clear_document_cache("Item", i.item_code)
+
     sales_order.update_items_from_db()
 
     for i in sales_order.items:
