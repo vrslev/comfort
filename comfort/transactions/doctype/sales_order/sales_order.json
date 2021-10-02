@@ -1,298 +1,303 @@
 {
-  "actions": [],
-  "autoname": "SO-.YYYY.-.####",
-  "creation": "2021-01-01 18:33:35.831110",
-  "doctype": "DocType",
-  "editable_grid": 1,
-  "engine": "InnoDB",
-  "field_order": [
-    "customer",
-    "section_break_1",
-    "items",
-    "section_break_2",
-    "services",
-    "column_break_1",
-    "discount",
-    "commission",
-    "edit_commission",
-    "payment_section",
-    "paid_amount",
-    "column_break_2",
-    "pending_amount",
-    "totals_section",
-    "total_amount",
-    "items_cost",
-    "column_break_3",
-    "total_weight",
-    "service_amount",
-    "column_break_4",
-    "total_quantity",
-    "margin",
-    "section_break_3",
-    "child_items",
-    "status_section",
-    "status",
-    "payment_status",
-    "per_paid",
-    "column_break_5",
-    "delivery_status",
-    "amended_from",
-    "from_available_stock",
-    "from_purchase_order"
-  ],
-  "fields": [
-    {
-      "fieldname": "customer",
-      "fieldtype": "Link",
-      "in_preview": 1,
-      "in_standard_filter": 1,
-      "label": "Customer",
-      "options": "Customer",
-      "reqd": 1,
-      "search_index": 1
-    },
-    {
-      "fieldname": "items",
-      "fieldtype": "Table",
-      "label": "Items",
-      "options": "Sales Order Item",
-      "reqd": 1
-    },
-    {
-      "allow_on_submit": 1,
-      "fieldname": "services",
-      "fieldtype": "Table",
-      "label": "Services",
-      "options": "Sales Order Service"
-    },
-    {
-      "fieldname": "commission",
-      "fieldtype": "Percent",
-      "label": "Commission",
-      "precision": "0",
-      "read_only_depends_on": "eval:doc.edit_commission == 0"
-    },
-    {
-      "default": "0",
-      "fieldname": "edit_commission",
-      "fieldtype": "Check",
-      "label": "Edit Commission"
-    },
-    {
-      "default": "0",
-      "fieldname": "discount",
-      "fieldtype": "Currency",
-      "label": "Discount"
-    },
-    {
-      "allow_on_submit": 1,
-      "fieldname": "total_amount",
-      "fieldtype": "Currency",
-      "in_list_view": 1,
-      "in_preview": 1,
-      "label": "Total Amount",
-      "read_only": 1
-    },
-    {
-      "fieldname": "payment_section",
-      "fieldtype": "Section Break",
-      "label": "Payment"
-    },
-    {
-      "fieldname": "paid_amount",
-      "fieldtype": "Currency",
-      "label": "Paid Amount",
-      "read_only": 1
-    },
-    {
-      "allow_on_submit": 1,
-      "fieldname": "pending_amount",
-      "fieldtype": "Currency",
-      "label": "Pending Amount",
-      "read_only": 1
-    },
-    {
-      "fieldname": "totals_section",
-      "fieldtype": "Section Break",
-      "label": "Totals"
-    },
-    {
-      "fieldname": "total_quantity",
-      "fieldtype": "Int",
-      "label": "Total Quantity",
-      "read_only": 1
-    },
-    {
-      "fieldname": "items_cost",
-      "fieldtype": "Currency",
-      "label": "Items Cost",
-      "read_only": 1
-    },
-    {
-      "allow_on_submit": 1,
-      "fieldname": "service_amount",
-      "fieldtype": "Currency",
-      "label": "Service Amount",
-      "read_only": 1
-    },
-    {
-      "fieldname": "total_weight",
-      "fieldtype": "Float",
-      "label": "Total Weight",
-      "precision": "2",
-      "read_only": 1
-    },
-    {
-      "fieldname": "margin",
-      "fieldtype": "Currency",
-      "label": "Margin",
-      "read_only": 1
-    },
-    {
-      "fieldname": "child_items",
-      "fieldtype": "Table",
-      "label": "Child Items",
-      "options": "Sales Order Child Item",
-      "read_only": 1
-    },
-    {
-      "fieldname": "status_section",
-      "fieldtype": "Section Break",
-      "label": "Status"
-    },
-    {
-      "default": "Draft",
-      "fieldname": "status",
-      "fieldtype": "Select",
-      "hidden": 1,
-      "in_list_view": 1,
-      "in_preview": 1,
-      "in_standard_filter": 1,
-      "label": "Status",
-      "no_copy": 1,
-      "options": "\nDraft\nIn Progress\nCompleted\nCancelled",
-      "read_only": 1,
-      "reqd": 1,
-      "search_index": 1
-    },
-    {
-      "fieldname": "payment_status",
-      "fieldtype": "Select",
-      "in_list_view": 1,
-      "in_standard_filter": 1,
-      "label": "Payment Status",
-      "no_copy": 1,
-      "options": "\nUnpaid\nPartially Paid\nPaid\nOverpaid",
-      "read_only": 1,
-      "search_index": 1
-    },
-    {
-      "allow_on_submit": 1,
-      "fieldname": "per_paid",
-      "fieldtype": "Percent",
-      "label": "% Paid",
-      "read_only": 1
-    },
-    {
-      "fieldname": "delivery_status",
-      "fieldtype": "Select",
-      "in_list_view": 1,
-      "in_standard_filter": 1,
-      "label": "Delivery Status",
-      "no_copy": 1,
-      "options": "\nTo Purchase\nPurchased\nTo Deliver\nDelivered",
-      "read_only": 1,
-      "search_index": 1
-    },
-    {
-      "fieldname": "amended_from",
-      "fieldtype": "Link",
-      "label": "Amended From",
-      "no_copy": 1,
-      "options": "Sales Order",
-      "print_hide": 1,
-      "read_only": 1
-    },
-    {
-      "fieldname": "section_break_1",
-      "fieldtype": "Section Break"
-    },
-    {
-      "fieldname": "section_break_2",
-      "fieldtype": "Section Break"
-    },
-    {
-      "fieldname": "column_break_1",
-      "fieldtype": "Column Break"
-    },
-    {
-      "fieldname": "column_break_2",
-      "fieldtype": "Column Break"
-    },
-    {
-      "fieldname": "column_break_3",
-      "fieldtype": "Column Break"
-    },
-    {
-      "fieldname": "column_break_4",
-      "fieldtype": "Column Break"
-    },
-    {
-      "fieldname": "section_break_3",
-      "fieldtype": "Section Break"
-    },
-    {
-      "fieldname": "column_break_5",
-      "fieldtype": "Column Break"
-    },
-    {
-      "fieldname": "from_purchase_order",
-      "fieldtype": "Link",
-      "label": "From Purchase Order",
-      "options": "Purchase Order"
-    },
-    {
-      "fieldname": "from_available_stock",
-      "fieldtype": "Data",
-      "label": "From Available Stock"
-    }
-  ],
-  "index_web_pages_for_search": 1,
-  "is_submittable": 1,
-  "links": [],
-  "modified": "2021-09-11 15:37:01.245435",
-  "modified_by": "Administrator",
-  "module": "Transactions",
-  "name": "Sales Order",
-  "owner": "Administrator",
-  "permissions": [
-    {
-      "amend": 1,
-      "cancel": 1,
-      "create": 1,
-      "delete": 1,
-      "read": 1,
-      "role": "System Manager",
-      "submit": 1,
-      "write": 1
-    },
-    {
-      "amend": 1,
-      "cancel": 1,
-      "create": 1,
-      "delete": 1,
-      "read": 1,
-      "role": "Comfort User",
-      "submit": 1,
-      "write": 1
-    }
-  ],
-  "quick_entry": 1,
-  "search_fields": "status,customer,total_amount",
-  "show_name_in_global_search": 1,
-  "show_preview_popup": 1,
-  "sort_field": "modified",
-  "sort_order": "DESC",
-  "title_field": "customer",
-  "track_changes": 1
+ "actions": [],
+ "autoname": "SO-.YYYY.-.####",
+ "creation": "2021-01-01 18:33:35.831110",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "customer",
+  "section_break_1",
+  "items",
+  "section_break_2",
+  "services",
+  "column_break_1",
+  "discount",
+  "commission",
+  "edit_commission",
+  "payment_section",
+  "paid_amount",
+  "column_break_2",
+  "pending_amount",
+  "totals_section",
+  "total_amount",
+  "items_cost",
+  "column_break_3",
+  "total_weight",
+  "service_amount",
+  "column_break_4",
+  "total_quantity",
+  "margin",
+  "section_break_3",
+  "child_items",
+  "status_section",
+  "from_available_stock",
+  "status",
+  "payment_status",
+  "per_paid",
+  "column_break_5",
+  "from_purchase_order",
+  "delivery_status",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Customer",
+   "options": "Customer",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Items",
+   "options": "Sales Order Item",
+   "reqd": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "services",
+   "fieldtype": "Table",
+   "label": "Services",
+   "options": "Sales Order Service"
+  },
+  {
+   "fieldname": "commission",
+   "fieldtype": "Percent",
+   "label": "Commission",
+   "precision": "0",
+   "read_only_depends_on": "eval:doc.edit_commission == 0"
+  },
+  {
+   "default": "0",
+   "fieldname": "edit_commission",
+   "fieldtype": "Check",
+   "label": "Edit Commission"
+  },
+  {
+   "default": "0",
+   "fieldname": "discount",
+   "fieldtype": "Currency",
+   "label": "Discount"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "total_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "label": "Total Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "payment_section",
+   "fieldtype": "Section Break",
+   "label": "Payment"
+  },
+  {
+   "fieldname": "paid_amount",
+   "fieldtype": "Currency",
+   "label": "Paid Amount",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "pending_amount",
+   "fieldtype": "Currency",
+   "label": "Pending Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "totals_section",
+   "fieldtype": "Section Break",
+   "label": "Totals"
+  },
+  {
+   "fieldname": "total_quantity",
+   "fieldtype": "Int",
+   "label": "Total Quantity",
+   "read_only": 1
+  },
+  {
+   "fieldname": "items_cost",
+   "fieldtype": "Currency",
+   "label": "Items Cost",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "service_amount",
+   "fieldtype": "Currency",
+   "label": "Service Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_weight",
+   "fieldtype": "Float",
+   "label": "Total Weight",
+   "precision": "2",
+   "read_only": 1
+  },
+  {
+   "fieldname": "margin",
+   "fieldtype": "Currency",
+   "label": "Margin",
+   "read_only": 1
+  },
+  {
+   "fieldname": "child_items",
+   "fieldtype": "Table",
+   "label": "Child Items",
+   "options": "Sales Order Child Item",
+   "read_only": 1
+  },
+  {
+   "fieldname": "status_section",
+   "fieldtype": "Section Break",
+   "label": "Status"
+  },
+  {
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "no_copy": 1,
+   "options": "\nDraft\nIn Progress\nCompleted\nCancelled",
+   "read_only": 1,
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "payment_status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Payment Status",
+   "no_copy": 1,
+   "options": "\nUnpaid\nPartially Paid\nPaid\nOverpaid",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "per_paid",
+   "fieldtype": "Percent",
+   "label": "% Paid",
+   "read_only": 1
+  },
+  {
+   "fieldname": "delivery_status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Delivery Status",
+   "no_copy": 1,
+   "options": "\nTo Purchase\nPurchased\nTo Deliver\nDelivered",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Sales Order",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_1",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "section_break_2",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_3",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "from_purchase_order",
+   "fieldtype": "Link",
+   "label": "From Purchase Order",
+   "no_copy": 1,
+   "options": "Purchase Order",
+   "read_only": 1
+  },
+  {
+   "fieldname": "from_available_stock",
+   "fieldtype": "Select",
+   "label": "From Available Stock",
+   "no_copy": 1,
+   "options": "\nAvailable Purchased\nAvailable Actual",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2021-10-02 13:49:43.742389",
+ "modified_by": "Administrator",
+ "module": "Transactions",
+ "name": "Sales Order",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "System Manager",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "Comfort User",
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "search_fields": "status,customer,total_amount",
+ "show_name_in_global_search": 1,
+ "show_preview_popup": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "title_field": "customer",
+ "track_changes": 1
 }
