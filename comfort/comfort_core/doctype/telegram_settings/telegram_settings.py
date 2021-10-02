@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from types import SimpleNamespace
 from typing import Any
 
 import telegram
@@ -26,8 +27,8 @@ def get_chats():
     chats: list[dict[str, str]] = []
     for update in bot.get_updates():
         if update.my_chat_member:
-            c = update.my_chat_member.chat
-            chats.append({"id": str(c.id), "title": c.title})  # type: ignore
+            c: SimpleNamespace = update.my_chat_member.chat
+            chats.append({"id": str(c.id), "title": c.title})
     return chats
 
 

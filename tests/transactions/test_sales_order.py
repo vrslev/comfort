@@ -322,10 +322,10 @@ def test_modify_purchase_order_for_from_available_stock_available_purchased(
     def get_po_counter(purchase_order: PurchaseOrder):
         items: list[
             SalesOrderItem | SalesOrderChildItem | PurchaseOrderItemToSell | ChildItem
-        ] = list(purchase_order._get_items_in_sales_orders(True))
-        items += purchase_order._get_items_to_sell(True)
-        print(count_qty(purchase_order._get_items_to_sell(True)))
-        print(count_qty(purchase_order._get_items_in_sales_orders(True)))
+        ] = list(purchase_order.get_items_in_sales_orders(True))
+        items += purchase_order.get_items_to_sell(True)
+        print(count_qty(purchase_order.get_items_to_sell(True)))
+        print(count_qty(purchase_order.get_items_in_sales_orders(True)))
         return count_qty(items)
 
     prev_counter = get_po_counter(purchase_order)

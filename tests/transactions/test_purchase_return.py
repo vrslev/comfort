@@ -88,9 +88,9 @@ def test_purchase_return_validate_voucher_statuses_status_raises(
 def test_purchase_return_get_all_items(purchase_return: PurchaseReturn):
     items = purchase_return._get_all_items()
     exp_items: list[AnyChildItem] = list(
-        purchase_return._voucher._get_items_to_sell(True)
+        purchase_return._voucher.get_items_to_sell(True)
     )
-    exp_items += purchase_return._voucher._get_items_in_sales_orders(True)
+    exp_items += purchase_return._voucher.get_items_in_sales_orders(True)
     assert count_qty(items) == count_qty(exp_items)
     can_allocate_items: Generator[bool | None, None, None] = (
         item.get("doctype") and item.get("parent") for item in items
@@ -172,7 +172,7 @@ def test_make_sales_returns_docstatus_all_items_returns(
     sales_order.submit()
     sales_order.db_set("delivery_status", "Purchased")
 
-    items = purchase_return._voucher._get_items_in_sales_orders(True)
+    items = purchase_return._voucher.get_items_in_sales_orders(True)
     purchase_return._add_missing_fields_to_items(items)
     purchase_return.items = []
     purchase_return.add_items([dict(i) for i in items])  # type: ignore
@@ -221,7 +221,7 @@ def test_add_missing_field_to_voucher_items_to_sell_changes(
     item_name: str | None,
     amount: int | None,
 ):
-    items = merge_same_items(purchase_return._voucher._get_items_to_sell(True))
+    items = merge_same_items(purchase_return._voucher.get_items_to_sell(True))
     item = items[0]
     item.rate = rate  # type: ignore
     item.weight = weight  # type: ignore
@@ -241,7 +241,7 @@ def test_add_missing_field_to_voucher_items_to_sell_not_changes(
     purchase_return: PurchaseReturn,
 ):
     rate, weight, item_name, amount = 100, 200, "The Name", 345
-    items = merge_same_items(purchase_return._voucher._get_items_to_sell(True))
+    items = merge_same_items(purchase_return._voucher.get_items_to_sell(True))
     item = items[0]
     item.rate = rate  # type: ignore
     item.weight = weight  # type: ignore
@@ -255,7 +255,7 @@ def test_add_missing_field_to_voucher_items_to_sell_not_changes(
 
 
 def test_purchase_return_split_combinations_in_voucher(purchase_return: PurchaseReturn):
-    items = merge_same_items(purchase_return._voucher._get_items_to_sell(True))
+    items = merge_same_items(purchase_return._voucher.get_items_to_sell(True))
     purchase_return._add_missing_field_to_voucher_items_to_sell(items)  # type: ignore
     purchase_return._split_combinations_in_voucher()
 
@@ -278,10 +278,10 @@ def test_purchase_return_split_combinations_in_voucher(purchase_return: Purchase
 def test_purchase_return_modify_voucher(
     purchase_return: PurchaseReturn,
 ):  # TODO: This needs more of integration test
-    prev_qty_counter = count_qty(purchase_return._voucher._get_items_to_sell(True))
+    prev_qty_counter = count_qty(purchase_return._voucher.get_items_to_sell(True))
     orders_to_items = purchase_return._allocate_items()
     purchase_return._modify_voucher(orders_to_items)
-    new_qty_counter = count_qty(purchase_return._voucher._get_items_to_sell(True))
+    new_qty_counter = count_qty(purchase_return._voucher.get_items_to_sell(True))
 
     diff = prev_qty_counter.copy()
     for item_code in prev_qty_counter:

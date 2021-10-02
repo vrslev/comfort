@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import csv
-from typing import Any
+from typing import Any, Generator
 
 import click
 
@@ -30,7 +30,9 @@ def connect(context: Any):
 
 
 def _cleanup():
-    modules = (m.name for m in get_all(ModuleDef, filters={"app_name": app_name}))
+    modules: Generator[Any, None, None] = (
+        m.name for m in get_all(ModuleDef, filters={"app_name": app_name})
+    )
     doctypes = get_all(
         DocType, fields=("name", "issingle"), filters={"module": ("in", modules)}
     )

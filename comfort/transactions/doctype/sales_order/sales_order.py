@@ -344,7 +344,7 @@ class SalesOrder(TypedDocument):
                 Payment, {"voucher_type": self.doctype, "voucher_no": self.name}
             )
         ]
-        returns = [
+        returns: list[Any] = [
             r.name for r in frappe.get_all("Sales Return", {"sales_order": self.name})
         ]
 

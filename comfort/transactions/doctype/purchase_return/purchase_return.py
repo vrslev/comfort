@@ -60,7 +60,7 @@ class PurchaseReturn(Return):
 
     def _get_all_items(self):
         items: list[AnyChildItem] = []
-        items += self._voucher._get_items_to_sell(True)  # type: ignore
+        items += self._voucher.get_items_to_sell(True)  # type: ignore
         # Using this way instead of _get_items_in_sales_orders(True)
         # to have `parent` and `doctype` fields in these items
         for sales_order in self._voucher.sales_orders:
@@ -148,7 +148,7 @@ class PurchaseReturn(Return):
             item.amount = item.qty * item.rate  # type: ignore
 
     def _split_combinations_in_voucher(self):
-        items = merge_same_items(self._voucher._get_items_to_sell(True))
+        items = merge_same_items(self._voucher.get_items_to_sell(True))
         self._add_missing_field_to_voucher_items_to_sell(items)  # type: ignore
         self._voucher.items_to_sell = []
         self._voucher.extend("items_to_sell", items)

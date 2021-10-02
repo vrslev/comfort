@@ -19,12 +19,12 @@ def test_checkout_before_submit(checkout: Checkout, purchase_order: PurchaseOrde
         doc = get_doc(StockEntry, name)
         assert doc.stock_type in ("Reserved Purchased", "Available Purchased")
         if doc.stock_type == "Reserved Purchased":
-            exp_items = count_qty(purchase_order._get_items_in_sales_orders(True))
+            exp_items = count_qty(purchase_order.get_items_in_sales_orders(True))
             for i in count_qty(doc.items):
                 assert i in exp_items
 
         elif doc.stock_type == "Available Purchased":
-            exp_items = count_qty(purchase_order._get_items_to_sell(True))
+            exp_items = count_qty(purchase_order.get_items_to_sell(True))
             for i in count_qty(doc.items):
                 assert i in exp_items
 

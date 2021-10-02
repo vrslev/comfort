@@ -198,17 +198,17 @@ def test_calculate_total_amount(purchase_order: PurchaseOrder):
 
 def test_get_items_to_sell_with_empty_items_to_sell(purchase_order: PurchaseOrder):
     purchase_order.items_to_sell = []
-    items = purchase_order._get_items_to_sell(split_combinations=False)
+    items = purchase_order.get_items_to_sell(split_combinations=False)
     assert items == []
 
 
 def test_get_items_to_sell_no_split_combinations(purchase_order: PurchaseOrder):
-    items = purchase_order._get_items_to_sell(split_combinations=False)
+    items = purchase_order.get_items_to_sell(split_combinations=False)
     assert items == purchase_order.items_to_sell
 
 
 def test_get_items_to_sell_split_combinations(purchase_order: PurchaseOrder):
-    items = purchase_order._get_items_to_sell(split_combinations=True)
+    items = purchase_order.get_items_to_sell(split_combinations=True)
 
     child_items = get_all(
         ChildItem,
@@ -229,7 +229,7 @@ def test_get_items_in_sales_orders_with_empty_sales_orders(
 ):
     # TODO: If set items = child_items instead of items += child_items, then test passes
     purchase_order.sales_orders = []
-    items = purchase_order._get_items_in_sales_orders(split_combinations=False)
+    items = purchase_order.get_items_in_sales_orders(split_combinations=False)
     assert items == []
 
 
@@ -244,7 +244,7 @@ def test_get_items_in_sales_orders_no_split_combinations(purchase_order: Purchas
             )
         },
     )
-    items = purchase_order._get_items_in_sales_orders(split_combinations=False)
+    items = purchase_order.get_items_in_sales_orders(split_combinations=False)
     assert items == exp_items
 
 
@@ -264,7 +264,7 @@ def test_get_items_in_sales_orders_split_combinations(purchase_order: PurchaseOr
     exp_items: list[SalesOrderItem | SalesOrderChildItem] = child_items + [  # type: ignore
         i for i in so_items if i.item_code not in parents
     ]
-    items = purchase_order._get_items_in_sales_orders(split_combinations=True)
+    items = purchase_order.get_items_in_sales_orders(split_combinations=True)
     assert items == exp_items
 
 
@@ -273,9 +273,9 @@ def test_get_templated_items_for_api(
     purchase_order: PurchaseOrder, split_combinations: bool
 ):
     items_for_api = purchase_order._get_templated_items_for_api(split_combinations)
-    all_items: list[Any] = purchase_order._get_items_to_sell(  # type: ignore
+    all_items: list[Any] = purchase_order.get_items_to_sell(  # type: ignore
         split_combinations
-    ) + purchase_order._get_items_in_sales_orders(split_combinations)
+    ) + purchase_order.get_items_in_sales_orders(split_combinations)
     assert count_qty(all_items) == items_for_api
 
 

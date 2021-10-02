@@ -209,7 +209,7 @@ class PurchaseOrder(TypedDocument):
         self._calculate_total_weight()
         self._calculate_total_amount()
 
-    def _get_items_to_sell(
+    def get_items_to_sell(
         self, split_combinations: bool
     ) -> list[PurchaseOrderItemToSell | ChildItem]:
         if not self.items_to_sell:
@@ -228,7 +228,7 @@ class PurchaseOrder(TypedDocument):
         ]
         return items_to_sell + child_items  # type: ignore
 
-    def _get_items_in_sales_orders(self, split_combinations: bool):
+    def get_items_in_sales_orders(self, split_combinations: bool):
         items: list[SalesOrderItem | SalesOrderChildItem] = []
         if not self.sales_orders:
             return items
@@ -255,9 +255,9 @@ class PurchaseOrder(TypedDocument):
         return items
 
     def _get_templated_items_for_api(self, split_combinations: bool):
-        items = self._get_items_to_sell(  # type: ignore
+        items = self.get_items_to_sell(  # type: ignore
             split_combinations
-        ) + self._get_items_in_sales_orders(split_combinations)
+        ) + self.get_items_in_sales_orders(split_combinations)
         return count_qty(items)  # type: ignore
 
     def _clear_delivery_options(self):
@@ -333,7 +333,7 @@ class PurchaseOrder(TypedDocument):
         for order in self.sales_orders:
             doc = get_doc(SalesOrder, order.sales_order_name)
             all_items += doc.get_items_with_splitted_combinations()
-        items_to_sell = self._get_items_to_sell(split_combinations=True)
+        items_to_sell = self.get_items_to_sell(split_combinations=True)
         for item in items_to_sell:
             item.parent = self.name  # type: ignore
         all_items += items_to_sell

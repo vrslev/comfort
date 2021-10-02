@@ -87,7 +87,7 @@ class Receipt(TypedDocument):
     def _create_purchase_stock_entries_for_sales_orders(self):
         items: list[
             SalesOrderItem | SalesOrderChildItem
-        ] = self._voucher._get_items_in_sales_orders(  # type: ignore
+        ] = self._voucher.get_items_in_sales_orders(  # type: ignore
             split_combinations=True
         )
         if not items:
@@ -98,7 +98,7 @@ class Receipt(TypedDocument):
     def _create_purchase_stock_entries_for_items_to_sell(self):
         items: list[
             PurchaseOrderItemToSell | ChildItem
-        ] = self._voucher._get_items_to_sell(  # type: ignore
+        ] = self._voucher.get_items_to_sell(  # type: ignore
             split_combinations=True
         )
         if not items:

@@ -17,7 +17,7 @@ class Checkout(TypedDocument):
                 self.doctype,
                 self.name,
                 "Reserved Purchased",
-                doc._get_items_in_sales_orders(True),
+                doc.get_items_in_sales_orders(True),
             )
 
         if doc.items_to_sell:
@@ -25,7 +25,7 @@ class Checkout(TypedDocument):
                 self.doctype,
                 self.name,
                 "Available Purchased",
-                doc._get_items_to_sell(True),
+                doc.get_items_to_sell(True),
             )
 
     def set_purchase_draft_status(self):
