@@ -248,6 +248,7 @@ class SalesOrder(TypedDocument):
     def _modify_purchase_order_for_from_available_stock(self):
         if self.from_available_stock != "Available Purchased":
             return
+
         from ..purchase_order.purchase_order import PurchaseOrder
 
         doc = get_doc(PurchaseOrder, self.from_purchase_order)
@@ -324,14 +325,13 @@ class SalesOrder(TypedDocument):
             "Available Actual": "Sales Order",
         }[self.from_available_stock]
 
-        if self.from_available_stock == "Available Purchased":
-            ref_name: str = get_value(
-                ref_doctype, {"purchase_order": self.from_purchase_order}
-            )
-        else:
-            ref_name = self.name
-
+        ref_name: str = (
+            get_value(ref_doctype, {"purchase_order": self.from_purchase_order})
+            if self.from_available_stock == "Available Purchased"
+            else self.name
+        )
         items = self.get_items_with_splitted_combinations()
+
         create_stock_entry(
             ref_doctype, ref_name, stock_types[0], items, reverse_qty=True  # type: ignore
         )
@@ -559,14 +559,14 @@ def validate_params_from_available_stock(
 
 
 @frappe.whitelist()
-def item_query(
+def item_query(  # TODO: Cover
     doctype: str,
     txt: str,
     searchfield: str,
     start: int,
     page_len: int,
     filters: dict[str, Any],
-):
+):  # pragma: no cover
     from_available_stock: Literal[
         "Available Purchased", "Available Actual"
     ] | None = filters.get("from_available_stock")

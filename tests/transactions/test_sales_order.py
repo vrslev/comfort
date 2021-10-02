@@ -14,8 +14,10 @@ from comfort.entities.doctype.child_item.child_item import ChildItem
 from comfort.entities.doctype.item.item import Item
 from comfort.finance import create_payment
 from comfort.finance.doctype.payment.payment import Payment
+from comfort.stock.doctype.checkout.checkout import Checkout
 from comfort.stock.doctype.delivery_stop.delivery_stop import DeliveryStop
 from comfort.stock.doctype.receipt.receipt import Receipt
+from comfort.stock.doctype.stock_entry.stock_entry import StockEntry
 from comfort.transactions.doctype.purchase_order.purchase_order import PurchaseOrder
 from comfort.transactions.doctype.purchase_order_item_to_sell.purchase_order_item_to_sell import (
     PurchaseOrderItemToSell,
@@ -359,6 +361,62 @@ def test_modify_purchase_order_for_from_available_stock_available_purchased(
     sales_order.update_children()
     purchase_order.reload()
     assert counters_are_same(prev_counter, get_po_counter(purchase_order))
+
+
+def test_make_stock_entries_for_from_available_stock_not_executed(
+    sales_order: SalesOrder,
+):
+    sales_order.from_available_stock = None
+    sales_order._make_stock_entries_for_from_available_stock()
+    assert len(get_all(StockEntry)) == 0
+
+
+@pytest.mark.usefixtures("ikea_settings")
+def test_make_stock_entries_for_from_available_stock_available_purchased(
+    sales_order: SalesOrder, purchase_order: PurchaseOrder
+):
+    purchase_order.db_insert()
+    purchase_order.update_children()
+
+    sales_order.from_available_stock = "Available Purchased"
+    sales_order.from_purchase_order = purchase_order.name
+
+    checkout = get_doc(
+        Checkout, {"purchase_order": purchase_order.name, "docstatus": 1}
+    )
+    checkout.db_insert()
+    sales_order._make_stock_entries_for_from_available_stock()
+
+    exp_counter = count_qty(sales_order.get_items_with_splitted_combinations())
+    for e in get_all(StockEntry):
+        entry = get_doc(StockEntry, e.name)
+        assert entry.stock_type in ("Available Purchased", "Reserved Purchased")
+        if entry.stock_type == "Available Purchased":
+            for item in entry.items:
+                item.qty = -item.qty
+            assert count_qty(entry.items) == exp_counter
+        else:
+            assert count_qty(entry.items) == exp_counter
+
+
+def test_make_stock_entries_for_from_available_stock_available_actual(
+    sales_order: SalesOrder,
+):
+    sales_order.from_available_stock = "Available Actual"
+    sales_order.db_insert()
+    sales_order.child_items = []
+    sales_order._make_stock_entries_for_from_available_stock()
+
+    exp_counter = count_qty(sales_order.get_items_with_splitted_combinations())
+    for e in get_all(StockEntry):
+        entry = get_doc(StockEntry, e.name)
+        assert entry.stock_type in ("Available Actual", "Reserved Actual")
+        if entry.stock_type == "Available Actual":
+            for item in entry.items:
+                item.qty = -item.qty
+            assert count_qty(entry.items) == exp_counter
+        else:
+            assert count_qty(entry.items) == exp_counter
 
 
 def test_get_paid_amount(sales_order: SalesOrder):
