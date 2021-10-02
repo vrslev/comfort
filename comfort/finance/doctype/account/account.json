@@ -1,93 +1,93 @@
 {
-  "actions": [],
-  "allow_rename": 1,
-  "autoname": "field:account_name",
-  "creation": "2020-12-29 15:31:26.299735",
-  "doctype": "DocType",
-  "editable_grid": 1,
-  "engine": "InnoDB",
-  "field_order": [
-    "account_name",
-    "is_group",
-    "column_break_3",
-    "parent_account",
-    "lft",
-    "rgt",
-    "old_parent"
-  ],
-  "fields": [
-    {
-      "fieldname": "account_name",
-      "fieldtype": "Data",
-      "in_list_view": 1,
-      "label": "Account Name",
-      "no_copy": 1,
-      "reqd": 1,
-      "unique": 1
-    },
-    {
-      "default": "0",
-      "fieldname": "is_group",
-      "fieldtype": "Check",
-      "label": "Is Group"
-    },
-    {
-      "fieldname": "column_break_3",
-      "fieldtype": "Column Break"
-    },
-    {
-      "fieldname": "parent_account",
-      "fieldtype": "Link",
-      "label": "Parent Account",
-      "options": "Account"
-    },
-    {
-      "fieldname": "lft",
-      "fieldtype": "Int",
-      "hidden": 1,
-      "label": "Left",
-      "no_copy": 1,
-      "read_only": 1
-    },
-    {
-      "fieldname": "rgt",
-      "fieldtype": "Int",
-      "hidden": 1,
-      "label": "Right",
-      "no_copy": 1,
-      "read_only": 1
-    },
-    {
-      "fieldname": "old_parent",
-      "fieldtype": "Link",
-      "hidden": 1,
-      "label": "Old Parent",
-      "options": "Account"
-    }
-  ],
-  "index_web_pages_for_search": 1,
-  "is_tree": 1,
-  "links": [],
-  "modified": "2021-08-31 22:13:24.625084",
-  "modified_by": "Administrator",
-  "module": "Finance",
-  "name": "Account",
-  "nsm_parent_field": "parent_account",
-  "owner": "Administrator",
-  "permissions": [
-    {
-      "create": 1,
-      "delete": 1,
-      "read": 1,
-      "role": "System Manager",
-      "write": 1
-    },
-    {
-      "read": 1,
-      "role": "Comfort User"
-    }
-  ],
-  "search_fields": "parent_account",
-  "sort_field": "modified",
-  "sort_order": "DESC"
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:account_name",
+ "creation": "2020-12-29 15:31:26.299735",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "account_name",
+  "is_group",
+  "column_break_3",
+  "parent_account",
+  "lft",
+  "rgt",
+  "old_parent"
+ ],
+ "fields": [
+  {
+   "fieldname": "account_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Account Name",
+   "no_copy": 1,
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_group",
+   "fieldtype": "Check",
+   "label": "Is Group"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "parent_account",
+   "fieldtype": "Link",
+   "label": "Parent Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "lft",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "Left",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "rgt",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "Right",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "old_parent",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Old Parent",
+   "options": "Account"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_tree": 1,
+ "links": [],
+ "modified": "2021-08-31 22:13:24.625084",
+ "modified_by": "Administrator",
+ "module": "Finance",
+ "name": "Account",
+ "nsm_parent_field": "parent_account",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Comfort User"
+  }
+ ],
+ "search_fields": "parent_account",
+ "sort_field": "modified",
+ "sort_order": "DESC"
 }

@@ -1,111 +1,111 @@
 {
-  "actions": [],
-  "autoname": "PAY-.YYYY.-.####",
-  "creation": "2021-08-17 22:54:46.533174",
-  "doctype": "DocType",
-  "editable_grid": 1,
-  "engine": "InnoDB",
-  "field_order": [
-    "voucher_section",
-    "voucher_type",
-    "column_break",
-    "voucher_no",
-    "amount_section",
-    "amount",
-    "section_break",
-    "paid_with_cash",
-    "amended_from"
-  ],
-  "fields": [
-    {
-      "fieldname": "voucher_type",
-      "fieldtype": "Select",
-      "in_list_view": 1,
-      "label": "Voucher Type",
-      "options": "\nSales Order\nPurchase Order",
-      "reqd": 1
-    },
-    {
-      "fieldname": "voucher_no",
-      "fieldtype": "Dynamic Link",
-      "in_list_view": 1,
-      "label": "Voucher No",
-      "options": "voucher_type",
-      "reqd": 1,
-      "search_index": 1
-    },
-    {
-      "fieldname": "amended_from",
-      "fieldtype": "Link",
-      "label": "Amended From",
-      "no_copy": 1,
-      "options": "Payment",
-      "print_hide": 1,
-      "read_only": 1
-    },
-    {
-      "fieldname": "voucher_section",
-      "fieldtype": "Section Break",
-      "label": "Voucher"
-    },
-    {
-      "fieldname": "amount_section",
-      "fieldtype": "Section Break",
-      "label": "Amount"
-    },
-    {
-      "fieldname": "amount",
-      "fieldtype": "Currency",
-      "label": "Amount",
-      "reqd": 1
-    },
-    {
-      "default": "0",
-      "fieldname": "paid_with_cash",
-      "fieldtype": "Check",
-      "hidden": 1,
-      "label": "Paid With Cash",
-      "read_only": 1
-    },
-    {
-      "fieldname": "column_break",
-      "fieldtype": "Column Break"
-    },
-    {
-      "fieldname": "section_break",
-      "fieldtype": "Section Break"
-    }
-  ],
-  "in_create": 1,
-  "index_web_pages_for_search": 1,
-  "is_submittable": 1,
-  "links": [],
-  "modified": "2021-09-01 15:11:01.430855",
-  "modified_by": "Administrator",
-  "module": "Finance",
-  "name": "Payment",
-  "owner": "Administrator",
-  "permissions": [
-    {
-      "cancel": 1,
-      "create": 1,
-      "delete": 1,
-      "read": 1,
-      "role": "System Manager",
-      "submit": 1,
-      "write": 1
-    },
-    {
-      "cancel": 1,
-      "create": 1,
-      "delete": 1,
-      "read": 1,
-      "role": "Comfort User",
-      "submit": 1,
-      "write": 1
-    }
-  ],
-  "show_name_in_global_search": 1,
-  "sort_field": "modified",
-  "sort_order": "DESC"
+ "actions": [],
+ "autoname": "PAY-.YYYY.-.####",
+ "creation": "2021-08-17 22:54:46.533174",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "voucher_section",
+  "voucher_type",
+  "column_break",
+  "voucher_no",
+  "amount_section",
+  "amount",
+  "section_break",
+  "paid_with_cash",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "voucher_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Voucher Type",
+   "options": "\nSales Order\nPurchase Order",
+   "reqd": 1
+  },
+  {
+   "fieldname": "voucher_no",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "Voucher No",
+   "options": "voucher_type",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Payment",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "voucher_section",
+   "fieldtype": "Section Break",
+   "label": "Voucher"
+  },
+  {
+   "fieldname": "amount_section",
+   "fieldtype": "Section Break",
+   "label": "Amount"
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "label": "Amount",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "paid_with_cash",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Paid With Cash",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break",
+   "fieldtype": "Section Break"
+  }
+ ],
+ "in_create": 1,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2021-09-01 15:11:01.430855",
+ "modified_by": "Administrator",
+ "module": "Finance",
+ "name": "Payment",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "System Manager",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "Comfort User",
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "show_name_in_global_search": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC"
 }

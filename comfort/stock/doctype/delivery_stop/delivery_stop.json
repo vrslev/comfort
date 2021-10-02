@@ -1,115 +1,115 @@
 {
-  "actions": [],
-  "creation": "2021-08-26 23:50:52.625428",
-  "doctype": "DocType",
-  "editable_grid": 1,
-  "engine": "InnoDB",
-  "field_order": [
-    "sales_order",
-    "customer",
-    "address",
-    "column_break_1",
-    "phone",
-    "pending_amount",
-    "city",
-    "section_break",
-    "details",
-    "column_break_2",
-    "delivery_type",
-    "installation"
-  ],
-  "fields": [
-    {
-      "fieldname": "sales_order",
-      "fieldtype": "Link",
-      "in_list_view": 1,
-      "label": "Sales Order",
-      "options": "Sales Order",
-      "reqd": 1,
-      "search_index": 1
-    },
-    {
-      "fetch_from": "sales_order.customer",
-      "fieldname": "customer",
-      "fieldtype": "Link",
-      "in_list_view": 1,
-      "label": "Customer",
-      "options": "Customer",
-      "read_only": 1
-    },
-    {
-      "fetch_from": "customer.address",
-      "fieldname": "address",
-      "fieldtype": "Data",
-      "in_list_view": 1,
-      "label": "Address",
-      "read_only": 1
-    },
-    {
-      "fetch_from": "sales_order.pending_amount",
-      "fieldname": "pending_amount",
-      "fieldtype": "Currency",
-      "in_list_view": 1,
-      "label": "Pending Amount",
-      "read_only": 1
-    },
-    {
-      "fetch_from": "customer.phone",
-      "fieldname": "phone",
-      "fieldtype": "Data",
-      "in_list_view": 1,
-      "label": "Phone",
-      "read_only": 1
-    },
-    {
-      "fieldname": "delivery_type",
-      "fieldtype": "Select",
-      "label": "Delivery Type",
-      "options": "\nTo Apartment\nTo Entrance",
-      "read_only": 1
-    },
-    {
-      "default": "0",
-      "fieldname": "installation",
-      "fieldtype": "Check",
-      "label": "Installation",
-      "read_only": 1
-    },
-    {
-      "fetch_from": "customer.city",
-      "fieldname": "city",
-      "fieldtype": "Data",
-      "label": "City",
-      "read_only": 1
-    },
-    {
-      "fieldname": "details",
-      "fieldtype": "Small Text",
-      "label": "Details"
-    },
-    {
-      "fieldname": "column_break_1",
-      "fieldtype": "Column Break"
-    },
-    {
-      "fieldname": "section_break",
-      "fieldtype": "Section Break"
-    },
-    {
-      "fieldname": "column_break_2",
-      "fieldtype": "Column Break"
-    }
-  ],
-  "index_web_pages_for_search": 1,
-  "istable": 1,
-  "links": [],
-  "modified": "2021-08-31 05:20:24.749531",
-  "modified_by": "Administrator",
-  "module": "Stock",
-  "name": "Delivery Stop",
-  "owner": "Administrator",
-  "permissions": [],
-  "sort_field": "modified",
-  "sort_order": "DESC",
-  "track_changes": 1
+ "actions": [],
+ "creation": "2021-08-26 23:50:52.625428",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "sales_order",
+  "customer",
+  "address",
+  "column_break_1",
+  "phone",
+  "pending_amount",
+  "city",
+  "section_break",
+  "details",
+  "column_break_2",
+  "delivery_type",
+  "installation"
+ ],
+ "fields": [
+  {
+   "fieldname": "sales_order",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Sales Order",
+   "options": "Sales Order",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fetch_from": "sales_order.customer",
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Customer",
+   "options": "Customer",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "customer.address",
+   "fieldname": "address",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Address",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "sales_order.pending_amount",
+   "fieldname": "pending_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Pending Amount",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "customer.phone",
+   "fieldname": "phone",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Phone",
+   "read_only": 1
+  },
+  {
+   "fieldname": "delivery_type",
+   "fieldtype": "Select",
+   "label": "Delivery Type",
+   "options": "\nTo Apartment\nTo Entrance",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "installation",
+   "fieldtype": "Check",
+   "label": "Installation",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "customer.city",
+   "fieldname": "city",
+   "fieldtype": "Data",
+   "label": "City",
+   "read_only": 1
+  },
+  {
+   "fieldname": "details",
+   "fieldtype": "Small Text",
+   "label": "Details"
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2021-08-31 05:20:24.749531",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Delivery Stop",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
 }

@@ -1,98 +1,98 @@
 {
-  "actions": [],
-  "creation": "2021-04-04 19:12:36.466132",
-  "doctype": "DocType",
-  "editable_grid": 1,
-  "engine": "InnoDB",
-  "field_order": [
-    "item_code",
-    "qty",
-    "column_break_1",
-    "item_name",
-    "section_break",
-    "rate",
-    "weight",
-    "column_break_2",
-    "amount"
-  ],
-  "fields": [
-    {
-      "columns": 2,
-      "fieldname": "item_code",
-      "fieldtype": "Link",
-      "in_list_view": 1,
-      "label": "Item Code",
-      "options": "Item",
-      "reqd": 1,
-      "search_index": 1,
-      "width": "150px"
-    },
-    {
-      "columns": 3,
-      "fetch_from": "item_code.item_name",
-      "fieldname": "item_name",
-      "fieldtype": "Data",
-      "label": "Item Name",
-      "read_only": 1,
-      "width": "200px"
-    },
-    {
-      "columns": 1,
-      "fieldname": "qty",
-      "fieldtype": "Int",
-      "in_list_view": 1,
-      "label": "Quantity",
-      "reqd": 1,
-      "width": "100px"
-    },
-    {
-      "columns": 2,
-      "fetch_from": "item_code.rate",
-      "fieldname": "rate",
-      "fieldtype": "Currency",
-      "in_list_view": 1,
-      "label": "Rate",
-      "read_only": 1,
-      "width": "100px"
-    },
-    {
-      "columns": 2,
-      "fieldname": "amount",
-      "fieldtype": "Currency",
-      "in_list_view": 1,
-      "label": "Amount",
-      "read_only": 1,
-      "width": "100px"
-    },
-    {
-      "fetch_from": "item_code.weight",
-      "fieldname": "weight",
-      "fieldtype": "Float",
-      "label": "Weight",
-      "read_only": 1
-    },
-    {
-      "fieldname": "column_break_2",
-      "fieldtype": "Column Break"
-    },
-    {
-      "fieldname": "column_break_1",
-      "fieldtype": "Column Break"
-    },
-    {
-      "fieldname": "section_break",
-      "fieldtype": "Section Break"
-    }
-  ],
-  "istable": 1,
-  "links": [],
-  "modified": "2021-08-31 05:34:02.150740",
-  "modified_by": "Administrator",
-  "module": "Transactions",
-  "name": "Purchase Order Item To Sell",
-  "owner": "Administrator",
-  "permissions": [],
-  "sort_field": "modified",
-  "sort_order": "DESC",
-  "track_changes": 1
+ "actions": [],
+ "creation": "2021-04-04 19:12:36.466132",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "item_code",
+  "qty",
+  "column_break_1",
+  "item_name",
+  "section_break",
+  "rate",
+  "weight",
+  "column_break_2",
+  "amount"
+ ],
+ "fields": [
+  {
+   "columns": 2,
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Item Code",
+   "options": "Item",
+   "reqd": 1,
+   "search_index": 1,
+   "width": "150px"
+  },
+  {
+   "columns": 3,
+   "fetch_from": "item_code.item_name",
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "label": "Item Name",
+   "read_only": 1,
+   "width": "200px"
+  },
+  {
+   "columns": 1,
+   "fieldname": "qty",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Quantity",
+   "reqd": 1,
+   "width": "100px"
+  },
+  {
+   "columns": 2,
+   "fetch_from": "item_code.rate",
+   "fieldname": "rate",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Rate",
+   "read_only": 1,
+   "width": "100px"
+  },
+  {
+   "columns": 2,
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amount",
+   "read_only": 1,
+   "width": "100px"
+  },
+  {
+   "fetch_from": "item_code.weight",
+   "fieldname": "weight",
+   "fieldtype": "Float",
+   "label": "Weight",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break",
+   "fieldtype": "Section Break"
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2021-08-31 05:34:02.150740",
+ "modified_by": "Administrator",
+ "module": "Transactions",
+ "name": "Purchase Order Item To Sell",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
 }

@@ -1,50 +1,50 @@
 {
-  "actions": [],
-  "creation": "2021-08-27 01:02:00.439109",
-  "doctype": "DocType",
-  "editable_grid": 1,
-  "engine": "InnoDB",
-  "field_order": ["bot_token", "get_chat_id", "column_break", "chat_id"],
-  "fields": [
-    {
-      "fieldname": "bot_token",
-      "fieldtype": "Data",
-      "in_list_view": 1,
-      "label": "Bot Token"
-    },
-    {
-      "depends_on": "eval:!doc.chat_id && doc.bot_token && !cur_frm.is_dirty()",
-      "fieldname": "get_chat_id",
-      "fieldtype": "Button",
-      "label": "Get Chat ID"
-    },
-    {
-      "fieldname": "chat_id",
-      "fieldtype": "Data",
-      "label": "Chat ID",
-      "read_only": 1
-    },
-    {
-      "fieldname": "column_break",
-      "fieldtype": "Column Break"
-    }
-  ],
-  "issingle": 1,
-  "links": [],
-  "modified": "2021-08-31 04:56:55.594138",
-  "modified_by": "Administrator",
-  "module": "Comfort Core",
-  "name": "Telegram Settings",
-  "owner": "Administrator",
-  "permissions": [
-    {
-      "create": 1,
-      "delete": 1,
-      "read": 1,
-      "role": "System Manager",
-      "write": 1
-    }
-  ],
-  "sort_field": "modified",
-  "sort_order": "DESC"
+ "actions": [],
+ "creation": "2021-08-27 01:02:00.439109",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": ["bot_token", "get_chat_id", "column_break", "chat_id"],
+ "fields": [
+  {
+   "fieldname": "bot_token",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Bot Token"
+  },
+  {
+   "depends_on": "eval:!doc.chat_id && doc.bot_token && !cur_frm.is_dirty()",
+   "fieldname": "get_chat_id",
+   "fieldtype": "Button",
+   "label": "Get Chat ID"
+  },
+  {
+   "fieldname": "chat_id",
+   "fieldtype": "Data",
+   "label": "Chat ID",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "issingle": 1,
+ "links": [],
+ "modified": "2021-08-31 04:56:55.594138",
+ "modified_by": "Administrator",
+ "module": "Comfort Core",
+ "name": "Telegram Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC"
 }

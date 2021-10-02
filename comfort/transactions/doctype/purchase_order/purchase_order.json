@@ -1,238 +1,238 @@
 {
-  "actions": [],
-  "allow_rename": 1,
-  "autoname": "PO-.YYYY.-.####",
-  "creation": "2021-03-24 18:03:18.180476",
-  "doctype": "DocType",
-  "editable_grid": 1,
-  "engine": "InnoDB",
-  "field_order": [
-    "delivery_options_section",
-    "delivery_options",
-    "cannot_add_items",
-    "reference_section",
-    "posting_date",
-    "column_break_1",
-    "schedule_date",
-    "column_break_2",
-    "order_confirmation_no",
-    "totals_section",
-    "total_amount",
-    "column_break_3",
-    "delivery_cost",
-    "column_break_4",
-    "total_weight",
-    "column_break_5",
-    "sales_orders_cost",
-    "column_break_6",
-    "items_to_sell_cost",
-    "section_break_1",
-    "sales_orders_section",
-    "sales_orders",
-    "items_to_sell_section",
-    "items_to_sell",
-    "section_break_2",
-    "status",
-    "amended_from"
-  ],
-  "fields": [
-    {
-      "fieldname": "delivery_options",
-      "fieldtype": "Table",
-      "label": "Delivery Options",
-      "options": "Purchase Order Delivery Option",
-      "read_only": 1
-    },
-    {
-      "fieldname": "cannot_add_items",
-      "fieldtype": "Long Text",
-      "hidden": 1,
-      "label": "Cannot Add Items",
-      "read_only": 1
-    },
-    {
-      "depends_on": "eval:doc.docstatus == 1",
-      "fieldname": "reference_section",
-      "fieldtype": "Section Break",
-      "label": "Reference"
-    },
-    {
-      "fieldname": "posting_date",
-      "fieldtype": "Date",
-      "label": "Posting Date"
-    },
-    {
-      "fieldname": "order_confirmation_no",
-      "fieldtype": "Data",
-      "in_list_view": 1,
-      "in_standard_filter": 1,
-      "label": "Order Confirmation No",
-      "search_index": 1
-    },
-    {
-      "fieldname": "amended_from",
-      "fieldtype": "Link",
-      "label": "Amended From",
-      "no_copy": 1,
-      "options": "Purchase Order",
-      "print_hide": 1,
-      "read_only": 1
-    },
-    {
-      "fieldname": "schedule_date",
-      "fieldtype": "Date",
-      "label": "Schedule Date"
-    },
-    {
-      "fieldname": "column_break_5",
-      "fieldtype": "Column Break"
-    },
-    {
-      "fieldname": "totals_section",
-      "fieldtype": "Section Break",
-      "label": "Totals"
-    },
-    {
-      "default": "0",
-      "fieldname": "total_amount",
-      "fieldtype": "Currency",
-      "in_list_view": 1,
-      "label": "Total Amount",
-      "read_only": 1
-    },
-    {
-      "fieldname": "delivery_cost",
-      "fieldtype": "Currency",
-      "label": "Delivery Cost",
-      "read_only": 1
-    },
-    {
-      "fieldname": "column_break_2",
-      "fieldtype": "Column Break"
-    },
-    {
-      "default": "0",
-      "fieldname": "total_weight",
-      "fieldtype": "Float",
-      "in_list_view": 1,
-      "label": "Total Weight",
-      "precision": "1",
-      "read_only": 1
-    },
-    {
-      "default": "0",
-      "fieldname": "items_to_sell_cost",
-      "fieldtype": "Currency",
-      "label": "Items to Sell Cost",
-      "read_only": 1
-    },
-    {
-      "fieldname": "sales_orders",
-      "fieldtype": "Table",
-      "label": "Sales Orders",
-      "options": "Purchase Order Sales Order"
-    },
-    {
-      "fieldname": "items_to_sell",
-      "fieldtype": "Table",
-      "label": "Items to Sell",
-      "options": "Purchase Order Item To Sell"
-    },
-    {
-      "default": "Draft",
-      "fieldname": "status",
-      "fieldtype": "Select",
-      "hidden": 1,
-      "in_list_view": 1,
-      "in_standard_filter": 1,
-      "label": "Status",
-      "no_copy": 1,
-      "options": "\nDraft\nTo Receive\nCompleted\nCancelled",
-      "read_only": 1,
-      "reqd": 1,
-      "search_index": 1
-    },
-    {
-      "fieldname": "sales_orders_cost",
-      "fieldtype": "Currency",
-      "label": "Sales Orders Cost",
-      "read_only": 1
-    },
-    {
-      "depends_on": "eval:doc.docstatus == 0",
-      "fieldname": "delivery_options_section",
-      "fieldtype": "Section Break",
-      "label": "Delivery Options"
-    },
-    {
-      "fieldname": "sales_orders_section",
-      "fieldtype": "Section Break",
-      "label": "Sales Orders"
-    },
-    {
-      "fieldname": "items_to_sell_section",
-      "fieldtype": "Section Break",
-      "label": "Items to Sell"
-    },
-    {
-      "fieldname": "column_break_6",
-      "fieldtype": "Column Break"
-    },
-    {
-      "fieldname": "column_break_1",
-      "fieldtype": "Column Break"
-    },
-    {
-      "fieldname": "column_break_3",
-      "fieldtype": "Column Break"
-    },
-    {
-      "fieldname": "column_break_4",
-      "fieldtype": "Column Break"
-    },
-    {
-      "fieldname": "section_break_1",
-      "fieldtype": "Section Break"
-    },
-    {
-      "fieldname": "section_break_2",
-      "fieldtype": "Section Break"
-    }
-  ],
-  "is_submittable": 1,
-  "links": [],
-  "modified": "2021-08-31 22:17:53.455295",
-  "modified_by": "Administrator",
-  "module": "Transactions",
-  "name": "Purchase Order",
-  "owner": "Administrator",
-  "permissions": [
-    {
-      "amend": 1,
-      "cancel": 1,
-      "create": 1,
-      "delete": 1,
-      "print": 1,
-      "read": 1,
-      "role": "System Manager",
-      "submit": 1,
-      "write": 1
-    },
-    {
-      "amend": 1,
-      "cancel": 1,
-      "create": 1,
-      "delete": 1,
-      "print": 1,
-      "read": 1,
-      "role": "Comfort User",
-      "submit": 1,
-      "write": 1
-    }
-  ],
-  "search_fields": "status,total_amount,total_weight",
-  "show_name_in_global_search": 1,
-  "sort_field": "modified",
-  "sort_order": "DESC",
-  "track_changes": 1
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "PO-.YYYY.-.####",
+ "creation": "2021-03-24 18:03:18.180476",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "delivery_options_section",
+  "delivery_options",
+  "cannot_add_items",
+  "reference_section",
+  "posting_date",
+  "column_break_1",
+  "schedule_date",
+  "column_break_2",
+  "order_confirmation_no",
+  "totals_section",
+  "total_amount",
+  "column_break_3",
+  "delivery_cost",
+  "column_break_4",
+  "total_weight",
+  "column_break_5",
+  "sales_orders_cost",
+  "column_break_6",
+  "items_to_sell_cost",
+  "section_break_1",
+  "sales_orders_section",
+  "sales_orders",
+  "items_to_sell_section",
+  "items_to_sell",
+  "section_break_2",
+  "status",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "delivery_options",
+   "fieldtype": "Table",
+   "label": "Delivery Options",
+   "options": "Purchase Order Delivery Option",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cannot_add_items",
+   "fieldtype": "Long Text",
+   "hidden": 1,
+   "label": "Cannot Add Items",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.docstatus == 1",
+   "fieldname": "reference_section",
+   "fieldtype": "Section Break",
+   "label": "Reference"
+  },
+  {
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Posting Date"
+  },
+  {
+   "fieldname": "order_confirmation_no",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Order Confirmation No",
+   "search_index": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Purchase Order",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "schedule_date",
+   "fieldtype": "Date",
+   "label": "Schedule Date"
+  },
+  {
+   "fieldname": "column_break_5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "totals_section",
+   "fieldtype": "Section Break",
+   "label": "Totals"
+  },
+  {
+   "default": "0",
+   "fieldname": "total_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Total Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "delivery_cost",
+   "fieldtype": "Currency",
+   "label": "Delivery Cost",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "total_weight",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Total Weight",
+   "precision": "1",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "items_to_sell_cost",
+   "fieldtype": "Currency",
+   "label": "Items to Sell Cost",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sales_orders",
+   "fieldtype": "Table",
+   "label": "Sales Orders",
+   "options": "Purchase Order Sales Order"
+  },
+  {
+   "fieldname": "items_to_sell",
+   "fieldtype": "Table",
+   "label": "Items to Sell",
+   "options": "Purchase Order Item To Sell"
+  },
+  {
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "no_copy": 1,
+   "options": "\nDraft\nTo Receive\nCompleted\nCancelled",
+   "read_only": 1,
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "sales_orders_cost",
+   "fieldtype": "Currency",
+   "label": "Sales Orders Cost",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.docstatus == 0",
+   "fieldname": "delivery_options_section",
+   "fieldtype": "Section Break",
+   "label": "Delivery Options"
+  },
+  {
+   "fieldname": "sales_orders_section",
+   "fieldtype": "Section Break",
+   "label": "Sales Orders"
+  },
+  {
+   "fieldname": "items_to_sell_section",
+   "fieldtype": "Section Break",
+   "label": "Items to Sell"
+  },
+  {
+   "fieldname": "column_break_6",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_1",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "section_break_2",
+   "fieldtype": "Section Break"
+  }
+ ],
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2021-08-31 22:17:53.455295",
+ "modified_by": "Administrator",
+ "module": "Transactions",
+ "name": "Purchase Order",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Comfort User",
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "search_fields": "status,total_amount,total_weight",
+ "show_name_in_global_search": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
 }

@@ -1,94 +1,94 @@
 {
-  "actions": [],
-  "creation": "2021-03-31 17:16:27.100554",
-  "doctype": "DocType",
-  "editable_grid": 1,
-  "engine": "InnoDB",
-  "field_order": [
-    "username",
-    "password",
-    "column_break",
-    "zip_code",
-    "secrets_section_break",
-    "guest_token",
-    "guest_token_expiration",
-    "authorized_token",
-    "authorized_token_expiration"
-  ],
-  "fields": [
-    {
-      "fieldname": "username",
-      "fieldtype": "Data",
-      "label": "Username"
-    },
-    {
-      "fieldname": "password",
-      "fieldtype": "Password",
-      "label": "Password"
-    },
-    {
-      "fieldname": "zip_code",
-      "fieldtype": "Data",
-      "label": "Zip Code"
-    },
-    {
-      "fieldname": "guest_token",
-      "fieldtype": "Text",
-      "hidden": 1,
-      "label": "Guest Token",
-      "read_only": 1
-    },
-    {
-      "fieldname": "authorized_token",
-      "fieldtype": "Text",
-      "hidden": 1,
-      "label": "Authorized Token",
-      "read_only": 1
-    },
-    {
-      "fieldname": "guest_token_expiration",
-      "fieldtype": "Datetime",
-      "hidden": 1,
-      "label": "Guest Token Expiration",
-      "read_only": 1
-    },
-    {
-      "fieldname": "authorized_token_expiration",
-      "fieldtype": "Datetime",
-      "hidden": 1,
-      "label": "Authorized Token Expiration",
-      "read_only": 1
-    },
-    {
-      "fieldname": "column_break",
-      "fieldtype": "Column Break"
-    },
-    {
-      "fieldname": "secrets_section_break",
-      "fieldtype": "Section Break"
-    }
-  ],
-  "issingle": 1,
-  "links": [],
-  "modified": "2021-08-31 21:55:53.196475",
-  "modified_by": "Administrator",
-  "module": "Comfort Core",
-  "name": "Ikea Settings",
-  "owner": "Administrator",
-  "permissions": [
-    {
-      "create": 1,
-      "read": 1,
-      "role": "System Manager",
-      "write": 1
-    },
-    {
-      "create": 1,
-      "read": 1,
-      "role": "Comfort User",
-      "write": 1
-    }
-  ],
-  "sort_field": "modified",
-  "sort_order": "DESC"
+ "actions": [],
+ "creation": "2021-03-31 17:16:27.100554",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "username",
+  "password",
+  "column_break",
+  "zip_code",
+  "secrets_section_break",
+  "guest_token",
+  "guest_token_expiration",
+  "authorized_token",
+  "authorized_token_expiration"
+ ],
+ "fields": [
+  {
+   "fieldname": "username",
+   "fieldtype": "Data",
+   "label": "Username"
+  },
+  {
+   "fieldname": "password",
+   "fieldtype": "Password",
+   "label": "Password"
+  },
+  {
+   "fieldname": "zip_code",
+   "fieldtype": "Data",
+   "label": "Zip Code"
+  },
+  {
+   "fieldname": "guest_token",
+   "fieldtype": "Text",
+   "hidden": 1,
+   "label": "Guest Token",
+   "read_only": 1
+  },
+  {
+   "fieldname": "authorized_token",
+   "fieldtype": "Text",
+   "hidden": 1,
+   "label": "Authorized Token",
+   "read_only": 1
+  },
+  {
+   "fieldname": "guest_token_expiration",
+   "fieldtype": "Datetime",
+   "hidden": 1,
+   "label": "Guest Token Expiration",
+   "read_only": 1
+  },
+  {
+   "fieldname": "authorized_token_expiration",
+   "fieldtype": "Datetime",
+   "hidden": 1,
+   "label": "Authorized Token Expiration",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "secrets_section_break",
+   "fieldtype": "Section Break"
+  }
+ ],
+ "issingle": 1,
+ "links": [],
+ "modified": "2021-08-31 21:55:53.196475",
+ "modified_by": "Administrator",
+ "module": "Comfort Core",
+ "name": "Ikea Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "Comfort User",
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC"
 }

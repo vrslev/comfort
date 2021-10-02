@@ -1,107 +1,107 @@
 {
-  "actions": [],
-  "creation": "2021-08-17 22:14:50.838363",
-  "doctype": "DocType",
-  "editable_grid": 1,
-  "engine": "InnoDB",
-  "field_order": [
-    "stock_type",
-    "voucher_section",
-    "voucher_type",
-    "column_break",
-    "voucher_no",
-    "items_section",
-    "items",
-    "section_break",
-    "amended_from"
-  ],
-  "fields": [
-    {
-      "fieldname": "voucher_type",
-      "fieldtype": "Select",
-      "in_list_view": 1,
-      "label": "Voucher Type",
-      "options": "\nReceipt\nCheckout\nSales Return\nPurchase Return\nSales Order"
-    },
-    {
-      "fieldname": "voucher_no",
-      "fieldtype": "Dynamic Link",
-      "in_list_view": 1,
-      "label": "Voucher No",
-      "options": "voucher_type",
-      "search_index": 1
-    },
-    {
-      "fieldname": "stock_type",
-      "fieldtype": "Select",
-      "in_list_view": 1,
-      "label": "Stock Type",
-      "options": "\nReserved Actual\nAvailable Actual\nReserved Purchased\nAvailable Purchased",
-      "reqd": 1
-    },
-    {
-      "fieldname": "items",
-      "fieldtype": "Table",
-      "label": "Items",
-      "options": "Stock Entry Item",
-      "reqd": 1
-    },
-    {
-      "fieldname": "amended_from",
-      "fieldtype": "Link",
-      "label": "Amended From",
-      "no_copy": 1,
-      "options": "Stock Entry",
-      "print_hide": 1,
-      "read_only": 1
-    },
-    {
-      "fieldname": "voucher_section",
-      "fieldtype": "Section Break",
-      "label": "Voucher"
-    },
-    {
-      "fieldname": "items_section",
-      "fieldtype": "Section Break",
-      "label": "Items"
-    },
-    {
-      "fieldname": "column_break",
-      "fieldtype": "Column Break"
-    },
-    {
-      "fieldname": "section_break",
-      "fieldtype": "Section Break"
-    }
-  ],
-  "in_create": 1,
-  "is_submittable": 1,
-  "links": [],
-  "modified": "2021-09-29 10:10:35.156229",
-  "modified_by": "Administrator",
-  "module": "Stock",
-  "name": "Stock Entry",
-  "owner": "Administrator",
-  "permissions": [
-    {
-      "cancel": 1,
-      "create": 1,
-      "read": 1,
-      "report": 1,
-      "role": "System Manager",
-      "submit": 1,
-      "write": 1
-    },
-    {
-      "cancel": 1,
-      "create": 1,
-      "read": 1,
-      "report": 1,
-      "role": "Comfort User",
-      "submit": 1,
-      "write": 1
-    }
-  ],
-  "sort_field": "modified",
-  "sort_order": "DESC"
+ "actions": [],
+ "creation": "2021-08-17 22:14:50.838363",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "stock_type",
+  "voucher_section",
+  "voucher_type",
+  "column_break",
+  "voucher_no",
+  "items_section",
+  "items",
+  "section_break",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "voucher_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Voucher Type",
+   "options": "\nReceipt\nCheckout\nSales Return\nPurchase Return\nSales Order"
+  },
+  {
+   "fieldname": "voucher_no",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "Voucher No",
+   "options": "voucher_type",
+   "search_index": 1
+  },
+  {
+   "fieldname": "stock_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Stock Type",
+   "options": "\nReserved Actual\nAvailable Actual\nReserved Purchased\nAvailable Purchased",
+   "reqd": 1
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Items",
+   "options": "Stock Entry Item",
+   "reqd": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Stock Entry",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "voucher_section",
+   "fieldtype": "Section Break",
+   "label": "Voucher"
+  },
+  {
+   "fieldname": "items_section",
+   "fieldtype": "Section Break",
+   "label": "Items"
+  },
+  {
+   "fieldname": "column_break",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break",
+   "fieldtype": "Section Break"
+  }
+ ],
+ "in_create": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2021-09-29 10:10:35.156229",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Stock Entry",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "cancel": 1,
+   "create": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Comfort User",
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC"
 }

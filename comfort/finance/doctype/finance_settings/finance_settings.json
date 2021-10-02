@@ -1,123 +1,123 @@
 {
-  "actions": [],
-  "creation": "2021-07-05 13:57:47.248304",
-  "doctype": "DocType",
-  "editable_grid": 1,
-  "engine": "InnoDB",
-  "field_order": [
-    "default_accounts_section",
-    "bank_account",
-    "prepaid_inventory_account",
-    "cost_of_goods_sold_account",
-    "sales_account",
-    "installation_account",
-    "column_break",
-    "cash_account",
-    "inventory_account",
-    "purchase_delivery_account",
-    "delivery_account",
-    "purchase_compensations_account",
-    "sales_compensations_account"
-  ],
-  "fields": [
-    {
-      "fieldname": "default_accounts_section",
-      "fieldtype": "Section Break",
-      "label": "Default Accounts"
-    },
-    {
-      "fieldname": "bank_account",
-      "fieldtype": "Link",
-      "label": "Bank Account",
-      "options": "Account"
-    },
-    {
-      "fieldname": "prepaid_inventory_account",
-      "fieldtype": "Link",
-      "label": "Prepaid Inventory Account",
-      "options": "Account"
-    },
-    {
-      "fieldname": "cost_of_goods_sold_account",
-      "fieldtype": "Link",
-      "label": "Cost of Goods Sold Account",
-      "options": "Account"
-    },
-    {
-      "fieldname": "sales_account",
-      "fieldtype": "Link",
-      "label": "Sales Account",
-      "options": "Account"
-    },
-    {
-      "fieldname": "installation_account",
-      "fieldtype": "Link",
-      "label": "Installation Account",
-      "options": "Account"
-    },
-    {
-      "fieldname": "cash_account",
-      "fieldtype": "Link",
-      "label": "Cash Account",
-      "options": "Account"
-    },
-    {
-      "fieldname": "inventory_account",
-      "fieldtype": "Link",
-      "label": "Inventory Account",
-      "options": "Account"
-    },
-    {
-      "fieldname": "purchase_delivery_account",
-      "fieldtype": "Link",
-      "label": "Purchase Delivery Account",
-      "options": "Account"
-    },
-    {
-      "fieldname": "delivery_account",
-      "fieldtype": "Link",
-      "label": "Delivery Account",
-      "options": "Account"
-    },
-    {
-      "fieldname": "purchase_compensations_account",
-      "fieldtype": "Link",
-      "label": "Purchase Compensations Account",
-      "options": "Account"
-    },
-    {
-      "fieldname": "sales_compensations_account",
-      "fieldtype": "Link",
-      "label": "Sales Compensations Account",
-      "options": "Account"
-    },
-    {
-      "fieldname": "column_break",
-      "fieldtype": "Column Break"
-    }
-  ],
-  "issingle": 1,
-  "links": [],
-  "modified": "2021-08-31 21:10:10.362955",
-  "modified_by": "Administrator",
-  "module": "Finance",
-  "name": "Finance Settings",
-  "nsm_parent_field": "parent_company",
-  "owner": "Administrator",
-  "permissions": [
-    {
-      "create": 1,
-      "delete": 1,
-      "read": 1,
-      "role": "System Manager",
-      "write": 1
-    },
-    {
-      "read": 1,
-      "role": "Comfort User"
-    }
-  ],
-  "sort_field": "modified",
-  "sort_order": "DESC",
-  "track_changes": 1
+ "actions": [],
+ "creation": "2021-07-05 13:57:47.248304",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "default_accounts_section",
+  "bank_account",
+  "prepaid_inventory_account",
+  "cost_of_goods_sold_account",
+  "sales_account",
+  "installation_account",
+  "column_break",
+  "cash_account",
+  "inventory_account",
+  "purchase_delivery_account",
+  "delivery_account",
+  "purchase_compensations_account",
+  "sales_compensations_account"
+ ],
+ "fields": [
+  {
+   "fieldname": "default_accounts_section",
+   "fieldtype": "Section Break",
+   "label": "Default Accounts"
+  },
+  {
+   "fieldname": "bank_account",
+   "fieldtype": "Link",
+   "label": "Bank Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "prepaid_inventory_account",
+   "fieldtype": "Link",
+   "label": "Prepaid Inventory Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "cost_of_goods_sold_account",
+   "fieldtype": "Link",
+   "label": "Cost of Goods Sold Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "sales_account",
+   "fieldtype": "Link",
+   "label": "Sales Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "installation_account",
+   "fieldtype": "Link",
+   "label": "Installation Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "cash_account",
+   "fieldtype": "Link",
+   "label": "Cash Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "inventory_account",
+   "fieldtype": "Link",
+   "label": "Inventory Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "purchase_delivery_account",
+   "fieldtype": "Link",
+   "label": "Purchase Delivery Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "delivery_account",
+   "fieldtype": "Link",
+   "label": "Delivery Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "purchase_compensations_account",
+   "fieldtype": "Link",
+   "label": "Purchase Compensations Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "sales_compensations_account",
+   "fieldtype": "Link",
+   "label": "Sales Compensations Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "column_break",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "issingle": 1,
+ "links": [],
+ "modified": "2021-08-31 21:10:10.362955",
+ "modified_by": "Administrator",
+ "module": "Finance",
+ "name": "Finance Settings",
+ "nsm_parent_field": "parent_company",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Comfort User"
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
 }

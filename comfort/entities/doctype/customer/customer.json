@@ -1,146 +1,146 @@
 {
-  "actions": [],
-  "allow_events_in_timeline": 1,
-  "allow_rename": 1,
-  "autoname": "Prompt",
-  "creation": "2020-12-29 15:27:53.782555",
-  "doctype": "DocType",
-  "editable_grid": 1,
-  "engine": "InnoDB",
-  "field_order": [
-    "image",
-    "basic_info_section",
-    "gender",
-    "column_break_1",
-    "customer_group",
-    "contact_details_section",
-    "vk_id",
-    "vk_url",
-    "column_break_2",
-    "phone",
-    "address_section",
-    "city",
-    "column_break_3",
-    "address"
-  ],
-  "fields": [
-    {
-      "fieldname": "image",
-      "fieldtype": "Attach Image",
-      "hidden": 1,
-      "label": "Image"
-    },
-    {
-      "fieldname": "basic_info_section",
-      "fieldtype": "Section Break",
-      "label": "Basic Info"
-    },
-    {
-      "fieldname": "gender",
-      "fieldtype": "Select",
-      "in_standard_filter": 1,
-      "label": "Gender",
-      "options": "\nMale\nFemale"
-    },
-    {
-      "fieldname": "customer_group",
-      "fieldtype": "Link",
-      "in_list_view": 1,
-      "in_preview": 1,
-      "in_standard_filter": 1,
-      "label": "Customer Group",
-      "options": "Customer Group"
-    },
-    {
-      "fieldname": "contact_details_section",
-      "fieldtype": "Section Break",
-      "label": "Contact Details"
-    },
-    {
-      "fieldname": "vk_id",
-      "fieldtype": "Data",
-      "hidden": 1,
-      "label": "VK ID",
-      "read_only": 1,
-      "unique": 1
-    },
-    {
-      "fieldname": "vk_url",
-      "fieldtype": "Data",
-      "label": "VK URL",
-      "options": "URL"
-    },
-    {
-      "fieldname": "column_break_1",
-      "fieldtype": "Column Break"
-    },
-    {
-      "fieldname": "phone",
-      "fieldtype": "Data",
-      "in_global_search": 1,
-      "in_list_view": 1,
-      "in_preview": 1,
-      "in_standard_filter": 1,
-      "label": "Phone",
-      "options": "Phone",
-      "search_index": 1
-    },
-    {
-      "fieldname": "address_section",
-      "fieldtype": "Section Break",
-      "label": "Address"
-    },
-    {
-      "default": "\u0421\u0435\u0432\u0435\u0440\u043e\u0434\u0432\u0438\u043d\u0441\u043a",
-      "fieldname": "city",
-      "fieldtype": "Data",
-      "label": "City"
-    },
-    {
-      "fieldname": "address",
-      "fieldtype": "Data",
-      "label": "Address"
-    },
-    {
-      "fieldname": "column_break_2",
-      "fieldtype": "Column Break"
-    },
-    {
-      "fieldname": "column_break_3",
-      "fieldtype": "Column Break"
-    }
-  ],
-  "image_field": "image",
-  "index_web_pages_for_search": 1,
-  "links": [],
-  "modified": "2021-08-31 22:05:53.968325",
-  "modified_by": "Administrator",
-  "module": "Entities",
-  "name": "Customer",
-  "name_case": "Title Case",
-  "owner": "Administrator",
-  "permissions": [
-    {
-      "create": 1,
-      "delete": 1,
-      "read": 1,
-      "report": 1,
-      "role": "System Manager",
-      "write": 1
-    },
-    {
-      "create": 1,
-      "delete": 1,
-      "read": 1,
-      "report": 1,
-      "role": "Comfort User",
-      "write": 1
-    }
-  ],
-  "search_fields": "customer_group,phone",
-  "show_name_in_global_search": 1,
-  "show_preview_popup": 1,
-  "sort_field": "modified",
-  "sort_order": "DESC",
-  "track_changes": 1
+ "actions": [],
+ "allow_events_in_timeline": 1,
+ "allow_rename": 1,
+ "autoname": "Prompt",
+ "creation": "2020-12-29 15:27:53.782555",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "image",
+  "basic_info_section",
+  "gender",
+  "column_break_1",
+  "customer_group",
+  "contact_details_section",
+  "vk_id",
+  "vk_url",
+  "column_break_2",
+  "phone",
+  "address_section",
+  "city",
+  "column_break_3",
+  "address"
+ ],
+ "fields": [
+  {
+   "fieldname": "image",
+   "fieldtype": "Attach Image",
+   "hidden": 1,
+   "label": "Image"
+  },
+  {
+   "fieldname": "basic_info_section",
+   "fieldtype": "Section Break",
+   "label": "Basic Info"
+  },
+  {
+   "fieldname": "gender",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Gender",
+   "options": "\nMale\nFemale"
+  },
+  {
+   "fieldname": "customer_group",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Customer Group",
+   "options": "Customer Group"
+  },
+  {
+   "fieldname": "contact_details_section",
+   "fieldtype": "Section Break",
+   "label": "Contact Details"
+  },
+  {
+   "fieldname": "vk_id",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "VK ID",
+   "read_only": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "vk_url",
+   "fieldtype": "Data",
+   "label": "VK URL",
+   "options": "URL"
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "phone",
+   "fieldtype": "Data",
+   "in_global_search": 1,
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Phone",
+   "options": "Phone",
+   "search_index": 1
+  },
+  {
+   "fieldname": "address_section",
+   "fieldtype": "Section Break",
+   "label": "Address"
+  },
+  {
+   "default": "\u0421\u0435\u0432\u0435\u0440\u043e\u0434\u0432\u0438\u043d\u0441\u043a",
+   "fieldname": "city",
+   "fieldtype": "Data",
+   "label": "City"
+  },
+  {
+   "fieldname": "address",
+   "fieldtype": "Data",
+   "label": "Address"
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "image_field": "image",
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2021-08-31 22:05:53.968325",
+ "modified_by": "Administrator",
+ "module": "Entities",
+ "name": "Customer",
+ "name_case": "Title Case",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Comfort User",
+   "write": 1
+  }
+ ],
+ "search_fields": "customer_group,phone",
+ "show_name_in_global_search": 1,
+ "show_preview_popup": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
 }
