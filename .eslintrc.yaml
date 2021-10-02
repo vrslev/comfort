@@ -6,13 +6,10 @@ extends:
   - prettier
 parserOptions:
   ecmaVersion: 9
-  # sourceType: module
-# rules:
 root: true
 globals:
   comfort: true
   frappe: true
-  erpnext: true
   cur_frm: true
   cur_dialog: true
   cur_page: true
