@@ -4,7 +4,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from comfort import get_all, get_doc, get_value
+from comfort import get_all, get_doc, get_value, new_doc
 from comfort.entities.doctype.item.item import Item
 from comfort.finance import get_account
 from comfort.finance.doctype.gl_entry.gl_entry import GLEntry
@@ -180,14 +180,14 @@ def test_create_purchase_stock_entries_for_sales_orders(receipt_purchase: Receip
                 assert i.qty > 0
 
 
-def test_create_purchase_stock_entries_for_sales_orders_not_executed_if_no_items(
-    receipt_purchase: Receipt, purchase_order: PurchaseOrder
-):
-    for doc in purchase_order.sales_orders:
-        doc.delete()
-    purchase_order.sales_orders = []
-    purchase_order.db_update_all()
+def test_create_purchase_stock_entries_for_sales_orders_not_executed_if_no_items():
+    purchase_order = new_doc(PurchaseOrder)
+    purchase_order.db_insert()
 
+    receipt_purchase = get_doc(
+        Receipt,
+        {"voucher_type": purchase_order.doctype, "voucher_no": purchase_order.name},
+    )
     receipt_purchase.db_insert()
     receipt_purchase._create_purchase_stock_entries_for_sales_orders()
 
