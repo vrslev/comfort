@@ -454,6 +454,7 @@ def patch_get_delivery_services(monkeypatch: pytest.MonkeyPatch):
 
 
 @pytest.fixture
+@pytest.mark.usefixtures("ikea_settings")
 def purchase_order(sales_order: SalesOrder, monkeypatch: pytest.MonkeyPatch):
 
     sales_order.set_child_items()
