@@ -17,7 +17,6 @@ typeCheckingMode = "strict"
 # reportUnusedCallResult = true
 
 # Disable those mostly because frappe is untyped:
-# reportGeneralTypeIssues = false
 reportMissingTypeStubs = false
 reportPrivateUsage = false
 reportUnknownVariableType = false
@@ -43,6 +42,7 @@ reportImplicitStringConcatenation = "warning"
 # reportUnusedFunction
 # reportUnusedVariable
 # reportDuplicateImport
+# reportGeneralTypeIssues
 # reportWildcardImportFromLibrary
 # reportOptionalSubscript
 # reportOptionalMemberAccess

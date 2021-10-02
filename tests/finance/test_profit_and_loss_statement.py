@@ -1,3 +1,5 @@
+from typing import Any
+
 import pytest
 
 from comfort import get_all, group_by_attr
@@ -104,15 +106,15 @@ def test_get_income_expense_profit_loss_totals(gl_entry: GLEntry):
 def test_get_chart_data():
     income, expense, profit_loss = 300, 200, 100
     filters = get_filters()
-    chart = get_chart_data(filters, income, expense, profit_loss)
-    assert chart["data"]["labels"][0] == f"{filters['from_date']}—{filters['to_date']}"  # type: ignore
-    for dataset in chart["data"]["datasets"]:  # type: ignore
-        if dataset["name"] == "Income":  # type: ignore
-            assert dataset["values"][0] == income  # type: ignore
-        elif dataset["name"] == "Expense":  # type: ignore
-            assert dataset["values"][0] == expense  # type: ignore
-        elif dataset["name"] == "Profit/Loss":  # type: ignore
-            assert dataset["values"][0] == profit_loss  # type: ignore
+    chart: dict[str, Any] = get_chart_data(filters, income, expense, profit_loss)
+    assert chart["data"]["labels"][0] == f"{filters['from_date']}—{filters['to_date']}"
+    for dataset in chart["data"]["datasets"]:
+        if dataset["name"] == "Income":
+            assert dataset["values"][0] == income
+        elif dataset["name"] == "Expense":
+            assert dataset["values"][0] == expense
+        elif dataset["name"] == "Profit/Loss":
+            assert dataset["values"][0] == profit_loss
 
 
 @pytest.mark.parametrize(

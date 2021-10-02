@@ -26,7 +26,7 @@ from comfort.comfort_core.ikea import add_items_to_cart, get_delivery_services
 from comfort.entities.doctype.child_item.child_item import ChildItem
 from comfort.finance import create_payment
 from comfort.stock import create_checkout, create_receipt
-from comfort.transactions import delete_empty_items, merge_same_items
+from comfort.transactions import AnyChildItem, delete_empty_items, merge_same_items
 from frappe.utils.data import add_to_date, getdate, now_datetime, today
 
 from ..purchase_order_delivery_option.purchase_order_delivery_option import (
@@ -212,10 +212,12 @@ class PurchaseOrder(TypedDocument):
     def get_items_to_sell(
         self, split_combinations: bool
     ) -> list[PurchaseOrderItemToSell | ChildItem]:
+        res: list[PurchaseOrderItemToSell | ChildItem] = []
         if not self.items_to_sell:
-            return []
+            return res
         if not split_combinations:
-            return self.items_to_sell  # type: ignore
+            res += self.items_to_sell
+            return res
 
         child_items = get_all(
             ChildItem,
@@ -226,7 +228,9 @@ class PurchaseOrder(TypedDocument):
         items_to_sell = [
             item for item in self.items_to_sell if item.item_code not in parents
         ]
-        return items_to_sell + child_items  # type: ignore
+        res += items_to_sell
+        res += child_items
+        return res
 
     def get_items_in_sales_orders(self, split_combinations: bool):
         items: list[SalesOrderItem | SalesOrderChildItem] = []
@@ -255,10 +259,9 @@ class PurchaseOrder(TypedDocument):
         return items
 
     def _get_templated_items_for_api(self, split_combinations: bool):
-        items = self.get_items_to_sell(  # type: ignore
-            split_combinations
-        ) + self.get_items_in_sales_orders(split_combinations)
-        return count_qty(items)  # type: ignore
+        items: list[AnyChildItem] = list(self.get_items_to_sell(split_combinations))
+        items += self.get_items_in_sales_orders(split_combinations)
+        return count_qty(items)
 
     def _clear_delivery_options(self):
         for option in self.delivery_options:

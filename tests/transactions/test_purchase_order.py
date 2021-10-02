@@ -9,6 +9,7 @@ import pytest
 import frappe
 from comfort import count_qty, get_all, get_doc, get_value, group_by_attr
 from comfort.entities.doctype.child_item.child_item import ChildItem
+from comfort.transactions import AnyChildItem
 from comfort.transactions.doctype.purchase_order.purchase_order import PurchaseOrder
 from comfort.transactions.doctype.purchase_order_delivery_option.purchase_order_delivery_option import (
     PurchaseOrderDeliveryOption,
@@ -261,9 +262,8 @@ def test_get_items_in_sales_orders_split_combinations(purchase_order: PurchaseOr
         filters={"parent": ("in", sales_order_names)},
     )
     parents = [i.parent_item_code for i in child_items]
-    exp_items: list[SalesOrderItem | SalesOrderChildItem] = child_items + [  # type: ignore
-        i for i in so_items if i.item_code not in parents
-    ]
+    exp_items: list[SalesOrderItem | SalesOrderChildItem] = list(child_items)
+    exp_items += [i for i in so_items if i.item_code not in parents]
     items = purchase_order.get_items_in_sales_orders(split_combinations=True)
     assert items == exp_items
 
@@ -273,9 +273,10 @@ def test_get_templated_items_for_api(
     purchase_order: PurchaseOrder, split_combinations: bool
 ):
     items_for_api = purchase_order._get_templated_items_for_api(split_combinations)
-    all_items: list[Any] = purchase_order.get_items_to_sell(  # type: ignore
-        split_combinations
-    ) + purchase_order.get_items_in_sales_orders(split_combinations)
+    all_items: list[AnyChildItem] = list(
+        purchase_order.get_items_to_sell(split_combinations)
+    )
+    all_items += purchase_order.get_items_in_sales_orders(split_combinations)
     assert count_qty(all_items) == items_for_api
 
 

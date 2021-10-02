@@ -115,8 +115,7 @@ def get_standard_queries(doctypes: Iterable[str]):  # pragma: no cover
 
 def _set_currency_symbol():
     doc = get_doc(Currency, "RUB")
-    doc.symbol = "₽"  # type: ignore
-    doc.enabled = True  # type: ignore
+    doc.update({"symbol": "₽", "enabled": True})
     doc.save()
     frappe.db.set_default("currency", "RUB")
     frappe.db.set_default("currency_precision", 0)

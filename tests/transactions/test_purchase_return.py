@@ -8,15 +8,11 @@ import pytest
 
 import frappe
 from comfort import count_qty, get_all, get_doc, get_value, group_by_attr
-from comfort.entities.doctype.child_item.child_item import ChildItem
 from comfort.finance import get_account
 from comfort.finance.doctype.gl_entry.gl_entry import GLEntry
 from comfort.stock.doctype.stock_entry.stock_entry import StockEntry
 from comfort.transactions import AnyChildItem, merge_same_items
 from comfort.transactions.doctype.purchase_order.purchase_order import PurchaseOrder
-from comfort.transactions.doctype.purchase_order_item_to_sell.purchase_order_item_to_sell import (
-    PurchaseOrderItemToSell,
-)
 from comfort.transactions.doctype.purchase_return.purchase_return import PurchaseReturn
 from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
 from comfort.transactions.doctype.sales_order_child_item.sales_order_child_item import (
@@ -221,19 +217,21 @@ def test_add_missing_field_to_voucher_items_to_sell_changes(
     item_name: str | None,
     amount: int | None,
 ):
-    items = merge_same_items(purchase_return._voucher.get_items_to_sell(True))
+    items: list[AnyChildItem] = list(
+        merge_same_items(purchase_return._voucher.get_items_to_sell(True))
+    )
     item = items[0]
     item.rate = rate  # type: ignore
     item.weight = weight  # type: ignore
-    item.item_name = item_name  # type: ignore
+    item.item_name = item_name
     item.amount = amount  # type: ignore
-    purchase_return._add_missing_field_to_voucher_items_to_sell(items)  # type: ignore
+    purchase_return._add_missing_field_to_voucher_items_to_sell(items)
     values: tuple[int, float, str, int] = get_value(
         "Item", item.item_code, ("rate", "weight", "item_name")
     )
     assert item.rate == values[0]  # type: ignore
     assert item.weight == values[1]  # type: ignore
-    assert item.item_name == values[2]  # type: ignore
+    assert item.item_name == values[2]
     assert item.amount == item.qty * item.rate  # type: ignore
 
 
@@ -241,13 +239,15 @@ def test_add_missing_field_to_voucher_items_to_sell_not_changes(
     purchase_return: PurchaseReturn,
 ):
     rate, weight, item_name, amount = 100, 200, "The Name", 345
-    items = merge_same_items(purchase_return._voucher.get_items_to_sell(True))
+    items: list[AnyChildItem] = list(
+        merge_same_items(purchase_return._voucher.get_items_to_sell(True))
+    )
     item = items[0]
     item.rate = rate  # type: ignore
     item.weight = weight  # type: ignore
     item.item_name = item_name
     item.amount = amount  # type: ignore
-    purchase_return._add_missing_field_to_voucher_items_to_sell(items)  # type: ignore
+    purchase_return._add_missing_field_to_voucher_items_to_sell(items)
     assert item.rate == rate  # type: ignore
     assert item.weight == weight  # type: ignore
     assert item.item_name == item_name
@@ -255,13 +255,13 @@ def test_add_missing_field_to_voucher_items_to_sell_not_changes(
 
 
 def test_purchase_return_split_combinations_in_voucher(purchase_return: PurchaseReturn):
-    items = merge_same_items(purchase_return._voucher.get_items_to_sell(True))
-    purchase_return._add_missing_field_to_voucher_items_to_sell(items)  # type: ignore
+    items: list[AnyChildItem] = list(
+        merge_same_items(purchase_return._voucher.get_items_to_sell(True))
+    )
+    purchase_return._add_missing_field_to_voucher_items_to_sell(items)
     purchase_return._split_combinations_in_voucher()
 
-    def build_shorten_item(
-        item: PurchaseOrderItemToSell | ChildItem,
-    ) -> dict[str, str | int | None]:
+    def build_shorten_item(item: AnyChildItem) -> dict[str, str | int | None]:
         return {
             "item_code": item.item_code,
             "item_name": item.item_name,

@@ -108,6 +108,13 @@ class TypedDocument(Document):
         )
         return self
 
+    def save(  # type: ignore
+        self, ignore_permissions: bool | None = None, ignore_version: bool | None = None
+    ):
+        super().save(  # type: ignore
+            ignore_permissions=ignore_permissions, ignore_version=ignore_version
+        )
+
 
 _T_c = TypeVar("_T_c", bound=Document)
 
