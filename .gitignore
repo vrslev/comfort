@@ -1,18 +1,9 @@
 *.DS_Store
 
-__pycache__/
-*.py[cod]
-*$py.class
-
-dist/
 *.egg-info/
-*.egg
-
-.ipynb_checkpoints/
-
+__pycache__/
 tests/.cache/
 
-node_modules
-
-TODO.md
 docker/.env
+
+node_modules
