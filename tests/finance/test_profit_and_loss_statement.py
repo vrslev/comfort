@@ -1,7 +1,6 @@
 import pytest
 
-import frappe
-from comfort import group_by_attr
+from comfort import get_all, group_by_attr
 from comfort.finance.doctype.account.account import Account
 from comfort.finance.doctype.gl_entry.gl_entry import GLEntry
 from comfort.finance.report.profit_and_loss_statement.profit_and_loss_statement import (
@@ -20,7 +19,7 @@ from tests.finance.test_general_ledger import insert_gl_entries_with_wrong_condi
 
 @pytest.mark.usefixtures("accounts")
 def test_get_parent_children_accounts_map():
-    accounts: list[Account] = frappe.get_all("Account", ("name", "parent_account"))
+    accounts = get_all(Account, ("name", "parent_account"))
     to_remove: list[Account] = []
     for account in accounts:
         if account.parent_account is None and account.name not in (
@@ -67,7 +66,7 @@ def test_get_account_balance_map(gl_entry: GLEntry):
 def test_calculate_total_in_parent_accounts(gl_entry: GLEntry):
     insert_gl_entries_with_wrong_conditions(gl_entry)
     gl_entry.account = "Installation"
-    gl_entry.name = None
+    gl_entry.name = None  # type: ignore
     gl_entry.credit = 250
     gl_entry.db_insert()
 
@@ -106,14 +105,14 @@ def test_get_chart_data():
     income, expense, profit_loss = 300, 200, 100
     filters = get_filters()
     chart = get_chart_data(filters, income, expense, profit_loss)
-    assert chart["data"]["labels"][0] == f"{filters['from_date']}—{filters['to_date']}"
-    for dataset in chart["data"]["datasets"]:
-        if dataset["name"] == "Income":
-            assert dataset["values"][0] == income
-        elif dataset["name"] == "Expense":
-            assert dataset["values"][0] == expense
-        elif dataset["name"] == "Profit/Loss":
-            assert dataset["values"][0] == profit_loss
+    assert chart["data"]["labels"][0] == f"{filters['from_date']}—{filters['to_date']}"  # type: ignore
+    for dataset in chart["data"]["datasets"]:  # type: ignore
+        if dataset["name"] == "Income":  # type: ignore
+            assert dataset["values"][0] == income  # type: ignore
+        elif dataset["name"] == "Expense":  # type: ignore
+            assert dataset["values"][0] == expense  # type: ignore
+        elif dataset["name"] == "Profit/Loss":  # type: ignore
+            assert dataset["values"][0] == profit_loss  # type: ignore
 
 
 @pytest.mark.parametrize(

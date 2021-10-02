@@ -22,13 +22,13 @@ def test_get_bot_raises_when_no_token(telegram_settings: TelegramSettings):
 
 @pytest.mark.usefixtures("telegram_settings")
 def test_get_chats():
-    assert get_chats() == [{"id": -249104912890, "title": "Test Channel"}]
+    assert get_chats() == [{"id": "-249104912890", "title": "Test Channel"}]
 
 
 def test_send_message(monkeypatch: MonkeyPatch, telegram_settings: TelegramSettings):
     class FakeFakeBot(FakeBot):
         def send_message(self, *args: Any, **kwargs: Any):
-            assert int(kwargs.get("chat_id", 0)) == telegram_settings.chat_id
+            assert str(kwargs.get("chat_id", 0)) == telegram_settings.chat_id
             return super().send_message()
 
     monkeypatch.setattr("telegram.Bot", FakeFakeBot)

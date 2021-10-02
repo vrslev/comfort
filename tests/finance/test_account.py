@@ -1,15 +1,16 @@
 import pytest
 
 import frappe
+from comfort import doc_exists, get_all, get_doc, get_value
 from comfort.finance import create_gl_entry
-from comfort.finance.doctype.account.account import add_node, get_children
+from comfort.finance.doctype.account.account import Account, add_node, get_children
 from comfort.finance.doctype.gl_entry.gl_entry import GLEntry
 
 
 @pytest.mark.usefixtures("accounts")
 def test_get_children_root():
-    assert get_children("Account") == frappe.get_all(
-        "Account",
+    assert get_children("Account") == get_all(
+        Account,
         fields=("name as value", "is_group as expandable", "parent_account"),
         filters={"parent_account": ""},
         order_by="name",
@@ -23,8 +24,8 @@ def test_get_children_not_root_all_entries_present():
         if "balance" in account:
             del account["balance"]
 
-    assert res == frappe.get_all(
-        "Account",
+    assert res == get_all(
+        Account,
         fields=("name as value", "is_group as expandable", "parent_account"),
         filters={"parent_account": "Income"},
         order_by="name",
@@ -33,11 +34,9 @@ def test_get_children_not_root_all_entries_present():
 
 @pytest.mark.usefixtures("accounts")
 def test_get_children_not_root_balance():
-    create_gl_entry(None, None, "Sales", 0, 300)
-    create_gl_entry(None, None, "Sales", 0, 500)
-    doc: GLEntry = frappe.get_doc(
-        "GL Entry", frappe.get_value("GL Entry", {"account": "Sales"})
-    )
+    create_gl_entry(None, None, "Sales", 0, 300)  # type: ignore
+    create_gl_entry(None, None, "Sales", 0, 500)  # type: ignore
+    doc = get_doc(GLEntry, get_value("GL Entry", {"account": "Sales"}))
     doc.docstatus = 2
     doc.db_update()
 
@@ -68,7 +67,7 @@ def test_add_node():
     }
     add_node()
     assert (
-        frappe.db.exists(
+        doc_exists(
             {"doctype": doctype, "account_name": name, "is_group": bool(is_group)}
         )
         is not None

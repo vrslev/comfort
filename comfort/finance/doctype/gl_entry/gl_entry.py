@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from typing import Literal
 
-from frappe.model.document import Document
+from comfort import TypedDocument
 
 
-class GLEntry(Document):
+class GLEntry(TypedDocument):
     voucher_type: Literal["Payment", "Receipt", "Sales Return", "Purchase Return"]
     voucher_no: str
     account: str

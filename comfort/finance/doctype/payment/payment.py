@@ -1,18 +1,17 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import Literal
 
-import frappe
-from comfort import TypedDocument, ValidationError, _
+from comfort import TypedDocument, ValidationError, _, get_doc, get_value
 from comfort.finance import cancel_gl_entries_for, create_gl_entry, get_account
 from comfort.transactions import OrderTypes
 
-if TYPE_CHECKING:
-    from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
 # TODO: Allow to change Cash/Bank after submit
 
 
 class Payment(TypedDocument):
+    doctype: Literal["Payment"]
+
     voucher_type: OrderTypes
     voucher_no: str
     amount: int
@@ -31,7 +30,9 @@ class Payment(TypedDocument):
         return "cash" if self.paid_with_cash else "bank"
 
     def _get_amounts_for_sales_gl_entries(self) -> dict[str, int]:
-        doc: SalesOrder = frappe.get_doc(self.voucher_type, self.voucher_no)
+        from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
+
+        doc = get_doc(SalesOrder, self.voucher_no)
 
         sales_amount: int = doc.total_amount - doc.service_amount
         delivery_amount, installation_amount = 0, 0
@@ -86,7 +87,7 @@ class Payment(TypedDocument):
 
     def create_purchase_gl_entries(self):
         cash_or_bank = self._resolve_cash_or_bank()
-        values: tuple[int, int] = frappe.get_value(
+        values: tuple[int, int] = get_value(
             self.voucher_type,
             self.voucher_no,
             fieldname=(
@@ -117,7 +118,9 @@ class Payment(TypedDocument):
 
     def set_status_in_sales_order(self):
         if self.voucher_type == "Sales Order":
-            doc: SalesOrder = frappe.get_doc(self.voucher_type, self.voucher_no)
+            from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
+
+            doc = get_doc(SalesOrder, self.voucher_no)
             doc.set_statuses()
             doc.db_update()
 

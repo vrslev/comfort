@@ -5,7 +5,7 @@ from collections import Counter
 import pytest
 
 import frappe
-from comfort import count_qty, counters_are_same
+from comfort import count_qty, counters_are_same, get_all, get_doc, get_value
 from comfort.stock import (
     cancel_stock_entries_for,
     create_checkout,
@@ -23,7 +23,7 @@ def test_create_receipt(sales_order: SalesOrder):
     sales_order.db_insert()
     sales_order.db_update_all()
     create_receipt(sales_order.doctype, sales_order.name)
-    docstatus: int = frappe.get_value(
+    docstatus: int = get_value(
         "Receipt",
         fieldname="docstatus",
         filters={"voucher_type": sales_order.doctype, "voucher_no": sales_order.name},
@@ -35,7 +35,7 @@ def test_create_checkout(purchase_order: PurchaseOrder):
     purchase_order.db_insert()
     purchase_order.db_update_all()
     create_checkout(purchase_order.name)
-    res: tuple[int, str] = frappe.get_value(
+    res: tuple[int, str] = get_value(
         "Checkout",
         {"purchase_order": purchase_order.name},
         ("docstatus", "purchase_order"),
@@ -65,10 +65,14 @@ def test_create_stock_entry(
         for item_code, qty in count_qty(items_obj).items()
     ]
     create_stock_entry(
-        receipt_sales.doctype, receipt_sales.name, stock_type, items, reverse_qty
+        receipt_sales.doctype,
+        receipt_sales.name,
+        stock_type,
+        items,
+        reverse_qty,  # type: ignore
     )
 
-    entry_name: str | None = frappe.get_value(
+    entry_name: str | None = get_value(
         "Stock Entry",
         filters={
             "voucher_type": receipt_sales.doctype,
@@ -77,7 +81,7 @@ def test_create_stock_entry(
     )
     assert entry_name is not None
 
-    doc: StockEntry = frappe.get_doc("Stock Entry", entry_name)
+    doc = get_doc(StockEntry, entry_name)
     exp_items = count_qty(items_obj)
     if reverse_qty:
         exp_items = reverse_qtys(exp_items)
@@ -92,8 +96,8 @@ def test_cancel_stock_entries_for(receipt_sales: Receipt):
     receipt_sales.submit()
     cancel_stock_entries_for(receipt_sales.doctype, receipt_sales.name)
 
-    entries: list[StockEntry] = frappe.get_all(
-        "Stock Entry",
+    entries = get_all(
+        StockEntry,
         "docstatus",
         filters={
             "voucher_type": receipt_sales.doctype,
@@ -124,9 +128,9 @@ def test_get_stock_balance(
     expected_res: dict[str, int],
 ):
     for first_qty, second_qty in qty_sets:
-        frappe.get_doc(
+        get_doc(
+            StockEntry,
             {
-                "doctype": "Stock Entry",
                 "stock_type": "Available Actual",
                 "voucher_type": receipt_sales.doctype,
                 "voucher_no": receipt_sales.name,
@@ -134,6 +138,6 @@ def test_get_stock_balance(
                     {"item_code": "10014030", "qty": first_qty},
                     {"item_code": "10366598", "qty": second_qty},
                 ],
-            }
+            },
         ).insert()
     assert get_stock_balance("Available Actual") == expected_res

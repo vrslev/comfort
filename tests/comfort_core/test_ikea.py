@@ -1,7 +1,7 @@
 from ikea_api_wrapped.parsers.item import ParsedItem
 
 import frappe
-from comfort import count_qty, counters_are_same
+from comfort import count_qty, counters_are_same, get_all, get_doc
 from comfort.comfort_core.ikea import (
     _child_items_are_same,
     _create_item,
@@ -16,9 +16,7 @@ from comfort.entities.doctype.item_category.item_category import ItemCategory
 
 def test_make_item_category_not_exists(parsed_item: ParsedItem):
     _make_item_category(parsed_item["category_name"], parsed_item["category_url"])
-    categories: list[ItemCategory] = frappe.get_all(
-        "Item Category", ("category_name", "url")
-    )
+    categories = get_all(ItemCategory, ("category_name", "url"))
     assert categories[0].category_name == parsed_item["category_name"]
     assert categories[0].url == parsed_item["category_url"]
 
@@ -28,27 +26,25 @@ def test_make_item_category_exists(parsed_item: ParsedItem):
     _make_item_category(
         parsed_item["category_name"], "https://www.ikea.com/ru/ru/cat/-43638"
     )
-    categories: list[ItemCategory] = frappe.get_all("Item Category", "url")
+    categories = get_all(ItemCategory, "url")
     assert categories[0].url == parsed_item["category_url"]
 
 
 def test_make_item_category_no_name(parsed_item: ParsedItem):
     _make_item_category(None, parsed_item["category_url"])
-    categories: list[ItemCategory] = frappe.get_all("Item Category", "url")
+    categories = get_all(ItemCategory, "url")
     assert len(categories) == 0
 
 
 def test_make_items_from_child_items_if_not_exist(parsed_item: ParsedItem):
     _make_items_from_child_items_if_not_exist(parsed_item)
-    items_in_db: set[str] = {
-        item.item_code for item in frappe.get_all("Item", "item_code")
-    }
+    items_in_db = {item.item_code for item in get_all(Item, "item_code")}
     assert (
         len({item["item_code"] for item in parsed_item["child_items"]} ^ items_in_db)
         == 0
     )
     _make_items_from_child_items_if_not_exist(parsed_item)  # test if not exists block
-    items_in_db = {item.item_code for item in frappe.get_all("Item", "item_code")}
+    items_in_db = {item.item_code for item in get_all(Item, "item_code")}
     assert (
         len({item["item_code"] for item in parsed_item["child_items"]} ^ items_in_db)
         == 0
@@ -75,7 +71,7 @@ def test_create_item_exists(parsed_item: ParsedItem):
     _make_item_category(parsed_item["category_name"], parsed_item["category_url"])
     _create_item(parsed_item)
 
-    doc: Item = frappe.get_doc("Item", parsed_item["item_code"])
+    doc = get_doc(Item, parsed_item["item_code"])
 
     assert doc.item_code == parsed_item["item_code"]
     assert doc.item_name == parsed_item["name"]
@@ -99,7 +95,7 @@ def test_create_item_exists_child_items_changed(parsed_item: ParsedItem):
     parsed_item["child_items"].pop()
     _create_item(parsed_item)
 
-    doc: Item = frappe.get_doc("Item", parsed_item["item_code"])
+    doc = get_doc(Item, parsed_item["item_code"])
     assert counters_are_same(
         count_qty(doc.child_items),
         count_qty(
@@ -112,7 +108,7 @@ def test_create_item_exists_child_items_changed(parsed_item: ParsedItem):
 def test_create_item_not_exists(parsed_item: ParsedItem):
     _make_item_category(parsed_item["category_name"], parsed_item["category_url"])
     _create_item(parsed_item)
-    doc: Item = frappe.get_doc("Item", parsed_item["item_code"])
+    doc = get_doc(Item, parsed_item["item_code"])
 
     assert doc.item_code == parsed_item["item_code"]
     assert doc.item_name == parsed_item["name"]
@@ -134,7 +130,7 @@ def test_create_item_not_exists_no_child_items(parsed_item: ParsedItem):
     parsed_item["child_items"] = []
     _make_item_category(parsed_item["category_name"], parsed_item["category_url"])
     _create_item(parsed_item)
-    doc: Item = frappe.get_doc("Item", parsed_item["item_code"])
+    doc = get_doc(Item, parsed_item["item_code"])
 
     assert len(doc.child_items) == 0
 
@@ -142,21 +138,19 @@ def test_create_item_not_exists_no_child_items(parsed_item: ParsedItem):
 def test_create_item_not_exists_no_item_category(parsed_item: ParsedItem):
     parsed_item["category_name"] = ""
     _create_item(parsed_item)
-    doc: Item = frappe.get_doc("Item", parsed_item["item_code"])
+    doc = get_doc(Item, parsed_item["item_code"])
 
     assert len(doc.item_categories) == 0
 
 
 def test_get_items_to_fetch_force_update():
-    item_codes = ["10014030"]
-    res = _get_items_to_fetch(item_codes, force_update=True)
+    res = _get_items_to_fetch(["10014030"], force_update=True)
     assert len(res) == 1
 
 
 def test_get_items_to_fetch_not_force_update(item: Item):
     item.db_insert()
-    item_codes = [item.item_code]
-    res = _get_items_to_fetch(item_codes, force_update=False)
+    res = _get_items_to_fetch([item.item_code], force_update=False)
     assert len(res) == 0
 
 
@@ -165,7 +159,7 @@ def test_create_item_categories(parsed_item: ParsedItem):
     new_category = "New Category Name"
     items[1]["category_name"] = new_category
     _create_item_categories(items)
-    categories_in_db: set[str] = {c.name for c in frappe.get_all("Item Category")}
+    categories_in_db = {c.name for c in get_all(ItemCategory)}
     assert len({new_category, parsed_item["category_name"]} ^ categories_in_db) == 0
 
 

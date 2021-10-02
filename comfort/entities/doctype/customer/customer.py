@@ -3,13 +3,12 @@ from __future__ import annotations
 from typing import Literal
 from urllib.parse import parse_qs, urlparse
 
-from comfort import ValidationError, _
-from frappe.model.document import Document
+from comfort import TypedDocument, ValidationError, _
 
 # TODO: Validate phone number
 
 
-class Customer(Document):
+class Customer(TypedDocument):
     image: str
     gender: Literal["Male", "Female"]
     customer_group: str

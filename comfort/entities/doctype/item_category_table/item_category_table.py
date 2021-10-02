@@ -1,7 +1,7 @@
-from frappe.model.document import Document
+from comfort import TypedDocument
 
 from ..item_category.item_category import ItemCategory
 
 
-class ItemCategoryTable(Document):
+class ItemCategoryTable(TypedDocument):
     item_category: ItemCategory

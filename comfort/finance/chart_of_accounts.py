@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from typing import Any
 
-import frappe
-from comfort import _
+from comfort import _, get_all, get_doc, new_doc
+from comfort.finance.doctype.account.account import Account
 from comfort.finance.doctype.finance_settings.finance_settings import FinanceSettings
 from frappe.utils.nestedset import rebuild_tree
 
@@ -44,14 +44,11 @@ DEFAULT_ACCOUNT_SETTINGS = {
 def _create_accounts_from_schema():
     def execute(parent: str | None, children: dict[str, Any]):
         for child, children_of_child in children.items():
-            frappe.get_doc(
-                {
-                    "doctype": "Account",
-                    "account_name": _(child),
-                    "parent_account": _(parent),
-                    "is_group": bool(children_of_child),
-                }
-            ).insert()
+            doc = new_doc(Account)
+            doc.account_name = _(child)
+            doc.parent_account = _(parent)
+            doc.is_group = bool(children_of_child)
+            doc.insert()
             execute(child, children_of_child)
 
     execute(None, ACCOUNTS)
@@ -59,12 +56,12 @@ def _create_accounts_from_schema():
 
 
 def _set_default_accounts():
-    doc: FinanceSettings = frappe.get_single("Finance Settings")
+    doc = get_doc(FinanceSettings)
     doc.update(DEFAULT_ACCOUNT_SETTINGS)
     doc.save()
 
 
 def initialize_accounts():
-    if not frappe.get_all("Account", limit_page_length=1):
+    if not get_all(Account, limit_page_length=1):
         _create_accounts_from_schema()
     _set_default_accounts()

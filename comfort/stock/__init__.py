@@ -1,17 +1,10 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Literal
+from typing import Any, Literal
 
-import frappe
-from comfort import count_qty
+from comfort import count_qty, get_all, get_doc, new_doc
 from comfort.stock.doctype.stock_entry_item.stock_entry_item import StockEntryItem
 from comfort.transactions import OrderTypes
-from frappe.model.document import Document
-
-if TYPE_CHECKING:
-    from comfort.stock.doctype.checkout.checkout import Checkout
-    from comfort.stock.doctype.receipt.receipt import Receipt
-    from comfort.stock.doctype.stock_entry.stock_entry import StockEntry
 
 StockTypes = Literal[
     "Reserved Actual", "Available Actual", "Reserved Purchased", "Available Purchased"
@@ -19,19 +12,20 @@ StockTypes = Literal[
 
 
 def create_receipt(doctype: OrderTypes, name: str):
-    doc: Receipt = frappe.get_doc(
-        {"doctype": "Receipt", "voucher_type": doctype, "voucher_no": name}
-    )
-    doc.insert()
-    doc.submit()
+    from comfort.stock.doctype.receipt.receipt import Receipt
+
+    doc = new_doc(Receipt)
+    doc.voucher_type = doctype
+    doc.voucher_no = name
+    doc.insert().submit()
 
 
 def create_checkout(purchase_order: str):
-    doc: Checkout = frappe.get_doc(
-        {"doctype": "Checkout", "purchase_order": purchase_order}
-    )
-    doc.insert()
-    doc.submit()
+    from comfort.stock.doctype.checkout.checkout import Checkout
+
+    doc = new_doc(Checkout)
+    doc.purchase_order = purchase_order
+    doc.insert().submit()
 
 
 def create_stock_entry(
@@ -41,41 +35,50 @@ def create_stock_entry(
     items: list[Any],
     reverse_qty: bool = False,
 ):
-    doc: StockEntry = frappe.get_doc(
-        {
-            "doctype": "Stock Entry",
-            "voucher_type": doctype,
-            "voucher_no": name,
-            "stock_type": stock_type,
-            "items": [
-                {"item_code": item_code, "qty": -qty if reverse_qty else qty}
-                for item_code, qty in count_qty(items).items()
-            ],
-        }
+    from comfort.stock.doctype.stock_entry.stock_entry import StockEntry
+
+    doc = new_doc(StockEntry)
+    doc.stock_type = stock_type
+    doc.voucher_type = doctype
+    doc.voucher_no = name
+    doc.extend(
+        "items",
+        [
+            {"item_code": item_code, "qty": -qty if reverse_qty else qty}
+            for item_code, qty in count_qty(items).items()
+        ],
     )
-    doc.insert()
-    doc.submit()
+    doc.insert().submit()
 
 
-def cancel_stock_entries_for(doctype: Literal["Checkout", "Receipt"], name: str):
-    entries: list[Document] = frappe.get_all(
-        "Stock Entry",
+def cancel_stock_entries_for(
+    doctype: Literal[
+        "Receipt", "Checkout", "Sales Return", "Purchase Return", "Sales Order"
+    ],
+    name: str,
+):
+    from comfort.stock.doctype.stock_entry.stock_entry import StockEntry
+
+    entries = get_all(
+        StockEntry,
         {"voucher_type": doctype, "voucher_no": name, "docstatus": ("!=", 2)},
     )
     for entry in entries:
-        doc: StockEntry = frappe.get_doc("Stock Entry", entry.name)
-        doc.cancel()
+        get_doc(StockEntry, entry.name).cancel()
 
 
 def get_stock_balance(stock_type: StockTypes) -> dict[str, int]:
-    stock_entries: list[str] = [
+    from comfort.stock.doctype.stock_entry.stock_entry import StockEntry
+
+    stock_entries = (
         entry.name
-        for entry in frappe.get_all(
-            "Stock Entry", {"docstatus": ("!=", 2), "stock_type": stock_type}
+        for entry in get_all(
+            StockEntry, {"docstatus": ("!=", 2), "stock_type": stock_type}
         )
-    ]
-    items: list[StockEntryItem] = frappe.get_all(
-        "Stock Entry Item",
+    )
+
+    items = get_all(
+        StockEntryItem,
         fields=("item_code", "qty"),
         filters={"parent": ("in", stock_entries)},
     )

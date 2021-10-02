@@ -8,10 +8,11 @@ import telegram
 from ikea_api_wrapped import format_item_code
 
 import frappe
-from comfort import TypedDocument, ValidationError, _, maybe_json
+from comfort import TypedDocument, ValidationError, _, get_all, get_doc, maybe_json
 from comfort.comfort_core.doctype.telegram_settings.telegram_settings import (
     send_message,
 )
+from comfort.stock.doctype.receipt.receipt import Receipt
 from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
 from comfort.transactions.doctype.sales_order_service.sales_order_service import (
     SalesOrderService,
@@ -37,7 +38,10 @@ class DeliveryTrip(TypedDocument):
         self.set_status()
 
     def set_status(self):
-        self.status = {0: "Draft", 1: "In Progress", 2: "Cancelled"}[self.docstatus]
+        docstatus_to_status_map: dict[
+            int, Literal["Draft", "In Progress", "Cancelled"]
+        ] = {0: "Draft", 1: "In Progress", 2: "Cancelled"}
+        self.status = docstatus_to_status_map[self.docstatus]
 
     def _validate_stops_have_address_and_city(self):
         for stop in self.stops:
@@ -61,9 +65,8 @@ class DeliveryTrip(TypedDocument):
                 )
 
     def _get_template_context(self):
-        form_url: str = get_url_to_form("Delivery Trip", self.name)
-        context: dict[str, str | None | list[dict[str, Any]]] = {
-            "form_url": form_url,
+        context: dict[str, Any] = {
+            "form_url": get_url_to_form("Delivery Trip", self.name),
             "doctype": _(self.doctype),
             "docname": self.name,
             "stops": [],
@@ -87,18 +90,18 @@ class DeliveryTrip(TypedDocument):
         return context
 
     @frappe.whitelist()
-    def render_telegram_message(self) -> str:
+    def render_telegram_message(self) -> str | None:
         return frappe.render_template(
-            "stock/doctype/delivery_trip/telegram_template.j2",
-            self._get_template_context(),
+            template="stock/doctype/delivery_trip/telegram_template.j2",
+            context=self._get_template_context(),
             is_path=True,
         )
 
     def _add_receipts_to_sales_orders(self):
         orders_have_receipt: list[str] = [
             r.voucher_no
-            for r in frappe.get_all(
-                "Receipt",
+            for r in get_all(
+                Receipt,
                 fields="voucher_no",
                 filters={
                     "voucher_type": "Sales Order",
@@ -110,7 +113,7 @@ class DeliveryTrip(TypedDocument):
 
         for stop in self.stops:
             if stop.sales_order not in orders_have_receipt:
-                doc: SalesOrder = frappe.get_doc("Sales Order", stop.sales_order)
+                doc = get_doc(SalesOrder, stop.sales_order)
                 doc.add_receipt()
 
     @frappe.whitelist()
@@ -130,7 +133,7 @@ def _make_route_url(
 
 
 def _get_items_for_order(sales_order_name: str):  # pragma: no cover
-    doc: SalesOrder = frappe.get_doc("Sales Order", sales_order_name)
+    doc = get_doc(SalesOrder, sales_order_name)
     return [
         {
             "item_code": format_item_code(item.item_code),
@@ -143,18 +146,19 @@ def _get_items_for_order(sales_order_name: str):  # pragma: no cover
 
 @frappe.whitelist()
 def get_delivery_and_installation_for_order(sales_order_name: str):
-    services: list[SalesOrderService] = frappe.get_all(
-        "Sales Order Service", fields="type", filters={"parent": sales_order_name}
-    )
     delivery_type: str | None = None
     installation = False
-    for service in services:
+
+    for service in get_all(
+        SalesOrderService, fields="type", filters={"parent": sales_order_name}
+    ):
         if service.type == "Delivery to Apartment":
             delivery_type = "To Apartment"
         if service.type == "Delivery to Entrance":
             delivery_type = "To Entrance"
         elif service.type == "Installation":
             installation = True
+
     return {"delivery_type": delivery_type, "installation": installation}
 
 

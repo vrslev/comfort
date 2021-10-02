@@ -4,7 +4,7 @@ from collections import defaultdict
 from typing import Any
 
 import frappe
-from comfort import _, group_by_attr
+from comfort import _, get_all, group_by_attr
 from comfort.finance.doctype.account.account import Account
 
 
@@ -38,14 +38,8 @@ def get_columns():  # pragma: no cover
     ]
 
 
-class AccountWithTotal(Account):
-    total: int
-
-
 def _get_parent_children_accounts_map() -> dict[str | None, list[AccountWithTotal]]:
-    accounts: list[AccountWithTotal] = frappe.get_all(
-        "Account", ("name", "parent_account")
-    )
+    accounts: list[AccountWithTotal] = get_all(Account, ("name", "parent_account"))  # type: ignore
     acceptable_parents = (_("Income"), _("Expense"))
     to_remove: list[AccountWithTotal] = []
     for account in accounts:
@@ -79,21 +73,25 @@ def _get_account_balance_map(filters: dict[str, str]):
             ("creation", "between", (filters["from_date"], filters["to_date"])),
         ),
     )
-    account_balance_map: defaultdict[str, int] = defaultdict(int)
+    account_balance_map: defaultdict[str | None, int] = defaultdict(int)
     for entry in entries:
         account_balance_map[entry.account] += abs(entry.balance)
     return account_balance_map
 
 
+class AccountWithTotal(Account):
+    total: int
+
+
 def _calculate_total_in_parent_accounts(
-    account_balance_map: defaultdict[str, int],
+    account_balance_map: defaultdict[str | None, int],
     parent_children_map: dict[str | None, list[AccountWithTotal]],
     accounts: list[AccountWithTotal],
 ):
     for account in reversed(accounts):
         account.total = account_balance_map[account.name]
-        children: list[Account] = parent_children_map.get(account.name)
-        if children:
+        children: list[AccountWithTotal] | None = parent_children_map.get(account.name)
+        if children is not None:
             account_balance_map[account.name] = account.total = sum(
                 account_balance_map[c.name] for c in children
             )

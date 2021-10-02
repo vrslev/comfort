@@ -9,7 +9,15 @@ from ikea_api_wrapped.parsers.item import ParsedItem
 from ikea_api_wrapped.wrappers import NoDeliveryOptionsAvailableError
 
 import frappe
-from comfort import count_qty, counters_are_same
+from comfort import (
+    count_qty,
+    counters_are_same,
+    doc_exists,
+    get_all,
+    get_cached_value,
+    get_doc,
+    new_doc,
+)
 from comfort.comfort_core.doctype.ikea_settings.ikea_settings import (
     get_authorized_api,
     get_guest_api,
@@ -21,9 +29,7 @@ from comfort.entities.doctype.item_category.item_category import ItemCategory
 
 def get_delivery_services(items: dict[str, int]):  # pragma: no cover
     api = get_guest_api()
-    zip_code: str = frappe.get_cached_value(
-        "Ikea Settings", "Ikea Settings", "zip_code"
-    )
+    zip_code: str = get_cached_value("Ikea Settings", "Ikea Settings", "zip_code")
     try:
         return ikea_api_wrapped.get_delivery_services(api, items, zip_code)
     except NoDeliveryOptionsAvailableError:
@@ -44,13 +50,13 @@ def get_purchase_history():  # pragma: no cover
 def get_purchase_info(purchase_id: int, use_lite_id: bool):  # pragma: no cover
     email: str | None = None
     if use_lite_id:
-        email = frappe.get_cached_value("Ikea Settings", "Ikea Settings", "username")
+        email = get_cached_value("Ikea Settings", "Ikea Settings", "username")
     return ikea_api_wrapped.get_purchase_info(get_authorized_api(), purchase_id, email)
 
 
 def _make_item_category(name: str | None, url: str | None):
-    if name and not frappe.db.exists("Item Category", name):
-        doc: ItemCategory = frappe.new_doc("Item Category")
+    if name and not doc_exists("Item Category", name):
+        doc = new_doc(ItemCategory)
         doc.category_name = name
         doc.url = url
         doc.insert()
@@ -58,8 +64,8 @@ def _make_item_category(name: str | None, url: str | None):
 
 def _make_items_from_child_items_if_not_exist(parsed_item: ParsedItem):
     for child_item in parsed_item["child_items"]:
-        if not frappe.db.exists("Item", child_item["item_code"]):
-            doc: Item = frappe.new_doc("Item")
+        if not doc_exists("Item", child_item["item_code"]):
+            doc = new_doc(Item)
             doc.item_code = child_item["item_code"]
             doc.item_name = child_item["item_name"]
             doc.weight = child_item["weight"]
@@ -76,10 +82,8 @@ def _child_items_are_same(old_child_items: list[ChildItem], new_child_items: lis
 
 
 def _create_item(parsed_item: ParsedItem):
-    if frappe.db.exists(
-        "Item", parsed_item["item_code"]
-    ):  # TODO: Update only if doc changed
-        doc: Item = frappe.get_doc("Item", parsed_item["item_code"])
+    if doc_exists("Item", parsed_item["item_code"]):  # TODO: Update only if doc changed
+        doc = get_doc(Item, parsed_item["item_code"])
         doc.item_name = parsed_item["name"]
         doc.url = parsed_item["url"]
         doc.rate = parsed_item["price"]
@@ -95,7 +99,7 @@ def _create_item(parsed_item: ParsedItem):
         doc.save()
 
     else:
-        doc: Item = frappe.new_doc("Item")
+        doc = new_doc(Item)
         doc.item_code = parsed_item["item_code"]
         doc.item_name = parsed_item["name"]
         doc.url = parsed_item["url"]
@@ -119,8 +123,8 @@ def _get_items_to_fetch(item_codes: str | int | list[str | int], force_update: b
     else:
         exist: list[str] = [
             item.item_code
-            for item in frappe.get_all(
-                "Item", "item_code", {"item_code": ("in", parsed_item_codes)}
+            for item in get_all(
+                Item, "item_code", {"item_code": ("in", parsed_item_codes)}
             )
         ]
         return [item_code for item_code in parsed_item_codes if item_code not in exist]
@@ -135,7 +139,7 @@ def _create_item_categories(items: list[ParsedItem]):
 
 
 def _fetch_child_items(items: list[ParsedItem], force_update: bool):  # pragma: no cover
-    items_to_fetch: list[str] = []
+    items_to_fetch: list[str | int] = []
     for item in items:
         for child in item["child_items"]:
             items_to_fetch.append(child["item_code"])
@@ -173,8 +177,8 @@ def download_images(items: list[ImageItem]):  # pragma: no cover
     item_codes = [item["item_code"] for item in items]
     items_have_image: list[str] = [
         item.item_code
-        for item in frappe.get_all(
-            "Item",
+        for item in get_all(
+            Item,
             fields=("item_code", "image"),
             filters={"item_code": ("in", item_codes)},
         )

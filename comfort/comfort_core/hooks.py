@@ -5,6 +5,7 @@ from typing import Any, Iterable
 
 import frappe
 import frappe.defaults
+from comfort import get_cached_value, get_doc
 from comfort.finance.chart_of_accounts import initialize_accounts
 from frappe.core.doctype.doctype.doctype import DocType
 from frappe.desk.reportview import get_filters_cond, get_match_cond
@@ -68,7 +69,7 @@ def _get_fields(
     search_fields: list[Any] = meta.get_search_fields()
     fields.extend(search_fields)
 
-    title_field: str | None = meta.get("title_field")
+    title_field: Any = meta.get("title_field")
     if title_field and not title_field.strip() in fields:
         fields.insert(1, title_field.strip())
 
@@ -88,7 +89,7 @@ def default_query(
     conditions = []
     fields = _get_fields(doctype, ["name"])
 
-    query: list[list[Any]] = frappe.db.sql(
+    query: list[list[Any]] = frappe.db.sql(  # type: ignore
         f"""
         SELECT {", ".join(fields)} FROM `tab{doctype}`
         WHERE {searchfield} LIKE %(txt)s
@@ -113,9 +114,9 @@ def get_standard_queries(doctypes: Iterable[str]):  # pragma: no cover
 
 
 def _set_currency_symbol():
-    doc: Currency = frappe.get_doc("Currency", "RUB")
-    doc.symbol = "₽"
-    doc.enabled = True
+    doc = get_doc(Currency, "RUB")
+    doc.symbol = "₽"  # type: ignore
+    doc.enabled = True  # type: ignore
     doc.save()
     frappe.db.set_default("currency", "RUB")
     frappe.db.set_default("currency_precision", 0)
@@ -140,7 +141,7 @@ def after_install():  # pragma: no cover
 
 
 def extend_boot_session(bootinfo: Any):  # pragma: no cover
-    currency_doc: dict[str, Any] = frappe.get_cached_value(
+    currency_doc: dict[str, Any] = get_cached_value(
         "Currency",
         bootinfo.sysdefaults.currency,
         (

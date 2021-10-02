@@ -1,8 +1,8 @@
 from typing import Literal
 
-from frappe.model.document import Document
+from comfort import TypedDocument
 
 
-class SalesOrderService(Document):
+class SalesOrderService(TypedDocument):
     type: Literal["Delivery to Apartment", "Delivery to Entrance", "Installation"]
     rate: int

@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 from collections import Counter
-from typing import Generator
+from typing import Generator, Literal
 
 import pytest
 
 import frappe
-from comfort import count_qty, group_by_attr
+from comfort import count_qty, get_all, get_doc, get_value, group_by_attr
 from comfort.entities.doctype.child_item.child_item import ChildItem
 from comfort.finance import get_account
 from comfort.finance.doctype.gl_entry.gl_entry import GLEntry
@@ -28,7 +28,6 @@ from comfort.transactions.doctype.sales_return.sales_return import SalesReturn
 from comfort.transactions.doctype.sales_return_item.sales_return_item import (
     SalesReturnItem,
 )
-from frappe.model.document import Document
 
 
 def test_purchase_return_voucher_property(purchase_return: PurchaseReturn):
@@ -66,7 +65,7 @@ def test_purchase_return_validate_voucher_statuses_docstatus_raises(
 
 @pytest.mark.parametrize("status", ("To Receive", "Completed"))
 def test_purchase_return_validate_voucher_statuses_status_not_raises(
-    purchase_return: PurchaseReturn, status: str
+    purchase_return: PurchaseReturn, status: Literal["To Receive", "Completed"]
 ):
     purchase_return._voucher.docstatus = 1
     purchase_return._voucher.status = status
@@ -78,7 +77,7 @@ def test_purchase_return_validate_voucher_statuses_status_raises(
     purchase_return: PurchaseReturn, status: str
 ):
     purchase_return._voucher.docstatus = 1
-    purchase_return._voucher.status = status
+    purchase_return._voucher.status = status  # type: ignore
     with pytest.raises(
         frappe.ValidationError, match="Status should be To Receive or Completed"
     ):
@@ -87,9 +86,10 @@ def test_purchase_return_validate_voucher_statuses_status_raises(
 
 def test_purchase_return_get_all_items(purchase_return: PurchaseReturn):
     items = purchase_return._get_all_items()
-    exp_items: list[AnyChildItem] = purchase_return._voucher._get_items_to_sell(
-        True
-    ) + purchase_return._voucher._get_items_in_sales_orders(True)
+    exp_items: list[AnyChildItem] = list(
+        purchase_return._voucher._get_items_to_sell(True)
+    )
+    exp_items += purchase_return._voucher._get_items_in_sales_orders(True)
     assert count_qty(items) == count_qty(exp_items)
     can_allocate_items: Generator[bool | None, None, None] = (
         item.get("doctype") and item.get("parent") for item in items
@@ -98,7 +98,7 @@ def test_purchase_return_get_all_items(purchase_return: PurchaseReturn):
 
 
 def test_allocate_items(purchase_return: PurchaseReturn):
-    exp_counters: dict[str, Counter[str]] = {
+    exp_counters: dict[str | None, Counter[str]] = {
         None: Counter({"10366598": 1, "40366634": 1}),
         purchase_return._voucher.sales_orders[0].sales_order_name: Counter(
             {"10366598": 1}
@@ -113,7 +113,7 @@ def test_allocate_items(purchase_return: PurchaseReturn):
         for item in cur_items:
             grouped_item = grouped_items[item["item_code"]][0]
             assert item["item_name"] == grouped_item.item_name
-            assert item["rate"] == grouped_item.rate
+            assert item["rate"] == grouped_item.rate  # type: ignore
 
 
 def test_make_sales_returns_creation(
@@ -124,9 +124,7 @@ def test_make_sales_returns_creation(
     sales_order.reload()
     orders_to_items = purchase_return._allocate_items()
     purchase_return._make_sales_returns(orders_to_items)
-    sales_returns: list[SalesReturn] = frappe.get_all(
-        "Sales Return", fields=("name", "sales_order")
-    )
+    sales_returns = get_all(SalesReturn, fields=("name", "sales_order"))
     grouped_sales_returns = group_by_attr(sales_returns, attr="sales_order")
 
     assert (
@@ -134,21 +132,19 @@ def test_make_sales_returns_creation(
     )  # There's None for items to sell
 
     def build_shorten_item(
-        item: SalesOrderItem | SalesOrderChildItem | SalesReturnItem,
-    ) -> dict[str, str | int]:
+        item: SalesOrderItem | SalesOrderChildItem | SalesReturnItem | frappe._dict,
+    ) -> dict[str, str | int | None]:
         return {
             "item_code": item.item_code,
             "item_name": item.item_name,
             "qty": item.qty,
-            "rate": item.rate,
+            "rate": item.rate,  # type: ignore
         }
 
     for order_name, cur_items in orders_to_items.items():
         if order_name is None:
             continue
-        doc: SalesReturn = frappe.get_doc(
-            "Sales Return", grouped_sales_returns[order_name][0].name
-        )
+        doc = get_doc(SalesReturn, grouped_sales_returns[order_name][0].name)
         assert doc.from_purchase_return == purchase_return.name
         assert [build_shorten_item(i) for i in doc.items] == [
             build_shorten_item(frappe._dict(i)) for i in cur_items
@@ -164,8 +160,8 @@ def test_make_sales_returns_docstatus_all_items_returns(
         "items_to_sell", {"item_code": "10014030", "qty": 2}
     )
 
-    sales_order: SalesOrder = frappe.get_doc(
-        "Sales Order", purchase_return._voucher.sales_orders[0].sales_order_name
+    sales_order = get_doc(
+        SalesOrder, purchase_return._voucher.sales_orders[0].sales_order_name
     )
     sales_order.items = []
     sales_order.append("items", {"item_code": "10366598", "qty": 1})
@@ -175,8 +171,7 @@ def test_make_sales_returns_docstatus_all_items_returns(
     items = purchase_return._voucher._get_items_in_sales_orders(True)
     purchase_return._add_missing_fields_to_items(items)
     purchase_return.items = []
-    payload: list[dict[str, str | int]] = [dict(i) for i in items]
-    purchase_return.add_items(payload)
+    purchase_return.add_items([dict(i) for i in items])  # type: ignore
     purchase_return.db_insert()
     purchase_return.update_children()
 
@@ -191,9 +186,8 @@ def test_make_sales_returns_docstatus_all_items_returns(
 def test_make_sales_returns_docstatus_not_all_items_returns(
     purchase_return: PurchaseReturn,
 ):
-    sales_order: SalesOrder = frappe.get_doc(
-        "Sales Order",
-        purchase_return._voucher.sales_orders[0].sales_order_name,
+    sales_order = get_doc(
+        SalesOrder, purchase_return._voucher.sales_orders[0].sales_order_name
     )
     sales_order.docstatus = 1
     sales_order.delivery_status = "Purchased"
@@ -225,18 +219,18 @@ def test_add_missing_field_to_voucher_items_to_sell_changes(
 ):
     items = merge_same_items(purchase_return._voucher._get_items_to_sell(True))
     item = items[0]
-    item.rate = rate
-    item.weight = weight
-    item.item_name = item_name
-    item.amount = amount
-    purchase_return._add_missing_field_to_voucher_items_to_sell(items)
-    values: tuple[int, float, str, int] = frappe.get_value(
+    item.rate = rate  # type: ignore
+    item.weight = weight  # type: ignore
+    item.item_name = item_name  # type: ignore
+    item.amount = amount  # type: ignore
+    purchase_return._add_missing_field_to_voucher_items_to_sell(items)  # type: ignore
+    values: tuple[int, float, str, int] = get_value(
         "Item", item.item_code, ("rate", "weight", "item_name")
     )
-    assert item.rate == values[0]
-    assert item.weight == values[1]
-    assert item.item_name == values[2]
-    assert item.amount == item.qty * item.rate
+    assert item.rate == values[0]  # type: ignore
+    assert item.weight == values[1]  # type: ignore
+    assert item.item_name == values[2]  # type: ignore
+    assert item.amount == item.qty * item.rate  # type: ignore
 
 
 def test_add_missing_field_to_voucher_items_to_sell_not_changes(
@@ -245,31 +239,31 @@ def test_add_missing_field_to_voucher_items_to_sell_not_changes(
     rate, weight, item_name, amount = 100, 200, "The Name", 345
     items = merge_same_items(purchase_return._voucher._get_items_to_sell(True))
     item = items[0]
-    item.rate = rate
-    item.weight = weight
+    item.rate = rate  # type: ignore
+    item.weight = weight  # type: ignore
     item.item_name = item_name
-    item.amount = amount
-    purchase_return._add_missing_field_to_voucher_items_to_sell(items)
-    assert item.rate == rate
-    assert item.weight == weight
+    item.amount = amount  # type: ignore
+    purchase_return._add_missing_field_to_voucher_items_to_sell(items)  # type: ignore
+    assert item.rate == rate  # type: ignore
+    assert item.weight == weight  # type: ignore
     assert item.item_name == item_name
-    assert item.amount == item.qty * item.rate
+    assert item.amount == item.qty * item.rate  # type: ignore
 
 
 def test_purchase_return_split_combinations_in_voucher(purchase_return: PurchaseReturn):
     items = merge_same_items(purchase_return._voucher._get_items_to_sell(True))
-    purchase_return._add_missing_field_to_voucher_items_to_sell(items)
+    purchase_return._add_missing_field_to_voucher_items_to_sell(items)  # type: ignore
     purchase_return._split_combinations_in_voucher()
 
     def build_shorten_item(
         item: PurchaseOrderItemToSell | ChildItem,
-    ) -> dict[str, str | int]:
+    ) -> dict[str, str | int | None]:
         return {
             "item_code": item.item_code,
             "item_name": item.item_name,
             "qty": item.qty,
-            "rate": item.rate,
-            "amount": item.qty * item.rate,
+            "rate": item.rate,  # type: ignore
+            "amount": item.qty * item.rate,  # type: ignore
         }
 
     assert [build_shorten_item(i) for i in items] == [
@@ -298,7 +292,7 @@ def test_purchase_return_modify_voucher(
 def test_purchase_return_make_gl_entries_status_raises(
     purchase_return: PurchaseReturn, status: str
 ):
-    purchase_return._voucher.status = status
+    purchase_return._voucher.status = status  # type: ignore
     with pytest.raises(KeyError):
         purchase_return._make_gl_entries()
 
@@ -308,14 +302,16 @@ def test_purchase_return_make_gl_entries_status_raises(
     (("To Receive", "prepaid_inventory"), ("Completed", "inventory")),
 )
 def test_purchase_return_make_gl_entries_create(
-    purchase_return: PurchaseReturn, status: str, exp_inventory_account: str
+    purchase_return: PurchaseReturn,
+    status: Literal["To Receive", "Completed"],
+    exp_inventory_account: str,
 ):
     purchase_return._voucher.status = status
     purchase_return.returned_paid_amount = 1000
     purchase_return._make_gl_entries()
 
-    entries: list[GLEntry] = frappe.get_all(
-        "GL Entry",
+    entries = get_all(
+        GLEntry,
         fields=("account", "debit", "credit"),
         filters={
             "voucher_type": purchase_return.doctype,
@@ -340,7 +336,7 @@ def test_purchase_return_make_gl_entries_create(
 def test_purchase_return_make_stock_entries_not_create(
     purchase_return: PurchaseReturn, status: str
 ):
-    purchase_return._voucher.status = status
+    purchase_return._voucher.status = status  # type: ignore
     with pytest.raises(KeyError):
         purchase_return._make_stock_entries()
 
@@ -350,20 +346,22 @@ def test_purchase_return_make_stock_entries_not_create(
     (("To Receive", "Available Purchased"), ("Completed", "Available Actual")),
 )
 def test_purchase_return_make_stock_entries_create(
-    purchase_return: PurchaseReturn, status: str, exp_stock_type: str
+    purchase_return: PurchaseReturn,
+    status: Literal["To Receive", "Completed"],
+    exp_stock_type: str,
 ):
     purchase_return._voucher.status = status
     purchase_return.db_insert()
     purchase_return._make_stock_entries()
 
-    entry_name: str = frappe.get_value(
+    entry_name: str = get_value(
         "Stock Entry",
         {"voucher_type": purchase_return.doctype, "voucher_no": purchase_return.name},
     )
     counter = count_qty(purchase_return.items)
     for item_code in counter:
         counter[item_code] = -counter[item_code]
-    doc: StockEntry = frappe.get_doc("Stock Entry", entry_name)
+    doc = get_doc(StockEntry, entry_name)
     assert count_qty(doc.items) == counter
     assert doc.stock_type == exp_stock_type
 
@@ -400,6 +398,6 @@ def test_purchase_return_on_cancel_linked_docs_cancelled(
     purchase_return.before_submit()
     purchase_return.on_cancel()
 
-    for doctype in ("Sales Return", "GL Entry", "Stock Entry"):
-        docs: list[Document] = frappe.get_all(doctype, "docstatus")
+    for doctype in (SalesReturn, GLEntry, StockEntry):
+        docs = get_all(doctype, "docstatus")
         assert all(doc.docstatus == 2 for doc in docs)

@@ -1,7 +1,7 @@
-from frappe.model.document import Document
+from comfort import TypedDocument
 
 
-class CommissionRange(Document):
+class CommissionRange(TypedDocument):
     percentage: int
     from_amount: int
     to_amount: int

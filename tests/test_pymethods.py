@@ -50,5 +50,5 @@ def test_dotted_py_methods_in_code():
             new_exception = e
             args = list(e.args)
             args.append(method)
-            new_exception.args = args
+            new_exception.args = args  # type: ignore
             raise new_exception

@@ -1,7 +1,7 @@
-from frappe.model.document import Document
+from comfort import TypedDocument
 
 
-class PurchaseReturnItem(Document):
+class PurchaseReturnItem(TypedDocument):
     item_code: str
     item_name: str
     qty: int

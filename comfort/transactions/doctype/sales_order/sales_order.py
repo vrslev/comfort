@@ -1,9 +1,21 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Iterable, Literal
+from typing import Any, Iterable, Literal
 
 import frappe
-from comfort import ValidationError, _, count_qty, group_by_attr
+from comfort import (
+    TypedDocument,
+    ValidationError,
+    _,
+    count_qty,
+    doc_exists,
+    get_all,
+    get_cached_doc,
+    get_doc,
+    get_value,
+    group_by_attr,
+    new_doc,
+)
 from comfort.comfort_core.doctype.commission_settings.commission_settings import (
     CommissionSettings,
 )
@@ -11,10 +23,14 @@ from comfort.comfort_core.hooks import default_query
 from comfort.entities.doctype.child_item.child_item import ChildItem
 from comfort.entities.doctype.item.item import Item
 from comfort.finance import create_payment, get_account
+from comfort.finance.doctype.payment.payment import Payment
 from comfort.stock import create_receipt, create_stock_entry, get_stock_balance
+from comfort.stock.doctype.receipt.receipt import Receipt
 from comfort.transactions import delete_empty_items, merge_same_items
-from frappe.model.document import Document
 
+from ..purchase_order_item_to_sell.purchase_order_item_to_sell import (
+    PurchaseOrderItemToSell,
+)
 from ..purchase_order_sales_order.purchase_order_sales_order import (
     PurchaseOrderSalesOrder,
 )
@@ -22,18 +38,10 @@ from ..sales_order_child_item.sales_order_child_item import SalesOrderChildItem
 from ..sales_order_item.sales_order_item import SalesOrderItem
 from ..sales_order_service.sales_order_service import SalesOrderService
 
-if TYPE_CHECKING:
-    from comfort.finance.doctype.payment.payment import Payment
-    from comfort.stock.doctype.receipt.receipt import Receipt
 
-    from ..purchase_order.purchase_order import PurchaseOrder
-    from ..purchase_order_item_to_sell.purchase_order_item_to_sell import (
-        PurchaseOrderItemToSell,
-    )
-    from ..sales_return.sales_return import SalesReturn
+class SalesOrder(TypedDocument):
+    doctype: Literal["Sales Order"]
 
-
-class SalesOrder(Document):
     customer: str
     items: list[SalesOrderItem]
     services: list[SalesOrderService]
@@ -59,6 +67,7 @@ class SalesOrder(Document):
     from_purchase_order: str | None = None
 
     ignore_linked_doctypes: list[str]
+    _doc_before_save: SalesOrder
 
     #########
     # Hooks #
@@ -95,17 +104,17 @@ class SalesOrder(Document):
         ]
 
         # TODO: Make (of find) generic `cancel_for` function
-        payments: list[Payment] = frappe.get_all(
-            "Payment", {"voucher_type": self.doctype, "voucher_no": self.name}
+        payments = get_all(
+            Payment, {"voucher_type": self.doctype, "voucher_no": self.name}
         )
         for payment in payments:
-            payment: Payment = frappe.get_doc("Payment", payment.name)
+            payment = get_doc(Payment, payment.name)
             payment.cancel()
-        receipts: list[Receipt] = frappe.get_all(
-            "Receipt", {"voucher_type": self.doctype, "voucher_no": self.name}
+        receipts = get_all(
+            Receipt, {"voucher_type": self.doctype, "voucher_no": self.name}
         )
         for receipt in receipts:
-            receipt: Payment = frappe.get_doc("Receipt", receipt.name)
+            receipt = get_doc(Receipt, receipt.name)
             receipt.cancel()
 
     def before_update_after_submit(self):  # pragma: no cover
@@ -119,7 +128,7 @@ class SalesOrder(Document):
     def update_items_from_db(self):
         """Load item properties from database and calculate Amount and Total Weight."""
         for item in self.items:
-            doc: Item = frappe.get_cached_doc("Item", item.item_code)
+            doc = get_cached_doc(Item, item.item_code)
             item.item_name = doc.item_name
             item.rate = doc.rate
             item.weight = doc.weight
@@ -134,15 +143,15 @@ class SalesOrder(Document):
         if not self.items:
             return
 
-        child_items: list[SalesOrderChildItem] = frappe.get_all(
-            "Child Item",
+        child_items = get_all(
+            ChildItem,
             fields=("parent as parent_item_code", "item_code", "item_name", "qty"),
             filters={"parent": ("in", (d.item_code for d in self.items))},
         )
 
         item_codes_to_qty = count_qty(self.items)
         for item in child_items:
-            item.qty = item.qty * item_codes_to_qty[item.parent_item_code]
+            item.qty = item.qty * item_codes_to_qty[item.parent_item_code]  # type: ignore
 
         self.extend("child_items", child_items)
 
@@ -157,8 +166,8 @@ class SalesOrder(Document):
         if self.from_available_stock == "Available Actual":
             stock_counter = get_stock_balance(self.from_available_stock)
         else:
-            items_to_sell: list[PurchaseOrderItemToSell] = frappe.get_all(
-                "Purchase Order Item To Sell",
+            items_to_sell = get_all(
+                PurchaseOrderItemToSell,
                 fields=("item_code", "qty"),
                 filters={"parent": ("in", self.from_purchase_order)},
             )
@@ -219,12 +228,14 @@ class SalesOrder(Document):
         self,
     ) -> list[SalesOrderChildItem | SalesOrderItem]:
         parents = [child.parent_item_code for child in self.child_items]
-        return self.child_items + [
+        return self.child_items + [  # type: ignore
             item for item in self.items if item.item_code not in parents
         ]
 
     def _create_cancel_sales_return(self):
-        sales_return: SalesReturn = frappe.new_doc("Sales Return")
+        from ..sales_return.sales_return import SalesReturn
+
+        sales_return = new_doc(SalesReturn)
         sales_return.sales_order = self.name
         sales_return.__voucher = self._doc_before_save
         sales_return.add_items(sales_return.get_items_available_to_add())
@@ -236,8 +247,9 @@ class SalesOrder(Document):
     def _modify_purchase_order_for_from_available_stock(self):
         if self.from_available_stock != "Available Purchased":
             return
+        from ..purchase_order.purchase_order import PurchaseOrder
 
-        doc: PurchaseOrder = frappe.get_doc("Purchase Order", self.from_purchase_order)
+        doc = get_doc(PurchaseOrder, self.from_purchase_order)
 
         # Remove items to sell
         qty_counter = count_qty(self.items)
@@ -312,7 +324,7 @@ class SalesOrder(Document):
         }[self.from_available_stock]
 
         if self.from_available_stock == "Available Purchased":
-            ref_name = frappe.get_value(
+            ref_name: str = get_value(
                 ref_doctype, {"purchase_order": self.from_purchase_order}
             )
         else:
@@ -320,18 +332,18 @@ class SalesOrder(Document):
 
         items = self.get_items_with_splitted_combinations()
         create_stock_entry(
-            ref_doctype, ref_name, stock_types[0], items, reverse_qty=True
+            ref_doctype, ref_name, stock_types[0], items, reverse_qty=True  # type: ignore
         )
-        create_stock_entry(ref_doctype, ref_name, stock_types[1], items)
+        create_stock_entry(ref_doctype, ref_name, stock_types[1], items)  # type: ignore
 
     def _get_paid_amount(self):
-        payments: list[str] = [
+        payments = [
             p.name
-            for p in frappe.get_all(
-                "Payment", {"voucher_type": self.doctype, "voucher_no": self.name}
+            for p in get_all(
+                Payment, {"voucher_type": self.doctype, "voucher_no": self.name}
             )
         ]
-        returns: list[str] = [
+        returns = [
             r.name for r in frappe.get_all("Sales Return", {"sales_order": self.name})
         ]
 
@@ -380,18 +392,18 @@ class SalesOrder(Document):
                 status = "To Purchase"
             else:
                 status = "To Deliver"
-        elif frappe.db.exists(
+        elif doc_exists(
             "Receipt",
             {"voucher_type": self.doctype, "voucher_no": self.name, "docstatus": 1},
         ):
             status = "Delivered"
         else:
-            if purchase_order_name := frappe.get_value(
+            if purchase_order_name := get_value(
                 "Purchase Order Sales Order",
                 fieldname="parent",
                 filters={"sales_order_name": self.name, "docstatus": 1},
             ):
-                if frappe.db.exists(
+                if doc_exists(
                     "Receipt",
                     {
                         "voucher_type": "Purchase Order",
@@ -477,8 +489,8 @@ class SalesOrder(Document):
 
         parent_item_codes_to_qty = count_qty(removed_combos)
 
-        child_items: list[ChildItem] = frappe.get_all(
-            "Child Item",
+        child_items = get_all(
+            ChildItem,
             fields=("parent", "item_code", "qty"),
             filters={"parent": ("in", parent_item_codes_to_qty.keys())},
         )
@@ -498,22 +510,22 @@ class SalesOrder(Document):
 
 @frappe.whitelist()
 def has_linked_delivery_trip(sales_order_name: str):
-    name: str | None = frappe.db.exists(
+    name: Any = doc_exists(
         {"doctype": "Delivery Stop", "sales_order": sales_order_name}
     )
     return bool(name)
 
 
 @frappe.whitelist()
-def get_sales_orders_not_in_purchase_order() -> list[str]:
+def get_sales_orders_not_in_purchase_order():
     # TODO: Validate status so completed orders from actual stock are good
     po_sales_orders: list[PurchaseOrderSalesOrder] = frappe.get_all(
         "Purchase Order Sales Order", "sales_order_name"
     )
     return [
         s.name
-        for s in frappe.get_all(
-            "Sales Order",
+        for s in get_all(
+            SalesOrder,
             {"name": ("not in", (s.sales_order_name for s in po_sales_orders))},
         )
     ]
@@ -531,12 +543,12 @@ def validate_params_from_available_stock(
                     "If From Available Stock is Available Purchased, From Purchase Order should be set"
                 )
             )
-        status: str = frappe.get_value("Purchase Order", from_purchase_order, "status")
+        status: str = get_value("Purchase Order", from_purchase_order, "status")
         if status != "To Receive":
             raise ValidationError(_("Status of Purchase Order should be To Receive"))
 
-        items_to_sell: list[PurchaseOrderItemToSell] = frappe.get_all(
-            "Purchase Order Item To Sell",
+        items_to_sell = get_all(
+            PurchaseOrderItemToSell,
             fields="item_code",
             filters={"parent": ("in", from_purchase_order)},
         )

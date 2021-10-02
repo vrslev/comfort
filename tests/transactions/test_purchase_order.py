@@ -7,10 +7,15 @@ import ikea_api_wrapped
 import pytest
 
 import frappe
-from comfort import count_qty, group_by_attr
+from comfort import count_qty, get_all, get_doc, get_value, group_by_attr
 from comfort.entities.doctype.child_item.child_item import ChildItem
-from comfort.transactions import AnyChildItem
 from comfort.transactions.doctype.purchase_order.purchase_order import PurchaseOrder
+from comfort.transactions.doctype.purchase_order_delivery_option.purchase_order_delivery_option import (
+    PurchaseOrderDeliveryOption,
+)
+from comfort.transactions.doctype.purchase_order_item_to_sell.purchase_order_item_to_sell import (
+    PurchaseOrderItemToSell,
+)
 from comfort.transactions.doctype.sales_order_child_item.sales_order_child_item import (
     SalesOrderChildItem,
 )
@@ -43,11 +48,11 @@ def test_delete_sales_order_duplicates(purchase_order: PurchaseOrder):
 
 def test_update_sales_orders_from_db(purchase_order: PurchaseOrder):
     for order in purchase_order.sales_orders:
-        order.customer = order.total_amount = None
+        order.customer = order.total_amount = None  # type: ignore
 
     purchase_order.update_sales_orders_from_db()
     for order in purchase_order.sales_orders:
-        values: tuple[str, int] = frappe.get_value(
+        values: tuple[str, int] = get_value(
             "Sales Order", order.sales_order_name, ("customer", "total_amount")
         )
         customer, total_amount = values
@@ -57,11 +62,11 @@ def test_update_sales_orders_from_db(purchase_order: PurchaseOrder):
 
 def test_update_items_to_sell_from_db(purchase_order: PurchaseOrder):
     for i in purchase_order.items_to_sell:
-        i.item_name = i.rate = i.amount = i.weight = None
+        i.item_name = i.rate = i.amount = i.weight = None  # type: ignore
 
     purchase_order.update_items_to_sell_from_db()
     for i in purchase_order.items_to_sell:
-        item_values: tuple[str, int, float] = frappe.get_value(
+        item_values: tuple[str, int, float] = get_value(
             "Item", i.item_code, ("item_name", "rate", "weight")
         )
         item_name, rate, weight = item_values
@@ -90,15 +95,15 @@ def test_calculate_items_to_sell_cost_if_no_items_to_sell(
 
 def test_calculate_sales_orders_cost(purchase_order: PurchaseOrder):
     purchase_order._calculate_sales_orders_cost()
-    doc = frappe.get_doc(
+    doc = get_doc(
+        SalesOrderItem,
         {
-            "doctype": "Sales Order Item",
             "parent": purchase_order.sales_orders[0].sales_order_name,
             "parenttype": "Sales Order",
             "item_code": "Some Item Code",
             "qty": 1,
             "rate": 100,
-        }
+        },
     )
     doc.flags.ignore_links = True
     doc.insert()
@@ -168,9 +173,9 @@ def test_calculate_total_weight(
 def test_calculate_total_amount_costs_set_if_none(
     purchase_order: PurchaseOrder,
 ):
-    purchase_order.delivery_cost = None
-    purchase_order.items_to_sell_cost = None
-    purchase_order.sales_orders_cost = None
+    purchase_order.delivery_cost = None  # type: ignore
+    purchase_order.items_to_sell_cost = None  # type: ignore
+    purchase_order.sales_orders_cost = None  # type: ignore
     purchase_order._calculate_total_amount()
     assert purchase_order.delivery_cost == 0
     assert purchase_order.items_to_sell_cost == 0
@@ -205,8 +210,8 @@ def test_get_items_to_sell_no_split_combinations(purchase_order: PurchaseOrder):
 def test_get_items_to_sell_split_combinations(purchase_order: PurchaseOrder):
     items = purchase_order._get_items_to_sell(split_combinations=True)
 
-    child_items: list[ChildItem] = frappe.get_all(
-        "Child Item",
+    child_items = get_all(
+        ChildItem,
         fields=("parent", "item_code", "qty"),
         filters={"parent": ("in", (i.item_code for i in purchase_order.items_to_sell))},
     )
@@ -214,8 +219,9 @@ def test_get_items_to_sell_split_combinations(purchase_order: PurchaseOrder):
     items_to_sell = [
         i for i in purchase_order.items_to_sell.copy() if i.item_code not in parents
     ]
-
-    assert items == items_to_sell + child_items
+    exp_list: list[PurchaseOrderItemToSell | ChildItem] = list(items_to_sell)
+    exp_list += child_items
+    assert items == exp_list
 
 
 def test_get_items_in_sales_orders_with_empty_sales_orders(
@@ -228,8 +234,8 @@ def test_get_items_in_sales_orders_with_empty_sales_orders(
 
 
 def test_get_items_in_sales_orders_no_split_combinations(purchase_order: PurchaseOrder):
-    exp_items: list[SalesOrderItem] = frappe.get_all(
-        "Sales Order Item",
+    exp_items = get_all(
+        SalesOrderItem,
         fields=("item_code", "qty"),
         filters={
             "parent": (
@@ -244,18 +250,18 @@ def test_get_items_in_sales_orders_no_split_combinations(purchase_order: Purchas
 
 def test_get_items_in_sales_orders_split_combinations(purchase_order: PurchaseOrder):
     sales_order_names = [o.sales_order_name for o in purchase_order.sales_orders]
-    so_items: list[SalesOrderItem] = frappe.get_all(
-        "Sales Order Item",
+    so_items = get_all(
+        SalesOrderItem,
         fields=("item_code", "qty"),
         filters={"parent": ("in", sales_order_names)},
     )
-    child_items: list[SalesOrderChildItem] = frappe.get_all(
-        "Sales Order Child Item",
+    child_items = get_all(
+        SalesOrderChildItem,
         fields=("parent_item_code", "item_code", "qty"),
         filters={"parent": ("in", sales_order_names)},
     )
     parents = [i.parent_item_code for i in child_items]
-    exp_items: list[SalesOrderItem | SalesOrderChildItem] = child_items + [
+    exp_items: list[SalesOrderItem | SalesOrderChildItem] = child_items + [  # type: ignore
         i for i in so_items if i.item_code not in parents
     ]
     items = purchase_order._get_items_in_sales_orders(split_combinations=True)
@@ -267,7 +273,7 @@ def test_get_templated_items_for_api(
     purchase_order: PurchaseOrder, split_combinations: bool
 ):
     items_for_api = purchase_order._get_templated_items_for_api(split_combinations)
-    all_items: list[AnyChildItem] = purchase_order._get_items_to_sell(
+    all_items: list[Any] = purchase_order._get_items_to_sell(  # type: ignore
         split_combinations
     ) + purchase_order._get_items_in_sales_orders(split_combinations)
     assert count_qty(all_items) == items_for_api
@@ -285,7 +291,7 @@ def test_clear_delivery_services(purchase_order: PurchaseOrder):
     # +                    "XXtypeXX": option["delivery_type"],
     purchase_order._clear_delivery_options()
     assert len(purchase_order.delivery_options) == 0
-    assert not frappe.get_all("Purchase Order Delivery Option", limit_page_length=1)
+    assert not get_all(PurchaseOrderDeliveryOption, limit_page_length=1)
 
 
 @pytest.mark.usefixtures("ikea_settings")
@@ -316,7 +322,7 @@ def test_create_payment(purchase_order: PurchaseOrder):
     purchase_order.db_insert()
     purchase_order._create_payment()
 
-    res: tuple[int, bool] = frappe.get_value(
+    res: tuple[int, bool] = get_value(
         "Payment",
         fieldname=("amount", "paid_with_cash"),
         filters={
@@ -354,7 +360,7 @@ def test_autoname_purchase_orders_exist_in_this_month(purchase_order: PurchaseOr
 
     # TODO: Parametrize
     this_month = get_this_month_ru_name()
-    frappe.get_doc({"doctype": "Purchase Order", "name": f"{this_month}-1"}).db_insert()
+    get_doc(PurchaseOrder, {"name": f"{this_month}-1"}).db_insert()
     purchase_order.autoname()
     assert purchase_order.name == f"{this_month}-2"
 
@@ -367,14 +373,14 @@ def test_autoname_purchase_orders_not_exist_in_this_month(
 
 
 def test_purchase_order_before_save(purchase_order: PurchaseOrder):
-    purchase_order.delivery_options.append("somevalue")
+    purchase_order.delivery_options.append("somevalue")  # type: ignore
     purchase_order.before_save()
     assert len(purchase_order.delivery_options) == 0
     assert purchase_order.cannot_add_items is None
 
 
 def test_purchase_order_before_insert(purchase_order: PurchaseOrder):
-    purchase_order.status = None
+    purchase_order.status = None  # type: ignore
     purchase_order.before_insert()
     assert purchase_order.status == "Draft"
 
@@ -418,9 +424,9 @@ def test_add_purchase_info_and_submit_info_not_loaded(purchase_order: PurchaseOr
     purchase_order.db_insert()
     purchase_order.add_purchase_info_and_submit(
         purchase_id,
-        purchase_info={"delivery_cost": delivery_cost},
+        purchase_info={"delivery_cost": delivery_cost},  # type: ignore
     )
-    assert purchase_order.schedule_date == add_to_date(None, weeks=2).date()
+    assert purchase_order.schedule_date == add_to_date(None, weeks=2).date()  # type: ignore
     assert purchase_order.posting_date == getdate(today())
     assert purchase_order.delivery_cost == delivery_cost
     assert purchase_order.order_confirmation_no == purchase_id

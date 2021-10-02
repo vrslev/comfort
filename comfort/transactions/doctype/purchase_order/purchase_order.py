@@ -9,13 +9,23 @@ from ikea_api_wrapped.parsers.order_capture import DeliveryOptionDict
 from ikea_api_wrapped.wrappers import PurchaseInfoDict
 
 import frappe
-from comfort import ValidationError, _, count_qty, group_by_attr, maybe_json
+from comfort import (
+    TypedDocument,
+    ValidationError,
+    _,
+    count_qty,
+    get_all,
+    get_cached_value,
+    get_doc,
+    get_value,
+    group_by_attr,
+    maybe_json,
+)
 from comfort.comfort_core.ikea import add_items_to_cart, get_delivery_services
 from comfort.entities.doctype.child_item.child_item import ChildItem
 from comfort.finance import create_payment
 from comfort.stock import create_checkout, create_receipt
-from comfort.transactions import AnyChildItem, delete_empty_items, merge_same_items
-from frappe.model.document import Document
+from comfort.transactions import delete_empty_items, merge_same_items
 from frappe.utils.data import add_to_date, getdate, now_datetime, today
 
 from ..purchase_order_delivery_option.purchase_order_delivery_option import (
@@ -34,7 +44,9 @@ from ..sales_order_item.sales_order_item import SalesOrderItem
 # TODO: Validate that this Purchase Order is the only one that contains current Sales Orders
 
 
-class PurchaseOrder(Document):
+class PurchaseOrder(TypedDocument):
+    doctype: Literal["Purchase Order"]
+
     delivery_options: list[PurchaseOrderDeliveryOption]
     cannot_add_items: str | None
     posting_date: datetime
@@ -70,7 +82,7 @@ class PurchaseOrder(Document):
         }
         this_month = months_number_to_name[now_datetime().month]
 
-        carts_in_this_month: tuple[tuple[str | None]] = frappe.db.sql(
+        carts_in_this_month: tuple[tuple[str]] | None = frappe.db.sql(  # type: ignore
             """
             SELECT name from `tabPurchase Order`
             WHERE name LIKE CONCAT(%s, '-%%')
@@ -82,7 +94,7 @@ class PurchaseOrder(Document):
 
         new_cart_number: int = 1
         if carts_in_this_month:
-            matches: list[str] = re.findall(r"-(\d+)", carts_in_this_month[0][0])
+            matches = re.findall(r"-(\d+)", carts_in_this_month[0][0])
             latest_cart_number: str | int = matches[0] if matches else 0
             new_cart_number = int(latest_cart_number) + 1
 
@@ -136,14 +148,14 @@ class PurchaseOrder(Document):
 
     def update_sales_orders_from_db(self):
         for order in self.sales_orders:
-            order_values: tuple[str, int] = frappe.get_value(
+            order_values: tuple[str, int] = get_value(
                 "Sales Order", order.sales_order_name, ("customer", "total_amount")
             )
             order.customer, order.total_amount = order_values
 
     def update_items_to_sell_from_db(self):
         for item in self.items_to_sell:
-            item_values: tuple[str, int, float] = frappe.get_value(
+            item_values: tuple[str, int, float] = get_value(
                 "Item", item.item_code, ("item_name", "rate", "weight")
             )
             item.item_name, item.rate, item.weight = item_values
@@ -153,7 +165,7 @@ class PurchaseOrder(Document):
         self.items_to_sell_cost = sum(item.amount for item in self.items_to_sell)
 
     def _calculate_sales_orders_cost(self):
-        res: list[int] = frappe.get_all(
+        res: list[list[int]] = frappe.get_all(
             "Sales Order Item",
             fields="SUM(qty * rate) AS sales_orders_cost",
             filters={
@@ -202,10 +214,10 @@ class PurchaseOrder(Document):
         if not self.items_to_sell:
             return []
         if not split_combinations:
-            return self.items_to_sell
+            return self.items_to_sell  # type: ignore
 
-        child_items: list[ChildItem] = frappe.get_all(
-            "Child Item",
+        child_items = get_all(
+            ChildItem,
             fields=("parent", "item_code", "qty"),
             filters={"parent": ("in", (i.item_code for i in self.items_to_sell))},
         )
@@ -213,7 +225,7 @@ class PurchaseOrder(Document):
         items_to_sell = [
             item for item in self.items_to_sell if item.item_code not in parents
         ]
-        return items_to_sell + child_items
+        return items_to_sell + child_items  # type: ignore
 
     def _get_items_in_sales_orders(self, split_combinations: bool):
         items: list[SalesOrderItem | SalesOrderChildItem] = []
@@ -221,15 +233,15 @@ class PurchaseOrder(Document):
             return items
 
         sales_order_names = [o.sales_order_name for o in self.sales_orders]
-        so_items: list[SalesOrderItem] = frappe.get_all(
-            "Sales Order Item",
+        so_items = get_all(
+            SalesOrderItem,
             fields=("item_code", "qty"),
             filters={"parent": ("in", sales_order_names)},
         )
 
         if split_combinations:
-            child_items: list[SalesOrderChildItem] = frappe.get_all(
-                "Sales Order Child Item",
+            child_items = get_all(
+                SalesOrderChildItem,
                 fields=("parent_item_code", "item_code", "qty"),
                 filters={"parent": ("in", sales_order_names)},
             )
@@ -242,10 +254,10 @@ class PurchaseOrder(Document):
         return items
 
     def _get_templated_items_for_api(self, split_combinations: bool):
-        items: list[AnyChildItem] = self._get_items_to_sell(
+        items = self._get_items_to_sell(  # type: ignore
             split_combinations
         ) + self._get_items_in_sales_orders(split_combinations)
-        return count_qty(items)
+        return count_qty(items)  # type: ignore
 
     def _clear_delivery_options(self):
         for option in self.delivery_options:
@@ -278,7 +290,7 @@ class PurchaseOrder(Document):
 
     def _submit_sales_orders_and_update_statuses(self):  # pragma: no cover
         for o in self.sales_orders:
-            doc: SalesOrder = frappe.get_doc("Sales Order", o.sales_order_name)
+            doc = get_doc(SalesOrder, o.sales_order_name)
             doc.set_statuses()
             doc.flags.ignore_validate_update_after_submit = True
             doc.submit()
@@ -293,10 +305,10 @@ class PurchaseOrder(Document):
     def add_purchase_info_and_submit(
         self, purchase_id: str, purchase_info: PurchaseInfoDict
     ):
-        self.schedule_date = getdate(
+        self.schedule_date = getdate(  # type: ignore
             purchase_info.get("delivery_date", add_to_date(None, weeks=2))
         )
-        self.posting_date = getdate(purchase_info.get("purchase_date", today()))
+        self.posting_date = getdate(purchase_info.get("purchase_date", today()))  # type: ignore
         self.delivery_cost = int(purchase_info["delivery_cost"])
         self.order_confirmation_no = purchase_id
         self.submit()
@@ -316,13 +328,13 @@ class PurchaseOrder(Document):
     def get_unavailable_items_in_cart_by_orders(  # TODO: It renders with duplicates
         self, unavailable_items: list[dict[str, str | int]]
     ):  # pragma: no cover
-        all_items: list[AnyChildItem] = []
+        all_items: list[Any] = []
         for order in self.sales_orders:
-            doc: SalesOrder = frappe.get_doc("Sales Order", order.sales_order_name)
+            doc = get_doc(SalesOrder, order.sales_order_name)
             all_items += doc.get_items_with_splitted_combinations()
         items_to_sell = self._get_items_to_sell(split_combinations=True)
         for item in items_to_sell:
-            item.parent = self.name
+            item.parent = self.name  # type: ignore
         all_items += items_to_sell
 
         counter = count_qty(
@@ -335,7 +347,7 @@ class PurchaseOrder(Document):
         for cur_items in grouped_items.values():
             for idx, item in enumerate(cur_items):
                 if item.item_name is None:
-                    item.item_name = frappe.get_cached_value(
+                    item.item_name = get_cached_value(
                         "Item", item.item_code, "item_name"
                     )
                 res.append(
@@ -360,10 +372,10 @@ def sales_order_query(
     page_len: str,
     filters: dict[str, Any],
 ):
-    ignore_orders: list[str] = [
+    ignore_orders: list[str] | str = [
         s.sales_order_name
-        for s in frappe.get_all(
-            "Purchase Order Sales Order",
+        for s in get_all(
+            PurchaseOrderSalesOrder,
             "sales_order_name",
             {"parent": ("!=", filters["docname"])},
         )
@@ -374,11 +386,11 @@ def sales_order_query(
         ignore_orders = "(" + ",".join(f"'{d}'" for d in ignore_orders) + ")"
         ignore_orders_cond = f"name NOT IN {ignore_orders} AND"
 
-    searchfields: list[Any] = frappe.get_meta("Sales Order").get_search_fields()
+    searchfields: list[Any] | str = frappe.get_meta("Sales Order").get_search_fields()
     if searchfield:
         searchfields = " or ".join(field + " LIKE %(txt)s" for field in searchfields)
 
-    orders: list[list[str | int]] = frappe.db.sql(  # nosec
+    orders: list[list[str | int]] = frappe.db.sql(  # type: ignore  # nosec
         """
         SELECT name, customer, total_amount from `tabSales Order`
         WHERE {ignore_orders_cond}
@@ -394,5 +406,5 @@ def sales_order_query(
     )
 
     for order in orders:
-        order[2] = frappe.format(order[2], "Currency")
+        order[2] = frappe.format(order[2], "Currency")  # type: ignore
     return orders

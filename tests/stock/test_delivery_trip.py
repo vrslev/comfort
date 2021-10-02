@@ -3,6 +3,7 @@ from __future__ import annotations
 import pytest
 
 import frappe
+from comfort import doc_exists, new_doc
 from comfort.entities.doctype.item.item import Item
 from comfort.stock.doctype.delivery_trip.delivery_trip import (
     DeliveryTrip,
@@ -116,22 +117,22 @@ def test_add_receipts_to_sales_orders(
 ):
     sales_order.delivery_status = "To Deliver"
     sales_order.db_update()
-    new_doc: SalesOrder = frappe.new_doc("Sales Order")
-    new_doc.name = "SO-2021-0002"
-    new_doc.customer = sales_order.customer
-    new_doc.append("items", {"item_code": item_no_children.item_code, "qty": 1})
-    new_doc.services = []
-    new_doc.validate()
-    new_doc.delivery_status = "To Deliver"
-    new_doc.db_insert()
-    new_doc.db_update_all()
+    doc = new_doc(SalesOrder)
+    doc.name = "SO-2021-0002"
+    doc.customer = sales_order.customer
+    doc.append("items", {"item_code": item_no_children.item_code, "qty": 1})
+    doc.services = []
+    doc.validate()
+    doc.delivery_status = "To Deliver"
+    doc.db_insert()
+    doc.db_update_all()
     if insert_receipt_before:
-        new_doc.add_receipt()
+        doc.add_receipt()
 
-    delivery_trip.append("stops", {"sales_order": new_doc.name})
+    delivery_trip.append("stops", {"sales_order": doc.name})
     delivery_trip._add_receipts_to_sales_orders()
-    assert frappe.db.exists({"doctype": "Receipt", "voucher_no": sales_order.name})
-    assert frappe.db.exists({"doctype": "Receipt", "voucher_no": new_doc.name})
+    assert doc_exists({"doctype": "Receipt", "voucher_no": sales_order.name})
+    assert doc_exists({"doctype": "Receipt", "voucher_no": doc.name})
 
 
 def test_set_completed_status(delivery_trip: DeliveryTrip):

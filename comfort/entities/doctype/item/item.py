@@ -3,9 +3,15 @@ from __future__ import annotations
 import re
 from collections import Counter
 
-import frappe
-from comfort import ValidationError, _, count_qty
-from frappe.model.document import Document
+from comfort import (
+    TypedDocument,
+    ValidationError,
+    _,
+    count_qty,
+    doc_exists,
+    get_all,
+    get_doc,
+)
 
 from ..child_item.child_item import ChildItem
 from ..item_category_table.item_category_table import ItemCategoryTable
@@ -14,7 +20,7 @@ from ..item_category_table.item_category_table import ItemCategoryTable
 class ItemMethods:
     image: str
     item_code: str
-    item_name: str
+    item_name: str | None
     item_categories: list[ItemCategoryTable]
     url: str | None
     rate: int
@@ -22,7 +28,7 @@ class ItemMethods:
     child_items: list[ChildItem]
 
     def validate_child_items(self):
-        if self.child_items and frappe.db.exists(
+        if self.child_items and doc_exists(
             "Child Item", {"parent": ["in", [d.item_code for d in self.child_items]]}
         ):
             raise ValidationError(_("Can't add child item that contains child items"))
@@ -40,8 +46,8 @@ class ItemMethods:
         if not (self.child_items and len(self.child_items) > 0):
             return
 
-        items: list[Item] = frappe.get_all(
-            "Item",
+        items = get_all(
+            Item,
             fields=("item_code", "weight"),
             filters={"item_code": ("in", (d.item_code for d in self.child_items))},
         )
@@ -51,18 +57,16 @@ class ItemMethods:
             self.weight += weight_map[d.item_code] * d.qty
 
     def calculate_weight_in_parent_docs(self):
-        parent_items: list[ChildItem] = frappe.get_all(
-            "Child Item", "parent", {"item_code": self.item_code}
-        )
+        parent_items = get_all(ChildItem, "parent", {"item_code": self.item_code})
         parent_item_names = list({d.parent for d in parent_items})
         for d in parent_item_names:
-            if frappe.db.exists("Item", d):
-                doc: Item = frappe.get_doc("Item", d)
+            if doc_exists("Item", d):
+                doc = get_doc(Item, d)
                 doc.calculate_weight()
                 doc.db_update()
 
 
-class Item(Document, ItemMethods):
+class Item(TypedDocument, ItemMethods):
     def validate(self):
         self.validate_child_items()
         self.validate_url()

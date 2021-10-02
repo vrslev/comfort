@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from typing import Any
+from datetime import datetime
 
-import frappe
-from comfort import ValidationError, _
+from comfort import ValidationError, _, get_all
+from comfort.finance.doctype.gl_entry.gl_entry import GLEntry
 
 
 def execute(filters: dict[str, str]):  # pragma: no cover
@@ -72,9 +72,15 @@ def get_columns():  # pragma: no cover
     ]
 
 
-def get_data(filters: dict[str, str]) -> list[Any]:
-    return frappe.get_all(
-        "GL Entry",
+class _GLEntryForReport(GLEntry):
+    gl_entry: str
+    date: datetime
+    balance: int
+
+
+def get_data(filters: dict[str, str]) -> list[_GLEntryForReport]:
+    return get_all(  # type: ignore
+        GLEntry,
         fields=(
             "name as gl_entry",
             "creation as date",

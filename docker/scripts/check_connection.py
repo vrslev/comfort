@@ -24,6 +24,7 @@ def _port_is_open(ip: str, port: str):
 
 
 def check_service(host: str, port: str | int):
+    port = str(port)
     for i in range(RETRY):
         print(f"Attempt {i + 1} to connect to {host}:{port}")
         if _port_is_open(host, port):

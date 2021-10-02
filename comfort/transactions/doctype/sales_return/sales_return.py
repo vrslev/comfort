@@ -1,9 +1,17 @@
 from __future__ import annotations
 
 from copy import copy
+from typing import Literal
 
-import frappe
-from comfort import ValidationError, _, count_qty, group_by_attr
+from comfort import (
+    ValidationError,
+    _,
+    count_qty,
+    get_all,
+    get_doc,
+    get_value,
+    group_by_attr,
+)
 from comfort.entities.doctype.item.item import Item
 from comfort.finance import cancel_gl_entries_for, create_gl_entry, get_account
 from comfort.stock import cancel_stock_entries_for, create_stock_entry
@@ -18,6 +26,8 @@ from ..sales_return_item.sales_return_item import SalesReturnItem
 
 
 class SalesReturn(Return):
+    doctype: Literal["Sales Return"]
+
     sales_order: str
     returned_paid_amount: int
     items: list[SalesReturnItem]
@@ -28,7 +38,7 @@ class SalesReturn(Return):
     @property
     def _voucher(self) -> SalesOrder:
         if not self.__voucher:
-            self.__voucher: SalesOrder = frappe.get_doc("Sales Order", self.sales_order)
+            self.__voucher = get_doc(SalesOrder, self.sales_order)
         return self.__voucher
 
     def _calculate_returned_paid_amount(self):  # TODO: Why is this not used?
@@ -94,7 +104,7 @@ class SalesReturn(Return):
     def _add_missing_info_to_items_in_voucher(self):
         for item in self._voucher.items:
             if not item.rate or not item.weight:
-                item_values: tuple[str, int, float] = frappe.get_value(
+                item_values: tuple[str, int, float] = get_value(
                     "Item", item.item_code, ("item_name", "rate", "weight")
                 )
                 item.item_name, item.rate, item.weight = item_values
@@ -122,8 +132,8 @@ class SalesReturn(Return):
     def _add_missing_info_to_items_in_items_to_sell(
         self, items: list[PurchaseOrderItemToSell]
     ):
-        items_with_weight: list[Item] = frappe.get_all(
-            "Item",
+        items_with_weight = get_all(
+            Item,
             fields=("item_code", "weight"),
             filters={"item_code": ("in", (i.item_code for i in items if not i.weight))},
         )
@@ -134,7 +144,7 @@ class SalesReturn(Return):
             item.amount = item.rate * item.qty
 
     def _add_items_to_sell_to_linked_purchase_order(self):
-        purchase_order_name: str | None = frappe.get_value(
+        purchase_order_name: str | None = get_value(
             "Purchase Order Sales Order",
             {"sales_order_name": self._voucher.name},
             "parent",
@@ -144,7 +154,7 @@ class SalesReturn(Return):
             # then it is not linked to any Purchase Order
             # TODO: Cover
             return
-        doc: PurchaseOrder = frappe.get_doc("Purchase Order", purchase_order_name)
+        doc = get_doc(PurchaseOrder, purchase_order_name)
         doc.extend(
             "items_to_sell",
             [
@@ -204,7 +214,7 @@ class SalesReturn(Return):
         """
         if not self.returned_paid_amount:
             return
-        paid_with_cash: bool | None = frappe.get_value(
+        paid_with_cash: bool | None = get_value(
             "Payment",
             fieldname="paid_with_cash",
             filters={"voucher_type": "Sales Order", "voucher_no": self.sales_order},

@@ -6,10 +6,20 @@ from typing import Any
 import click
 
 import frappe
+from comfort import doc_exists, get_all, get_doc, new_doc
+from comfort.comfort_core.doctype.commission_settings.commission_settings import (
+    CommissionSettings,
+)
 from comfort.comfort_core.hooks import after_install
+from comfort.entities.doctype.customer.customer import Customer
+from comfort.entities.doctype.customer_group.customer_group import CustomerGroup
+from comfort.entities.doctype.item.item import Item
 from comfort.hooks import app_name
+from comfort.transactions.doctype.purchase_order.purchase_order import PurchaseOrder
 from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
 from frappe.commands import get_site, pass_context
+from frappe.core.doctype.doctype.doctype import DocType
+from frappe.core.doctype.module_def.module_def import ModuleDef
 from frappe.translate import get_full_dict, get_messages_for_app
 from frappe.utils.fixtures import sync_fixtures
 
@@ -20,19 +30,12 @@ def connect(context: Any):
 
 
 def _cleanup():
-    modules = (
-        m.name for m in frappe.get_all("Module Def", filters={"app_name": app_name})
-    )
-    doctypes: list[Any] = frappe.get_all(
-        "DocType",
-        fields=("name", "issingle"),
-        filters={
-            "module": ("in", modules),
-            "name": ("not in", ("Ikea Settings", "Telegram Settings")),
-        },
+    modules = (m.name for m in get_all(ModuleDef, filters={"app_name": app_name}))
+    doctypes = get_all(
+        DocType, fields=("name", "issingle"), filters={"module": ("in", modules)}
     )
     for doctype in doctypes:
-        if doctype.issingle:
+        if doctype.issingle:  # type: ignore
             frappe.db.sql("DELETE FROM tabSingles WHERE doctype=%s", (doctype.name,))
         else:
             frappe.db.sql(f"DELETE FROM `tab{doctype.name}`")  # nosec
@@ -47,8 +50,8 @@ def _make_customer_group():
         "customer_group_name": "Friends",
         "doctype": "Customer Group",
     }
-    if not frappe.db.exists(doc):
-        frappe.get_doc(doc).insert()
+    if not doc_exists(doc):
+        CustomerGroup(doc).insert()
 
 
 def _make_customer():
@@ -62,31 +65,30 @@ def _make_customer():
         "doctype": "Customer",
         "customer_group": "Friends",
     }
-    if not frappe.db.exists(doc["doctype"], doc["name"]):
-        frappe.get_doc(doc).insert()
+    if not doc_exists(doc["doctype"], doc["name"]):
+        Customer(doc).insert()
 
 
 def _make_commission_settings():
-    frappe.get_doc(
-        {
-            "name": "Commission Settings",
-            "doctype": "Commission Settings",
-            "ranges": [
-                {
-                    "percentage": 20,
-                    "to_amount": 100,
-                },
-                {
-                    "percentage": 15,
-                    "to_amount": 200,
-                },
-                {
-                    "percentage": 10,
-                    "to_amount": 0,
-                },
-            ],
-        }
-    ).insert()
+    doc = new_doc(CommissionSettings)
+    doc.extend(
+        "ranges",
+        [
+            {
+                "percentage": 20,
+                "to_amount": 100,
+            },
+            {
+                "percentage": 15,
+                "to_amount": 200,
+            },
+            {
+                "percentage": 10,
+                "to_amount": 0,
+            },
+        ],
+    )
+    doc.insert()
 
 
 def _make_items():
@@ -195,49 +197,48 @@ def _make_items():
         },
     ]
     for doc in items:
-        if not frappe.db.exists(doc["doctype"], doc["item_code"]):
-            frappe.get_doc(doc).insert()
+        if not doc_exists(doc["doctype"], doc["item_code"]):  # type: ignore
+            Item(doc).insert()
 
 
 def _make_sales_order():
-    doc: SalesOrder = frappe.get_doc(
+    doc = new_doc(SalesOrder)
+    doc.customer = "Pavel Durov"
+    doc.append(
+        "items",
         {
-            "customer": "Pavel Durov",
-            "doctype": "Sales Order",
-            "items": [
-                {
-                    "item_code": "29128569",
-                    "qty": 1,
-                    "item_name": "ПАКС, Гардероб, 175x58x236 см, белый",
-                }
-            ],
-            "services": [
-                {
-                    "type": "Delivery to Apartment",
-                    "rate": 200,
-                },
-                {
-                    "type": "Installation",
-                    "rate": 600,
-                },
-            ],
-        }
+            "item_code": "29128569",
+            "qty": 1,
+            "item_name": "ПАКС, Гардероб, 175x58x236 см, белый",
+        },
     )
-    doc.insert()
-    return doc
+    doc.extend(
+        "services",
+        [
+            {
+                "type": "Delivery to Apartment",
+                "rate": 200,
+            },
+            {
+                "type": "Installation",
+                "rate": 600,
+            },
+        ],
+    )
+    return doc.insert()
 
 
 def _add_payment(sales_order: SalesOrder):
     sales_order.add_payment(500, cash=False)
 
 
-def _make_purchase_order(sales_order_name: str):
-    frappe.get_doc(
+def _make_purchase_order(sales_order_name: str | None):
+    get_doc(
+        PurchaseOrder,
         {
-            "doctype": "Purchase Order",
             "sales_orders": [{"sales_order_name": sales_order_name}],
             "items_to_sell": [{"item_code": "50121575", "qty": 3}],
-        }
+        },
     ).insert()
 
 
@@ -283,10 +284,6 @@ def write_translations(context: Any, untranslated_file: str | None, lang: str):
 
     if untranslated := [m[1] for m in messages if m[1] not in full_dict]:
         print(f"{len(untranslated)} of {len(messages)} translations missing")
-
-        # in_file: list[str] = []
-        # if os.path.exists(untranslated_file):
-        #     with open(untranslated_file, "r") as f:
 
         with open(untranslated_file, "a+") as f:
             in_file = [m[0] for m in csv.reader(f)]

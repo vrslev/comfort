@@ -1,5 +1,5 @@
-from frappe.model.document import Document
+from comfort import TypedDocument
 
 
-class CustomerGroup(Document):
+class CustomerGroup(TypedDocument):
     customer_group_name: str

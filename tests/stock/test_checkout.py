@@ -1,5 +1,4 @@
-import frappe
-from comfort import count_qty
+from comfort import count_qty, get_all, get_doc
 from comfort.stock.doctype.checkout.checkout import Checkout
 from comfort.stock.doctype.stock_entry.stock_entry import StockEntry
 from comfort.transactions.doctype.purchase_order.purchase_order import PurchaseOrder
@@ -8,8 +7,8 @@ from comfort.transactions.doctype.purchase_order.purchase_order import PurchaseO
 def test_checkout_before_submit(checkout: Checkout, purchase_order: PurchaseOrder):
     checkout.before_submit()
 
-    entry_names: list[StockEntry] = frappe.get_all(
-        "Stock Entry",
+    entry_names = get_all(
+        StockEntry,
         filters={
             "voucher_type": purchase_order.doctype,
             "voucher_no": purchase_order.name,
@@ -17,7 +16,7 @@ def test_checkout_before_submit(checkout: Checkout, purchase_order: PurchaseOrde
     )
 
     for name in entry_names:
-        doc: StockEntry = frappe.get_doc("Stock Entry", name)
+        doc = get_doc(StockEntry, name)
         assert doc.stock_type in ("Reserved Purchased", "Available Purchased")
         if doc.stock_type == "Reserved Purchased":
             exp_items = count_qty(purchase_order._get_items_in_sales_orders(True))

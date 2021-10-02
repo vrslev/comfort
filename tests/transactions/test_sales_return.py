@@ -1,11 +1,19 @@
 from __future__ import annotations
 
 from copy import copy
+from typing import Literal
 
 import pytest
 
 import frappe
-from comfort import count_qty, counters_are_same
+from comfort import (
+    count_qty,
+    counters_are_same,
+    doc_exists,
+    get_all,
+    get_doc,
+    get_value,
+)
 from comfort.finance import create_payment, get_account
 from comfort.finance.doctype.gl_entry.gl_entry import GLEntry
 from comfort.stock.doctype.stock_entry.stock_entry import StockEntry
@@ -13,7 +21,6 @@ from comfort.transactions import merge_same_items
 from comfort.transactions.doctype.purchase_order.purchase_order import PurchaseOrder
 from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
 from comfort.transactions.doctype.sales_return.sales_return import SalesReturn
-from frappe.model.document import Document
 from tests.stock.test_init import reverse_qtys
 
 
@@ -67,7 +74,8 @@ def test_validate_voucher_statuses_docstatus_raises(
 
 @pytest.mark.parametrize("delivery_status", ("Purchased", "To Deliver", "Delivered"))
 def test_validate_voucher_statuses_delivery_status_not_raises(
-    sales_return: SalesReturn, delivery_status: str
+    sales_return: SalesReturn,
+    delivery_status: Literal["Purchased", "To Deliver", "Delivered"],
 ):
     sales_return._voucher.docstatus = 1
     sales_return._voucher.delivery_status = delivery_status
@@ -79,7 +87,7 @@ def test_validate_voucher_statuses_delivery_status_raises(
     sales_return: SalesReturn, delivery_status: str
 ):
     sales_return._voucher.docstatus = 1
-    sales_return._voucher.delivery_status = delivery_status
+    sales_return._voucher.delivery_status = delivery_status  # type: ignore
     with pytest.raises(
         frappe.ValidationError,
         match="Delivery Status should be Purchased, To Deliver or Delivered",
@@ -162,13 +170,13 @@ def test_split_combinations_in_voucher_needed(
 
 def test_add_missing_info_to_items_in_voucher(sales_return: SalesReturn):
     for item in sales_return._voucher.items:
-        item.rate = None
-        item.weight = None
+        item.rate = None  # type: ignore
+        item.weight = None  # type: ignore
 
     sales_return._add_missing_info_to_items_in_voucher()
 
     for item in sales_return._voucher.items:
-        res: tuple[str, int, int] = frappe.get_value(
+        res: tuple[str, int, int] = get_value(
             "Item", item.item_code, ("item_name", "rate", "weight")
         )
         assert item.item_name == res[0]
@@ -205,12 +213,12 @@ def test_add_missing_info_to_items_in_items_to_sell_weight(
 ):
     item = purchase_order.items_to_sell[0]
     item.rate = 0
-    item.weight = weight_before
+    item.weight = weight_before  # type: ignore
     sales_return._add_missing_info_to_items_in_items_to_sell(
         purchase_order.items_to_sell
     )
     if weight_should_change:
-        assert item.weight == frappe.get_value("Item", item.item_code, "weight")
+        assert item.weight == get_value("Item", item.item_code, "weight")
     else:
         assert item.weight == weight_before
 
@@ -255,8 +263,8 @@ def test_sales_return_make_delivery_gl_entries_create(sales_return: SalesReturn)
     sales_return._modify_voucher()
     new_items_cost = copy(sales_return._voucher.items_cost)
     amount = prev_items_cost - new_items_cost
-    entries: list[GLEntry] = frappe.get_all(
-        "GL Entry",
+    entries = get_all(
+        GLEntry,
         fields=("account", "debit", "credit"),
         filters={
             "voucher_type": sales_return.doctype,
@@ -276,10 +284,10 @@ def test_sales_return_make_delivery_gl_entries_create(sales_return: SalesReturn)
 
 
 def test_sales_return_make_delivery_gl_entries_not_create(sales_return: SalesReturn):
-    sales_return._voucher.delivery_status = "Random Delivery Status"
+    sales_return._voucher.delivery_status = "Random Delivery Status"  # type: ignore
     sales_return.db_insert()
     sales_return._make_delivery_gl_entries()
-    assert not frappe.db.exists(
+    assert not doc_exists(
         "GL Entry",
         {"voucher_type": sales_return.doctype, "voucher_no": sales_return.name},
     )
@@ -296,14 +304,14 @@ def test_sales_return_make_delivery_gl_entries_not_create(sales_return: SalesRet
 def test_sales_return_make_stock_entries_create(
     sales_return: SalesReturn, delivery_status: str, exp_stock_types: tuple[str, str]
 ):
-    sales_return._voucher.delivery_status = delivery_status
+    sales_return._voucher.delivery_status = delivery_status  # type: ignore
     sales_return.db_insert()
     sales_return._make_stock_entries()
 
-    entry_names: list[str] = [
+    entry_names = [
         e.name
-        for e in frappe.get_all(
-            "Stock Entry",
+        for e in get_all(
+            StockEntry,
             {
                 "voucher_type": sales_return.doctype,
                 "voucher_no": sales_return.name,
@@ -315,7 +323,7 @@ def test_sales_return_make_stock_entries_create(
     entry_with_first_type, entry_with_second_type = False, False
 
     for name in entry_names:
-        doc: StockEntry = frappe.get_doc("Stock Entry", name)
+        doc = get_doc(StockEntry, name)
         expected_counter = return_counter
         if doc.stock_type == exp_stock_types[0]:
             expected_counter = reverse_qtys(return_counter)
@@ -329,7 +337,7 @@ def test_sales_return_make_stock_entries_create(
 
 
 def test_sales_return_make_stock_entries_not_create(sales_return: SalesReturn):
-    sales_return._voucher.delivery_status = "Some Random Delivery Status"
+    sales_return._voucher.delivery_status = "Some Random Delivery Status"  # type: ignore
     sales_return.db_insert()
     with pytest.raises(KeyError):
         sales_return._make_stock_entries()
@@ -347,8 +355,8 @@ def test_sales_return_make_payment_gl_entries_create(
     if paid_with_cash is not None:
         create_payment("Sales Order", sales_return.sales_order, 1000, paid_with_cash)
     sales_return._make_payment_gl_entries()
-    entries: list[GLEntry] = frappe.get_all(
-        "GL Entry",
+    entries = get_all(
+        GLEntry,
         fields=("account", "debit", "credit"),
         filters={"voucher_type": sales_return.doctype, "voucher_no": sales_return.name},
     )
@@ -371,7 +379,7 @@ def test_sales_return_make_payment_gl_entries_not_create(sales_return: SalesRetu
     sales_return.returned_paid_amount = 0
     sales_return.db_insert()
     sales_return._make_payment_gl_entries()
-    assert not frappe.db.exists(
+    assert not doc_exists(
         "GL Entry",
         {"voucher_type": sales_return.doctype, "voucher_no": sales_return.name},
     )
@@ -439,6 +447,6 @@ def test_sales_return_on_cancel_linked_docs_cancelled(sales_return: SalesReturn)
     sales_return._make_stock_entries()
 
     sales_return.on_cancel()
-    for doctype in ("GL Entry", "Stock Entry"):
-        docs: list[Document] = frappe.get_all(doctype, "docstatus")
+    for doctype in (GLEntry, StockEntry):
+        docs = get_all(doctype, "docstatus")
         assert all(doc.docstatus == 2 for doc in docs)

@@ -1,14 +1,17 @@
+from typing import Literal
+
 import frappe
+from comfort import TypedDocument, get_doc
 from comfort.stock import cancel_stock_entries_for, create_stock_entry
 from comfort.transactions.doctype.purchase_order.purchase_order import PurchaseOrder
-from frappe.model.document import Document
 
 
-class Checkout(Document):
+class Checkout(TypedDocument):
+    doctype: Literal["Checkout"]
     purchase_order: str
 
     def before_submit(self):
-        doc: PurchaseOrder = frappe.get_doc("Purchase Order", self.purchase_order)
+        doc = get_doc(PurchaseOrder, self.purchase_order)
         if doc.sales_orders:
             create_stock_entry(
                 self.doctype,

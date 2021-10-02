@@ -1,10 +1,18 @@
 from __future__ import annotations
 
 from collections import defaultdict
+from typing import Literal
 
 import frappe
-from comfort import ValidationError, _, count_qty, group_by_attr
-from comfort.entities.doctype.child_item.child_item import ChildItem
+from comfort import (
+    ValidationError,
+    _,
+    count_qty,
+    get_all,
+    get_doc,
+    group_by_attr,
+    new_doc,
+)
 from comfort.entities.doctype.item.item import Item
 from comfort.finance import cancel_gl_entries_for, create_gl_entry, get_account
 from comfort.stock import cancel_stock_entries_for, create_stock_entry
@@ -16,9 +24,6 @@ from comfort.transactions import (
 )
 
 from ..purchase_order.purchase_order import PurchaseOrder
-from ..purchase_order_item_to_sell.purchase_order_item_to_sell import (
-    PurchaseOrderItemToSell,
-)
 from ..purchase_order_sales_order.purchase_order_sales_order import (
     PurchaseOrderSalesOrder,
 )
@@ -28,6 +33,8 @@ from ..sales_return.sales_return import SalesReturn
 
 
 class PurchaseReturn(Return):
+    doctype: Literal["Purchase Return"]
+
     purchase_order: str
     returned_paid_amount: int
     items: list[PurchaseReturnItem]
@@ -37,9 +44,7 @@ class PurchaseReturn(Return):
     @property
     def _voucher(self) -> PurchaseOrder:
         if not self.__voucher:
-            self.__voucher: PurchaseOrder = frappe.get_doc(
-                "Purchase Order", self.purchase_order
-            )
+            self.__voucher = get_doc(PurchaseOrder, self.purchase_order)
         return self.__voucher
 
     def _calculate_returned_paid_amount(self):
@@ -54,27 +59,25 @@ class PurchaseReturn(Return):
 
     def _get_all_items(self):
         items: list[AnyChildItem] = []
-        items += self._voucher._get_items_to_sell(True)
+        items += self._voucher._get_items_to_sell(True)  # type: ignore
         # Using this way instead of _get_items_in_sales_orders(True)
         # to have `parent` and `doctype` fields in these items
         for sales_order in self._voucher.sales_orders:
-            doc: SalesOrder = frappe.get_doc(
-                "Sales Order", sales_order.sales_order_name
-            )
+            doc = get_doc(SalesOrder, sales_order.sales_order_name)
             items += doc.get_items_with_splitted_combinations()
         return items
 
     def _allocate_items(self):
         orders_to_items: defaultdict[
-            str | None, list[dict[str, str | int]]
+            str | None, list[dict[str, str | int | None]]
         ] = defaultdict(list)
 
         def append_item(item: AnyChildItem):
-            item_dict: dict[str, str | int] = {
+            item_dict: dict[str, str | int | None] = {
                 "item_code": item.item_code,
                 "item_name": item.item_name,
                 "qty": item.qty,
-                "rate": item.rate,
+                "rate": item.rate,  # type: ignore
             }
             if item.get("doctype") in ("Sales Order Item", "Sales Order Child Item"):
                 orders_to_items[item.parent].append(item_dict)
@@ -97,13 +100,14 @@ class PurchaseReturn(Return):
         return orders_to_items
 
     def _make_sales_returns(
-        self, orders_to_items: defaultdict[str | None, list[AnyChildItem]]
+        self,
+        orders_to_items: defaultdict[str | None, list[dict[str, str | int | None]]],
     ):
         to_remove: list[PurchaseOrderSalesOrder] = []
         for order_name, items in orders_to_items.items():
             if order_name is None:
                 continue
-            doc: SalesReturn = frappe.new_doc("Sales Return")
+            doc = new_doc(SalesReturn)
             doc.sales_order = order_name
             doc.from_purchase_return = self.name
             doc.extend("items", items)
@@ -118,10 +122,8 @@ class PurchaseReturn(Return):
         for order in to_remove:
             self._voucher.sales_orders.remove(order)
 
-    def _add_missing_field_to_voucher_items_to_sell(
-        self, items: list[PurchaseOrderItemToSell | ChildItem]
-    ):
-        def include(item: PurchaseOrderItemToSell | ChildItem):
+    def _add_missing_field_to_voucher_items_to_sell(self, items: list[AnyChildItem]):
+        def include(item: AnyChildItem):
             if (
                 not item.get("rate")
                 or not item.get("weight")
@@ -130,8 +132,8 @@ class PurchaseReturn(Return):
             ):
                 return True
 
-        items_with_missing_fields: list[Item] = frappe.get_all(
-            "Item",
+        items_with_missing_fields = get_all(
+            Item,
             fields=("item_code", "item_name", "rate", "weight"),
             filters={"item_code": ("in", (i.item_code for i in items if include(i)))},
         )
@@ -140,22 +142,23 @@ class PurchaseReturn(Return):
             if item.item_code in grouped_items:
                 grouped_item = grouped_items[item.item_code][0]
                 item.item_name = grouped_item.item_name
-                item.rate = grouped_item.rate
-                item.weight = grouped_item.weight
-            item.amount = item.qty * item.rate
+                item.rate = grouped_item.rate  # type: ignore
+                item.weight = grouped_item.weight  # type: ignore
+            item.amount = item.qty * item.rate  # type: ignore
 
     def _split_combinations_in_voucher(self):
         items = merge_same_items(self._voucher._get_items_to_sell(True))
-        self._add_missing_field_to_voucher_items_to_sell(items)
+        self._add_missing_field_to_voucher_items_to_sell(items)  # type: ignore
         self._voucher.items_to_sell = []
         self._voucher.extend("items_to_sell", items)
 
     def _modify_voucher(
-        self, orders_to_items: defaultdict[str | None, list[AnyChildItem]]
+        self,
+        orders_to_items: defaultdict[str | None, list[dict[str, str | int | None]]],
     ):
         self._split_combinations_in_voucher()
 
-        qty_counter = count_qty(frappe._dict(i) for i in orders_to_items[None])
+        qty_counter = count_qty(frappe._dict(i) for i in orders_to_items[None])  # type: ignore
         for item in self._voucher.items_to_sell:
             if item.item_code in qty_counter:
                 item.qty -= qty_counter[item.item_code]
@@ -185,10 +188,13 @@ class PurchaseReturn(Return):
 
         Since Sales Returns make Stock Entries (Reserved -> Available), making only (Available -> None)
         """
-        stock_type = {
+        status_to_stock_type_map: dict[
+            str, Literal["Available Purchased", "Available Actual"]
+        ] = {
             "To Receive": "Available Purchased",
             "Completed": "Available Actual",
-        }[self._voucher.status]
+        }
+        stock_type = status_to_stock_type_map[self._voucher.status]
         create_stock_entry(
             self.doctype, self.name, stock_type, self.items, reverse_qty=True
         )
@@ -212,7 +218,7 @@ class PurchaseReturn(Return):
             "Sales Return", {"from_purchase_return": self.name}
         )
         for return_ in sales_returns:
-            doc: SalesReturn = frappe.get_doc("Sales Return", return_.name)
+            doc = get_doc(SalesReturn, return_.name)
             doc.flags.from_purchase_return = True
             doc.cancel()
 

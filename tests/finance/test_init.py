@@ -3,6 +3,7 @@ import re
 import pytest
 
 import frappe
+from comfort import get_all, get_value
 from comfort.finance import (
     cancel_gl_entries_for,
     create_gl_entry,
@@ -36,8 +37,8 @@ def test_create_gl_entry(payment_sales: Payment):
     payment_sales.db_insert()
     account, debit, credit = get_account("cash"), 300, 0
     create_gl_entry(payment_sales.doctype, payment_sales.name, account, debit, credit)
-    entries: list[GLEntry] = frappe.get_all(
-        "GL Entry",
+    entries = get_all(
+        GLEntry,
         fields=("docstatus", "account", "debit", "credit"),
         filters={
             "voucher_type": payment_sales.doctype,
@@ -58,7 +59,7 @@ def test_cancel_gl_entries_for(payment_sales: Payment):
     )
 
     cancel_gl_entries_for(payment_sales.doctype, payment_sales.name)
-    docstatus: int = frappe.get_value(
+    docstatus: int = get_value(
         "GL Entry",
         fieldname="docstatus",
         filters={
@@ -77,8 +78,8 @@ def test_create_payment(sales_order: SalesOrder):
         sales_order.doctype, sales_order.name, amount, paid_with_cash=paid_with_cash
     )
 
-    payments: list[Payment] = frappe.get_all(
-        "Payment",
+    payments = get_all(
+        Payment,
         fields=("amount", "paid_with_cash"),
         filters={
             "voucher_type": sales_order.doctype,

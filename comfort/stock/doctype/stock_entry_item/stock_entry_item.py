@@ -1,6 +1,6 @@
-from frappe.model.document import Document
+from comfort import TypedDocument
 
 
-class StockEntryItem(Document):
+class StockEntryItem(TypedDocument):
     item_code: str
     qty: int

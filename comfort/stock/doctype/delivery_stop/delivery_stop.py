@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from typing import Literal
 
-from frappe.model.document import Document
+from comfort import TypedDocument
 
 
-class DeliveryStop(Document):
+class DeliveryStop(TypedDocument):
     sales_order: str
     customer: str
     address: str | None

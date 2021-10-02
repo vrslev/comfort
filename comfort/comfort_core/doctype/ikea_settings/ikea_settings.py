@@ -5,8 +5,7 @@ from datetime import datetime
 import ikea_api
 import ikea_api.auth
 
-import frappe
-from comfort import TypedDocument, ValidationError, _
+from comfort import TypedDocument, ValidationError, _, get_cached_doc
 from frappe.utils import add_to_date, get_datetime, now_datetime
 
 
@@ -23,12 +22,12 @@ class IkeaSettings(TypedDocument):
         self.clear_cache()
 
 
-def convert_to_datetime(datetime_str: str) -> datetime:  # pragma: no cover
-    return get_datetime(datetime_str)
+def convert_to_datetime(datetime_str: datetime | str) -> datetime:  # pragma: no cover
+    return get_datetime(datetime_str)  # type: ignore
 
 
 def get_guest_api():
-    doc: IkeaSettings = frappe.get_cached_doc("Ikea Settings", "Ikea Settings")
+    doc = get_cached_doc(IkeaSettings)
     if (
         doc.guest_token is None
         or doc.guest_token_expiration is None
@@ -42,7 +41,7 @@ def get_guest_api():
 
 
 def get_authorized_api():
-    doc: IkeaSettings = frappe.get_cached_doc("Ikea Settings", "Ikea Settings")
+    doc = get_cached_doc(IkeaSettings)
     password = doc.get_password(raise_exception=False)
     if (
         doc.authorized_token is None

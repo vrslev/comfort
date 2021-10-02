@@ -1,10 +1,16 @@
+from __future__ import annotations
+
 from collections import Counter
 
 import pytest
 
 import frappe
-from comfort import count_qty, group_by_attr
-from comfort.transactions import delete_empty_items, merge_same_items
+from comfort import count_qty, get_value, group_by_attr
+from comfort.transactions import (
+    _ReturnAddItemsPayloadItem,
+    delete_empty_items,
+    merge_same_items,
+)
 from comfort.transactions.doctype.purchase_return.purchase_return import PurchaseReturn
 from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
 from comfort.transactions.doctype.sales_return.sales_return import SalesReturn
@@ -26,7 +32,7 @@ def test_return_delete_empty_items_no_attr(sales_return: SalesReturn):
 
 
 def test_return_delete_empty_items_attr_is_none(sales_return: SalesReturn):
-    sales_return.items = None
+    sales_return.items = None  # type: ignore
     sales_return.delete_empty_items()
 
 
@@ -56,9 +62,9 @@ def test_return_add_missing_fields_to_items(
 
     for item in items:
         if item.doctype == "Sales Order Item":
-            assert item.rate == grouped_order_items[item.name][0].rate
+            assert item.rate == grouped_order_items[item.name][0].rate  # type: ignore
         elif item.doctype == "Sales Order Child Item":
-            assert item.rate == frappe.get_value("Item", item.item_code, "rate")
+            assert item.rate == get_value("Item", item.item_code, "rate")  # type: ignore
 
 
 def test_return_get_items_available_to_add(sales_return: SalesReturn):
@@ -68,7 +74,7 @@ def test_return_get_items_available_to_add(sales_return: SalesReturn):
         )
     )
     for item in sales_return.get_items_available_to_add():
-        assert (item["item_name"], item["rate"]) == frappe.get_value(
+        assert (item["item_name"], item["rate"]) == get_value(
             "Item", item["item_code"], ("item_name", "rate")
         )
         assert item["qty"] == available_item_and_qty[item["item_code"]]
@@ -100,7 +106,7 @@ def test_return_validate_new_item(sales_return: SalesReturn, item_code: str, qty
 
 def test_return_add_items(sales_return: SalesReturn):
     expected_item_amount = 2000
-    test_item = {
+    test_item: _ReturnAddItemsPayloadItem = {
         "item_code": "40366634",
         "item_name": "random_name",
         "qty": 2,
@@ -110,12 +116,15 @@ def test_return_add_items(sales_return: SalesReturn):
 
     item_added, item_amount = False, 0
     for item in sales_return.items:
-        if {
-            "item_code": item.item_code,
-            "item_name": item.item_name,
-            "qty": item.qty,
-            "rate": item.rate,
-        } == test_item:
+        if (
+            _ReturnAddItemsPayloadItem(
+                item_code=item.item_code,
+                item_name=item.item_name,
+                qty=item.qty,
+                rate=item.rate,
+            )
+            == test_item
+        ):
             item_added = True
             item_amount = item.amount
 

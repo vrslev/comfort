@@ -1,6 +1,6 @@
-from frappe.model.document import Document
+from comfort import TypedDocument
 
 
-class FinanceSettings(Document):
+class FinanceSettings(TypedDocument):
     def on_change(self):
         self.clear_cache()

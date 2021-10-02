@@ -1,9 +1,9 @@
 from datetime import datetime
 
-from frappe.model.document import Document
+from comfort import TypedDocument
 
 
-class PurchaseOrderDeliveryOption(Document):
+class PurchaseOrderDeliveryOption(TypedDocument):
     type: str
     service_provider: str
     date: datetime

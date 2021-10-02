@@ -1,6 +1,7 @@
 import pytest
 
-import frappe
+from comfort import get_doc, get_value
+from comfort.entities.doctype.child_item.child_item import ChildItem
 from comfort.entities.doctype.item.item import Item
 from frappe import ValidationError
 
@@ -13,15 +14,15 @@ def test_validate_child_items(item: Item):
 def test_validate_child_items_raises_on_nested_child(
     item: Item, child_items: list[Item]
 ):
-    frappe.get_doc(
+    get_doc(
+        ChildItem,
         {
-            "doctype": "Child Item",
             "item_code": child_items[0].item_code,
             "item_name": child_items[0].item_name,
             "qty": 2,
             "parenttype": "Item",
             "parent": child_items[1].item_code,  # this causes ValidationError
-        }
+        },
     ).db_insert()
 
     with pytest.raises(
@@ -96,14 +97,14 @@ def test_calculate_weight_in_parent_docs(item: Item, child_items: list[Item]):
     child_items[0].calculate_weight_in_parent_docs()
     child_items[0].save()
 
-    child_item_qty: int = frappe.get_value(
+    child_item_qty: int = get_value(
         "Child Item",
         {"parent": item.item_code, "item_code": child_items[0].item_code},
         "qty",
     )
     expected_weight = item.weight + child_item_qty * 10
 
-    new_weight: float = frappe.get_value("Item", item.item_code, "weight")
+    new_weight: float = get_value("Item", item.item_code, "weight")
     assert expected_weight == new_weight
 
 

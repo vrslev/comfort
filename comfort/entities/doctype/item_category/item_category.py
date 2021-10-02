@@ -2,11 +2,10 @@ from __future__ import annotations
 
 import re
 
-from comfort import ValidationError, _
-from frappe.model.document import Document
+from comfort import TypedDocument, ValidationError, _
 
 
-class ItemCategory(Document):
+class ItemCategory(TypedDocument):
     category_name: str
     url: str | None
 

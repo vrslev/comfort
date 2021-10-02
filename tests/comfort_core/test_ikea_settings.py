@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+from typing import Any
 
 import pytest
 
@@ -14,7 +15,7 @@ from frappe.utils import add_to_date, get_datetime
 from tests.conftest import mock_token
 
 
-def is_same_date(first: datetime, second: datetime):
+def is_same_date(first: Any, second: Any):
     return first.replace(minute=0, second=0, microsecond=0) == second.replace(
         minute=0, second=0, microsecond=0
     )
@@ -31,8 +32,8 @@ _testdata = ("token", "expiration"), (
 def test_get_guest_api_update(
     ikea_settings: IkeaSettings, token: str | None, expiration: datetime | None
 ):
-    ikea_settings.guest_token = token
-    ikea_settings.guest_token_expiration = expiration
+    ikea_settings.guest_token = token  # type: ignore
+    ikea_settings.guest_token_expiration = expiration  # type: ignore
     ikea_settings.save()
     get_guest_api()
     ikea_settings.reload()
@@ -65,8 +66,8 @@ def test_get_authorized_api_update(
     ikea_settings: IkeaSettings, token: str | None, expiration: datetime | None
 ):
     ikea_settings.username = ikea_settings.password = "lalalalalalala"
-    ikea_settings.authorized_token = token
-    ikea_settings.authorized_token_expiration = expiration
+    ikea_settings.authorized_token = token  # type: ignore
+    ikea_settings.authorized_token_expiration = expiration  # type: ignore
     ikea_settings.save()
     get_authorized_api()
     ikea_settings.reload()

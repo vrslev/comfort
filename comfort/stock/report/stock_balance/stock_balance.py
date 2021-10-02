@@ -2,8 +2,7 @@ from __future__ import annotations
 
 from typing import TypedDict
 
-import frappe
-from comfort import group_by_attr
+from comfort import get_all, group_by_attr
 from comfort.entities.doctype.item.item import Item
 from comfort.stock import StockTypes, get_stock_balance
 
@@ -35,10 +34,10 @@ def get_columns():  # pragma: no cover
     ]
 
 
-def get_data(filters: StockBalanceFilters) -> list[dict[str, str | int]]:
+def get_data(filters: StockBalanceFilters):
     balance = get_stock_balance(filters["stock_type"])
-    items_with_names: list[Item] = frappe.get_all(
-        "Item",
+    items_with_names = get_all(
+        Item,
         fields=("item_code", "item_name"),
         filters={"item_code": ("in", balance.keys())},
     )

@@ -1,9 +1,11 @@
-from frappe.model.document import Document
+from __future__ import annotations
+
+from comfort import TypedDocument
 
 
-class SalesOrderItem(Document):
+class SalesOrderItem(TypedDocument):
     item_code: str
-    item_name: str
+    item_name: str | None
     qty: int
     rate: int
     amount: int

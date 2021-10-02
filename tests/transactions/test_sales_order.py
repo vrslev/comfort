@@ -1,18 +1,19 @@
 from __future__ import annotations
 
 from copy import deepcopy
-from typing import Callable
+from typing import Callable, Literal
 
 import pytest
 
-import frappe
-from comfort import count_qty, counters_are_same
+from comfort import count_qty, counters_are_same, get_all, get_doc, get_value
 from comfort.comfort_core.doctype.commission_settings.commission_settings import (
     CommissionSettings,
 )
 from comfort.entities.doctype.child_item.child_item import ChildItem
 from comfort.entities.doctype.item.item import Item
 from comfort.finance import create_payment
+from comfort.finance.doctype.payment.payment import Payment
+from comfort.stock.doctype.delivery_stop.delivery_stop import DeliveryStop
 from comfort.stock.doctype.receipt.receipt import Receipt
 from comfort.transactions.doctype.purchase_order.purchase_order import PurchaseOrder
 from comfort.transactions.doctype.purchase_order_item_to_sell.purchase_order_item_to_sell import (
@@ -32,14 +33,13 @@ from comfort.transactions.doctype.sales_order_item.sales_order_item import (
 )
 from comfort.transactions.doctype.sales_return.sales_return import SalesReturn
 from frappe import ValidationError
-from frappe.model.document import Document
 
 
 def test_update_items_from_db(sales_order: SalesOrder):
     sales_order.update_items_from_db()
 
     for i in sales_order.items:
-        doc: Item = frappe.get_doc("Item", i.item_code)
+        doc = get_doc(Item, i.item_code)
         assert i.item_name == doc.item_name
         assert i.rate == doc.rate
         assert i.weight == doc.weight
@@ -254,10 +254,8 @@ def test_create_cancel_sales_return_without_return_before(
     sales_order.load_doc_before_save()
     sales_order._create_cancel_sales_return()
 
-    return_name: str = frappe.get_value(
-        "Sales Return", {"sales_order": sales_order.name}
-    )
-    cancel_return: SalesReturn = frappe.get_doc("Sales Return", return_name)
+    return_name: str = get_value("Sales Return", {"sales_order": sales_order.name})
+    cancel_return = get_doc(SalesReturn, return_name)
     assert cancel_return.sales_order == sales_order.name
     assert counters_are_same(
         count_qty(sales_order.get_items_with_splitted_combinations()),
@@ -286,10 +284,8 @@ def test_create_cancel_sales_return_with_return_before(
     sales_order.load_doc_before_save()
     sales_order._create_cancel_sales_return()
 
-    return_name: str = frappe.get_value(
-        "Sales Return", {"sales_order": sales_order.name}
-    )
-    cancel_return: SalesReturn = frappe.get_doc("Sales Return", return_name)
+    return_name: str = get_value("Sales Return", {"sales_order": sales_order.name})
+    cancel_return = get_doc(SalesReturn, return_name)
     new_counter = count_qty(sales_order.get_items_with_splitted_combinations())
 
     assert cancel_return.sales_order == sales_order.name
@@ -323,18 +319,11 @@ def test_modify_purchase_order_for_from_available_stock_available_purchased(
     sales_order.from_available_stock = "Available Purchased"
     sales_order.from_purchase_order = purchase_order.name
 
-    def get_po_counter(
-        purchase_order: PurchaseOrder,
-    ) -> list[
-        SalesOrderItem | SalesOrderChildItem | PurchaseOrderItemToSell | ChildItem
-    ]:
+    def get_po_counter(purchase_order: PurchaseOrder):
         items: list[
             SalesOrderItem | SalesOrderChildItem | PurchaseOrderItemToSell | ChildItem
-        ] = purchase_order._get_items_in_sales_orders(
-            True
-        ) + purchase_order._get_items_to_sell(
-            True
-        )
+        ] = list(purchase_order._get_items_in_sales_orders(True))
+        items += purchase_order._get_items_to_sell(True)
         print(count_qty(purchase_order._get_items_to_sell(True)))
         print(count_qty(purchase_order._get_items_in_sales_orders(True)))
         return count_qty(items)
@@ -500,16 +489,16 @@ def test_set_delivery_status_from_available_actual_stock(
 def test_set_document_status(
     sales_order: SalesOrder,
     docstatus: int,
-    payment_status: str,
-    delivery_status: str,
-    expected_status: str,
+    payment_status: str | None,
+    delivery_status: str | None,
+    expected_status: Literal["Draft", "In Progress", "Completed", "Cancelled"],
 ):
     # TODO
     # -            if self.payment_status == "Paid" and self.delivery_status == "Delivered":
     # +            if self.payment_status == "Paid" or self.delivery_status == "Delivered":
     sales_order.docstatus = docstatus
-    sales_order.payment_status = payment_status
-    sales_order.delivery_status = delivery_status
+    sales_order.payment_status = payment_status  # type: ignore
+    sales_order.delivery_status = delivery_status  # type: ignore
     sales_order._set_document_status()
     assert sales_order.status == expected_status
 
@@ -524,8 +513,8 @@ def test_sales_order_on_cancel(sales_order: SalesOrder):
     sales_order.add_receipt()
 
     sales_order.on_cancel()
-    for doctype in ("Payment", "Receipt"):
-        docs: list[Document] = frappe.get_all(
+    for doctype in (Payment, Receipt):
+        docs = get_all(
             doctype,
             {"voucher_type": sales_order.doctype, "voucher_no": sales_order.name},
             "docstatus",
@@ -570,8 +559,8 @@ def test_split_combinations(sales_order: SalesOrder, save: bool):
 
     sales_order.split_combinations([splitted_combination.name], save)
 
-    child_items: list[ChildItem] = frappe.get_all(
-        "Child Item",
+    child_items = get_all(
+        ChildItem,
         fields=("item_code", "qty"),
         filters={"parent": splitted_combination.item_code},
     )
@@ -604,9 +593,7 @@ def test_split_combinations(sales_order: SalesOrder, save: bool):
 
 def test_has_linked_delivery_trip_true(sales_order: SalesOrder):
     sales_order.db_insert()
-    frappe.get_doc(
-        {"doctype": "Delivery Stop", "sales_order": sales_order.name}
-    ).db_insert()
+    get_doc(DeliveryStop, {"sales_order": sales_order.name}).db_insert()
     assert has_linked_delivery_trip(sales_order.name)
 
 
@@ -621,9 +608,7 @@ def test_get_sales_orders_not_in_purchase_order(
     purchase_order.db_insert()
     purchase_order.db_update_all()
     new_name = "random_name"
-    new_sales_order: SalesOrder = frappe.get_doc(
-        {"doctype": "Sales Order", "name": new_name}
-    )
+    new_sales_order = get_doc(SalesOrder, {"name": new_name})
     new_sales_order.db_insert()
 
     res = get_sales_orders_not_in_purchase_order()
@@ -650,7 +635,7 @@ def test_params_validate_from_available_stock_available_purchased_raises_on_no_f
 
 @pytest.mark.parametrize("status", ("Draft", "Completed", "Cancelled"))
 def test_params_validate_from_available_stock_available_purchased_raises_on_wrong_po_status(
-    purchase_order: PurchaseOrder, status: str
+    purchase_order: PurchaseOrder, status: Literal["Draft", "Completed", "Cancelled"]
 ):
     purchase_order.status = status
     purchase_order.set_new_name()

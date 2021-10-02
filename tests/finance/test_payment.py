@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 import pytest
 
-import frappe
+from comfort import get_all, get_doc, get_value
 from comfort.finance import get_account
 from comfort.finance.doctype.gl_entry.gl_entry import GLEntry
 from comfort.finance.doctype.payment.payment import Payment
@@ -23,7 +25,7 @@ def test_new_gl_entry(payment_sales: Payment):
     payment_sales.db_insert()
     payment_sales._new_gl_entry(account, debit, credit)
 
-    values: tuple[str, int, int] = frappe.get_value(
+    values: tuple[str, int, int] = get_value(
         "GL Entry",
         filters={
             "voucher_type": payment_sales.doctype,
@@ -60,9 +62,9 @@ def test_get_amounts_for_sales_gl_entries(
     assert amounts["installation_amount"] == 500
 
 
-def get_gl_entries(doc: Payment) -> list[GLEntry]:
-    return frappe.get_all(
-        "GL Entry",
+def get_gl_entries(doc: Payment | SalesOrder):
+    return get_all(
+        GLEntry,
         fields=("account", "debit", "credit"),
         filters={"voucher_type": doc.doctype, "voucher_no": doc.name},
     )
@@ -231,11 +233,10 @@ def test_set_status_in_sales_order(sales_order: SalesOrder, docstatus: int):
     sales_order.db_update_all()
     sales_order.add_payment(300, cash=True)
 
-    payment_name: str = frappe.get_value(
-        "Payment",
-        {"voucher_type": sales_order.doctype, "voucher_no": sales_order.name},
+    payment_name: str = get_value(
+        "Payment", {"voucher_type": sales_order.doctype, "voucher_no": sales_order.name}
     )
-    payment: Payment = frappe.get_doc("Payment", payment_name)
+    payment = get_doc(Payment, payment_name)
     payment.cancel_gl_entries()
     payment.set_status_in_sales_order()
 

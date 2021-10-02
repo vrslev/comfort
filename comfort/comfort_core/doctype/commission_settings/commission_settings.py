@@ -1,13 +1,11 @@
 from __future__ import annotations
 
-import frappe
-from comfort import ValidationError, _
-from frappe.model.document import Document
+from comfort import TypedDocument, ValidationError, _, get_cached_doc
 
 from ..commission_range.commission_range import CommissionRange
 
 
-class CommissionSettings(Document):
+class CommissionSettings(TypedDocument):
     ranges: list[CommissionRange]
 
     def validate_last_to_amount_is_zero(self):
@@ -46,9 +44,7 @@ class CommissionSettings(Document):
         if amount < 0:
             raise ValidationError(_("Amount should be a positive number"))
 
-        doc: CommissionSettings = frappe.get_cached_doc(
-            "Commission Settings", "Commission Settings"
-        )
+        doc = get_cached_doc(CommissionSettings)
         ranges = doc.ranges.copy()
         ranges.reverse()
         from_amounts_to_percentage = {r.from_amount: r.percentage for r in ranges}

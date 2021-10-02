@@ -6,9 +6,12 @@ import ikea_api.auth
 import ikea_api_wrapped
 import pytest
 from ikea_api_wrapped.parsers.item import ParsedItem
+from ikea_api_wrapped.parsers.purchases import PurchaseHistoryItemDict
+from ikea_api_wrapped.wrappers import PurchaseInfoDict
 from pymysql import OperationalError
 
 import frappe
+from comfort import TypedDocument, doc_exists, get_doc
 from comfort.comfort_core.doctype.commission_settings.commission_settings import (
     CommissionSettings,
 )
@@ -30,7 +33,6 @@ from comfort.transactions.doctype.purchase_return.purchase_return import Purchas
 from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
 from comfort.transactions.doctype.sales_return.sales_return import SalesReturn
 from frappe.database.mariadb.database import MariaDBDatabase
-from frappe.model.document import Document
 
 TEST_SITE_NAME = "tests"
 
@@ -69,10 +71,10 @@ def db_transaction(db_instance: MariaDBDatabase):
 
 
 @pytest.fixture
-def customer() -> Customer:
-    return frappe.get_doc(
+def customer():
+    return get_doc(
+        Customer,
         {
-            "doctype": "Customer",
             "name": "Pavel Durov",
             "gender": "Male",
             "vk_id": "1",
@@ -80,12 +82,12 @@ def customer() -> Customer:
             "phone": "89115553535",
             "city": "Moscow",
             "address": "Arbat, 1",
-        }
+        },
     )
 
 
 @pytest.fixture
-def child_items() -> list[Item]:
+def child_items():
     test_data: list[dict[str, Any]] = [
         {
             "item_code": "10014030",
@@ -93,7 +95,6 @@ def child_items() -> list[Item]:
             "url": "https://www.ikea.com/ru/ru/p/-10014030",
             "rate": 3100,
             "weight": 41.3,
-            "doctype": "Item",
             "child_items": [],
         },
         {
@@ -102,7 +103,6 @@ def child_items() -> list[Item]:
             "url": "https://www.ikea.com/ru/ru/p/-10366598",
             "rate": 250,
             "weight": 0.43,
-            "doctype": "Item",
         },
         {
             "item_code": "20277974",
@@ -110,7 +110,6 @@ def child_items() -> list[Item]:
             "url": "https://www.ikea.com/ru/ru/p/-20277974",
             "rate": 400,
             "weight": 4.66,
-            "doctype": "Item",
         },
         {
             "item_code": "40277973",
@@ -118,7 +117,6 @@ def child_items() -> list[Item]:
             "url": "https://www.ikea.com/ru/ru/p/-40277973",
             "rate": 300,
             "weight": 2.98,
-            "doctype": "Item",
         },
         {
             "item_code": "40366634",
@@ -126,7 +124,6 @@ def child_items() -> list[Item]:
             "url": "https://www.ikea.com/ru/ru/p/-40366634",
             "rate": 1700,
             "weight": 7.72,
-            "doctype": "Item",
         },
         {
             "item_code": "50121575",
@@ -134,7 +131,6 @@ def child_items() -> list[Item]:
             "url": "https://www.ikea.com/ru/ru/p/-50121575",
             "rate": 3600,
             "weight": 46.8,
-            "doctype": "Item",
         },
         {
             "item_code": "50366596",
@@ -142,27 +138,26 @@ def child_items() -> list[Item]:
             "url": "https://www.ikea.com/ru/ru/p/-50366596",
             "rate": 200,
             "weight": 0.3,
-            "doctype": "Item",
         },
     ]
 
     res: list[Item] = []
     for i in test_data:
-        doc: Item = frappe.get_doc(i)
+        doc = get_doc(Item, i)
         doc.db_insert()
         res.append(doc)
     return res
 
 
 @pytest.fixture
-def item() -> Item:
-    return frappe.get_doc(
+def item():
+    return get_doc(
+        Item,
         {
             "item_code": "29128569",
             "item_name": "ПАКС, Гардероб, 175x58x236 см, белый",
             "url": "https://www.ikea.com/ru/ru/p/-s29128569",
             "rate": 17950,
-            "doctype": "Item",
             "child_items": [
                 {
                     "item_code": "10014030",
@@ -200,7 +195,7 @@ def item() -> Item:
                     "qty": 1,
                 },
             ],
-        }
+        },
     )
 
 
@@ -211,13 +206,14 @@ def item_no_children(item: Item):
 
 
 @pytest.fixture
-def item_category() -> ItemCategory:
-    return frappe.get_doc(
+def item_category():
+    return get_doc(
+        ItemCategory,
         {
             "name": "Столешницы",
             "url": "https://www.ikea.com/ru/ru/cat/-11844",
             "doctype": "Item Category",
-        }
+        },
     )
 
 
@@ -229,9 +225,10 @@ def accounts():
 
 @pytest.fixture
 @pytest.mark.usefixtures("accounts")
-def gl_entry(payment_sales: Payment) -> GLEntry:
+def gl_entry(payment_sales: Payment):
     payment_sales.db_insert()
-    return frappe.get_doc(
+    return get_doc(
+        GLEntry,
         {
             "name": "GLE-2021-00001",
             "owner": "Administrator",
@@ -240,15 +237,15 @@ def gl_entry(payment_sales: Payment) -> GLEntry:
             "credit": 300,
             "voucher_type": "Payment",
             "voucher_no": "ebd35a9cc9",
-            "doctype": "GL Entry",
-        }
+        },
     )
 
 
 @pytest.fixture
-def payment_sales(sales_order: SalesOrder) -> Payment:
+def payment_sales(sales_order: SalesOrder):
     sales_order.db_insert()
-    return frappe.get_doc(
+    return get_doc(
+        Payment,
         {
             "name": "ebd35a9cc9",
             "docstatus": 0,
@@ -256,15 +253,15 @@ def payment_sales(sales_order: SalesOrder) -> Payment:
             "voucher_no": "SO-2021-0001",
             "amount": 5000,
             "paid_with_cash": False,
-            "doctype": "Payment",
-        }
+        },
     )
 
 
 @pytest.fixture
-def payment_purchase(purchase_order: PurchaseOrder) -> Payment:
+def payment_purchase(purchase_order: PurchaseOrder):
     purchase_order.db_insert()
-    return frappe.get_doc(
+    return get_doc(
+        Payment,
         {
             "name": "ebd35a9cc9",
             "docstatus": 0,
@@ -272,34 +269,26 @@ def payment_purchase(purchase_order: PurchaseOrder) -> Payment:
             "voucher_no": "Август-1",
             "amount": 5000,
             "paid_with_cash": False,
-            "doctype": "Payment",
-        }
+        },
     )
 
 
 @pytest.fixture
-def receipt_sales(sales_order: SalesOrder) -> Receipt:
+def receipt_sales(sales_order: SalesOrder):
     sales_order.db_insert()
     sales_order.db_update_all()
-    return frappe.get_doc(
-        {
-            "doctype": "Receipt",
-            "voucher_type": sales_order.doctype,
-            "voucher_no": sales_order.name,
-        }
+    return get_doc(
+        Receipt, {"voucher_type": sales_order.doctype, "voucher_no": sales_order.name}
     )
 
 
 @pytest.fixture
-def receipt_purchase(purchase_order: PurchaseOrder) -> Receipt:
+def receipt_purchase(purchase_order: PurchaseOrder):
     purchase_order.db_insert()
     purchase_order.db_update_all()
-    return frappe.get_doc(
-        {
-            "doctype": "Receipt",
-            "voucher_type": purchase_order.doctype,
-            "voucher_no": purchase_order.name,
-        }
+    return get_doc(
+        Receipt,
+        {"voucher_type": purchase_order.doctype, "voucher_no": purchase_order.name},
     )
 
 
@@ -314,32 +303,28 @@ def sales_order(
     item.set_new_name(set_child_names=True)
     item.set_parent_in_children()
     item.db_insert()
-    all_children: list[Document] = item.get_all_children()
+    all_children: list[TypedDocument] = item.get_all_children()  # type: ignore
     for child in all_children:
         child.db_insert()
     commission_settings.insert()
-    doc: SalesOrder = frappe.get_doc(
+    return get_doc(
+        SalesOrder,
         {
             "name": "SO-2021-0001",
             "customer": "Pavel Durov",
             "edit_commission": 0,
             "discount": 0,
             "paid_amount": 0,
-            "doctype": "Sales Order",
             "services": [
                 {"type": "Delivery to Entrance", "rate": 300},
                 {"type": "Installation", "rate": 500},
             ],
-        }
+            "items": [
+                {"item_code": item.item_code, "qty": 1},
+                {"item_code": child_items[0].item_code, "qty": 2},
+            ],
+        },
     )
-    doc.extend(
-        "items",
-        [
-            {"item_code": item.item_code, "qty": 1},
-            {"item_code": child_items[0].item_code, "qty": 2},
-        ],
-    )
-    return doc
 
 
 mock_delivery_services = {
@@ -430,31 +415,32 @@ mock_delivery_services = {
 }
 
 
-mock_purchase_history = [
-    {
-        "id": "11111111",
-        "datetime": "2021-04-19T10:12:00Z",
-        "datetime_formatted": "19 апреля 2021, 13:12",
-        "status": "IN_PROGRESS",
-        "store": "Интернет-магазин",
-        "cost": 8326.0,
-    },
-    {
-        "id": "111111110",
-        "datetime": "2021-04-14T18:16:25Z",
-        "datetime_formatted": "14 апреля 2021, 21:16",
-        "status": "COMPLETED",
-        "store": "Интернет-магазин",
-        "cost": 0,
-    },
+mock_purchase_history = [  # TODO: Unused
+    PurchaseHistoryItemDict(
+        datetime="2021-04-19T10:12:00Z",
+        datetime_formatted="19 апреля 2021, 13:12",
+        price=8326.0,
+        purchase_id=11111111,
+        status="IN_PROGRESS",
+        store="Интернет-магазин",
+    ),
+    PurchaseHistoryItemDict(
+        datetime="2021-04-14T18:16:25Z",
+        datetime_formatted="14 апреля 2021, 21:16",
+        price=0,
+        purchase_id=111111110,
+        status="COMPLETED",
+        store="Интернет-магазин",
+    ),
 ]
 
-mock_purchase_info = {
-    "purchase_date": "2021-04-19",
-    "delivery_date": "2021-04-24",
-    "delivery_cost": 399.0,
-    "items_cost": 7927.0,
-}
+
+mock_purchase_info = PurchaseInfoDict(
+    purchase_date="2021-04-19",
+    delivery_date="2021-04-24",
+    delivery_cost=399.0,
+    total_cost=7927.0,
+)
 
 
 def patch_get_delivery_services(monkeypatch: pytest.MonkeyPatch):
@@ -467,23 +453,21 @@ def patch_get_delivery_services(monkeypatch: pytest.MonkeyPatch):
 
 
 @pytest.fixture
-def purchase_order(
-    sales_order: SalesOrder, monkeypatch: pytest.MonkeyPatch
-) -> PurchaseOrder:
+def purchase_order(sales_order: SalesOrder, monkeypatch: pytest.MonkeyPatch):
 
     sales_order.set_child_items()
-    if not frappe.db.exists(sales_order.doctype, sales_order.name):
+    if not doc_exists(sales_order.doctype, sales_order.name):
         sales_order.db_insert()
         sales_order.db_update_all()
 
     patch_get_delivery_services(monkeypatch)
 
-    return frappe.get_doc(
+    return get_doc(
+        PurchaseOrder,
         {
             "name": "Август-1",
             "docstatus": 0,
             "status": "Draft",
-            "doctype": "Purchase Order",
             "delivery_options": [],
             "sales_orders": [
                 {
@@ -498,16 +482,16 @@ def purchase_order(
                     "qty": 1,
                 }
             ],
-        }
+        },
     )
 
 
 @pytest.fixture
-def commission_settings() -> CommissionSettings:
-    return frappe.get_doc(
+def commission_settings():
+    return get_doc(
+        CommissionSettings,
         {
             "name": "Commission Settings",
-            "doctype": "Commission Settings",
             "ranges": [
                 {
                     "percentage": 20,
@@ -522,7 +506,7 @@ def commission_settings() -> CommissionSettings:
                     "to_amount": 0,
                 },
             ],
-        }
+        },
     )
 
 
@@ -548,7 +532,7 @@ def ikea_settings(monkeypatch: pytest.MonkeyPatch):
         ikea_api.auth, "get_authorized_token", mock_get_authorized_token
     )
 
-    doc: IkeaSettings = frappe.get_single("Ikea Settings")
+    doc = get_doc(IkeaSettings)
     doc.zip_code = "101000"
     doc.save()
     return doc
@@ -614,13 +598,10 @@ def parsed_item() -> ParsedItem:
 
 
 @pytest.fixture
-def checkout(purchase_order: PurchaseOrder) -> Checkout:
+def checkout(purchase_order: PurchaseOrder):
     purchase_order.db_insert()
     purchase_order.db_update_all()
-
-    return frappe.get_doc(
-        {"doctype": "Checkout", "purchase_order": purchase_order.name}
-    )
+    return get_doc(Checkout, {"purchase_order": purchase_order.name})
 
 
 class FakeBot(MagicMock):
@@ -698,20 +679,20 @@ class FakeBot(MagicMock):
 @pytest.fixture
 def telegram_settings(monkeypatch: pytest.MonkeyPatch) -> TelegramSettings:
     monkeypatch.setattr("telegram.Bot", FakeBot)
-    doc: TelegramSettings = frappe.get_single("Telegram Settings")
+    doc = get_doc(TelegramSettings)
     doc.bot_token = "28910482:82359djtg3fi0denjk"
-    doc.chat_id = -103921437849
+    doc.chat_id = "-103921437849"
     doc.save()
     return doc
 
 
 @pytest.fixture
-def delivery_trip(sales_order: SalesOrder) -> DeliveryTrip:
+def delivery_trip(sales_order: SalesOrder):
     sales_order.db_insert()
     sales_order.db_update_all()
-    return frappe.get_doc(
+    return get_doc(
+        DeliveryTrip,
         {
-            "doctype": "Delivery Trip",
             "stops": [
                 {
                     "doctype": "Delivery Stop",
@@ -725,21 +706,21 @@ def delivery_trip(sales_order: SalesOrder) -> DeliveryTrip:
                     "installation": True,
                 }
             ],
-        }
+        },
     )
 
 
 @pytest.fixture
-def sales_return(sales_order: SalesOrder) -> SalesReturn:
+def sales_return(sales_order: SalesOrder):
     sales_order.update_items_from_db()
     sales_order.set_child_items()
     sales_order.calculate()
     sales_order.db_insert()
     sales_order.db_update_all()
-    return frappe.get_doc(
+    return get_doc(
+        SalesReturn,
         {
             "sales_order": sales_order.name,
-            "doctype": "Sales Return",
             "items": [
                 {
                     "item_code": "10366598",
@@ -754,21 +735,19 @@ def sales_return(sales_order: SalesOrder) -> SalesReturn:
                     "rate": 1700,
                 },
             ],
-        }
+        },
     )
 
 
 @pytest.fixture
-def purchase_return(
-    purchase_order: PurchaseOrder, sales_order: SalesOrder
-) -> PurchaseReturn:
+def purchase_return(purchase_order: PurchaseOrder, sales_order: SalesOrder):
     sales_order.save()
     purchase_order.db_insert()
     purchase_order.db_update_all()
-    return frappe.get_doc(
+    return get_doc(
+        PurchaseReturn,
         {
             "purchase_order": purchase_order.name,
-            "doctype": "Purchase Return",
             "items": [
                 {
                     "item_code": "10366598",
@@ -783,5 +762,5 @@ def purchase_return(
                     "rate": 1700,
                 },
             ],
-        }
+        },
     )
