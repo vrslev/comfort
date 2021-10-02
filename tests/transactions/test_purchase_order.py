@@ -281,7 +281,7 @@ def test_get_templated_items_for_api(
 
 
 @pytest.mark.usefixtures("ikea_settings")
-def test_clear_delivery_services(purchase_order: PurchaseOrder):
+def test_clear_delivery_options(purchase_order: PurchaseOrder):
     purchase_order.get_delivery_services()
     # TODO: Cover this method properly
     # -        templated_items = self._get_templated_items_for_api(split_combinations=True)
