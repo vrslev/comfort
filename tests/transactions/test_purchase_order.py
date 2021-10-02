@@ -386,6 +386,7 @@ def test_purchase_order_before_insert(purchase_order: PurchaseOrder):
     assert purchase_order.status == "Draft"
 
 
+@pytest.mark.usefixtures("ikea_settings")
 def test_purchase_order_before_submit(purchase_order: PurchaseOrder):
     # TODO:
     # -        self.delivery_options = []
