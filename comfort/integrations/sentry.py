@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import os
 from importlib.metadata import distribution
 from logging import Logger
@@ -21,12 +23,18 @@ class _GetSentryInfoPayload(TypedDict):
     release: str
 
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def get_info() -> _GetSentryInfoPayload:
+
     return {
         "dsn": os.environ["SENTRY_DSN"],
         "release": f"comfort@{distribution('comfort').metadata['Version']}",
     }
+
+
+def _get_user_email() -> str | None:
+    if frappe.session and frappe.session.user:
+        return frappe.get_value("User", frappe.session.user, "email")  # type: ignore
 
 
 def _init_sentry():
@@ -38,6 +46,7 @@ def _init_sentry():
         traces_sample_rate=1.0,
         ignore_errors=[redis.exceptions.ConnectionError],
     )
+    sentry_sdk.set_user({"email": _get_user_email()})
 
 
 def _add_wsgi_integration():

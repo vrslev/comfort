@@ -1,4 +1,4 @@
-import * as Sentry from "@sentry/browser";
+import { init, setUser } from "@sentry/browser";
 import { Integrations } from "@sentry/tracing";
 
 export function init_sentry() {
@@ -9,17 +9,20 @@ export function init_sentry() {
         if (!r.message) return;
         localStorage.sentry_dsn = r.message.dsn;
         localStorage.sentry_release = r.message.release;
+        localStorage.sentry_user = r.message.user;
       },
     });
   }
 
   if (localStorage.sentry_dsn) {
-    Sentry.init({
+    init({
       dsn: localStorage.sentry_dsn,
       release: localStorage.sentry_release,
       integrations: [new Integrations.BrowserTracing()],
       tracesSampleRate: 1.0,
-      debug: true,
     });
+    if (frappe.session.user_email) {
+      setUser({ email: frappe.session.user_email });
+    }
   }
 }
