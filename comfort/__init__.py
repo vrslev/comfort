@@ -5,11 +5,14 @@ from collections import Counter, defaultdict
 from typing import Any, Iterable, TypeVar
 
 import frappe
+from comfort.integrations import sentry
+from frappe import _ as _gettext
 from frappe.model.document import Document
 
 _T = TypeVar("_T")
 
-from frappe import _ as _gettext
+
+sentry.init()
 
 
 def _(msg: Any, lang: str | None = None, context: str | None = None) -> str:

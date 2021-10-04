@@ -1,4 +1,5 @@
 import os
+from importlib.metadata import distribution
 from logging import Logger
 from typing import Callable
 
@@ -12,9 +13,6 @@ from werkzeug.wrappers.response import Response
 
 import frappe
 import frappe.app
-from comfort.hooks import app_version
-
-print(f"{__package__}@{app_version}")
 
 
 def _init_sentry(dsn: str):
@@ -22,7 +20,7 @@ def _init_sentry(dsn: str):
         dsn=dsn,
         integrations=[RedisIntegration(), RqIntegration()],
         traces_sample_rate=1.0,
-        release=f"{__package__}@{app_version}",
+        release=f"comfort@{distribution('comfort').metadata['Version']}",
     )
 
 
