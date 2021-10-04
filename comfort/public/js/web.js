@@ -1,3 +1,5 @@
 import { init_sentry } from "./sentry";
 
-init_sentry();
+frappe.ready(() => {
+  init_sentry();
+});
