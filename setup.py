@@ -22,7 +22,7 @@ setup(
             "black==21.9b0",
             "pre_commit==2.15.0",
             "pytest==6.2.5",
-            "pytest-cov==2.12.1",
+            "pytest-cov==3.0.0",
             "pytest-randomly==3.10.1",
         ]
     },
