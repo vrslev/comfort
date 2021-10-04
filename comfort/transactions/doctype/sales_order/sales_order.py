@@ -20,7 +20,6 @@ from comfort import (
 from comfort.comfort_core.doctype.commission_settings.commission_settings import (
     CommissionSettings,
 )
-from comfort.comfort_core.hooks import default_query
 from comfort.entities.doctype.child_item.child_item import ChildItem
 from comfort.entities.doctype.item.item import Item
 from comfort.finance import create_payment, get_account
@@ -559,46 +558,3 @@ def validate_params_from_available_stock(
     elif from_available_stock == "Available Actual":
         if not get_stock_balance(from_available_stock):
             raise ValidationError(_("No Items in Available Actual stock"))
-
-
-@frappe.whitelist()
-def item_query(  # TODO: Cover
-    doctype: str,
-    txt: str,
-    searchfield: str,
-    start: int,
-    page_len: int,
-    filters: dict[str, Any],
-):  # pragma: no cover
-    from_available_stock: Literal[
-        "Available Purchased", "Available Actual"
-    ] | None = filters.get("from_available_stock")
-    from_purchase_order: str | None = filters.get("from_purchase_order")
-
-    validate_params_from_available_stock(from_available_stock, from_purchase_order)
-
-    acceptable_item_codes: Iterable[str] | None = None
-
-    if from_available_stock == "Available Actual":
-        acceptable_item_codes = get_stock_balance(from_available_stock).keys()
-    elif from_available_stock == "Available Purchased":
-        items_to_sell = get_all(
-            PurchaseOrderItemToSell,
-            fields="item_code",
-            filters={"parent": ("in", from_purchase_order)},
-        )
-        acceptable_item_codes = (d.item_code for d in items_to_sell)
-
-    if acceptable_item_codes is None:
-        filters = {}
-    else:
-        filters = {"item_code": ("in", acceptable_item_codes)}
-
-    return default_query(
-        doctype=doctype,
-        txt=txt,
-        searchfield=searchfield,
-        start=start,
-        page_len=page_len,
-        filters=filters,
-    )

@@ -1,18 +1,12 @@
-from __future__ import annotations
-
 from importlib.metadata import distribution
-from typing import Any, Iterable
+from typing import Any
 
 import frappe
 import frappe.defaults
-from comfort import get_cached_value, get_doc
 from comfort.finance.chart_of_accounts import initialize_accounts
 from frappe.core.doctype.doctype.doctype import DocType
-from frappe.desk.reportview import get_filters_cond, get_match_cond
 from frappe.geo.doctype.currency.currency import Currency
-from frappe.model.meta import Meta
 from frappe.modules import make_boilerplate
-from frappe.utils import unique
 
 
 def load_metadata():
@@ -23,98 +17,13 @@ def load_metadata():
     app_title: str = app_name.capitalize()
     app_description: str = meta["Summary"]
     app_publisher = f"{meta['Author']} <{meta['Author-email']}>"
+    app_version = meta["Version"]
 
-    return app_name, app_title, app_description, app_publisher
-
-
-def _format_money(money: str | int):  # pragma: no cover
-    return f"{int(money)} ₽"
-
-
-def _format_weight(weight: int | float):  # pragma: no cover
-    return f"{float(weight)} кг"
-
-
-def _format_item_query(d: list[Any]):  # pragma: no cover
-    if d[2]:
-        d[2] = _format_money(d[2])
-
-
-def _format_purchase_order_query(d: list[Any]):  # pragma: no cover
-    if d[2]:
-        d[2] = _format_money(d[2])
-    if d[3]:
-        d[3] = _format_weight(d[3])
-
-
-def _format_sales_order_query(d: list[Any]):  # pragma: no cover
-    if d[3]:
-        d[3] = _format_money(d[3])
-
-
-_QUERY_FORMATTERS = {  # pragma: no cover
-    "Item": _format_item_query,
-    "Purchase Order": _format_purchase_order_query,
-    "Sales Order": _format_sales_order_query,
-}
-
-
-def _get_fields(
-    doctype: str, fields: list[Any] | None = None
-) -> list[Any]:  # pragma: no cover
-    # From ERPNext
-    if fields is None:
-        fields = []
-    meta: Meta = frappe.get_meta(doctype)
-    search_fields: list[Any] = meta.get_search_fields()
-    fields.extend(search_fields)
-
-    title_field: Any = meta.get("title_field")
-    if title_field and not title_field.strip() in fields:
-        fields.insert(1, title_field.strip())
-
-    return unique(fields)
-
-
-@frappe.whitelist()  # pragma: no cover
-@frappe.validate_and_sanitize_search_inputs
-def default_query(
-    doctype: str,
-    txt: str,
-    searchfield: str,
-    start: int,
-    page_len: int,
-    filters: dict[Any, Any],
-):
-    conditions = []
-    fields = _get_fields(doctype, ["name"])
-
-    query: list[list[Any]] = frappe.db.sql(  # type: ignore
-        f"""
-        SELECT {", ".join(fields)} FROM `tab{doctype}`
-        WHERE {searchfield} LIKE %(txt)s
-        {get_filters_cond(doctype, filters, conditions)}
-        {get_match_cond(doctype)}
-
-        ORDER BY modified DESC
-        LIMIT {start}, {page_len}
-        """,
-        {"txt": "%%%s%%" % txt},
-        as_list=True,
-    )
-    if doctype in _QUERY_FORMATTERS:
-        for d in query:
-            _QUERY_FORMATTERS[doctype](d)
-    return query
-
-
-def get_standard_queries(doctypes: Iterable[str]):  # pragma: no cover
-    query_name = default_query.__module__ + "." + default_query.__name__
-    return {d: query_name for d in doctypes}
+    return app_name, app_title, app_description, app_publisher, app_version
 
 
 def _set_currency_symbol():
-    doc = get_doc(Currency, "RUB")
+    doc: Currency = frappe.get_doc("Currency", "RUB")  # type: ignore
     doc.update({"symbol": "₽", "enabled": True})
     doc.save()
     frappe.db.set_default("currency", "RUB")
@@ -140,7 +49,7 @@ def after_install():  # pragma: no cover
 
 
 def extend_boot_session(bootinfo: Any):  # pragma: no cover
-    currency_doc: dict[str, Any] = get_cached_value(
+    currency_doc: dict[str, Any] = frappe.get_cached_value(  # type: ignore
         "Currency",
         bootinfo.sysdefaults.currency,
         (

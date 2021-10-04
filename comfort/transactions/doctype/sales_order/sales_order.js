@@ -48,8 +48,7 @@ comfort.SalesOrderController = frappe.ui.form.Controller.extend({
   setup_item_query() {
     this.frm.set_query("item_code", "items", () => {
       return {
-        query:
-          "comfort.transactions.doctype.sales_order.sales_order.item_query",
+        query: "comfort.queries.sales_order_item_query",
         filters: {
           from_available_stock: this.frm.doc.from_available_stock,
           from_purchase_order: this.frm.doc.from_purchase_order,

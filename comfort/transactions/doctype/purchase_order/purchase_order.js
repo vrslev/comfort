@@ -15,8 +15,7 @@ comfort.PurchaseOrderController = frappe.ui.form.Controller.extend({
         });
       }
       return {
-        query:
-          "comfort.transactions.doctype.purchase_order.purchase_order.sales_order_query",
+        query: "comfort.queries.purchase_order_sales_order_query",
         filters: {
           "not in": cur_sales_orders,
           docname: this.frm.doc.name,
