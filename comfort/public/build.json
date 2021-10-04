@@ -3,5 +3,6 @@
     "public/js/index.js",
     "public/js/returns.js",
     "public/js/listviews.js"
-  ]
+  ],
+  "js/comfort-web.min.js": ["public/js/web.js"]
 }

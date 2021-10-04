@@ -1,3 +1,7 @@
+import { init_sentry } from "./sentry";
+
+init_sentry();
+
 frappe.provide("comfort");
 
 var DONT_REMOVE_SIDEBAR_IN_DOCTYPES = ["Item"];

@@ -1,7 +1,7 @@
 import os
 from importlib.metadata import distribution
 from logging import Logger
-from typing import Callable
+from typing import Callable, TypedDict
 
 import redis.exceptions
 import sentry_sdk
@@ -16,12 +16,26 @@ import frappe
 import frappe.app
 
 
-def _init_sentry(dsn: str):
+class _GetSentryInfoPayload(TypedDict):
+    dsn: str
+    release: str
+
+
+@frappe.whitelist()
+def get_info() -> _GetSentryInfoPayload:
+    return {
+        "dsn": os.environ["SENTRY_DSN"],
+        "release": f"comfort@{distribution('comfort').metadata['Version']}",
+    }
+
+
+def _init_sentry():
+    info = get_info()
     sentry_sdk.init(
-        dsn=dsn,
+        dsn=info["dsn"],
+        release=info["release"],
         integrations=[RedisIntegration(), RqIntegration()],
         traces_sample_rate=1.0,
-        release=f"comfort@{distribution('comfort').metadata['Version']}",
         ignore_errors=[redis.exceptions.ConnectionError],
     )
 
@@ -49,7 +63,7 @@ def _patch_router_exception_handler():
 
 
 def init():
-    if dsn := os.environ.get("SENTRY_DSN"):
-        _init_sentry(dsn)
+    if os.environ.get("SENTRY_DSN"):
+        _init_sentry()
         _add_wsgi_integration()
         _patch_router_exception_handler()
