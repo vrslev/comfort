@@ -3,6 +3,7 @@ from importlib.metadata import distribution
 from logging import Logger
 from typing import Callable
 
+import redis.exceptions
 import sentry_sdk
 import sentry_sdk.integrations.wsgi
 from sentry_sdk.integrations.logging import ignore_logger
@@ -21,6 +22,7 @@ def _init_sentry(dsn: str):
         integrations=[RedisIntegration(), RqIntegration()],
         traces_sample_rate=1.0,
         release=f"comfort@{distribution('comfort').metadata['Version']}",
+        ignore_errors=[redis.exceptions.ConnectionError],
     )
 
 
