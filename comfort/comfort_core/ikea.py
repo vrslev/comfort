@@ -140,7 +140,7 @@ def _create_item_categories(items: list[ParsedItem]):
 
 
 def _fetch_child_items(items: list[ParsedItem], force_update: bool):  # pragma: no cover
-    items_to_fetch: list[str | int] = []
+    items_to_fetch: list[str] = []
     for item in items:
         for child in item["child_items"]:
             items_to_fetch.append(child["item_code"])
