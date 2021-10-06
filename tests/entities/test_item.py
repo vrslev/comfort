@@ -41,9 +41,9 @@ def test_validate_child_items_raises_on_nested_child(
         None,
     ),
 )
-def test_validate_url_valid(item: Item, url: str):
-    item.url = url
-    item.validate_url()
+def test_validate_url_valid(item_no_children: Item, url: str):
+    item_no_children.url = url
+    item_no_children.validate_url()
 
 
 @pytest.mark.parametrize(
@@ -56,19 +56,19 @@ def test_validate_url_valid(item: Item, url: str):
         "https://example.com/f023",
     ),
 )
-def test_validate_url_raises_on_invalid(item: Item, url: str):
-    item.url = url
+def test_validate_url_raises_on_invalid(item_no_children: Item, url: str):
+    item_no_children.url = url
     with pytest.raises(ValidationError, match="Invalid URL"):
-        item.validate_url()
+        item_no_children.validate_url()
 
 
-def test_set_name(item: Item):
-    item.set_name()
-    assert item.item_name != item.item_code
+def test_set_name(item_no_children: Item):
+    item_no_children.set_name()
+    assert item_no_children.item_name != item_no_children.item_code
 
-    item.item_name = None
-    item.set_name()
-    assert item.item_name == item.item_code
+    item_no_children.item_name = None
+    item_no_children.set_name()
+    assert item_no_children.item_name == item_no_children.item_code
 
 
 @pytest.mark.usefixtures("child_items")

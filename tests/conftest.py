@@ -151,7 +151,7 @@ def child_items():
 
 
 @pytest.fixture
-def item():
+def item_no_children():
     return get_doc(
         Item,
         {
@@ -159,51 +159,54 @@ def item():
             "item_name": "ПАКС, Гардероб, 175x58x236 см, белый",
             "url": "https://www.ikea.com/ru/ru/p/-s29128569",
             "rate": 17950,
-            "child_items": [
-                {
-                    "item_code": "10014030",
-                    "item_name": "ПАКС Каркас гардероба, 50x58x236 см, белый",
-                    "qty": 2,
-                },
-                {
-                    "item_code": "10366598",
-                    "item_name": "КОМПЛИМЕНТ Штанга платяная, 75 см, белый",
-                    "qty": 1,
-                },
-                {
-                    "item_code": "20277974",
-                    "item_name": "КОМПЛИМЕНТ Полка, 75x58 см, белый",
-                    "qty": 2,
-                },
-                {
-                    "item_code": "40277973",
-                    "item_name": "КОМПЛИМЕНТ Полка, 50x58 см, белый",
-                    "qty": 6,
-                },
-                {
-                    "item_code": "40366634",
-                    "item_name": "КОМПЛИМЕНТ Ящик, 75x58 см, белый",
-                    "qty": 3,
-                },
-                {
-                    "item_code": "50121575",
-                    "item_name": "ПАКС Каркас гардероба, 75x58x236 см, белый",
-                    "qty": 1,
-                },
-                {
-                    "item_code": "50366596",
-                    "item_name": "КОМПЛИМЕНТ Штанга платяная, 50 см, белый",
-                    "qty": 1,
-                },
-            ],
+            "child_items": [],
         },
     )
 
 
 @pytest.fixture
-def item_no_children(item: Item):
-    item.child_items = []
-    return item
+def item(item_no_children: Item):
+    item_no_children.extend(
+        "child_items",
+        [
+            {
+                "item_code": "10014030",
+                "item_name": "ПАКС Каркас гардероба, 50x58x236 см, белый",
+                "qty": 2,
+            },
+            {
+                "item_code": "10366598",
+                "item_name": "КОМПЛИМЕНТ Штанга платяная, 75 см, белый",
+                "qty": 1,
+            },
+            {
+                "item_code": "20277974",
+                "item_name": "КОМПЛИМЕНТ Полка, 75x58 см, белый",
+                "qty": 2,
+            },
+            {
+                "item_code": "40277973",
+                "item_name": "КОМПЛИМЕНТ Полка, 50x58 см, белый",
+                "qty": 6,
+            },
+            {
+                "item_code": "40366634",
+                "item_name": "КОМПЛИМЕНТ Ящик, 75x58 см, белый",
+                "qty": 3,
+            },
+            {
+                "item_code": "50121575",
+                "item_name": "ПАКС Каркас гардероба, 75x58x236 см, белый",
+                "qty": 1,
+            },
+            {
+                "item_code": "50366596",
+                "item_name": "КОМПЛИМЕНТ Штанга платяная, 50 см, белый",
+                "qty": 1,
+            },
+        ],
+    )
+    return item_no_children
 
 
 @pytest.fixture
