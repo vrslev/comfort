@@ -116,8 +116,8 @@ def _create_item(parsed_item: ParsedItem):
         doc.insert()
 
 
-def _get_items_to_fetch(item_codes: str | int | list[str | int], force_update: bool):
-    parsed_item_codes = ikea_api_wrapped.get_item_codes(item_codes)
+def _get_items_to_fetch(item_codes: str | int | list[str], force_update: bool):
+    parsed_item_codes = ikea_api_wrapped.get_item_codes(item_codes)  # type: ignore
 
     if force_update:
         return parsed_item_codes
@@ -212,7 +212,7 @@ class FetchItemsResult(TypedDict):  # pragma: no cover
 
 
 def fetch_items(
-    item_codes: str | int | list[str | int], force_update: bool
+    item_codes: str | int | list[str], force_update: bool
 ) -> FetchItemsResult:  # pragma: no cover
     items_to_fetch = _get_items_to_fetch(item_codes, force_update)
     if not items_to_fetch:

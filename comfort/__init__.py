@@ -190,7 +190,7 @@ def get_cached_value(
 
 def doc_exists(
     doctype: str | dict[str, Any], name: str | dict[str, Any] | None = None
-) -> str | None:
+) -> tuple[tuple[str]] | None:
     return frappe.db.exists(dt=doctype, dn=name)  # type: ignore
 
 
