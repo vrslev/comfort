@@ -233,6 +233,20 @@ comfort.SalesOrderController = frappe.ui.form.Controller.extend({
         });
       });
     }
+
+    if (this.frm.doc.delivery_status == "To Deliver") {
+      this.frm.add_custom_button(__("Pickup order Message"), () => {
+        this.frm.call({
+          method: "generate_pickup_order_message",
+          doc: this.frm.doc,
+          callback: (r) => {
+            if (r.message) {
+              copy_to_clipboard(r.message);
+            }
+          },
+        });
+      });
+    }
   },
 
   setup_quick_add_items() {

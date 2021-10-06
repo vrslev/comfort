@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-import re
 from copy import deepcopy
+from datetime import datetime, timedelta
 from typing import Callable, Literal
 
 import pytest
@@ -673,10 +673,19 @@ def test_split_combinations(sales_order: SalesOrder, save: bool):
 
 #      def before_cancel(self):  # pragma: no cover
 #          self.set_statuses()
-def test_get_check_order_message_context_correct_customer(sales_order: SalesOrder):
+def test_get_customer_first_name_valid(sales_order: SalesOrder):
+    assert sales_order._get_customer_first_name() == "Pavel"
+
+
+def test_get_customer_first_name_not_valid(sales_order: SalesOrder):
+    sales_order.customer = r"dfkj"
+    assert sales_order._get_customer_first_name() == sales_order.customer
+
+
+def test_get_check_order_message_context(sales_order: SalesOrder):
     sales_order.validate()
     context = sales_order._get_check_order_message_context()
-    assert context["customer_first_name"] == re.findall(r"\w+", sales_order.customer)[0]
+    assert context["customer_first_name"] == sales_order._get_customer_first_name()
     assert context["items"] == [
         {
             "item_code": format_item_code(i.item_code),
@@ -690,11 +699,46 @@ def test_get_check_order_message_context_correct_customer(sales_order: SalesOrde
     assert context["total_amount"] == sales_order.total_amount
 
 
-def test_get_check_order_message_context_incorrect_customer(sales_order: SalesOrder):
+def test_get_pickup_order_message_context(sales_order: SalesOrder):
+    MONTHS = {
+        1: "января",
+        2: "февраля",
+        3: "марта",
+        4: "апреля",
+        5: "мая",
+        6: "июня",
+        7: "июля",
+        8: "августа",
+        9: "сентября",
+        10: "октября",
+        11: "ноября",
+        12: "декабря",
+    }
+    WEEKDAYS = {
+        0: "в понедельник",
+        1: "во вторник",
+        2: "в среду",
+        3: "в четверг",
+        4: "в пятницу",
+        5: "в субботу",
+        6: "в воскресенье",
+    }
+    tomorrow = datetime.now() + timedelta(days=1)
+
     sales_order.validate()
-    sales_order.customer = r"dfkj"
-    context = sales_order._get_check_order_message_context()
-    assert context["customer_first_name"] == sales_order.customer
+    context = sales_order._get_pickup_order_message_context()
+    assert context["customer_first_name"] == sales_order._get_customer_first_name()
+    assert context["weekday"] == WEEKDAYS[tomorrow.weekday()]
+    assert context["day"] == tomorrow.day
+    assert context["month"] == MONTHS[tomorrow.month]
+    assert context["has_delivery"] == True
+
+
+def test_get_pickup_order_message_context_not_has_delivery(sales_order: SalesOrder):
+    sales_order.services = []
+    sales_order.validate()
+    context = sales_order._get_pickup_order_message_context()
+    assert context["has_delivery"] == False
 
 
 def test_has_linked_delivery_trip_true(sales_order: SalesOrder):

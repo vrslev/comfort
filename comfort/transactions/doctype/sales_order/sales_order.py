@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+from datetime import datetime, timedelta
 from types import SimpleNamespace
 from typing import Any, Iterable, Literal
 
@@ -513,9 +514,11 @@ class SalesOrder(TypedDocument):
         if save:
             self.save()
 
-    def _get_check_order_message_context(self):
+    def _get_customer_first_name(self):
         matches = re.findall(r"\w+", self.customer)
-        customer_first_name = matches[0] if matches else self.customer
+        return matches[0] if matches else self.customer
+
+    def _get_check_order_message_context(self):
         items = [
             {
                 "item_code": format_item_code(i.item_code),
@@ -526,7 +529,7 @@ class SalesOrder(TypedDocument):
             for i in self.items
         ]
         return {
-            "customer_first_name": customer_first_name,
+            "customer_first_name": self._get_customer_first_name(),
             "items": items,
             "services": self.services,
             "total_amount": self.total_amount,
@@ -538,6 +541,47 @@ class SalesOrder(TypedDocument):
             template="transactions/doctype/sales_order/check_order_message.j2",
             is_path=True,
             context=self._get_check_order_message_context(),
+        )
+
+    def _get_pickup_order_message_context(self):
+        MONTHS = {
+            1: "января",
+            2: "февраля",
+            3: "марта",
+            4: "апреля",
+            5: "мая",
+            6: "июня",
+            7: "июля",
+            8: "августа",
+            9: "сентября",
+            10: "октября",
+            11: "ноября",
+            12: "декабря",
+        }
+        WEEKDAYS = {
+            0: "в понедельник",
+            1: "во вторник",
+            2: "в среду",
+            3: "в четверг",
+            4: "в пятницу",
+            5: "в субботу",
+            6: "в воскресенье",
+        }
+        tomorrow = datetime.now() + timedelta(days=1)
+        return {
+            "customer_first_name": self._get_customer_first_name(),
+            "weekday": WEEKDAYS[tomorrow.weekday()],
+            "day": tomorrow.day,
+            "month": MONTHS[tomorrow.month],
+            "has_delivery": any("Delivery" in s.type for s in self.services),
+        }
+
+    @frappe.whitelist()
+    def generate_pickup_order_message(self) -> str:  # pragma: no cover
+        return frappe.render_template(  # type: ignore
+            template="transactions/doctype/sales_order/pickup_order_message.j2",
+            is_path=True,
+            context=self._get_pickup_order_message_context(),
         )
 
 
