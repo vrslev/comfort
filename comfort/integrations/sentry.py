@@ -25,7 +25,6 @@ class _GetSentryInfoPayload(TypedDict):
 
 @frappe.whitelist(allow_guest=True)
 def get_info() -> _GetSentryInfoPayload:
-
     return {
         "dsn": os.environ["SENTRY_DSN"],
         "release": f"comfort@{distribution('comfort').metadata['Version']}",
@@ -37,7 +36,7 @@ def _get_user_email() -> str | None:
         return frappe.get_value("User", frappe.session.user, "email")  # type: ignore
 
 
-def _init_sentry():
+def _init_sentry():  # pragma: no cover
     info = get_info()
     sentry_sdk.init(
         dsn=info["dsn"],
@@ -49,11 +48,11 @@ def _init_sentry():
     sentry_sdk.set_user({"email": _get_user_email()})
 
 
-def _add_wsgi_integration():
+def _add_wsgi_integration():  # pragma: no cover
     frappe.app.application = SentryWsgiMiddleware(frappe.app.application)  # type: ignore
 
 
-def _patch_router_exception_handler():
+def _patch_router_exception_handler():  # pragma: no cover
     def add_frappe_logger_to_disabled():
         logger_to_disable: Logger = frappe.logger()
         ignore_logger(logger_to_disable.name)
@@ -71,7 +70,7 @@ def _patch_router_exception_handler():
     frappe.app.handle_exception = handle_exception
 
 
-def init():
+def init():  # pragma: no cover
     if os.environ.get("SENTRY_DSN"):
         _init_sentry()
         _add_wsgi_integration()
