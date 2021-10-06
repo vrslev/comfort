@@ -1,11 +1,36 @@
 from __future__ import annotations
 
-from typing import Literal
+from typing import Literal, overload
 from urllib.parse import parse_qs, urlparse
 
 from comfort import TypedDocument, ValidationError, _
 
 # TODO: Validate phone number
+
+
+@overload
+def parse_vk_id(vk_url: str) -> str:  # pragma: no cover
+    ...
+
+
+@overload
+def parse_vk_id(vk_url: None) -> None:  # pragma: no cover
+    ...
+
+
+def parse_vk_id(vk_url: str | None):
+    if not vk_url:
+        return
+
+    parsed_url = urlparse(vk_url)
+    if "vk.com" in parsed_url.netloc and "im" in parsed_url.path:
+        query = parse_qs(parsed_url.query)
+        if "sel" in query:
+            vk_id = query["sel"][0]
+            if vk_id and int(vk_id):
+                return vk_id
+
+    raise ValidationError(_("Wrong VK URL"))
 
 
 class Customer(TypedDocument):
@@ -18,24 +43,5 @@ class Customer(TypedDocument):
     city: str | None
     address: str | None
 
-    def validate(self):  # pragma: no cover
-        self.validate_vk_url_and_set_vk_id()
-
-    def validate_vk_url_and_set_vk_id(self):
-        if not self.vk_url:
-            self.vk_id = None
-            return
-
-        is_validated = False
-
-        parsed = urlparse(self.vk_url)
-        if "vk.com" in parsed.netloc and "im" in parsed.path:
-            query = parse_qs(parsed.query)
-            if "sel" in query:
-                vk_id = query["sel"][0]
-                if vk_id and int(vk_id):
-                    is_validated = True
-                    self.vk_id = vk_id
-
-        if not is_validated:
-            raise ValidationError(_("Wrong VK URL"))
+    def validate(self):
+        self.vk_id = parse_vk_id(self.vk_url)

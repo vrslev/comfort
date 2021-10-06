@@ -23,13 +23,13 @@ expected_vk_ids = ("1", "1", "18392044", "1", "1", "18392044", None)
 @pytest.mark.parametrize("vk_url", acceptable_vk_urls)
 def test_validate_vk_url(customer: Customer, vk_url: str | None):
     customer.vk_url = vk_url
-    customer.validate_vk_url_and_set_vk_id()
+    customer.validate()
 
 
 @pytest.mark.parametrize("vk_url,vk_id", zip(acceptable_vk_urls, expected_vk_ids))
 def test_set_vk_id(customer: Customer, vk_url: str | None, vk_id: str | None):
     customer.vk_url = vk_url
-    customer.validate_vk_url_and_set_vk_id()
+    customer.validate()
     assert customer.vk_id == vk_id
 
 
@@ -56,4 +56,4 @@ def test_validate_vk_url_and_set_vk_id_raises_on_wrong_url(
 ):
     customer.vk_url = vk_url
     with pytest.raises(ValidationError):
-        customer.validate_vk_url_and_set_vk_id()
+        customer.validate()

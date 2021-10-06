@@ -90,7 +90,7 @@ filterwarnings = [
   "ignore:the imp module is deprecated in favour of importlib:DeprecationWarning"
 ]
 cache_dir = "tests/.cache"
-testpaths = ["tests"]
+testpaths = ["tests", "browser_ext"]
 
 [tool.coverage.run]
 source = ["comfort"]
