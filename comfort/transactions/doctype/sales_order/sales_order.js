@@ -219,6 +219,20 @@ comfort.SalesOrderController = frappe.ui.form.Controller.extend({
         dialog.show();
       });
     }
+
+    if (this.frm.doc.docstatus == 0) {
+      this.frm.add_custom_button(__("Check order Message"), () => {
+        this.frm.call({
+          method: "generate_check_order_message",
+          doc: this.frm.doc,
+          callback: (r) => {
+            if (r.message) {
+              copy_to_clipboard(r.message);
+            }
+          },
+        });
+      });
+    }
   },
 
   setup_quick_add_items() {
@@ -465,6 +479,20 @@ function quick_add_items(text) {
 
     recalculate_global_item_totals(cur_frm);
     refresh_field("items");
+  });
+}
+
+function copy_to_clipboard(message) {
+  let input = $("<textarea>");
+  $("body").append(input);
+  input.val(message).select();
+
+  document.execCommand("copy");
+  input.remove();
+
+  frappe.show_alert({
+    indicator: "green",
+    message: __("Copied to clipboard."),
   });
 }
 

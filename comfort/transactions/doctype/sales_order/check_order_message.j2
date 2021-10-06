@@ -1,0 +1,19 @@
+{{customer_first_name}}, добрый день! Проверьте ваш заказ:
+{%- for item in items %}
+{{loop.index}}. {{item.item_code}} {{item.item_name}} ({{item.rate}} ₽ ⨉ {{item.qty}} шт)
+{%- endfor %}
+{% for service in services %}
+{{service.type}} ({{service.rate}} ₽)
+{%- endfor %}
+
+Сумма заказа — {{total_amount}} ₽.
+Оплатить можно н
+{%- if total_amount > 6999 -%}
+аличными, можем подъехать к вам.
+{% elif total_amount > 3999 -%}
+аличными или на карту одного из этих банков: Тинькофф, ВТБ, Альфа-Банк, Райффайзен.
+{% else -%}
+а карту одного из этих банков: Тинькофф, ВТБ, Альфа-Банк, Райффайзен.
+{% endif -%}
+
+Как вам удобно?

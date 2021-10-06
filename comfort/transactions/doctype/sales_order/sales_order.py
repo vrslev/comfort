@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+import re
 from types import SimpleNamespace
 from typing import Any, Iterable, Literal
+
+from ikea_api_wrapped import format_item_code
 
 import frappe
 from comfort import (
@@ -509,6 +512,33 @@ class SalesOrder(TypedDocument):
 
         if save:
             self.save()
+
+    def _get_check_order_message_context(self):
+        matches = re.findall(r"\w+", self.customer)
+        customer_first_name = matches[0] if matches else self.customer
+        items = [
+            {
+                "item_code": format_item_code(i.item_code),
+                "item_name": i.item_name,
+                "rate": i.rate,
+                "qty": i.qty,
+            }
+            for i in self.items
+        ]
+        return {
+            "customer_first_name": customer_first_name,
+            "items": items,
+            "services": self.services,
+            "total_amount": self.total_amount,
+        }
+
+    @frappe.whitelist()
+    def generate_check_order_message(self) -> str:  # pragma: no cover
+        return frappe.render_template(  # type: ignore
+            template="transactions/doctype/sales_order/check_order_message.j2",
+            is_path=True,
+            context=self._get_check_order_message_context(),
+        )
 
 
 @frappe.whitelist()

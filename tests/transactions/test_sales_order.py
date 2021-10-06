@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+import re
 from copy import deepcopy
 from typing import Callable, Literal
 
 import pytest
+from ikea_api_wrapped import format_item_code
 
 import frappe
 from comfort import count_qty, counters_are_same, get_all, get_doc, get_value
@@ -671,6 +673,28 @@ def test_split_combinations(sales_order: SalesOrder, save: bool):
 
 #      def before_cancel(self):  # pragma: no cover
 #          self.set_statuses()
+def test_get_check_order_message_context_correct_customer(sales_order: SalesOrder):
+    sales_order.validate()
+    context = sales_order._get_check_order_message_context()
+    assert context["customer_first_name"] == re.findall(r"\w+", sales_order.customer)[0]
+    assert context["items"] == [
+        {
+            "item_code": format_item_code(i.item_code),
+            "item_name": i.item_name,
+            "rate": i.rate,
+            "qty": i.qty,
+        }
+        for i in sales_order.items
+    ]
+    assert context["services"] == sales_order.services
+    assert context["total_amount"] == sales_order.total_amount
+
+
+def test_get_check_order_message_context_incorrect_customer(sales_order: SalesOrder):
+    sales_order.validate()
+    sales_order.customer = r"dfkj"
+    context = sales_order._get_check_order_message_context()
+    assert context["customer_first_name"] == sales_order.customer
 
 
 def test_has_linked_delivery_trip_true(sales_order: SalesOrder):
