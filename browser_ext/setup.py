@@ -15,13 +15,4 @@ setup(
         "beautifulsoup4==4.10.0",
         "sentry-sdk==1.4.3",
     ],
-    extras_require={
-        "dev": [
-            "black==21.9b0",
-            "pre_commit==2.15.0",
-            "pytest==6.2.5",
-            "pytest-cov==2.12.1",
-            "pytest-randomly==3.10.1",
-        ]
-    },
 )
