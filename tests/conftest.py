@@ -6,12 +6,13 @@ from unittest.mock import MagicMock
 import ikea_api.auth
 import ikea_api_wrapped
 import pytest
-from ikea_api_wrapped.parsers.item import ParsedItem
-from ikea_api_wrapped.parsers.order_capture import (
+from ikea_api_wrapped.types import (
     DeliveryOptionDict,
+    GetDeliveryServicesResponse,
+    ParsedItem,
+    PurchaseInfoDict,
     UnavailableItemDict,
 )
-from ikea_api_wrapped.wrappers import GetDeliveryServicesResponse, PurchaseInfoDict
 from pymysql import OperationalError
 
 import frappe

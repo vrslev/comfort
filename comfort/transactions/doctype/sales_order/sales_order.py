@@ -6,7 +6,7 @@ from types import SimpleNamespace
 from typing import Any, Iterable, Literal, TypedDict
 
 from ikea_api_wrapped import format_item_code
-from ikea_api_wrapped.parsers.order_capture import DeliveryOptionDict
+from ikea_api_wrapped.types import DeliveryOptionDict
 
 import frappe
 from comfort import (

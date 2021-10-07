@@ -6,8 +6,7 @@ from typing import Any, TypedDict
 
 import aiohttp
 import ikea_api_wrapped
-from ikea_api_wrapped.parsers.item import ParsedItem
-from ikea_api_wrapped.wrappers import NoDeliveryOptionsAvailableError
+from ikea_api_wrapped.types import NoDeliveryOptionsAvailableError, ParsedItem
 
 import frappe
 from comfort import (
@@ -117,7 +116,7 @@ def _create_item(parsed_item: ParsedItem):
 
 
 def _get_items_to_fetch(item_codes: str | int | list[str], force_update: bool):
-    parsed_item_codes = ikea_api_wrapped.get_item_codes(item_codes)  # type: ignore
+    parsed_item_codes = ikea_api_wrapped.parse_item_codes(item_codes)  # type: ignore
 
     if force_update:
         return parsed_item_codes

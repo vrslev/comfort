@@ -13,7 +13,7 @@ setup(
     package_data={"": ["*.md", "*.json", "*.txt", "*.css", "*.csv", "*.html", "*.js"]},
     zip_safe=False,
     install_requires=[
-        "ikea-api-wrapped@git+https://github.com/vrslev/ikea-api-wrapped.git@v0.3.11",
+        "ikea-api-wrapped@git+https://github.com/vrslev/ikea-api-wrapped.git@v0.4.0",
         "python-telegram-bot==13.7",
         "sentry-sdk==1.4.3",
     ],

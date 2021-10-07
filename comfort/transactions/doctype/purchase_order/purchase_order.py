@@ -6,8 +6,7 @@ from datetime import datetime
 from types import SimpleNamespace
 from typing import Any, Literal
 
-from ikea_api_wrapped.parsers.order_capture import DeliveryOptionDict
-from ikea_api_wrapped.wrappers import PurchaseInfoDict
+from ikea_api_wrapped.types import DeliveryOptionDict, PurchaseInfoDict
 
 import frappe
 from comfort import (

@@ -1,6 +1,6 @@
 from types import SimpleNamespace
 
-from ikea_api_wrapped.parsers.item import ParsedItem
+from ikea_api_wrapped.types import ParsedItem
 
 from comfort import count_qty, counters_are_same, get_all, get_doc
 from comfort.comfort_core.ikea import (

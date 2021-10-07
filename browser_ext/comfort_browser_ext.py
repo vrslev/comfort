@@ -42,7 +42,7 @@ def unshorten_item_urls(html: str):
 
 def get_item_codes(html: str):
     text = unshorten_item_urls(html).get_text()
-    return ikea_api_wrapped.get_item_codes(text)
+    return ikea_api_wrapped.parse_item_codes(text)
 
 
 @dataclass
