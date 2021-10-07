@@ -79,7 +79,7 @@ def test_get_commission_percentage_raises_on_negative_number(
     commission_settings: CommissionSettings,
 ):
     commission_settings.insert()
-    with pytest.raises(ValidationError, match="Amount should be a positive number"):
+    with pytest.raises(ValidationError, match="Amount should be more that zero"):
         return commission_settings.get_commission_percentage(-100)
 
 

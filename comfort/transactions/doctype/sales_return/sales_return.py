@@ -63,7 +63,7 @@ class SalesReturn(Return):
             "Delivered",
         ):
             raise ValidationError(
-                _("Delivery Status should be Purchased, To Deliver or Delivered")
+                _("Delivery Status should be Purchased, To Deliver, or Delivered")
             )
 
     def _validate_not_all_items_returned(self):

@@ -1,231 +1,230 @@
-% Paid,
-About,
-Account Name,
-Accounts,
-Add Payment,
-Add Receipt,
-Add Sales Order from Available Stock,
-Add Sales Orders or Items to Sell,
-All items are available for this delivery option,
-All items available,
-Amount should be a positive number,
-Amount should be more that zero,
-Are you sure you want to mark this Purchase Order as delivered?,
-Are you sure you want to mark this Sales Order as delivered?,
-Authorized Token,
-Authorized Token Expiration,
-Available,
-Available Actual,
-Available Purchased,
-Bank Account,
-Basic Info,
-Bot Token,
-Can fetch items specs only if status is Draft,
-Can't add child item that contains child items,
-"Can't receive purchase history, enter order number",
-Can't return all items,
-Cannot Add Items,
-Cannot fetch those items: {},
-Cash Account,
-Chart of Accounts,
-Chat ID,
-Check availability,
-Check order Message,
-Checkout,
-Child Item,
-Child Items,
-Choose Items,
-Choose Purchase Order,
-Choose Stock Type,
-Choose combinations to split,
-Choose items first.,
-Choose order,
-Combinations are split!,
-Comfort Core,
-Comfort User,
-Commission,
-Commission Range,
-Commission Settings,
-Cost of Goods Sold Account,
-Credit,
-Customer,
-Customer Group,
-Customer Group Name,
-Debit,
-Default Accounts,
-Delivered,
-Delivery Account,
-Delivery Cost,
-Delivery Options,
-"Delivery Status Sales Order should be ""To Deliver"" to add Receipt",
-"Delivery Status should be Purchased, To Deliver or Delivered",
-Delivery Stop,
-Delivery Trip,
-Delivery Trip completed,
-Delivery Type,
-Delivery to Apartment,
-Delivery to Entrance,
-Discount,
-Edit Commission,
-Enter Bot Token first,
-Enter login and password in Ikea Settings,
-Entities,
-Every stop should have address,
-Every stop should have city,
-Expense,
-Fetch specs,
-Finance,
-Finance Settings,
-"Finance Settings has no field ""{}""",
-From Amount,
-From Available Stock,
-From Purchase Order,
-From Purchase Return,
-GL Entry,
-General Ledger,
-Get Chat ID,
-Get Chat ID first,
-Get Delivery Services,
-Guest Token,
-Guest Token Expiration,
-Ikea Settings,
-Income,
-Information about item updated,
-Installation,
-Installation Account,
-Insufficient stock for Item {},
-Invalid category URL,
-Inventory Account,
-Is Group,
-Item,
-Item Categories,
-Item Category,
-Item Category Table,
-Item Code,
-Item Name,
-Items,
-Items Cost,
-Items added!,
-Items cannot be added,
-Items to Sell,
-Items to Sell Cost,
-Loading items into cart...,
-Margin,
-Message sent!,
-My Profile,
-My Settings,
-New Account name,
-No Items To Sell in Purchase Order,
-No Items in Available Actual stock,
-No items to add available.,
-No satisfying commission found,
-Not allowed to cancel Sales Return,
-Not in Purchase Order,
-Old Parent,
-Order Confirmation No,
-Overpaid,
-Paid,
-Paid Amount,
-Paid With Cash,
-Parent Account,
-Parent Item Code,
-Partially Paid,
-Payment,
-Payment Status,
-Payment added!,
-Pending Amount,
-Percentage shouldn't be zero,
-Pickup order Message,
-Posting Date,
-Prepaid Inventory Account,
-Price,
-Profit and Loss Statement,
-Purchase Compensations Account,
-Purchase Delivery Account,
-Purchase Order,
-Purchase Order Delivery Option,
-Purchase Order Item To Sell,
-Purchase Order Sales Order,
-Purchase Order completed,
-Purchase Order should be submitted,
-Purchase Return,
-Purchase Return Item,
-Purchased,
-Qty,
-Quantity,
-Ranges,
-Rate,
-Receipt,
-Receipt added!,
-Required,
-Reserved Actual,
-Reserved Purchased,
-Returned Paid Amount,
-Sales Account,
-Sales Compensations Account,
-Sales Order,
-Sales Order Child Item,
-Sales Order Item,
-Sales Order Name,
-Sales Order Service,
-Sales Order should be not cancelled to add Payment,
-Sales Order should be not cancelled to add Receipt,
-Sales Order should be submitted,
-Sales Order {} has no delivery service,
-Sales Order {} has no installation service,
-Sales Orders,
-Sales Orders Cost,
-Sales Return,
-Sales Return Item,
-Save Purchase Order before checkout,
-Schedule Date,
-Send Telegram message,
-Service Amount,
-Service Provider,
-Services,
-Split Combinations,
-Status of Purchase Order should be To Receive,
-Status should be To Receive or Completed,
-Stock,
-Stock Balance,
-Stock Entry,
-Stock Entry Item,
-Stock Type,
-Stops,
-Telegram Settings,
-To Amount,
-To Amount in last row should be zero,
-To Amount shouldn't be zero except last row,
-To Amounts should be in ascending order,
-To Apartment,
+% Paid,% оплачено
+About,Подробнее
+Account Name,Название счёта
+Accounts,Счета
+Add Payment,Добавить платёж
+Add Receipt,Добавить накладную
+Add Sales Order from Available Stock,Добавить заказ из доступного запаса
+Add Sales Orders or Items to Sell,Добавьте заказы или товары на продажу
+All items are available for this delivery option,Все товары доступны для этого способа доставки
+All items available,Все товары доступны для заказа
+Amount should be more that zero,Сумма должна быть больше нуля
+Are you sure you want to mark this Purchase Order as delivered?,"Вы уверены, что хотите отметить эту закупку как доставленную?"
+Are you sure you want to mark this Sales Order as delivered?,"Вы уверены, что хотите отметить этот заказ как доставленный?"
+Authorized Token,Авторизированный токен
+Authorized Token Expiration,Истечение срока действия авторизированного токена
+Available,Доступно
+Available Actual,Доступный фактический
+Available Purchased,Доступный закупленный
+Bank Account,Банковский счёт
+Basic Info,Основная информация
+Bot Token,Токен бота
+Can fetch items specs only if status is Draft,"Загрузить новую информацию о товарах можно, только если статус заказа — Черновик"
+Can't add child item that contains child items,Нельзя добавить дочерний товар в дочерний товар
+"Can't receive purchase history, enter order number","Не удалось загрузить историю закупок, введите номер закупки"
+Can't return all items,Нельзя вернуть все товары
+Cannot Add Items,"Товары, которые нельзя добавить"
+Cannot fetch those items: {},Не удалось загрузить эти товары: {}
+Cash Account,Наличный счёт
+Chart of Accounts,Диаграмма счетов
+Chat ID,ID чата
+Check availability,Проверить наличие
+Check order Message,Сообщение о проверке заказа
+Checkout,Оформление закупки
+Child Item,Дочерний товар
+Child Items,Дочерние товары
+Choose Items,Выберите товары
+Choose Purchase Order,Выберите закупку
+Choose Stock Type,Выберите тип запаса
+Choose combinations to split,"Выберите комбинации, которые нужно разделить"
+Choose items first,Сначала выберите товары
+Choose order,Выберите заказ
+Combinations are split,Комбинации разделены
+Comfort Core,Ядро Комфорта
+Comfort User,Пользователь Комфорта
+Commission,Комиссия
+Commission Range,Диапазон комиссии
+Commission Settings,Настройки комиссии
+Cost of Goods Sold Account,Счёт проданных товаров
+Credit,Кредит
+Customer,Клиент
+Customer Group,Группа клиентов
+Customer Group Name,Название группы клиентов
+Debit,Дебет
+Default Accounts,Счета по умолчанию
+Delivered,Доставлено
+Delivery Account,Счёт доставки заказов
+Delivery Cost,Стоимость доставки
+Delivery Options,Способы доставки
+"Delivery Status Sales Order should be To Deliver to add Receipt","Статус доставки должен быть Доставить, чтобы добавить накладную"
+"Delivery Status should be Purchased, To Deliver, or Delivered","Статус доставки должен быть Закуплен, Доставить или Доставлен"
+Delivery Stop,Остановка доставки
+Delivery Trip,Маршрут доставки
+Delivery Trip completed,Маршрут завершён
+Delivery Type,Тип доставки
+Delivery to Apartment,Доставка до квартиры
+Delivery to Entrance,Доставка до подъезда
+Discount,Скидка
+Edit Commission,Изменить комиссию
+Enter Bot Token first,Сначала введите токен бота
+Enter login and password in Ikea Settings,Введите логин и пароль в Настройках ИКЕА
+Entities,Сущности
+Every stop should have address,Каждая остановка должна иметь адрес
+Every stop should have city,Каждая остановка должна иметь город
+Expense,Расход
+Fetch specs,Загрузить информацию
+Fetch items specs,Загрузить информацию о товарах
+Finance,Финансы
+Finance Settings,Настройки финансов
+"Finance Settings has no field ""{}""","Настройки финансов не имеют поле ""{}"""
+From Amount,Сумма от
+From Available Stock,Из доступного запаса
+From Purchase Order,Из закупки
+From Purchase Return,Из возврата закупки
+GL Entry,Бухгалтерская запись
+General Ledger,Бухгалтерская книга
+Get Chat ID,Получить ID чата
+Get Chat ID first,Сначала получите ID чата
+Get Delivery Services,Получить способы доставки
+Guest Token,Токен гостя
+Guest Token Expiration,Истечение срока действия токена гостя
+Ikea Settings,Настройки ИКЕА
+Income,Доход
+Information about item updated,Информация о товаре обновлена
+Installation,Установка
+Installation Account,Счёт установки
+Insufficient stock for Item {},Недостаточный запас товара {}
+Invalid category URL,Неверная ссылка на категорию
+Inventory Account,Счёт инвентаря
+Is Group,Является группой
+Item,Товар
+Item Categories,Категории товара
+Item Category,Категория товара
+Item Category Table,Таблица категорий товара
+Item Code,Артикул
+Item Name,Название товара
+Items,Товары
+Items Cost,Стоимость товаров
+Items added,Товары добавленны
+Items to Sell,Товары на продажу
+Items to Sell Cost,Стоимость товаров на продажу
+Loading items into cart...,Загрузка товаров в корзину...
+Margin,Прибыль
+Message sent,Сообщение отправлено
+My Profile,Мой профиль
+My Settings,Мои настройки
+New Account name,Новое название счёта
+Selected Purchase Order has no Items To Sell,В выбранной закупке нет товаров на продажу
+No Items in Available Actual stock,Нет товаров в доступном фактическом запасе
+No items to add available,"Нет товаров, которые можно добавить"
+No satisfying commission found,Не найдено удовлетворительной комиссии
+Not allowed to cancel Sales Return,Не разрешено отменять возврат заказа
+Not in Purchase Order,Не в закупке
+Old Parent,Предыдущий родитель
+Order Confirmation No,Номер подтверждения заказа
+Overpaid,Переплачено
+Paid,Оплачено
+Paid Amount,Оплаченная сумма
+Paid With Cash,Оплачено наличными
+Parent Account,Родительский счёт
+Parent Item Code,Артикул родительского товара
+Partially Paid,Частично оплачено
+Payment,Платёж
+Payment Status,Статус оплаты
+Payment added,Платёж добавлен
+Pending Amount,Ожидаемая сумма
+Percentage shouldn't be zero,Процент не может быть равен нулю
+Pickup order Message,Сообщение о выдаче
+Posting Date,Дата публикации
+Prepaid Inventory Account,Счёт предоплаченного инвентаря
+Price,Цена
+Profit and Loss Statement,Отчет о прибылях и убытках
+Purchase Compensations Account,Счёт компенсации закупок
+Purchase Delivery Account,Счёт доставки закупок
+Purchase Order,Закупка
+Purchase Order Delivery Option,Способ доставки закупки
+Purchase Order Item To Sell,Товары на продажу закупки
+Purchase Order Sales Order,Заказа закупки
+Purchase Order completed,Закупка завершена
+Purchase Order should be submitted,Закупка должна быть подтверждена
+Purchase Return,Возврат закупки
+Purchase Return Item,Товар возврата закупки
+Purchased,Закуплено
+Qty,Кол-во
+Quantity,Кол-во
+Ranges,Диапазоны
+Rate,Цена
+Receipt,Накладная
+Receipt added,Накладная добавлена
+Required,Требуется
+Reserved Actual,Зарезервированный доступный
+Reserved Purchased,Зарезервированный закупленный
+Returned Paid Amount,Возвращённая оплаченная сумма
+Sales Account,Счёт заказов
+Sales Compensations Account,Счёт компенсаций заказов
+Sales Order,Заказ
+Sales Order Child Item,Дочерние товары заказа
+Sales Order Item,Товары заказа
+Sales Order Name,Название заказа
+Sales Order Service,Услуги заказа
+Sales Order should be not Сancelled to add Payment,"Заказ не может быть отменён, чтобы добавить платёж"
+Sales Order should be not Сancelled to add Receipt,"Заказ не может быть отменён, чтобы добавить накладную"
+Sales Order should be submitted,Заказ должен быть подтверждён
+Sales Order {} has no delivery service,В заказе {} нет доставки
+Sales Order {} has no installation service,В заказе {} нет установки
+Sales Orders,Заказы
+Sales Orders Cost,Стоимость заказов
+Sales Return,Возврат заказа
+Sales Return Item,Товар возврата заказа
+Save Purchase Order before checkout,Сохраните закупку до оформления
+Schedule Date,Планируемая дата
+Send Telegram message,Отправить сообщение в Telegram
+Service Amount,Сумма услуг
+Service Provider,Поставщик услуг
+Services,Услуги
+Split Combinations,Разделить комбинации
+Status of Purchase Order should be To Receive,Статус закупки должен быть Получить
+Status should be To Receive or Completed,Статус должен быть Получить или Завершено
+Stock,Запасы
+Stock Balance,Баланс запасов
+Stock Entry,Складская запись
+Stock Entry Item,Товар складской записи
+Stock Type,Тип запаса
+Stops,Остановки
+Telegram Settings,Настройки Telegram
+To Amount,Сумма до
+To Amount in last row should be zero,Сумма до в последней строке должна быть равна нулю
+To Amount shouldn't be zero except last row,Сумма до не должна быть равна нулю кроме последней строки
+To Amounts should be in ascending order,Суммы должны быть в порядке возрастания
+To Apartment,До квартиры
 To Date should be after From Date,
-To Deliver,
-To Entrance,
-To Purchase,
-To Receive,
-To proceed you need to add bot to the chat,
-Toggle Full Width,
-Total Amount,
-Total Quantity,
-Total Weight,
-Transactions,
-Unavailable Items,
-Unpaid,
-VK ID,
-VK URL,
-Voucher,
-Voucher No,
-Voucher Type,
-Weight,
-Wrong VK URL,
-Zip Code,
-image,
+To Deliver,Доставить
+To Entrance,До подъезда
+To Purchase,Закупить
+To Receive,Получить
+To proceed you need to add bot to the chat,"Чтобы продолжить, нужно добавить бота в чат"
+Total Amount,Общая сумма
+Total Quantity,Общее кол-во
+Total Weight,Общий вес
+Transactions,Операции
+Unavailable Items,Недоступные товары
+Unpaid,Не оплачено
+VK ID,VK ID
+VK URL,Ссылка VK
+Voucher,Документ
+Voucher No,Номер документа
+Voucher Type,Тип документа
+Weight,Вес
+Invalid VK URL,Неверная ссылка VK
+Zip Code,Почтовый индекс
+image,изображение
 FRAPPE CORRECTIONS,
 Reports & Masters,Основное
 Submitted,Подтверждено
 Draft,Черновик
 Closed,Закрыто
 Completed,Завершено
+Cancelled,Отменено
 User,Пользователь
 Invite as User,Пригласить как пользователя
 User Permissions,Разрешения пользователей
@@ -409,11 +408,9 @@ Toggle Full Width,Открыть в полном размере
 View Website,Посмотреть сайт
 Reload,Перезагрузить
 Session Defaults,Постоянные сессии
-My Settings,Мои настройки
 Help,Помощь
 Administration,Администрирование
 Modules,Модули
-My Profile,Мой профиль
 Integrations,Интеграции
 Customization,Кастомизация
 just now,только что

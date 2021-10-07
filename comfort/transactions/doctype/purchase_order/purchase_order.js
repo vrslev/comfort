@@ -163,11 +163,11 @@ comfort.PurchaseOrderController = frappe.ui.form.Controller.extend({
     var grid = this.frm.fields_dict.delivery_options.grid;
     var cannot_add_items = JSON.parse(this.frm.doc.cannot_add_items);
     if (cannot_add_items && cannot_add_items.length > 0) {
-      grid.add_custom_button(__("Items cannot be added"), () => {
+      grid.add_custom_button(__("Cannot Add Items"), () => {
         if (this.frm.doc.cannot_add_items) {
           var fake_grid_row = {
             doc: {
-              type: __("Items cannot be added"),
+              type: __("Cannot Add Items"),
               unavailable_items: JSON.stringify(
                 cannot_add_items.map((d) => {
                   return {

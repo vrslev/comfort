@@ -458,7 +458,7 @@ class SalesOrder(TypedDocument):
     def add_payment(self, paid_amount: int, cash: bool):
         if self.docstatus == 2:
             raise ValidationError(
-                _("Sales Order should be not cancelled to add Payment")
+                _("Sales Order should be not Сancelled to add Payment")
             )
         create_payment(self.doctype, self.name, paid_amount, cash)  # pragma: no cover
         self.set_statuses()  # pragma: no cover
@@ -468,11 +468,11 @@ class SalesOrder(TypedDocument):
     def add_receipt(self):
         if self.docstatus == 2:
             raise ValidationError(
-                _("Sales Order should be not cancelled to add Receipt")
+                _("Sales Order should be not Сancelled to add Receipt")
             )
         if self.delivery_status != "To Deliver":
             raise ValidationError(
-                _('Delivery Status Sales Order should be "To Deliver" to add Receipt')
+                _("Delivery Status Sales Order should be To Deliver to add Receipt")
             )
 
         create_receipt(self.doctype, self.name)  # pragma: no cover
@@ -714,7 +714,7 @@ def validate_params_from_available_stock(
             filters={"parent": ("in", from_purchase_order)},
         )
         if not items_to_sell:
-            raise ValidationError(_("No Items To Sell in Purchase Order"))
+            raise ValidationError(_("Selected Purchase Order has no Items To Sell"))
     elif from_available_stock == "Available Actual":
         if not get_stock_balance(from_available_stock):
             raise ValidationError(_("No Items in Available Actual stock"))

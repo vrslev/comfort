@@ -95,7 +95,7 @@ comfort.SalesOrderController = frappe.ui.form.Controller.extend({
               },
               callback: () => {
                 frappe.show_alert({
-                  message: __("Payment added!"),
+                  message: __("Payment added"),
                   indicator: "green",
                 });
                 this.frm.refresh();
@@ -126,7 +126,7 @@ comfort.SalesOrderController = frappe.ui.form.Controller.extend({
               method: "add_receipt",
               callback: () => {
                 frappe.show_alert({
-                  message: __("Receipt added!"),
+                  message: __("Receipt added"),
                   indicator: "green",
                 });
                 this.frm.refresh();
@@ -183,7 +183,7 @@ comfort.SalesOrderController = frappe.ui.form.Controller.extend({
               callback: () => {
                 dialog.hide();
                 frappe.show_alert({
-                  message: __("Combinations are split!"),
+                  message: __("Combinations are split"),
                   indicator: "green",
                 });
               },
@@ -256,7 +256,7 @@ comfort.SalesOrderController = frappe.ui.form.Controller.extend({
           fieldtype: "Table",
           cannot_add_rows: true,
           in_place_edit: true,
-          label: __("Items cannot be added"),
+          label: __("Cannot Add Items"),
           data: response.cannot_add,
           fields: [
             {

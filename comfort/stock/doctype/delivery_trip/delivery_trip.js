@@ -42,7 +42,7 @@ frappe.ui.form.on("Delivery Trip", {
                   freeze: 1,
                   callback: () => {
                     frappe.show_alert({
-                      message: __("Message sent!"),
+                      message: __("Message sent"),
                       indicator: "green",
                     });
                     dialog.hide();

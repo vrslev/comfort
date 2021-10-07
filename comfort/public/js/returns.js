@@ -38,7 +38,7 @@ async function show_add_row_dialog() {
     method: "get_items_available_to_add",
     callback: (r) => (data = r.message),
   });
-  if (!data) return frappe.show_alert(__("No items to add available."));
+  if (!data) return frappe.show_alert(__("No items to add available"));
 
   var dialog = new frappe.ui.Dialog({
     title: __("Choose Items"),
@@ -75,7 +75,7 @@ async function show_add_row_dialog() {
         .get_selected_children()
         .filter((item) => item.__checked);
       if (selected_items.length == 0)
-        return frappe.show_alert(__("Choose items first."));
+        return frappe.show_alert(__("Choose items first"));
 
       cur_frm.call({
         doc: cur_frm.doc,
@@ -87,7 +87,7 @@ async function show_add_row_dialog() {
           if (r.exc) return;
 
           frappe.show_alert({
-            message: __("Items added!"),
+            message: __("Items added"),
             indicator: "Green",
           });
           cur_frm.dirty();

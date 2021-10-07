@@ -90,7 +90,7 @@ def test_validate_voucher_statuses_delivery_status_raises(
     sales_return._voucher.delivery_status = delivery_status  # type: ignore
     with pytest.raises(
         frappe.ValidationError,
-        match="Delivery Status should be Purchased, To Deliver or Delivered",
+        match="Delivery Status should be Purchased, To Deliver, or Delivered",
     ):
         sales_return._validate_voucher_statuses()
 

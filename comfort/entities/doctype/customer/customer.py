@@ -30,7 +30,7 @@ def parse_vk_id(vk_url: str | None):
             if vk_id and int(vk_id):
                 return vk_id
 
-    raise ValidationError(_("Wrong VK URL"))
+    raise ValidationError(_("Invalid VK URL"))
 
 
 class Customer(TypedDocument):
