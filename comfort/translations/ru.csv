@@ -1,0 +1,440 @@
+% Paid,
+About,
+Account Name,
+Accounts,
+Add Payment,
+Add Receipt,
+Add Sales Order from Available Stock,
+Add Sales Orders or Items to Sell,
+All items are available for this delivery option,
+All items available,
+Amount should be a positive number,
+Amount should be more that zero,
+Are you sure you want to mark this Purchase Order as delivered?,
+Are you sure you want to mark this Sales Order as delivered?,
+Authorized Token,
+Authorized Token Expiration,
+Available,
+Available Actual,
+Available Purchased,
+Bank Account,
+Basic Info,
+Bot Token,
+Can fetch items specs only if status is Draft,
+Can't add child item that contains child items,
+"Can't receive purchase history, enter order number",
+Can't return all items,
+Cannot Add Items,
+Cannot fetch those items: {},
+Cash Account,
+Chart of Accounts,
+Chat ID,
+Check availability,
+Check order Message,
+Checkout,
+Child Item,
+Child Items,
+Choose Items,
+Choose Purchase Order,
+Choose Stock Type,
+Choose combinations to split,
+Choose items first.,
+Choose order,
+Combinations are split!,
+Comfort Core,
+Comfort User,
+Commission,
+Commission Range,
+Commission Settings,
+Cost of Goods Sold Account,
+Credit,
+Customer,
+Customer Group,
+Customer Group Name,
+Debit,
+Default Accounts,
+Delivered,
+Delivery Account,
+Delivery Cost,
+Delivery Options,
+"Delivery Status Sales Order should be ""To Deliver"" to add Receipt",
+"Delivery Status should be Purchased, To Deliver or Delivered",
+Delivery Stop,
+Delivery Trip,
+Delivery Trip completed,
+Delivery Type,
+Delivery to Apartment,
+Delivery to Entrance,
+Discount,
+Edit Commission,
+Enter Bot Token first,
+Enter login and password in Ikea Settings,
+Entities,
+Every stop should have address,
+Every stop should have city,
+Expense,
+Fetch specs,
+Finance,
+Finance Settings,
+"Finance Settings has no field ""{}""",
+From Amount,
+From Available Stock,
+From Purchase Order,
+From Purchase Return,
+GL Entry,
+General Ledger,
+Get Chat ID,
+Get Chat ID first,
+Get Delivery Services,
+Guest Token,
+Guest Token Expiration,
+Ikea Settings,
+Income,
+Information about item updated,
+Installation,
+Installation Account,
+Insufficient stock for Item {},
+Invalid category URL,
+Inventory Account,
+Is Group,
+Item,
+Item Categories,
+Item Category,
+Item Category Table,
+Item Code,
+Item Name,
+Items,
+Items Cost,
+Items added!,
+Items cannot be added,
+Items to Sell,
+Items to Sell Cost,
+Loading items into cart...,
+Margin,
+Message sent!,
+My Profile,
+My Settings,
+New Account name,
+No Items To Sell in Purchase Order,
+No Items in Available Actual stock,
+No items to add available.,
+No satisfying commission found,
+Not allowed to cancel Sales Return,
+Not in Purchase Order,
+Old Parent,
+Order Confirmation No,
+Overpaid,
+Paid,
+Paid Amount,
+Paid With Cash,
+Parent Account,
+Parent Item Code,
+Partially Paid,
+Payment,
+Payment Status,
+Payment added!,
+Pending Amount,
+Percentage shouldn't be zero,
+Pickup order Message,
+Posting Date,
+Prepaid Inventory Account,
+Price,
+Profit and Loss Statement,
+Purchase Compensations Account,
+Purchase Delivery Account,
+Purchase Order,
+Purchase Order Delivery Option,
+Purchase Order Item To Sell,
+Purchase Order Sales Order,
+Purchase Order completed,
+Purchase Order should be submitted,
+Purchase Return,
+Purchase Return Item,
+Purchased,
+Qty,
+Quantity,
+Ranges,
+Rate,
+Receipt,
+Receipt added!,
+Required,
+Reserved Actual,
+Reserved Purchased,
+Returned Paid Amount,
+Sales Account,
+Sales Compensations Account,
+Sales Order,
+Sales Order Child Item,
+Sales Order Item,
+Sales Order Name,
+Sales Order Service,
+Sales Order should be not cancelled to add Payment,
+Sales Order should be not cancelled to add Receipt,
+Sales Order should be submitted,
+Sales Order {} has no delivery service,
+Sales Order {} has no installation service,
+Sales Orders,
+Sales Orders Cost,
+Sales Return,
+Sales Return Item,
+Save Purchase Order before checkout,
+Schedule Date,
+Send Telegram message,
+Service Amount,
+Service Provider,
+Services,
+Split Combinations,
+Status of Purchase Order should be To Receive,
+Status should be To Receive or Completed,
+Stock,
+Stock Balance,
+Stock Entry,
+Stock Entry Item,
+Stock Type,
+Stops,
+Telegram Settings,
+To Amount,
+To Amount in last row should be zero,
+To Amount shouldn't be zero except last row,
+To Amounts should be in ascending order,
+To Apartment,
+To Date should be after From Date,
+To Deliver,
+To Entrance,
+To Purchase,
+To Receive,
+To proceed you need to add bot to the chat,
+Toggle Full Width,
+Total Amount,
+Total Quantity,
+Total Weight,
+Transactions,
+Unavailable Items,
+Unpaid,
+VK ID,
+VK URL,
+Voucher,
+Voucher No,
+Voucher Type,
+Weight,
+Wrong VK URL,
+Zip Code,
+image,
+FRAPPE CORRECTIONS,
+Reports & Masters,Основное
+Submitted,Подтверждено
+Draft,Черновик
+Closed,Закрыто
+Completed,Завершено
+User,Пользователь
+Invite as User,Пригласить как пользователя
+User Permissions,Разрешения пользователей
+Role Permissions Manager,Управление разрешениями ролей
+Add to Dashboard,Добавить на дашборд
+Last Modified On,Дата изменения
+Card Label,Название карточки
+Maximum,Максимум
+Minimum,Минимум
+Average,Среднее значение
+Sum,Сумма
+Field,Поле
+Please select X and Y fields,Выберите поля X и Y
+Y axis,Ось Y
+Pie,Пирог
+Percentage,Процент
+Line,Линия
+Bar,Полоса
+X Field,Поле X
+Y Field,Поле Y
+Type of Chart,Тип диаграммы
+Set Chart,Создать диаграммму
+Create Card,Создать карточку
+Add Column,Добавить столбец
+Export,Экспорт
+Setup Auto Email,Настроить автоматические Email
+Execution Time: {0} sec,Время выполнения: {0} c
+"For comparison, use >5, <10 or =324. For ranges, use 5:10 (for values between 5 & 10). ","Для сравнения используйте >5, <10 или =324. Для диапазонов используйте 5:10 (для значений от 5 до 10). "
+Timeless Night,Тёмная
+Frappe Light,Светлая
+Switch Theme,Сменить тему
+Theme Changed,Тема переключена
+Make {0},Создать {0}
+Select {0},Выберите {0}
+No changes in document,В документе нет изменений
+{0} has been submitted successfully,{0} успешно подтверждён
+No New notifications,Нет новых уведомлений
+Email Address,Электронная почта
+No filters found,Фильтров не найдено
+No filters selected,Нет выбранных фильтров
+Loading,Загрузка
+Not Linked to any record,Не связано с другими записями
+Linked With,Связи
+This is a background report. Please set the appropriate filters and then generate a new one.,"Это фоновый отчёт. Пожалуйста, установите соответствующие фильтры, а затем сгенерируйте новый."
+{0} Updated,{0} обновлено
+Copied to clipboard.,Скопировано
+values separated by commas,значения разделены запятой
+{0} filters,{0} фильтров
+{0} filter,{0} фильтр
+filter,фильтр
+Stats,Статистика
+Index,Индекс
+Liked By,Лайки
+Comments,Комментарии
+Full Name,Полное имя
+Recents,Недавние
+All Results,Все результаты
+"Mandatory fields required in table {0}, Row {1}","Необходимо заполнить поля в таблице {0}, строка {1}"
+Mandatory fields required in {0},Необходимо заполнить поля в таблице {0}
+Mandatory Fields,Обязательные поля
+{0} are mandatory fields,{0} — обязательные поля
+Missing Fields,Отсутствующие поля
+Enter Value,Введите значение
+Meter,метр
+{0} items selected,{0} выбрано
+Logged Out,Вы вышли
+Copy to Clipboard,Скопировать
+Success,Успех
+View,Вид
+Successfully Submitted!,Успешно подтверждено!
+Amend,Возобновить
+Workspace,Зона
+Add,Добавить
+Delete All,Удалить все
+Are you sure you want to delete the attachment?,"Вы уверены, что хотите удалить вложение?"
+Are you sure you want to save this document?,"Вы уверены, что хотите сохранить этот документ?"
+Are you sure you want to merge {0} with {1}?,"Вы уверены, что хотите объединить {0} с {1}?"
+Are you sure you want to delete all rows?,"Вы уверены, что хотите удалить все строки?"
+"To Do ",Задача
+Add Tags,Добавить теги
+Apply Assignment Rule,Добавить правило назначения
+{0} must be submitted,{0} должен быть подтверждён
+Permanently Submit {0}?,Навсегда подтвердить {0}?
+Confirm,Подтвердите
+Open,Открыть
+Due Date,Срок
+Reference Name,Упоминание
+Reference Type,Тип упоминания
+Assigned By Full Name,"Имя назначившего"
+Assigned By,Кем назначено
+Allocated To,Ответственный
+Create a new {0},Создать {0}
+No Remarks,Нет примечаний
+Advanced Search,Расширенный поиск
+Created,создано
+Do you want to cancel all linked documents?,Хотите отменить все связанные документы?
+Cancel All,Отменить все
+Cancel,Отменить
+URL,Ссылка
+Move,Переместить
+Rename,Переименовать
+Duplicate,Дублировать
+Delete,Удалить
+Enabled,Включено
+New Event,Новое событие
+Comment,Отправить
+Edit,Изм.
+Upload,Загрузить
+Add Row,Добавить строку
+Add Multiple,Добавить несколько
+New,Новый
+Submit this document to confirm,"Подтвердите документ, если в нём не будет изменений"
+of,из
+Title,Название
+New Email,Новое письмо
+Ctrl+Enter to add comment,"Ctrl + Enter — добавить комментарий"
+Add a comment,Оставить комментарий
+Print Heading,Печатать заголовок
+Letter Head,Заголовок письма
+No.,№
+New {},Новый {}
+Repeat,Повторить
+Jump to field,Перейти к ячейке
+Print,Печать
+Follow,Подписаться
+Add a tag ...,Добавить тег ...
+Shared With,Поделились с
+Reviews,Обзоры
+Attachments,Вложения
+Attach File,Прикрепить файл
+Priority,Приоритет
+Complete By,Завершить к
+Assign To,Исполнитель
+Auto Repeat,Автоповтор
+Reference,Упоминания
+Logout,Выйти
+Not Permitted,Не разрешено
+Your Shortcuts,Быстрые команды
+Reset Customizations,Сбросить кастомизации
+Mark all as read,Отметить все как прочитанные
+No Upcoming Events,Нет ближайших событий
+Today's Events,События на сегодня
+No New notifications,Нет новых уведомлений
+Customize,Кастомизировать
+List Settings,Настройки списка
+Share URL,Поделиться ссылкой
+Toggle Sidebar,Боковая панель
+Import,Импорт
+Most Used,Частота использования
+Submit,Подтвердить
+Not Like,не похож
+Like,похож
+Dashboard,Дашборд
+List View,Список
+Not Ancestors Of,не предок
+Ancestors Of,предок
+Not Descendants Of,не потомок
+Descendants Of,потомок
+Timespan,промежуток времени
+Between,между
+Is,является
+Not In,не в
+In,в
+Not Equals,не равно
+Equals,равно
+Name,Имя
+Show Saved,Показать сохранённые
+Filter By,Фильтр
+Filter Name,Имя
+Edit Filters,Изменить фильтр
+Save Filter,Сохранить фильтр
+Apply Filters,Применить
+Show Tags,Показать теги
+Expand,Расширить
+Search,Поиск
+Created By,Создано
+Assigned To,Назначено
+Background Jobs,Фоновые задачи
+Toggle Theme,Сменить тему
+Toggle Full Width,Открыть в полном размере
+View Website,Посмотреть сайт
+Reload,Перезагрузить
+Session Defaults,Постоянные сессии
+My Settings,Мои настройки
+Help,Помощь
+Administration,Администрирование
+Modules,Модули
+My Profile,Мой профиль
+Integrations,Интеграции
+Customization,Кастомизация
+just now,только что
+Add Comment,Добавить комментарий
+Saved,Сохранено
+Settings,Настройки
+Note,Заметка
+ToDo,Задача
+No Tags,Нет тегов
+Insert Above,Добавить строку выше
+Insert Below,Добавить строку ниже
+Order Information,Информация о заказе
+Shortcuts,Горячие клавиши
+Ctrl + Down,Ctrl + Down
+Ctrl + Up,Ctrl + Up
+Permanently Cancel {0}?,Навсегда отменить {0}?
+Permanently Submit {0}?,Навсегда подтвердить {0}?
+From Date,С даты
+To Date,До даты
+Terms,Условия
+Amended From,Возобновлено от документа
+Sorry! I could not find what you were looking for.,"Извините! Не удалось найти, что вы ищете.",
+More,Больше
+Preview,Предпросмотр
