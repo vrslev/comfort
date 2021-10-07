@@ -63,8 +63,8 @@ comfort.SalesOrderController = frappe.ui.form.Controller.extend({
 
   async setup_buttons() {
     if (
-      this.frm.doc.docstatus != 2 &&
       !this.frm.is_new() &&
+      this.frm.doc.docstatus != 2 &&
       this.frm.doc.per_paid < 100
     ) {
       this.frm.add_custom_button(__("Add Payment"), () => {
@@ -106,35 +106,33 @@ comfort.SalesOrderController = frappe.ui.form.Controller.extend({
       });
     }
 
-    let r = await frappe.call({
-      method:
-        "comfort.transactions.doctype.sales_order.sales_order.has_linked_delivery_trip",
-      args: { sales_order_name: cur_frm.doc.name },
-    });
-    let has_linked_delivery_stop = await r.message;
-    if (
-      this.frm.docstatus != 2 &&
-      this.frm.doc.delivery_status == "To Deliver" &&
-      !has_linked_delivery_stop
-    ) {
-      this.frm.add_custom_button(__("Add Receipt"), () => {
-        frappe.confirm(
-          __("Are you sure you want to mark this Sales Order as delivered?"),
-          () => {
-            this.frm.call({
-              doc: this.frm.doc,
-              method: "add_receipt",
-              callback: () => {
-                frappe.show_alert({
-                  message: __("Receipt added"),
-                  indicator: "green",
-                });
-                this.frm.refresh();
-              },
-            });
-          }
-        );
+    if (this.frm.doc.delivery_status == "To Deliver") {
+      let r = await frappe.call({
+        method:
+          "comfort.transactions.doctype.sales_order.sales_order.has_linked_delivery_trip",
+        args: { sales_order_name: cur_frm.doc.name },
       });
+      let has_linked_delivery_stop = await r.message;
+      if (!has_linked_delivery_stop) {
+        this.frm.add_custom_button(__("Add Receipt"), () => {
+          frappe.confirm(
+            __("Are you sure you want to mark this Sales Order as delivered?"),
+            () => {
+              this.frm.call({
+                doc: this.frm.doc,
+                method: "add_receipt",
+                callback: () => {
+                  frappe.show_alert({
+                    message: __("Receipt added"),
+                    indicator: "green",
+                  });
+                  this.frm.refresh();
+                },
+              });
+            }
+          );
+        });
+      }
     }
 
     if (
@@ -220,7 +218,7 @@ comfort.SalesOrderController = frappe.ui.form.Controller.extend({
       });
     }
 
-    if (this.frm.doc.docstatus == 0) {
+    if (!this.frm.is_new() && this.frm.doc.docstatus == 0) {
       this.frm.add_custom_button(__("Check order Message"), () => {
         this.frm.call({
           method: "generate_check_order_message",
@@ -327,7 +325,7 @@ comfort.SalesOrderController = frappe.ui.form.Controller.extend({
       dialog.show();
     }
 
-    if (this.frm.doc.docstatus == 0) {
+    if (!this.frm.is_new() && this.frm.doc.docstatus == 0) {
       this.frm.add_custom_button(__("Check availability"), () => {
         this.frm.call({
           method: "check_availability",
@@ -345,7 +343,8 @@ comfort.SalesOrderController = frappe.ui.form.Controller.extend({
 
     let grid = this.frm.fields_dict.items.grid;
     let label = __("Fetch items specs");
-    if (this.frm.doc.docstatus == 0) {
+
+    if (!this.frm.is_new() && this.frm.doc.docstatus == 0) {
       // Add "Fetch items specs" button
       let wrapper = grid.wrapper.find('div[class="text-right"]')[0];
 
