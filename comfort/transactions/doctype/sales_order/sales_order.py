@@ -3,9 +3,10 @@ from __future__ import annotations
 import re
 from datetime import datetime, timedelta
 from types import SimpleNamespace
-from typing import Any, Iterable, Literal
+from typing import Any, Iterable, Literal, TypedDict
 
 from ikea_api_wrapped import format_item_code
+from ikea_api_wrapped.parsers.order_capture import DeliveryOptionDict
 
 import frappe
 from comfort import (
@@ -24,6 +25,7 @@ from comfort import (
 from comfort.comfort_core.doctype.commission_settings.commission_settings import (
     CommissionSettings,
 )
+from comfort.comfort_core.ikea import get_delivery_services
 from comfort.entities.doctype.child_item.child_item import ChildItem
 from comfort.entities.doctype.item.item import Item
 from comfort.finance import create_payment, get_account
@@ -582,6 +584,76 @@ class SalesOrder(TypedDocument):
             template="transactions/doctype/sales_order/pickup_order_message.j2",
             is_path=True,
             context=self._get_pickup_order_message_context(),
+        )
+
+    @frappe.whitelist()
+    def check_availability(self):  # TODO: Cover
+        items_with_splitted_combos = self.get_items_with_splitted_combinations()
+        qty_counter = count_qty(items_with_splitted_combos)
+        grouped_items: dict[
+            str, list[SalesOrderItem | SalesOrderChildItem]
+        ] = group_by_attr(items_with_splitted_combos)
+        delivery_services = get_delivery_services(qty_counter)
+
+        if delivery_services is None or (
+            not delivery_services["cannot_add"]
+            and not any(
+                option["unavailable_items"]
+                for option in delivery_services["delivery_options"]
+            )
+        ):
+            return frappe.msgprint(
+                _("All items available"), alert=True, indicator="green"
+            )
+
+        class CheckAvailabilityDeliveryOptionItem(TypedDict):
+            item_code: str
+            item_name: str | None
+            available_qty: int
+            required_qty: int
+
+        class CheckAvailabilityDeliveryOption(TypedDict):
+            delivery_type: str
+            items: list[CheckAvailabilityDeliveryOptionItem]
+
+        class CheckAvailabilityCannotAddItem(TypedDict):
+            item_code: str
+            item_name: str | None
+
+        class CheckAvailabilityResponse(TypedDict):
+            options: list[CheckAvailabilityDeliveryOption]
+            cannot_add: list[CheckAvailabilityCannotAddItem]
+
+        def _get_delivery_type(option: DeliveryOptionDict):
+            if option["service_provider"] and option["delivery_type"]:
+                return f"{option['delivery_type']} ({option['service_provider']})"
+            return option["delivery_type"]
+
+        def _get_items(option: DeliveryOptionDict):
+            return [
+                CheckAvailabilityDeliveryOptionItem(
+                    item_code=item["item_code"],
+                    item_name=grouped_items[item["item_code"]][0].item_name,
+                    available_qty=item["available_qty"],
+                    required_qty=qty_counter[item["item_code"]],
+                )
+                for item in option["unavailable_items"]
+            ]
+
+        return CheckAvailabilityResponse(
+            options=[
+                CheckAvailabilityDeliveryOption(
+                    delivery_type=_get_delivery_type(option), items=_get_items(option)
+                )
+                for option in delivery_services["delivery_options"]
+                if option["unavailable_items"]
+            ],
+            cannot_add=[
+                CheckAvailabilityCannotAddItem(
+                    item_code=item_code, item_name=grouped_items[item_code][0].item_name
+                )
+                for item_code in delivery_services["cannot_add"]
+            ],
         )
 
 

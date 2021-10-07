@@ -247,6 +247,101 @@ comfort.SalesOrderController = frappe.ui.form.Controller.extend({
         });
       });
     }
+
+    function show_check_availability_dialog(response) {
+      var fields = [];
+      if (response.cannot_add.length > 0) {
+        fields.push({
+          fieldname: "cannot_add_items",
+          fieldtype: "Table",
+          cannot_add_rows: true,
+          in_place_edit: true,
+          label: __("Items cannot be added"),
+          data: response.cannot_add,
+          fields: [
+            {
+              fieldname: "item_code",
+              fieldtype: "Link",
+              options: "Item",
+              in_list_view: 1,
+              label: __("Item Code"),
+              read_only: 1,
+            },
+          ],
+        });
+      }
+
+      if (response.options.length > 0) {
+        for (let options of response.options) {
+          fields.push({
+            fieldname: "unavailable_items",
+            fieldtype: "Table",
+            label: options.delivery_type,
+            cannot_add_rows: true,
+            in_place_edit: true,
+            data: options.items,
+            fields: [
+              {
+                fieldname: "item_code",
+                fieldtype: "Link",
+                label: __("Item Code"),
+                options: "Item",
+                in_list_view: 1,
+                read_only: 1,
+                columns: 4,
+              },
+              {
+                fieldname: "required_qty",
+                fieldtype: "Int",
+                label: __("Required"),
+                in_list_view: 1,
+                read_only: 1,
+                columns: 1,
+              },
+              {
+                fieldname: "available_qty",
+                fieldtype: "Int",
+                label: __("Available"),
+                in_list_view: 1,
+                read_only: 1,
+                columns: 1,
+              },
+            ],
+          });
+        }
+      }
+
+      var dialog = new frappe.ui.Dialog({
+        title: __("Unavailable Items"),
+        size: "extra-large",
+        fields: fields,
+        minimizable: 1,
+        indicator: "red",
+      });
+
+      dialog.fields_list.forEach((field) => {
+        // Make tables read only
+        field.grid.wrapper.find(".col").unbind("click");
+        field.grid.toggle_checkboxes(false);
+      });
+      dialog.show();
+    }
+
+    if (this.frm.doc.docstatus == 0) {
+      this.frm.add_custom_button(__("Check availability"), () => {
+        this.frm.call({
+          method: "check_availability",
+          doc: this.frm.doc,
+          freeze: true,
+          callback: (r) => {
+            // console.log(r.message);
+            if (r.message) {
+              show_check_availability_dialog(r.message);
+            }
+          },
+        });
+      });
+    }
   },
 
   setup_quick_add_items() {
