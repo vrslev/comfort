@@ -84,7 +84,6 @@ def _child_items_are_same(old_child_items: list[ChildItem], new_child_items: lis
 def _create_item(parsed_item: ParsedItem):
     if doc_exists("Item", parsed_item["item_code"]):  # TODO: Update only if doc changed
         doc = get_doc(Item, parsed_item["item_code"])
-        doc.image = None  # We fetch new image every time
         doc.item_name = parsed_item["name"]
         doc.url = parsed_item["url"]
         doc.rate = parsed_item["price"]
@@ -101,7 +100,6 @@ def _create_item(parsed_item: ParsedItem):
 
     else:
         doc = new_doc(Item)
-        doc.image = None
         doc.item_code = parsed_item["item_code"]
         doc.item_name = parsed_item["name"]
         doc.url = parsed_item["url"]
