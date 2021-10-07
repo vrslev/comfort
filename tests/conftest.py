@@ -7,8 +7,11 @@ import ikea_api.auth
 import ikea_api_wrapped
 import pytest
 from ikea_api_wrapped.parsers.item import ParsedItem
-from ikea_api_wrapped.parsers.purchases import PurchaseHistoryItemDict
-from ikea_api_wrapped.wrappers import PurchaseInfoDict
+from ikea_api_wrapped.parsers.order_capture import (
+    DeliveryOptionDict,
+    UnavailableItemDict,
+)
+from ikea_api_wrapped.wrappers import GetDeliveryServicesResponse, PurchaseInfoDict
 from pymysql import OperationalError
 
 import frappe
@@ -331,112 +334,92 @@ def sales_order(
     )
 
 
-mock_delivery_services = {
-    "delivery_options": [
-        {
-            "delivery_date": date(2021, 8, 26),
-            "delivery_type": "Доставка",
-            "price": 3299,
-            "service_provider": None,
-            "unavailable_items": [
-                {"item_code": "50366596", "available_qty": 0},
-                {"item_code": "10366598", "available_qty": 0},
-                {"item_code": "29128569", "available_qty": 0},
+mock_delivery_services = GetDeliveryServicesResponse(
+    delivery_options=[
+        DeliveryOptionDict(
+            delivery_date=date(2021, 8, 26),
+            delivery_type="Доставка",
+            price=3299,
+            service_provider=None,
+            unavailable_items=[
+                UnavailableItemDict(item_code="50366596", available_qty=0),
+                UnavailableItemDict(item_code="10366598", available_qty=0),
+                UnavailableItemDict(item_code="29128569", available_qty=0),
             ],
-        },
-        {
-            "delivery_date": date(2021, 8, 26),
-            "delivery_type": "Доставка без подъёма",
-            "price": 2799,
-            "service_provider": None,
-            "unavailable_items": [
-                {"item_code": "50366596", "available_qty": 0},
-                {"item_code": "10366598", "available_qty": 0},
-                {"item_code": "29128569", "available_qty": 0},
+        ),
+        DeliveryOptionDict(
+            delivery_date=date(2021, 8, 26),
+            delivery_type="Доставка без подъёма",
+            price=2799,
+            service_provider=None,
+            unavailable_items=[
+                UnavailableItemDict(item_code="50366596", available_qty=0),
+                UnavailableItemDict(item_code="10366598", available_qty=0),
+                UnavailableItemDict(item_code="29128569", available_qty=0),
             ],
-        },
-        {
-            "delivery_date": date(2021, 8, 27),
-            "delivery_type": "Пункт самовывоза",
-            "price": 1998,
-            "service_provider": "Деловые линии",
-            "unavailable_items": [
-                {"item_code": "50366596", "available_qty": 0},
-                {"item_code": "40277973", "available_qty": 0},
-                {"item_code": "10366598", "available_qty": 0},
-                {"item_code": "29128569", "available_qty": 0},
+        ),
+        DeliveryOptionDict(
+            delivery_date=date(2021, 8, 27),
+            delivery_type="Пункт самовывоза",
+            price=1998,
+            service_provider="Деловые линии",
+            unavailable_items=[
+                UnavailableItemDict(item_code="50366596", available_qty=0),
+                UnavailableItemDict(item_code="40277973", available_qty=0),
+                UnavailableItemDict(item_code="10366598", available_qty=0),
+                UnavailableItemDict(item_code="29128569", available_qty=0),
             ],
-        },
-        {
-            "delivery_date": date(2021, 8, 25),
-            "delivery_type": "Магазин",
-            "price": 999999,
-            "service_provider": None,
-            "unavailable_items": [
-                {"item_code": "50366596", "available_qty": 0},
-                {"item_code": "40277973", "available_qty": 0},
-                {"item_code": "10366598", "available_qty": 0},
-                {"item_code": "29128569", "available_qty": 0},
+        ),
+        DeliveryOptionDict(
+            delivery_date=date(2021, 8, 25),
+            delivery_type="Магазин",
+            price=999999,
+            service_provider=None,
+            unavailable_items=[
+                UnavailableItemDict(item_code="50366596", available_qty=0),
+                UnavailableItemDict(item_code="40277973", available_qty=0),
+                UnavailableItemDict(item_code="10366598", available_qty=0),
+                UnavailableItemDict(item_code="29128569", available_qty=0),
             ],
-        },
-        {
-            "delivery_date": date(2021, 8, 24),
-            "delivery_type": "Магазин",
-            "price": 1998,
-            "service_provider": None,
-            "unavailable_items": [
-                {"item_code": "50366596", "available_qty": 0},
-                {"item_code": "40277973", "available_qty": 0},
-                {"item_code": "10366598", "available_qty": 0},
-                {"item_code": "29128569", "available_qty": 0},
+        ),
+        DeliveryOptionDict(
+            delivery_date=date(2021, 8, 24),
+            delivery_type="Магазин",
+            price=1998,
+            service_provider=None,
+            unavailable_items=[
+                UnavailableItemDict(item_code="50366596", available_qty=0),
+                UnavailableItemDict(item_code="40277973", available_qty=0),
+                UnavailableItemDict(item_code="10366598", available_qty=0),
+                UnavailableItemDict(item_code="29128569", available_qty=0),
             ],
-        },
-        {
-            "delivery_date": date(2021, 8, 24),
-            "delivery_type": "Магазин",
-            "price": 1998,
-            "service_provider": None,
-            "unavailable_items": [
-                {"item_code": "50366596", "available_qty": 0},
-                {"item_code": "10366598", "available_qty": 0},
-                {"item_code": "29128569", "available_qty": 0},
+        ),
+        DeliveryOptionDict(
+            delivery_date=date(2021, 8, 24),
+            delivery_type="Магазин",
+            price=1998,
+            service_provider=None,
+            unavailable_items=[
+                UnavailableItemDict(item_code="50366596", available_qty=0),
+                UnavailableItemDict(item_code="10366598", available_qty=0),
+                UnavailableItemDict(item_code="29128569", available_qty=0),
             ],
-        },
-        {
-            "delivery_date": date(2021, 8, 25),
-            "delivery_type": "Магазин",
-            "price": 1998,
-            "service_provider": None,
-            "unavailable_items": [
-                {"item_code": "50366596", "available_qty": 0},
-                {"item_code": "40277973", "available_qty": 0},
-                {"item_code": "10366598", "available_qty": 0},
-                {"item_code": "29128569", "available_qty": 0},
+        ),
+        DeliveryOptionDict(
+            delivery_date=date(2021, 8, 25),
+            delivery_type="Магазин",
+            price=1998,
+            service_provider=None,
+            unavailable_items=[
+                UnavailableItemDict(item_code="50366596", available_qty=0),
+                UnavailableItemDict(item_code="40277973", available_qty=0),
+                UnavailableItemDict(item_code="10366598", available_qty=0),
+                UnavailableItemDict(item_code="29128569", available_qty=0),
             ],
-        },
+        ),
     ],
-    "cannot_add": ["50366596"],
-}
-
-
-mock_purchase_history = [  # TODO: Unused
-    PurchaseHistoryItemDict(
-        datetime="2021-04-19T10:12:00Z",
-        datetime_formatted="19 апреля 2021, 13:12",
-        price=8326.0,
-        purchase_id=11111111,
-        status="IN_PROGRESS",
-        store="Интернет-магазин",
-    ),
-    PurchaseHistoryItemDict(
-        datetime="2021-04-14T18:16:25Z",
-        datetime_formatted="14 апреля 2021, 21:16",
-        price=0,
-        purchase_id=111111110,
-        status="COMPLETED",
-        store="Интернет-магазин",
-    ),
-]
+    cannot_add=["50366596"],
+)
 
 
 mock_purchase_info = PurchaseInfoDict(
