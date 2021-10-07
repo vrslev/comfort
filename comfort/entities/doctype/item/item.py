@@ -18,7 +18,7 @@ from ..item_category_table.item_category_table import ItemCategoryTable
 
 
 class ItemMethods:
-    image: str
+    image: str | None
     item_code: str
     item_name: str | None
     item_categories: list[ItemCategoryTable]
