@@ -56,7 +56,6 @@ jobs:
                 SET GLOBAL collation_server = 'utf8mb4_unicode_ci';
                 SET GLOBAL innodb_read_only_compressed = OFF"
 
-      # TODO: Use reqd_frappe_version from hooks
       - name: Initialize bench
         run: |
           FRAPPE_VERSION=$(awk -F '"' '/reqd_frappe_version/{print $2}' comfort/hooks.py)
