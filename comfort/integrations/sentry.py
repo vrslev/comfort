@@ -19,16 +19,16 @@ import frappe.app
 
 
 class _GetSentryInfoPayload(TypedDict):
-    dsn: str
+    dsn: str | None
     release: str
 
 
 @frappe.whitelist(allow_guest=True)
-def get_info() -> _GetSentryInfoPayload:
-    return {
-        "dsn": os.environ["SENTRY_DSN"],
-        "release": f"comfort@{distribution('comfort').metadata['Version']}",
-    }
+def get_info():
+    return _GetSentryInfoPayload(
+        dsn=os.environ.get("SENTRY_DSN"),
+        release=f"comfort@{distribution('comfort').metadata['Version']}",
+    )
 
 
 def _get_user_email() -> str | None:

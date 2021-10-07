@@ -2,7 +2,10 @@ import { init, setUser } from "@sentry/browser";
 import { Integrations } from "@sentry/tracing";
 
 export function init_sentry() {
-  if (!localStorage.sentry_dsn || !localStorage.sentry_release) {
+  if (
+    localStorage.sentry_dsn == "null" ||
+    localStorage.sentry_release == "null"
+  ) {
     frappe.call({
       method: "comfort.integrations.sentry.get_info",
       callback: (r) => {
@@ -14,7 +17,7 @@ export function init_sentry() {
     });
   }
 
-  if (localStorage.sentry_dsn) {
+  if (localStorage.sentry_dsn != "null") {
     init({
       dsn: localStorage.sentry_dsn,
       release: localStorage.sentry_release,
