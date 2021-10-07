@@ -3,6 +3,10 @@ frappe.ui.form.on("Item", {
     frm.add_custom_button(__("Fetch specs"), () => {
       comfort.get_items(cur_frm.doc.item_code).then(() => {
         cur_frm.reload_doc();
+        frappe.show_alert({
+          message: __("Information about item updated"),
+          indicator: "Green",
+        });
       });
     });
   },
