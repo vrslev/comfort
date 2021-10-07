@@ -25,6 +25,7 @@ from comfort.comfort_core.doctype.ikea_settings.ikea_settings import (
 from comfort.entities.doctype.child_item.child_item import ChildItem
 from comfort.entities.doctype.item.item import Item
 from comfort.entities.doctype.item_category.item_category import ItemCategory
+from frappe.utils import get_files_path
 
 
 def get_delivery_services(items: dict[str, int]):  # pragma: no cover
@@ -146,16 +147,11 @@ def _fetch_child_items(items: list[ParsedItem], force_update: bool):  # pragma: 
     return fetch_items(items_to_fetch, force_update=force_update)
 
 
-def _save_image(item_code: str, image_url: str, content: bytes):  # pragma: no cover
-    fpath = f"files/items/{item_code}"
-    fname = f"{image_url.rsplit('/', 1)[1]}"
-    site_path = frappe.get_site_path("public", fpath)
-
-    frappe.create_folder(site_path)
-    with open(f"{site_path}/{fname}", "wb+") as f:
+def _save_image(item_code: str, content: bytes):  # pragma: no cover
+    file_name = f"{item_code}.jpg"
+    with open(get_files_path(file_name), "wb+") as f:
         f.write(content)
-
-    frappe.db.set_value("Item", item_code, "image", f"/{fpath}/{fname}")
+    frappe.db.set_value("Item", item_code, "image", f"/files/{file_name}")
 
 
 class ImageItem(TypedDict):  # pragma: no cover
@@ -167,7 +163,7 @@ def download_images(items: list[ImageItem]):  # pragma: no cover
     async def fetch(session: aiohttp.ClientSession, item: ImageItem):
         async with session.get(item["image_url"]) as r:
             content = await r.content.read()
-        _save_image(content=content, **item)
+        _save_image(item["item_code"], content)
 
     async def main(items: list[ImageItem]):
         async with aiohttp.ClientSession() as session:
