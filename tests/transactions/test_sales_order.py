@@ -208,6 +208,12 @@ def test_calculate_commission_with_edit_commission(sales_order: SalesOrder):
     assert sales_order.commission == 100
 
 
+def test_calculate_commission_items_cost_is_zero(sales_order: SalesOrder):
+    sales_order.items_cost = 0
+    sales_order._calculate_commission()
+    assert sales_order.commission == None
+
+
 def test_calculate_margin_zero_if_items_cost_is_zero(sales_order: SalesOrder):
     # TODO
     # -        if self.items_cost <= 0:

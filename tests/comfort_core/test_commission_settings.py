@@ -66,7 +66,7 @@ def test_set_from_amounts(commission_settings: CommissionSettings):
 
 @pytest.mark.parametrize(
     "amount,expected_percentage",
-    ((0, 20), (50, 20), (100, 20), (101, 15), (150, 15), (200, 15), (500, 10)),
+    ((50, 20), (100, 20), (101, 15), (150, 15), (200, 15), (500, 10)),
 )
 def test_get_commission_percentage(
     commission_settings: CommissionSettings, amount: int, expected_percentage: int
@@ -81,6 +81,14 @@ def test_get_commission_percentage_raises_on_negative_number(
     commission_settings.insert()
     with pytest.raises(ValidationError, match="Amount should be more that zero"):
         return commission_settings.get_commission_percentage(-100)
+
+
+def test_get_commission_percentage_raises_on_none(
+    commission_settings: CommissionSettings,
+):
+    commission_settings.insert()
+    with pytest.raises(ValidationError, match="Amount should be more that zero"):
+        return commission_settings.get_commission_percentage(None)
 
 
 # TODO

@@ -40,8 +40,8 @@ class CommissionSettings(TypedDocument):
         self.clear_cache()
 
     @staticmethod
-    def get_commission_percentage(amount: float | int) -> int:
-        if amount < 0:
+    def get_commission_percentage(amount: float | int | None) -> int:
+        if not amount or amount < 0:
             raise ValidationError(_("Amount should be more that zero"))
 
         doc = get_cached_doc(CommissionSettings)
