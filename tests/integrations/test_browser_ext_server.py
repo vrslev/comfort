@@ -1,3 +1,5 @@
+import re
+
 import pytest
 
 import comfort.integrations.browser_ext
@@ -112,9 +114,9 @@ def test_get_url_to_reference_doc_with_items(
     customer_name = "John Johnson"
     customer = _create_customer(customer_name, "https://vk.com/im?sel=1")
     sales_order = _create_sales_order(customer_name, [item_no_children.item_code])
-    assert (
-        _get_url_to_reference_doc(customer, sales_order)
-        == "http://tests:8005/app/sales-order/SO-2021-0001"
+    assert re.match(
+        r"http://tests:\d+/app/sales-order/SO-2021-0001",
+        _get_url_to_reference_doc(customer, sales_order),
     )
 
 
@@ -122,7 +124,7 @@ def test_get_url_to_reference_doc_no_items():
     customer_name = "John Johnson"
     customer = _create_customer(customer_name, "https://vk.com/im?sel=1")
     sales_order = _create_sales_order(customer_name, [])
-    assert (
-        _get_url_to_reference_doc(customer, sales_order)
-        == "http://tests:8005/app/customer/John%20Johnson"
+    assert re.match(
+        r"http://tests:\d+/app/customer/John%20Johnson",
+        _get_url_to_reference_doc(customer, sales_order),
     )
