@@ -803,7 +803,9 @@ def test_params_validate_from_available_stock_available_purchased_raises_on_no_i
     purchase_order.items_to_sell = []
     purchase_order.db_insert()
     purchase_order.update_children()
-    with pytest.raises(ValidationError, match="No Items To Sell in Purchase Order"):
+    with pytest.raises(
+        ValidationError, match="Selected Purchase Order has no Items To Sell"
+    ):
         validate_params_from_available_stock("Available Purchased", purchase_order.name)
 
 
