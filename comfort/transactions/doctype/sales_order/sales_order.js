@@ -342,6 +342,40 @@ comfort.SalesOrderController = frappe.ui.form.Controller.extend({
         });
       });
     }
+
+    let grid = this.frm.fields_dict.items.grid;
+    let label = "Fetch items specs";
+    if (this.frm.doc.docstatus == 0) {
+      // Add "Fetch items specs" button
+      let wrapper = grid.wrapper.find('div[class="text-right"]')[0];
+
+      let action = () => {
+        this.frm.call({
+          method: "fetch_items_specs",
+          doc: this.frm.doc,
+          freeze: 1,
+        });
+      };
+
+      let btn = grid.custom_buttons[label];
+      if (!btn) {
+        btn = $(
+          `<button class="btn btn-xs btn-secondary style="margin-right: 4px;">${__(
+            label
+          )}</button>`
+        )
+          .appendTo(wrapper)
+          .on("click", action);
+        grid.custom_buttons[label] = btn;
+      } else {
+        btn.removeClass("hidden");
+      }
+    } else {
+      let btn = grid.custom_buttons[label];
+      if (btn) {
+        btn.addClass("hidden");
+      }
+    }
   },
 
   setup_quick_add_items() {

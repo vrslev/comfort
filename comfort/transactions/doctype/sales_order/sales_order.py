@@ -25,7 +25,7 @@ from comfort import (
 from comfort.comfort_core.doctype.commission_settings.commission_settings import (
     CommissionSettings,
 )
-from comfort.comfort_core.ikea import get_delivery_services
+from comfort.comfort_core.ikea import fetch_items, get_delivery_services
 from comfort.entities.doctype.child_item.child_item import ChildItem
 from comfort.entities.doctype.item.item import Item
 from comfort.finance import create_payment, get_account
@@ -655,6 +655,20 @@ class SalesOrder(TypedDocument):
                 for item_code in delivery_services["cannot_add"]
             ],
         )
+
+    @frappe.whitelist()
+    def fetch_items_specs(self):  # TODO: Cover
+        if self.status != "Draft":
+            raise ValidationError(_("Can fetch items specs only if status is Draft"))
+
+        response = fetch_items([i.item_code for i in self.items], force_update=True)
+        if response["unsuccessful"]:
+            frappe.msgprint(
+                _("Cannot fetch those items: {}").format(
+                    ", ".join(response["unsuccessful"])
+                )
+            )
+        self.save()
 
 
 @frappe.whitelist()
