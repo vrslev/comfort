@@ -42,6 +42,7 @@ Choose order,Выберите заказ
 Combinations are split,Комбинации разделены
 Comfort Core,Ядро Комфорта
 Comfort User,Пользователь Комфорта
+Comfort,Комфорт
 Commission,Комиссия
 Commission Range,Диапазон комиссии
 Commission Settings,Настройки комиссии
@@ -206,6 +207,7 @@ To proceed you need to add bot to the chat,"Чтобы продолжить, н�
 Total Amount,Общая сумма
 Total Quantity,Общее кол-во
 Total Weight,Общий вес
+Totals,Итоги
 Transactions,Операции
 Unavailable Items,Недоступные товары
 Unpaid,Не оплачено
@@ -219,6 +221,7 @@ Invalid VK URL,Неверная ссылка VK
 Zip Code,Почтовый индекс
 image,изображение
 FRAPPE CORRECTIONS,
+Search or type a command (Ctrl + G),Поиск
 Reports & Masters,Основное
 Submitted,Подтверждено
 Draft,Черновик

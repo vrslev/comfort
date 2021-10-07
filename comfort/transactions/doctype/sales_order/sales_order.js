@@ -344,7 +344,7 @@ comfort.SalesOrderController = frappe.ui.form.Controller.extend({
     }
 
     let grid = this.frm.fields_dict.items.grid;
-    let label = "Fetch items specs";
+    let label = __("Fetch items specs");
     if (this.frm.doc.docstatus == 0) {
       // Add "Fetch items specs" button
       let wrapper = grid.wrapper.find('div[class="text-right"]')[0];
@@ -360,9 +360,7 @@ comfort.SalesOrderController = frappe.ui.form.Controller.extend({
       let btn = grid.custom_buttons[label];
       if (!btn) {
         btn = $(
-          `<button class="btn btn-xs btn-secondary style="margin-right: 4px;">${__(
-            label
-          )}</button>`
+          `<button class="btn btn-xs btn-secondary style="margin-right: 4px;">${label}</button>`
         )
           .appendTo(wrapper)
           .on("click", action);
