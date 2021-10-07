@@ -1,4 +1,4 @@
-name: Tests
+name: Test
 
 on:
   pull_request:
@@ -16,7 +16,7 @@ on:
       - "!docker/scripts/**"
 
 jobs:
-  tests:
+  test:
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -78,6 +78,10 @@ jobs:
           cd ~/frappe-bench
           bench get-app $GITHUB_WORKSPACE --skip-assets
           env/bin/pip install -U -e apps/comfort[dev]
+
+      - name: Install browser extension
+        run: |
+          env/bin/pip install -U -e apps/comfort/browser_ext
 
       - name: Create site
         run: |
