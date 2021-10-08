@@ -64,6 +64,7 @@ jobs:
 
       - name: Smoke Test
         run: |
+          # TODO: Should I use version from setup.py?
           export COMFORT_VERSION=${GITHUB_REF##*/}
           cd docker
           bash scripts/smoke-test.sh
