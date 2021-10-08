@@ -64,7 +64,9 @@ frappe.listview_settings["Sales Order"] = {
                   args: data,
                 })
                 .then(() => {
-                  frappe.new_doc("Sales Order", data);
+                  frappe.new_doc("Sales Order", {}, (doc) => {
+                    Object.assign(doc, data);
+                  });
                 });
             }
 
