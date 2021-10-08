@@ -1,12 +1,16 @@
 from __future__ import annotations
 
+from types import SimpleNamespace
+
 import pytest
 
 import frappe
-from comfort import doc_exists, new_doc
+from comfort import doc_exists, get_doc, new_doc
+from comfort.entities.doctype.customer.customer import Customer
 from comfort.entities.doctype.item.item import Item
 from comfort.stock.doctype.delivery_trip.delivery_trip import (
     DeliveryTrip,
+    _get_delivery_and_installation_from_services,
     _get_items_for_order,
     _make_route_url,
     _prepare_message_for_telegram,
@@ -14,6 +18,53 @@ from comfort.stock.doctype.delivery_trip.delivery_trip import (
 )
 from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
 from frappe.utils import get_url_to_form
+
+
+def test_validate_delivery_statuses_in_orders_not_raises(delivery_trip: DeliveryTrip):
+    frappe.db.set_value(
+        "Sales Order",
+        delivery_trip.stops[0].sales_order,
+        "delivery_status",
+        "To Deliver",
+    )
+    delivery_trip._validate_delivery_statuses_in_orders()
+
+
+def test_validate_delivery_statuses_in_orders_raises(delivery_trip: DeliveryTrip):
+    order_name = delivery_trip.stops[0].sales_order
+    frappe.db.set_value("Sales Order", order_name, "delivery_status", "Delivered")
+    with pytest.raises(
+        frappe.exceptions.ValidationError,
+        match=f"Can only deliver Sales Orders that have delivery status To Deliver: {order_name}",
+    ):
+        delivery_trip._validate_delivery_statuses_in_orders()
+
+
+def test_delivery_trip_update_sales_orders_from_db(delivery_trip: DeliveryTrip):
+    stop = delivery_trip.stops[0]
+    stop.customer = None  # type: ignore
+    stop.address = None
+    stop.phone = None
+    stop.pending_amount = None  # type: ignore
+    stop.city = None
+    stop.delivery_type = None
+    stop.installation = None  # type: ignore
+
+    sales_order = get_doc(SalesOrder, stop.sales_order)
+    sales_order.pending_amount = 2000
+    sales_order.db_update()
+    services_resp = _get_delivery_and_installation_from_services(sales_order.services)
+
+    customer = get_doc(Customer, sales_order.customer)
+
+    delivery_trip.update_sales_orders_from_db()
+    assert stop.customer == sales_order.customer
+    assert stop.address == customer.address
+    assert stop.phone == customer.phone
+    assert stop.pending_amount == sales_order.pending_amount
+    assert stop.city == customer.city
+    assert stop.delivery_type == services_resp["delivery_type"]
+    assert stop.installation == services_resp["installation"]
 
 
 @pytest.mark.parametrize(
@@ -43,7 +94,7 @@ def test_validate_stops_have_address_and_city_raises_when_no_city(
         delivery_trip._validate_stops_have_address_and_city()
 
 
-def test_validate_orders_have_services_raises_on_no_delivery(
+def test_validate_orders_have_delivery_services_raises_on_no_delivery(
     delivery_trip: DeliveryTrip, sales_order: SalesOrder
 ):
     sales_order.services = []
@@ -56,31 +107,12 @@ def test_validate_orders_have_services_raises_on_no_delivery(
     )
     sales_order.save()
 
+    delivery_trip.update_sales_orders_from_db()
     with pytest.raises(
         frappe.ValidationError,
         match=f"Sales Order {sales_order.name} has no delivery service",
     ):
-        delivery_trip._validate_orders_have_services()
-
-
-def test_validate_orders_have_services_raises_on_no_installation(
-    delivery_trip: DeliveryTrip, sales_order: SalesOrder
-):
-    sales_order.services = []
-    sales_order.append(
-        "services",
-        {
-            "type": "Delivery to Entrance",
-            "rate": 300,
-        },
-    )
-    sales_order.save()
-
-    with pytest.raises(
-        frappe.ValidationError,
-        match=f"Sales Order {sales_order.name} has no installation service",
-    ):
-        delivery_trip._validate_orders_have_services()
+        delivery_trip._validate_orders_have_delivery_services()
 
 
 def test_get_template_context(delivery_trip: DeliveryTrip):
@@ -152,29 +184,45 @@ def test_make_route_url(delivery_trip: DeliveryTrip):
     )
 
 
-@pytest.mark.parametrize(
-    ("services", "expected_result"),
+delivery_and_and_installation_test_data = (
     (
-        (
-            [{"type": "Installation", "rate": 500}],
-            {"delivery_type": None, "installation": True},
-        ),
-        (
-            [{"type": "Delivery to Apartment", "rate": 500}],
-            {"delivery_type": "To Apartment", "installation": False},
-        ),
-        (
-            [{"type": "Delivery to Entrance", "rate": 100}],
-            {"delivery_type": "To Entrance", "installation": False},
-        ),
-        (
-            [
-                {"type": "Delivery to Entrance", "rate": 100},
-                {"type": "Installation", "rate": 500},
-            ],
-            {"delivery_type": "To Entrance", "installation": True},
-        ),
+        [{"type": "Installation", "rate": 500}],
+        {"delivery_type": None, "installation": True},
     ),
+    (
+        [{"type": "Delivery to Apartment", "rate": 500}],
+        {"delivery_type": "To Apartment", "installation": False},
+    ),
+    (
+        [{"type": "Delivery to Entrance", "rate": 100}],
+        {"delivery_type": "To Entrance", "installation": False},
+    ),
+    (
+        [
+            {"type": "Delivery to Entrance", "rate": 100},
+            {"type": "Installation", "rate": 500},
+        ],
+        {"delivery_type": "To Entrance", "installation": True},
+    ),
+)
+
+
+@pytest.mark.parametrize(
+    ("services", "expected_result"), delivery_and_and_installation_test_data
+)
+def test_get_delivery_and_installation_from_services(
+    services: list[dict[str, str | int]], expected_result: dict[str, str | bool]
+):
+    assert (
+        _get_delivery_and_installation_from_services(
+            [SimpleNamespace(**s) for s in services]  # type: ignore
+        )
+        == expected_result
+    )
+
+
+@pytest.mark.parametrize(
+    ("services", "expected_result"), delivery_and_and_installation_test_data
 )
 def test_get_delivery_and_installation_for_order(
     sales_order: SalesOrder,

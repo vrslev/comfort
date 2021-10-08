@@ -13,5 +13,5 @@ class DeliveryStop(TypedDocument):
     pending_amount: int
     city: str | None
     details: str | None
-    delivery_type: Literal["To Apartment", "To Entrance"]
+    delivery_type: Literal["To Apartment", "To Entrance"] | None
     installation: bool

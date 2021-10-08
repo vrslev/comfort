@@ -20,6 +20,7 @@ Bank,Банк
 Bank Account,Банковский счёт
 Basic Info,Основная информация
 Bot Token,Токен бота
+Can only deliver Sales Orders that have delivery status To Deliver: {},Можно доставить только те заказы, у которых статус доставки — Доставить: {}
 Can fetch items specs only if status is Draft,"Загрузить новую информацию о товарах можно, только если статус заказа — Черновик"
 Can't add child item that contains child items,Нельзя добавить дочерний товар в дочерний товар
 "Can't receive purchase history, enter order number","Не удалось загрузить историю закупок, введите номер закупки"
@@ -232,6 +233,7 @@ Submitted,Подтверждено
 Draft,Черновик
 Closed,Закрыто
 Completed,Завершено
+Complete,Завершить
 Cancelled,Отменено
 User,Пользователь
 Invite as User,Пригласить как пользователя

@@ -2,16 +2,25 @@ frappe.ui.form.on("Delivery Trip", {
   setup(frm) {
     frm.show_submit_message = () => {};
 
+    // Add "Add Multiple" button
+    frm.fields_dict.stops.grid.set_multiple_add("sales_order");
+
+    // Disable "Search" and "Add new Sales Order" buttons in "sales_order" field
     frm.fields_dict.stops.grid.get_docfield("sales_order").only_select = 1; // TODO: Do this on refresh
+
+    // Add query for "sales_order" field
+    // that doesn't allow to add orders that have unacceptable status
+    // or already in current Trip
     frm.set_query("sales_order", "stops", () => {
       let cur_sales_orders = [];
       frm.doc.stops.forEach((order) => {
         if (order.sales_order) cur_sales_orders.push(order.sales_order);
       });
+      // TODO: Info about order doesn't update
       return {
         filters: {
           name: ["not in", cur_sales_orders],
-          docstatus: ["!=", 2],
+          delivery_status: "To Deliver",
         },
       };
     });
