@@ -259,6 +259,68 @@ def test_calculate_total_amount(sales_order: SalesOrder):
     assert sales_order.total_amount == exp_total_amount
 
 
+@pytest.mark.parametrize("delivery_status", ("", "Delivered"))
+def test_validate_services_not_changed_raises_on_changed_value(
+    sales_order: SalesOrder, delivery_status: Literal["", "Delivered"]
+):
+    sales_order.insert()
+    sales_order.db_set("delivery_status", delivery_status)
+    sales_order.services[0].rate += 300
+    with pytest.raises(
+        ValidationError,
+        match="Allowed to change services in Sales Order only if delivery status is To Purchase, Purchased or To Deliver",
+    ):
+        sales_order._validate_services_not_changed()
+
+
+def test_validate_services_not_changed_raises_on_added_item(sales_order: SalesOrder):
+    sales_order.insert()
+    sales_order.db_set("delivery_status", "Delivered")
+    sales_order.append("services", {"type": "Installation", "rate": 200})
+    with pytest.raises(
+        ValidationError,
+        match="Allowed to change services in Sales Order only if delivery status is To Purchase, Purchased or To Deliver",
+    ):
+        sales_order._validate_services_not_changed()
+
+
+def test_validate_services_not_changed_raises_on_removed_item(sales_order: SalesOrder):
+    sales_order.insert()
+    sales_order.db_set("delivery_status", "Delivered")
+    sales_order.services.pop()
+    with pytest.raises(
+        ValidationError,
+        match="Allowed to change services in Sales Order only if delivery status is To Purchase, Purchased or To Deliver",
+    ):
+        sales_order._validate_services_not_changed()
+
+
+@pytest.mark.parametrize(
+    "delivery_status",
+    (
+        "To Purchase",
+        "Purchased",
+        "To Deliver",
+    ),
+)
+def test_validate_services_not_changed_not_raises_on_status(
+    sales_order: SalesOrder,
+    delivery_status: Literal["To Purchase", "Purchased", "To Deliver"],
+):
+    sales_order.insert()
+    sales_order.db_set("delivery_status", delivery_status)
+    sales_order.services[0].rate += 300
+    sales_order._validate_services_not_changed()
+
+
+def test_validate_services_not_changed_not_raises_if_value_not_changed(
+    sales_order: SalesOrder,
+):
+    sales_order.insert()
+    sales_order.db_set("delivery_status", "Delivered")
+    sales_order._validate_services_not_changed()
+
+
 def test_get_sales_order_items_with_splitted_combinations(sales_order: SalesOrder):
     sales_order.set_child_items()
     items = sales_order.get_items_with_splitted_combinations()
