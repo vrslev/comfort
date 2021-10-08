@@ -59,7 +59,9 @@ function get_html() {
     return html;
   }
   var html = exec(get_selected_html);
-  if (!html) exit("Выделите текст");
+  if (!html) {
+    html = " ";
+  }
   return html;
 }
 
