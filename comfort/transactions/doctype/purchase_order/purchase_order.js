@@ -119,7 +119,7 @@ comfort.PurchaseOrderController = frappe.ui.form.Controller.extend({
                   message: __("Purchase Order completed"),
                   indicator: "green",
                 });
-                this.clear_sales_orders_from_localstorage();
+                clear_sales_orders_from_localstorage();
                 this.frm.refresh();
               },
             });
@@ -188,12 +188,6 @@ comfort.PurchaseOrderController = frappe.ui.form.Controller.extend({
     }
   },
 
-  clear_sales_orders_from_localstorage() {
-    this.frm.doc.sales_orders.forEach((s) => {
-      frappe.model.remove_from_locals("Sales Order", s.sales_order_name);
-    });
-  },
-
   before_submit() {
     function add_purchase_info_and_submit(purchase_id, use_lite_id) {
       return new Promise((resolve) => {
@@ -204,7 +198,7 @@ comfort.PurchaseOrderController = frappe.ui.form.Controller.extend({
             args: args,
             freeze: 1,
             callback: () => {
-              this.clear_sales_orders_from_localstorage();
+              clear_sales_orders_from_localstorage();
               cur_frm.reload_doc();
               resolve();
             },
@@ -527,6 +521,12 @@ function calculate_items_to_sell_cost() {
     items_to_sell += item.amount;
   });
   cur_frm.set_value("items_to_sell_cost", items_to_sell);
+}
+
+function clear_sales_orders_from_localstorage() {
+  cur_frm.doc.sales_orders.forEach((s) => {
+    frappe.model.remove_from_locals("Sales Order", s.sales_order_name);
+  });
 }
 
 $.extend(
