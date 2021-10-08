@@ -82,7 +82,7 @@ comfort.PurchaseOrderController = frappe.ui.form.Controller.extend({
     }
 
     if (this.frm.doc.docstatus == 0) {
-      this.frm.add_custom_button(__("Checkout"), () => {
+      this.frm.add_custom_button(__("Checkout order"), () => {
         if (this.frm.is_dirty()) {
           frappe.msgprint(__("Save Purchase Order before checkout"));
         } else {
@@ -107,7 +107,7 @@ comfort.PurchaseOrderController = frappe.ui.form.Controller.extend({
     }
 
     if (this.frm.doc.status == "To Receive") {
-      this.frm.page.set_primary_action("Add Receipt", () => {
+      this.frm.page.set_primary_action(__("Add Receipt"), () => {
         frappe.confirm(
           __("Are you sure you want to mark this Purchase Order as delivered?"),
           () => {
@@ -228,9 +228,8 @@ comfort.PurchaseOrderController = frappe.ui.form.Controller.extend({
             } else {
               frappe.prompt(
                 {
-                  label: __(
-                    "Can't load information about this order, enter delivery cost"
-                  ),
+                  // prettier-ignore
+                  label: __("Can't load information about this order, enter delivery cost"),
                   fieldname: "delivery_cost",
                   fieldtype: "Currency",
                   reqd: 1,
