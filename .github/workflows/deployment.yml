@@ -33,6 +33,7 @@ jobs:
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           DOMAIN: ${{ secrets.DOMAIN }}
           LETSENCRYPT_EMAIL: ${{ secrets.LETSENCRYPT_EMAIL }}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
 
       - name: Backup
         uses: ./.github/actions/backup
