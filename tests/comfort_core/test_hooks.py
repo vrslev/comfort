@@ -2,6 +2,7 @@ import frappe
 from comfort import get_doc, get_value
 from comfort.comfort_core.hooks import (
     _add_app_name,
+    _disable_signup,
     _set_currency_symbol,
     _set_default_date_and_number_format,
     load_metadata,
@@ -33,6 +34,11 @@ def test_set_default_date_and_number_format():
     assert frappe.db.get_default("date_format") == date_format
     assert get_value("System Settings", None, "date_format") == date_format
     assert get_value("System Settings", None, "number_format") == "#.###,##"
+
+
+def test_disable_signup():
+    _disable_signup()
+    assert int(get_value("Website Settings", None, "disable_signup")) == 1
 
 
 # TODO: Cover comfort.comfort_core.hooks.get_standard_queries

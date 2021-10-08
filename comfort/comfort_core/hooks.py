@@ -41,11 +41,16 @@ def _set_default_date_and_number_format():
     frappe.db.set_value("System Settings", None, "number_format", "#.###,##")
 
 
+def _disable_signup():
+    frappe.db.set_value("Website Settings", None, "disable_signup", 1)
+
+
 def after_install():  # pragma: no cover
     initialize_accounts()
     _set_currency_symbol()
     _add_app_name()
     _set_default_date_and_number_format()
+    _disable_signup()
 
 
 def extend_boot_session(bootinfo: Any):  # pragma: no cover
