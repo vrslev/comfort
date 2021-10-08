@@ -183,7 +183,7 @@ class SalesOrder(TypedDocument):
 
         for item_code, qty in order_counter.items():
             if stock_counter[item_code] < qty:
-                raise ValidationError(
+                raise ValidationError(  # TODO: More meaningful error message
                     _("Insufficient stock for Item {}").format(item_code)
                 )
 
