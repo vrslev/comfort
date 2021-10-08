@@ -36,6 +36,24 @@ $(document).ready(() => {
   $('[href="/app/user-profile"]').remove();
 });
 
+// Hide unused modules for production
+if (location.href.match("/app/home$" && !frappe.boot.developer_mode)) {
+  $(document).ready(() => {
+    $('[href="/app/build"]').remove();
+    $('[href="/app/website"').remove();
+    $('[href="/app/customization"').remove();
+    $('[href="/app/settings"').remove();
+    $('[href="/app/integrations"').remove();
+    $('[href="/app/users"').remove();
+    $('[href="/app/tools"').remove();
+    for (let el of $('[class="standard-sidebar-label"]')) {
+      if (el.textContent.includes("Administration")) {
+        $(el).hide();
+      }
+    }
+  });
+}
+
 comfort.get_items = (item_codes) => {
   // TODO: Fix freeze
   var promise = new Promise((resolve) => {
