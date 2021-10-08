@@ -6,7 +6,7 @@ frappe.ui.form.on("Delivery Trip", {
     frm.fields_dict.stops.grid.set_multiple_add("sales_order");
 
     // Disable "Search" and "Add new Sales Order" buttons in "sales_order" field
-    frm.fields_dict.stops.grid.get_docfield("sales_order").only_select = 1; // TODO: Do this on refresh
+    frm.fields_dict.stops.grid.get_docfield("sales_order").only_select = 1;
 
     // Add query for "sales_order" field
     // that doesn't allow to add orders that have unacceptable status
@@ -27,6 +27,9 @@ frappe.ui.form.on("Delivery Trip", {
   },
 
   refresh(frm) {
+    // Duplicate from setup method. Needed here and there.
+    frm.fields_dict.stops.grid.get_docfield("sales_order").only_select = 1;
+
     if (
       !frm.is_new() &&
       frm.doc.docstatus != 2 &&
