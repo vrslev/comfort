@@ -87,9 +87,8 @@ comfort.PurchaseOrderController = frappe.ui.form.Controller.extend({
           frappe.msgprint(__("Save Purchase Order before checkout"));
         } else {
           frappe.confirm(
-            __(
-              "Current cart in your IKEA account will be replaced with new one. Proceed?"
-            ),
+            // prettier-ignore
+            __("Current cart in your IKEA account will be replaced with new one. Proceed?"),
             () => {
               this.frm.call({
                 doc: this.frm.doc,
