@@ -9,6 +9,10 @@
 #!/bin/bash
 set -e
 
+if [[ -z "$(docker network ls | grep comfort_default)" ]]; then
+  exit 0
+fi
+
 export $(cat .env)
 
 WORKER_IMAGE=cr.yandex/crpdmuh1072ntg30t18g/comfort-worker:$COMFORT_VERSION
