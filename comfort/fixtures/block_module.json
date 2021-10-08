@@ -1,0 +1,92 @@
+[
+ {
+  "docstatus": 0,
+  "doctype": "Block Module",
+  "modified": "2021-10-08 17:18:37.191086",
+  "module": "Workflow",
+  "name": "3e5e2c5909",
+  "parent": "Comfort Module Profile",
+  "parentfield": "block_modules",
+  "parenttype": "Module Profile"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Block Module",
+  "modified": "2021-10-08 17:18:37.191086",
+  "module": "Custom",
+  "name": "d63a920169",
+  "parent": "Comfort Module Profile",
+  "parentfield": "block_modules",
+  "parenttype": "Module Profile"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Block Module",
+  "modified": "2021-10-08 17:18:37.191086",
+  "module": "Data Migration",
+  "name": "744d1d6965",
+  "parent": "Comfort Module Profile",
+  "parentfield": "block_modules",
+  "parenttype": "Module Profile"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Block Module",
+  "modified": "2021-10-08 17:18:37.191086",
+  "module": "Social",
+  "name": "b706fe45a3",
+  "parent": "Comfort Module Profile",
+  "parentfield": "block_modules",
+  "parenttype": "Module Profile"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Block Module",
+  "modified": "2021-10-08 17:18:37.191086",
+  "module": "Event Streaming",
+  "name": "7a714eab68",
+  "parent": "Comfort Module Profile",
+  "parentfield": "block_modules",
+  "parenttype": "Module Profile"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Block Module",
+  "modified": "2021-10-08 17:18:37.191086",
+  "module": "Website",
+  "name": "60627ec9a6",
+  "parent": "Comfort Module Profile",
+  "parentfield": "block_modules",
+  "parenttype": "Module Profile"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Block Module",
+  "modified": "2021-10-08 17:18:37.191086",
+  "module": "Contacts",
+  "name": "c75bdea332",
+  "parent": "Comfort Module Profile",
+  "parentfield": "block_modules",
+  "parenttype": "Module Profile"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Block Module",
+  "modified": "2021-10-08 17:18:37.191086",
+  "module": "Chat",
+  "name": "fd80f0be4f",
+  "parent": "Comfort Module Profile",
+  "parentfield": "block_modules",
+  "parenttype": "Module Profile"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Block Module",
+  "modified": "2021-10-08 17:18:37.191086",
+  "module": "Automation",
+  "name": "753168cc13",
+  "parent": "Comfort Module Profile",
+  "parentfield": "block_modules",
+  "parenttype": "Module Profile"
+ }
+]

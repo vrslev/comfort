@@ -12,6 +12,8 @@ standard_queries = _get_standard_queries(
 fixtures = [
     {"doctype": "Role", "filters": {"role_name": "Comfort User"}},
     {"doctype": "Custom DocPerm", "filters": {"role": "Comfort User"}},
+    {"doctype": "Module Profile", "filters": {"name": "Comfort Module Profile"}},
+    {"doctype": "Block Module", "filters": {"parent": "Comfort Module Profile"}},
 ]
 
 after_install = "comfort.comfort_core.hooks.after_install"
