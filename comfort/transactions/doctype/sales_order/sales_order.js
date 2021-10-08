@@ -325,7 +325,11 @@ comfort.SalesOrderController = frappe.ui.form.Controller.extend({
       dialog.show();
     }
 
-    if (!this.frm.is_new() && this.frm.doc.docstatus == 0) {
+    if (
+      !this.frm.is_new() &&
+      this.frm.doc.docstatus == 0 &&
+      !this.frm.doc.from_available_stock
+    ) {
       this.frm.add_custom_button(__("Check availability"), () => {
         this.frm.call({
           method: "check_availability",
@@ -344,7 +348,11 @@ comfort.SalesOrderController = frappe.ui.form.Controller.extend({
     let grid = this.frm.fields_dict.items.grid;
     let label = __("Fetch items specs");
 
-    if (!this.frm.is_new() && this.frm.doc.docstatus == 0) {
+    if (
+      !this.frm.is_new() &&
+      this.frm.doc.docstatus == 0 &&
+      !this.frm.doc.from_available_stock
+    ) {
       // Add "Fetch items specs" button
       let wrapper = grid.wrapper.find('div[class="text-right"]')[0];
 
