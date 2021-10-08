@@ -126,6 +126,7 @@ class SalesOrder(TypedDocument):
             receipt.cancel()
 
     def before_update_after_submit(self):  # pragma: no cover
+        self._validate_services_not_changed()
         self.calculate()
         self.set_statuses()
 
@@ -231,6 +232,37 @@ class SalesOrder(TypedDocument):
         self._calculate_commission()
         self._calculate_margin()
         self._calculate_total_amount()
+
+    def _validate_services_not_changed(self):
+        if self.delivery_status in (
+            "To Purchase",
+            "Purchased",
+            "To Deliver",
+        ):
+            return
+
+        def services_changed():
+            self.load_doc_before_save()
+
+            if len(self.services) != len(self._doc_before_save.services):
+                return True
+
+            for idx, service in enumerate(self.services):
+                service_before_save = self._doc_before_save.services[idx]
+
+                if (
+                    service.type != service_before_save.type
+                    or service.rate != service_before_save.rate
+                ):
+                    return True
+
+        if services_changed():
+            raise ValidationError(
+                _(
+                    "Allowed to change services in Sales Order only if delivery"
+                    + " status is To Purchase, Purchased or To Deliver"
+                )
+            )
 
     def get_items_with_splitted_combinations(
         self,
