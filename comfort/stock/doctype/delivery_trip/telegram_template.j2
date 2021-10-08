@@ -1,12 +1,15 @@
 <b><a href="{{form_url}}">{{doctype}} {{docname}}</a></b>
 <br>
 ------
-<br>
 {%- for stop in stops -%}
     <br><br>
     <b>{{loop.index}}. {{stop.customer}}</b>
-    {% if stop.deilvery_type %}
-        ({{ stop.deilvery_type.lower()}})
+    {% if stop.delivery_type %}
+        ({{ _(stop.delivery_type).lower() }}
+        {%- if stop.installation -%}
+         , {{ _("Installation").lower() }}
+        {%- endif -%}
+        )
     {% endif %}
     <br>
     {{stop.phone}}

@@ -145,6 +145,7 @@ class DeliveryTrip(TypedDocument):
                 {
                     "customer": stop.customer,
                     "delivery_type": stop.delivery_type,
+                    "installation": stop.installation,
                     "phone": stop.phone,
                     "route_url": _make_route_url(stop.city, stop.address),
                     "address": stop.address,

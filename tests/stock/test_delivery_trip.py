@@ -127,6 +127,7 @@ def test_get_template_context(delivery_trip: DeliveryTrip):
     doc_stop = delivery_trip.stops[0]
     assert context_stop["customer"] == doc_stop.customer
     assert context_stop["delivery_type"] == doc_stop.delivery_type
+    assert context_stop["installation"] == doc_stop.installation
     assert context_stop["phone"] == doc_stop.phone
     assert context_stop["route_url"] == _make_route_url(doc_stop.city, doc_stop.address)
     assert context_stop["address"] == doc_stop.address
