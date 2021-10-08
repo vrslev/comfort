@@ -71,6 +71,7 @@ services:
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD}
       INSTALL_APPS: comfort
+      SENTRY_DSN: ${SENTRY_DSN}
     depends_on:
       - mariadb
       - redis-cache
@@ -88,12 +89,13 @@ services:
       args:
         FRAPPE_VERSION: ${FRAPPE_VERSION}
     environment:
-      - MARIADB_HOST=mariadb
-      - REDIS_CACHE=redis-cache:6379
-      - REDIS_QUEUE=redis-queue:6379
-      - REDIS_SOCKETIO=redis-socketio:6379
-      - SOCKETIO_PORT=9000
-      - WORKERS=2
+      MARIADB_HOST: mariadb
+      REDIS_CACHE: redis-cache:6379
+      REDIS_QUEUE: redis-queue:6379
+      REDIS_SOCKETIO: redis-socketio:6379
+      SOCKETIO_PORT: 9000
+      WORKERS: 2
+      SENTRY_DSN: ${SENTRY_DSN}
     volumes:
       - sites-vol:/home/frappe/frappe-bench/sites:rw
       - assets-vol:/home/frappe/frappe-bench/sites/assets:rw
@@ -134,6 +136,7 @@ services:
     command: worker
     environment:
       WORKER_TYPE: default
+      SENTRY_DSN: ${SENTRY_DSN}
     depends_on:
       - redis-queue
       - redis-cache
@@ -147,6 +150,7 @@ services:
     command: worker
     environment:
       WORKER_TYPE: short
+      SENTRY_DSN: ${SENTRY_DSN}
     depends_on:
       - redis-queue
       - redis-cache
@@ -160,6 +164,7 @@ services:
     command: worker
     environment:
       WORKER_TYPE: long
+      SENTRY_DSN: ${SENTRY_DSN}
     depends_on:
       - redis-queue
       - redis-cache
@@ -171,6 +176,8 @@ services:
     image: cr.yandex/crpdmuh1072ntg30t18g/comfort-worker:${COMFORT_VERSION}
     restart: on-failure
     command: schedule
+    environment:
+      SENTRY_DSN: ${SENTRY_DSN}
     depends_on:
       - redis-queue
       - redis-cache
