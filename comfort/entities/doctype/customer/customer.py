@@ -6,6 +6,7 @@ from urllib.parse import parse_qs, urlparse
 from comfort import TypedDocument, ValidationError, _
 
 # TODO: Validate phone number
+# TODO: Fix vk_url: https://vk.com/im?peers=1111111&sel=111111 (keep only "sel" part)
 
 
 @overload
