@@ -658,6 +658,10 @@ class SalesOrder(TypedDocument):
 
     @frappe.whitelist()
     def fetch_items_specs(self):  # TODO: Cover
+        if self.from_available_stock:
+            raise ValidationError(
+                _("Can't fetch items specs if order is from Available Stock")
+            )
         if self.status != "Draft":
             raise ValidationError(_("Can fetch items specs only if status is Draft"))
 
