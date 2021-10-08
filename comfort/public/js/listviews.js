@@ -69,9 +69,9 @@ frappe.listview_settings["Sales Order"] = {
             }
 
             if (stock_type == "Available Purchased") {
-              frappe.prompt(
+              let prompt = frappe.prompt(
                 {
-                  label: __("Purchase Order"), // TODO: Add query for Purchase Order
+                  label: __("Purchase Order"),
                   fieldname: "purchase_order",
                   fieldtype: "Link",
                   options: "Purchase Order",
@@ -81,6 +81,13 @@ frappe.listview_settings["Sales Order"] = {
                 ({ purchase_order }) => create_doc(purchase_order),
                 __("Choose Purchase Order")
               );
+              prompt.fields[0].get_query = () => {
+                return {
+                  filters: {
+                    status: "To Receive",
+                  },
+                };
+              };
             } else {
               create_doc();
             }
