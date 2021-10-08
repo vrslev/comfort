@@ -19,7 +19,7 @@ jobs:
           password: ${{ secrets.YANDEX_TOKEN }}
 
       - name: Get latest Comfort version
-        run: echo COMFORT_VERSION=v$(awk -F '"' '/__version__/{print $2}' comfort/__init__.py) >>$GITHUB_ENV
+        run: echo COMFORT_VERSION=v$(awk -F '"' '/__version__/{print $2}' setup.py) >>$GITHUB_ENV
 
       - name: Generate .env
         run: |
