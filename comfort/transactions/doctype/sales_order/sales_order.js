@@ -81,8 +81,8 @@ comfort.SalesOrderController = frappe.ui.form.Controller.extend({
               label: "Account",
               fieldname: "account",
               fieldtype: "Select",
-              options: "Cash\nBank",
-              default: "Cash",
+              options: [__("Cash"), __("Bank")].join("\n"),
+              default: __("Cash"),
             },
           ],
           (values) => {
@@ -91,7 +91,7 @@ comfort.SalesOrderController = frappe.ui.form.Controller.extend({
               method: "add_payment",
               args: {
                 paid_amount: values.paid_amount,
-                cash: values.account == "Cash",
+                cash: values.account == __("Cash"),
               },
               callback: () => {
                 frappe.show_alert({
