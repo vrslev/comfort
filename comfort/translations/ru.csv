@@ -145,6 +145,7 @@ Payment added,Платёж добавлен
 Pending Amount,Ожидаемая сумма
 Percentage shouldn't be zero,Процент не может быть равен нулю
 Pickup order Message,Сообщение о выдаче
+Pickup List,Список на выдачу
 Posting Date,Дата публикации
 Prepaid Inventory Account,Счёт предоплаченного инвентаря
 Price,Цена
@@ -450,3 +451,9 @@ Amended From,Возобновлено от документа
 Sorry! I could not find what you were looking for.,"Извините! Не удалось найти, что вы ищете.",
 More,Больше
 Preview,Предпросмотр
+No Letterhead,Без шапки
+Select Letterhead,Выберите шапку
+Select Network Printer,Выберите принтер в сети
+Printer,Принтер
+Previous Document,Предыдущий документ
+Next Document,Следующий документ

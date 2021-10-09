@@ -1,0 +1,67 @@
+<div class="page-break">
+  <div class="print-heading">
+    <h2>{{ doc.name }}</h2>
+  </div>
+
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <th>{{ _("No.") }}</th>
+        <th>{{ _("Item Code") }}</th>
+        <th>{{ _("Item Name") }}</th>
+        <th>{{ _("Qty") }}</th>
+        <th>{{ _("Price") }}</th>
+        <th>{{ _("Weight") }}</th>
+      </tr>
+    </thead>
+    <tbody>
+
+      {% set idx = [] %}
+      {% macro add_table_row(loop_index, item, customer) %}
+          <tr>
+            {% if item %}
+              <td style="width: 2%">
+                {{ idx|length + 1 }}
+                {% if idx.append('1') %}{% endif %}
+              </td>
+
+              <td style="width: 8%">
+                <b>{{ item.item_code }}</b>
+              </td>
+              <td>
+                {{ item.item_name or frappe.db.get_value("Item", item.item_code, "item_name") }}
+              </td>
+
+              <td style="width: 10%">
+                {{ item.qty | int }}
+              </td>
+
+              <td style="width: 10%">
+                {{ item.rate | int or frappe.db.get_value("Item", item.item_code, "rate") | int }} ₽
+              </td>
+
+              <td style="width: 3%">
+                {{ item.weight or frappe.db.get_value("Item", item.item_code, "weight")}}
+              </td>
+
+            {% else %}
+              <td colspan="5"><b style="font-size: 16px">{{ customer }}<b/><td/>
+            {% endif %}
+          </tr>
+      {% endmacro %}
+
+
+      {% for item in doc.get_items_to_sell(split_combinations=True) %}
+        {{ add_table_row(loop.index, item, None)}}
+      {% endfor %}
+
+      {% for po_sales_order in doc.sales_orders %}
+        {% set sales_order = frappe.get_doc("Sales Order", po_sales_order.sales_order_name) %}
+        {{ add_table_row(None, None, sales_order.customer) }}
+        {% for item in sales_order.get_items_with_splitted_combinations() %}
+          {{ add_table_row(loop.index, item, sales_order.customer)}}
+        {% endfor %}
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

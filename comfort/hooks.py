@@ -14,6 +14,10 @@ fixtures = [
     {"doctype": "Custom DocPerm", "filters": {"role": "Comfort User"}},
     {"doctype": "Module Profile", "filters": {"name": "Comfort Module Profile"}},
     {"doctype": "Block Module", "filters": {"parent": "Comfort Module Profile"}},
+    {
+        "doctype": "Property Setter",
+        "filters": {"name": "Purchase Order-main-default_print_format"},
+    },
 ]
 
 after_install = "comfort.comfort_core.hooks.after_install"
