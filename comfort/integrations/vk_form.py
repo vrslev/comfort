@@ -124,7 +124,6 @@ def parse_form(form: dict[Any, Any]):
 
 @frappe.whitelist(allow_guest=True)
 def main():  # pragma: no cover
-    return Response("5bd42ea9")
     frappe.local.session.user = frappe.local.session.sid = "Administrator"
     frappe.enqueue(
         queue="short",
