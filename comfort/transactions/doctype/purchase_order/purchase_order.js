@@ -240,54 +240,60 @@ comfort.PurchaseOrderController = frappe.ui.form.Controller.extend({
 
     frappe.validated = false;
 
-    frappe.call({
-      method: "comfort.comfort_core.ikea.get_purchase_history",
-      freeze: true,
-      callback: (r) => {
-        if (r.message && r.message.length > 0) {
-          let purchases = [];
-          r.message.forEach((p) => {
-            if (p.status == "IN_PROGRESS") {
-              purchases.push([
-                [p.id, p.datetime_formatted, p.cost + " ₽"].join(" | "),
-              ]);
-            }
-          });
+    this.frm
+      .call({ method: "fetch_items_specs", doc: this.frm.doc })
+      .then(() => {
+        frappe.call({
+          method: "comfort.comfort_core.ikea.get_purchase_history",
+          freeze: true,
+          callback: (r) => {
+            if (r.message && r.message.length > 0) {
+              let purchases = [];
+              r.message.forEach((p) => {
+                if (p.status == "IN_PROGRESS") {
+                  purchases.push([
+                    [p.id, p.datetime_formatted, p.cost + " ₽"].join(" | "),
+                  ]);
+                }
+              });
 
-          var dialog = new frappe.ui.Dialog({
-            title: __("Choose order"),
-            fields: [
-              {
-                fieldname: "select",
-                fieldtype: "Select",
-                in_list_view: 1,
-                options: purchases.join("\n"),
-              },
-            ],
+              var dialog = new frappe.ui.Dialog({
+                title: __("Choose order"),
+                fields: [
+                  {
+                    fieldname: "select",
+                    fieldtype: "Select",
+                    in_list_view: 1,
+                    options: purchases.join("\n"),
+                  },
+                ],
 
-            primary_action({ select }) {
-              let purchase_id = /\d+/.exec(select)[0];
-              add_purchase_info_and_submit(purchase_id, false);
-              dialog.hide();
-            },
-          });
-          dialog.no_cancel();
-          dialog.show();
-        } else {
-          frappe.prompt(
-            {
-              label: __("Can't receive purchase history, enter order number"),
-              fieldname: "purchase_id",
-              fieldtype: "Int",
-              reqd: 1,
-            },
-            ({ purchase_id }) => {
-              add_purchase_info_and_submit(purchase_id, true);
+                primary_action({ select }) {
+                  let purchase_id = /\d+/.exec(select)[0];
+                  add_purchase_info_and_submit(purchase_id, false);
+                  dialog.hide();
+                },
+              });
+              dialog.no_cancel();
+              dialog.show();
+            } else {
+              frappe.prompt(
+                {
+                  label: __(
+                    "Can't receive purchase history, enter order number"
+                  ),
+                  fieldname: "purchase_id",
+                  fieldtype: "Int",
+                  reqd: 1,
+                },
+                ({ purchase_id }) => {
+                  add_purchase_info_and_submit(purchase_id, true);
+                }
+              );
             }
-          );
-        }
-      },
-    });
+          },
+        });
+      });
   },
 
   delivery_cost() {
