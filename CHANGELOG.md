@@ -3,6 +3,11 @@
 
 <!--next-version-placeholder-->
 
+## v0.3.3 (2021-10-09)
+### Fix
+* **VK Form:** Commit ([`86cb43a`](https://github.com/vrslev/comfort/commit/86cb43a9e5ddfb498f2b7ac3c53ad33560c7b052))
+* **VK Form:** Add translations ([`da0ed62`](https://github.com/vrslev/comfort/commit/da0ed62663ca57b88794a4c9efeb2e5857de8dd1))
+
 ## v0.3.2 (2021-10-09)
 ### Fix
 * **VK Form:** Remove confirmation thing ([`b213b7f`](https://github.com/vrslev/comfort/commit/b213b7f9f6bf291bbf0983ae630a8a90c404eddd))
