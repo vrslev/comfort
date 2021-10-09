@@ -7,6 +7,6 @@ def get_data():
         },
         "transactions": [
             {"items": ["Payment", "Checkout", "Receipt"]},
-            {"items": ["Purchase Return"]},
+            {"items": ["Purchase Return", "Compensation"]},
         ],
     }
