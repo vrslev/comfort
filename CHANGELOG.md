@@ -3,6 +3,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.3.4 (2021-10-09)
+### Fix
+* **VK Form:** VK URL building ([`c54b4c5`](https://github.com/vrslev/comfort/commit/c54b4c56d888918c15f06d5c4c4879b7ad64c5f4))
+
 ## v0.3.3 (2021-10-09)
 ### Fix
 * **VK Form:** Commit ([`86cb43a`](https://github.com/vrslev/comfort/commit/86cb43a9e5ddfb498f2b7ac3c53ad33560c7b052))
