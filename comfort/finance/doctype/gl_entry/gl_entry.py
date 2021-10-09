@@ -6,7 +6,9 @@ from comfort import TypedDocument
 
 
 class GLEntry(TypedDocument):
-    voucher_type: Literal["Payment", "Receipt", "Sales Return", "Purchase Return"]
+    voucher_type: Literal[
+        "Payment", "Receipt", "Sales Return", "Purchase Return", "Compensation"
+    ]
     voucher_no: str
     account: str
     debit: int

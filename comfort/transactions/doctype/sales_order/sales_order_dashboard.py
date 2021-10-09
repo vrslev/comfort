@@ -7,7 +7,7 @@ def get_data():
             "Sales Return": "sales_order",
         },
         "transactions": [
-            {"items": ["Payment"]},
+            {"items": ["Payment", "Compensation"]},
             {
                 "items": [
                     "Purchase Order",

@@ -21,7 +21,9 @@ def get_account(field_name: str) -> str:
 
 
 def create_gl_entry(
-    doctype: Literal["Payment", "Receipt", "Sales Return", "Purchase Return"],
+    doctype: Literal[
+        "Payment", "Receipt", "Sales Return", "Purchase Return", "Compensation"
+    ],
     name: str,
     account: str,
     debit: int,
@@ -36,7 +38,12 @@ def create_gl_entry(
     doc.insert().submit()
 
 
-def cancel_gl_entries_for(doctype: str, name: str):
+def cancel_gl_entries_for(
+    doctype: Literal[
+        "Payment", "Receipt", "Sales Return", "Purchase Return", "Compensation"
+    ],
+    name: str,
+):
     for entry in get_all(
         GLEntry,
         {"voucher_type": doctype, "voucher_no": name, "docstatus": ("!=", 2)},
