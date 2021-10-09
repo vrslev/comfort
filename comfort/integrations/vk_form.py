@@ -29,10 +29,12 @@ class VkFormObjectProp(BaseModel):
     @validator("group_id")
     def check_group_id(cls, v: int):
         assert v == int(get_value("Vk Form Settings", fieldname="group_id"))
+        return v
 
     @validator("form_name")
     def check_form_name(cls, v: str):
         assert v == "Оформить заказ"
+        return v
 
 
 class VkForm(BaseModel):
@@ -45,10 +47,12 @@ class VkForm(BaseModel):
     @validator("type")
     def check_type(cls, v: str):
         assert v == "lead_forms_new"
+        return v
 
     @validator("secret")
     def check_secret(cls, v: str):
         assert v == get_value("Vk Form Settings", fieldname="api_secret")
+        return v
 
 
 def _get_mapped_answers(answers: list[VkFormAnswer]):
