@@ -1,6 +1,6 @@
-from frappe.model.document import Document
+from comfort import TypedDocument
 
 
-class VkFormSettings(Document):
+class VkFormSettings(TypedDocument):
     api_secret: str
     group_id: int
