@@ -19,29 +19,29 @@ from frappe.model.meta import Meta
 from frappe.utils import unique
 
 
-def _format_money(money: str | int):  # pragma: no cover
+def _format_money(money: str | int | float):
     return f"{int(money)} ₽"
 
 
-def _format_weight(weight: int | float):  # pragma: no cover
+def _format_weight(weight: int | float):
     return f"{float(weight)} кг"
 
 
-def _format_item_query(d: list[Any]):  # pragma: no cover
-    if d[2]:
-        d[2] = _format_money(d[2])
+def _format_item_query(result: list[Any]):  # pragma: no cover
+    if result[2]:
+        result[2] = _format_money(result[2])
 
 
-def _format_purchase_order_query(d: list[Any]):  # pragma: no cover
-    if d[2]:
-        d[2] = _format_money(d[2])
-    if d[3]:
-        d[3] = _format_weight(d[3])
+def _format_purchase_order_query(result: list[Any]):  # pragma: no cover
+    if result[2]:
+        result[2] = _format_money(result[2])
+    if result[3]:
+        result[3] = _format_weight(result[3])
 
 
-def _format_sales_order_query(d: list[Any]):  # pragma: no cover
-    if d[3]:
-        d[3] = _format_money(d[3])
+def _format_sales_order_query(result: list[Any]):  # pragma: no cover
+    if result[3]:
+        result[3] = _format_money(result[3])
 
 
 _QUERY_FORMATTERS = {  # pragma: no cover
@@ -95,8 +95,8 @@ def default_query(
         as_list=True,
     )
     if doctype in _QUERY_FORMATTERS:
-        for d in query:
-            _QUERY_FORMATTERS[doctype](d)
+        for result in query:
+            _QUERY_FORMATTERS[doctype](result)
     return query
 
 
@@ -133,7 +133,7 @@ def purchase_order_sales_order_query(
     if searchfield:
         searchfields = " or ".join(field + " LIKE %(txt)s" for field in searchfields)
 
-    orders: list[list[str | int]] = frappe.db.sql(  # type: ignore  # nosec
+    orders: list[list[Any]] = frappe.db.sql(  # type: ignore  # nosec
         """
         SELECT name, customer, total_amount from `tabSales Order`
         WHERE {ignore_orders_cond}
@@ -149,12 +149,12 @@ def purchase_order_sales_order_query(
     )
 
     for order in orders:
-        order[2] = frappe.format(order[2], "Currency")  # type: ignore
+        order[2] = frappe.format(order[2], "Currency")
     return orders
 
 
 @frappe.whitelist()
-def sales_order_item_query(  # TODO: Cover
+def sales_order_item_query(
     doctype: str,
     txt: str,
     searchfield: str,
