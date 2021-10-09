@@ -336,7 +336,6 @@ comfort.SalesOrderController = frappe.ui.form.Controller.extend({
           doc: this.frm.doc,
           freeze: true,
           callback: (r) => {
-            // console.log(r.message);
             if (r.message) {
               show_check_availability_dialog(r.message);
             }
@@ -381,6 +380,22 @@ comfort.SalesOrderController = frappe.ui.form.Controller.extend({
         btn.addClass("hidden");
       }
     }
+
+    // Add Open in VK button
+    frappe.db
+      .get_value("Customer", this.frm.doc.customer, "vk_url")
+      .then((r) => {
+        let label = __("Open in VK");
+        if (r.message && r.message.vk_url) {
+          var btn = this.frm.add_custom_button(label, () => {});
+          $(btn).attr("onclick", `window.open("${r.message.vk_url}");`);
+        } else {
+          btn = this.frm.custom_buttons[label];
+          if (btn) {
+            btn.hide();
+          }
+        }
+      });
   },
 
   setup_quick_add_items() {

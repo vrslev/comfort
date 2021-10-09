@@ -23,7 +23,7 @@ Bot Token,Токен бота
 Can only deliver Sales Orders that have delivery status To Deliver: {},Можно доставить только те заказы, у которых статус доставки — Доставить: {}
 Can't add child item that contains child items,Нельзя добавить дочерний товар в дочерний товар
 Can fetch items specs only if status is Draft,"Загрузить новую информацию о товарах можно, только если статус заказа — Черновик"
-Can't fetch items specs if order is from Available Stock,Нельзя загрузить новую информацию о товарах, если он из доступного запаса
+Can't fetch items specs if order is from Available Stock,"Нельзя загрузить новую информацию о товарах, если он из доступного запаса"
 "Can't receive purchase history, enter order number","Не удалось загрузить историю закупок, введите номер закупки"
 Can't return all items,Нельзя вернуть все товары
 "Can't load information about this order, enter delivery cost","Не удалось загрузить информацию об этом заказе, введите стоимость доставки"
@@ -83,6 +83,7 @@ Expense,Расход
 Fetch specs,Загрузить информацию
 Fetch items specs,Загрузить информацию о товарах
 Finance,Финансы
+Open in VK,Открыть в VK
 Finance Settings,Настройки финансов
 "Finance Settings has no field ""{}""","Настройки финансов не имеют поле ""{}"""
 From Amount,Сумма от
