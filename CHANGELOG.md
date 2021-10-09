@@ -3,6 +3,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.3.2 (2021-10-09)
+### Fix
+* **VK Form:** Remove confirmation thing ([`b213b7f`](https://github.com/vrslev/comfort/commit/b213b7f9f6bf291bbf0983ae630a8a90c404eddd))
+
 ## v0.3.1 (2021-10-09)
 ### Fix
 * Add vk form settings to search ([`5381f07`](https://github.com/vrslev/comfort/commit/5381f073d499dc9a93b8f70ab8406a79dd4f16b3))
