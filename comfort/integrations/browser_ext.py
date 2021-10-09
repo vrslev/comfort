@@ -11,7 +11,7 @@ from frappe.model.rename_doc import rename_doc
 from frappe.utils import get_url_to_form
 
 
-def _generate_new_customer_name(name: str):
+def _generate_new_customer_name(name: str):  # TODO: Transfer to autoname
     regex = re.compile(r" (\d+)$")
     while True:
         if doc_exists("Customer", name):
