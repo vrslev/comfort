@@ -17,7 +17,7 @@ from comfort.integrations.vk_form import (
     _create_vk_group_dialog_url,
     _get_customer_name,
     _get_delivery_service,
-    parse_form,
+    process_form,
 )
 from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
 from tests.integrations.test_browser_ext_server import patch_fetch_items
@@ -160,7 +160,7 @@ def vk_form_settings():
 
 
 @pytest.mark.usefixtures("vk_form_settings")
-def test_parse_form(
+def test_process_form(
     monkeypatch: pytest.MonkeyPatch,
     item_no_children: Item,
     commission_settings: CommissionSettings,
@@ -169,7 +169,7 @@ def test_parse_form(
     commission_settings.insert()
     patch_fetch_items(monkeypatch)
 
-    parse_form(mock_form)
+    process_form(mock_form)
     doc = get_doc(SalesOrder, "SO-2021-0001")
     assert doc.customer
     assert doc.items

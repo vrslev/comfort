@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 
+import sentry_sdk
 from pydantic import BaseModel, Field, validator
 from werkzeug import Response
 
@@ -109,7 +110,7 @@ def _create_sales_order(customer_name: str, raw_order: str, raw_delivery_type: s
     doc.save()
 
 
-def parse_form(form: dict[Any, Any]):
+def process_form(form: dict[Any, Any]):
     response = VkForm(**form)
     answers = _get_mapped_answers(response.object.answers)
 
@@ -120,14 +121,15 @@ def parse_form(form: dict[Any, Any]):
         response.object.user_id,
     )
     _create_sales_order(customer.name, answers.raw_order, answers.raw_delivery_type)
+    frappe.db.commit()
 
 
 @frappe.whitelist(allow_guest=True)
 def main():  # pragma: no cover
     frappe.local.session.user = frappe.local.session.sid = "Administrator"
-    frappe.enqueue(
-        queue="short",
-        method=parse_form,
-        form=frappe.form_dict,  # type: ignore
-    )
+    try:
+        process_form(frappe.form_dict)  # type: ignore
+    except Exception as e:
+        sentry_sdk.capture_exception(e)
+
     return Response("ok")
