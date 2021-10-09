@@ -17,7 +17,7 @@ export $(cat .env)
 
 WORKER_IMAGE=cr.yandex/crpdmuh1072ntg30t18g/comfort-worker:$COMFORT_VERSION
 
-docker run \
+docker run \ # TODO: Hide site name in backup names
   -e WITH_FILES=1 \
   -v comfort_sites-vol:/home/frappe/frappe-bench/sites \
   --network comfort_default \
