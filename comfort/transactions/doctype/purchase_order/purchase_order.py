@@ -21,7 +21,11 @@ from comfort import (
     group_by_attr,
     maybe_json,
 )
-from comfort.comfort_core.ikea import add_items_to_cart, get_delivery_services
+from comfort.comfort_core.ikea import (
+    add_items_to_cart,
+    fetch_items,
+    get_delivery_services,
+)
 from comfort.entities.doctype.child_item.child_item import ChildItem
 from comfort.finance import create_payment
 from comfort.stock import create_checkout, create_receipt
@@ -303,6 +307,24 @@ class PurchaseOrder(TypedDocument):
 
     def _create_checkout(self):  # pragma: no cover
         create_checkout(self.name)
+
+    @frappe.whitelist()
+    def fetch_items_specs(self):
+        items: list[AnyChildItem] = list(self.get_items_to_sell(False))
+        items += self.get_items_in_sales_orders(False)
+        fetched_items = fetch_items([i.item_code for i in items], force_update=True)[
+            "successful"
+        ]
+
+        for po_sales_order in self.sales_orders:
+            sales_order = get_doc(SalesOrder, po_sales_order.sales_order_name)
+            if any(i.item_code in fetched_items for i in sales_order.items):
+                sales_order.save()
+
+        self.save()
+        frappe.msgprint(_("Information about items updated"), alert=True)
+        # if any(i.item_code in fetched_items for i in self.items_to_sell):
+        #     self.validate()
 
     @frappe.whitelist()
     def add_purchase_info_and_submit(
