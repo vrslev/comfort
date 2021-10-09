@@ -3,6 +3,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.3.0 (2021-10-09)
+### Feature
+* Add VK Form integration ([`8d047b9`](https://github.com/vrslev/comfort/commit/8d047b9908fc195e7b8cf278e07fb91f2cba4b64))
+
 ## v0.2.1 (2021-10-08)
 ### Fix
 * Disable Signup ([`02b58cd`](https://github.com/vrslev/comfort/commit/02b58cd188e5f49d004e1531cffb59a69dd92871))
