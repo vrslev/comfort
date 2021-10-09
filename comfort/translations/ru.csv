@@ -90,6 +90,7 @@ From Available Stock,Из доступного запаса
 From Purchase Order,Из закупки
 From Purchase Return,Из возврата закупки
 GL Entry,Бухгалтерская запись
+Group ID,ID группы
 General Ledger,Бухгалтерская книга
 Get Chat ID,Получить ID чата
 Get Chat ID first,Сначала получите ID чата
@@ -218,6 +219,7 @@ Totals,Итоги
 Transactions,Операции
 Unavailable Items,Недоступные товары
 Unpaid,Не оплачено
+Vk Form Settings,Настройки формы VK
 VK ID,VK ID
 VK URL,Ссылка VK
 Voucher,Документ
