@@ -3,6 +3,11 @@
 
 <!--next-version-placeholder-->
 
+## v0.3.1 (2021-10-09)
+### Fix
+* Add vk form settings to search ([`5381f07`](https://github.com/vrslev/comfort/commit/5381f073d499dc9a93b8f70ab8406a79dd4f16b3))
+* Add pydantic dependency ([`b4049f8`](https://github.com/vrslev/comfort/commit/b4049f815b67541785b9e7af6980f182ef774dc0))
+
 ## v0.3.0 (2021-10-09)
 ### Feature
 * Add VK Form integration ([`8d047b9`](https://github.com/vrslev/comfort/commit/8d047b9908fc195e7b8cf278e07fb91f2cba4b64))
