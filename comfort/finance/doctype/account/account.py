@@ -14,7 +14,7 @@ class Account(NestedSet):
     name: str | None
     account_name: str
     is_group: bool
-    parent_account: str
+    parent_account: str | None
     indent: int
 
 

@@ -3,7 +3,7 @@
 {{loop.index}}. {{item.item_code}} {{item.item_name}} ({{item.rate}} ₽ ⨉ {{item.qty}} шт)
 {%- endfor %}
 {% for service in services %}
-{{service.type}} ({{service.rate}} ₽)
+{{ _(service.type) }} ({{ service.rate }} ₽)
 {%- endfor %}
 
 Сумма заказа — {{total_amount}} ₽.

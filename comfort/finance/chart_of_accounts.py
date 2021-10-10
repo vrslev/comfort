@@ -45,8 +45,8 @@ def _create_accounts_from_schema():
     def execute(parent: str | None, children: dict[str, Any]):
         for child, children_of_child in children.items():
             doc = new_doc(Account)
-            doc.account_name = _(child)
-            doc.parent_account = _(parent)
+            doc.account_name = child
+            doc.parent_account = parent
             doc.is_group = bool(children_of_child)
             doc.insert()
             execute(child, children_of_child)

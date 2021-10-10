@@ -62,13 +62,13 @@
    "default": "0",
    "fieldname": "paid_with_cash",
    "fieldtype": "Check",
-   "label": "Paid with cash"
+   "label": "Paid With Cash"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-10-09 15:10:26.918498",
+ "modified": "2021-10-10 17:57:54.584356",
  "modified_by": "Administrator",
  "module": "Finance",
  "name": "Compensation",

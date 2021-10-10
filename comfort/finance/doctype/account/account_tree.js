@@ -18,7 +18,7 @@ frappe.treeview_settings["Account"] = {
   ],
   ignore_fields: ["parent_account"],
   get_label: (node) =>
-    node.label == __("Account") ? __("Accounts") : node.label,
+    node.label == __("Account") ? __("Accounts") : __(node.label),
   onrender: (node) => {
     if (node.data && node.data.balance !== undefined) {
       $(

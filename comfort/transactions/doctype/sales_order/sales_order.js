@@ -157,7 +157,7 @@ comfort.SalesOrderController = frappe.ui.form.Controller.extend({
             {
               fieldname: "combinations",
               fieldtype: "Table",
-              label: "Combinations",
+              label: __("Combinations"),
               cannot_add_rows: true,
               size: "large",
               reqd: 1,
