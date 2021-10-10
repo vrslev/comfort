@@ -15,4 +15,11 @@ frappe.query_reports["General Ledger"] = {
       reqd: 1,
     },
   ],
+  formatter: (value, row, column, data, default_formatter) => {
+    if (column.id == "voucher_type" && value) {
+      return __(value);
+    }
+
+    return default_formatter(value, row, column, data);
+  },
 };

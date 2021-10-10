@@ -40,7 +40,7 @@ def get_columns():  # pragma: no cover
 
 def _get_parent_children_accounts_map() -> dict[str | None, list[AccountWithTotal]]:
     accounts: list[AccountWithTotal] = get_all(Account, ("name", "parent_account"))  # type: ignore
-    acceptable_parents = (_("Income"), _("Expense"))
+    acceptable_parents = ("Income", "Expense")
     to_remove: list[AccountWithTotal] = []
     for account in accounts:
         if account.parent_account is None and account.name not in acceptable_parents:
@@ -111,9 +111,9 @@ def get_income_expense_profit_loss_totals(data: list[AccountWithTotal]):
     income: int = 0
     expense: int = 0
     for account in data:
-        if account.name == _("Income"):
+        if account.name == "Income":
             income = account.total
-        elif account.name == _("Expense"):
+        elif account.name == "Expense":
             expense = account.total
     return income, expense, income - expense
 
@@ -125,9 +125,9 @@ def get_chart_data(
         "data": {
             "labels": [f"{filters['from_date']}—{filters['to_date']}"],
             "datasets": [
-                {"name": "Income", "values": [income]},
-                {"name": "Expense", "values": [expense]},
-                {"name": "Profit/Loss", "values": [profit_loss]},
+                {"name": _("Income"), "values": [income]},
+                {"name": _("Expense"), "values": [expense]},
+                {"name": _("Profit/Loss"), "values": [profit_loss]},
             ],
         },
         "type": "bar",
@@ -136,12 +136,12 @@ def get_chart_data(
 
 def get_report_summary(income: int, expense: int, profit_loss: int):
     return [
-        {"value": income, "label": "Income", "datatype": "Currency"},
-        {"value": expense, "label": "Expense", "datatype": "Currency"},
+        {"value": income, "label": _("Income"), "datatype": "Currency"},
+        {"value": expense, "label": _("Expense"), "datatype": "Currency"},
         {
             "value": profit_loss,
             "indicator": "Green" if profit_loss >= 0 else "Red",
-            "label": "Total Profit This Year",
+            "label": _("Total Profit This Year"),
             "datatype": "Currency",
         },
     ]

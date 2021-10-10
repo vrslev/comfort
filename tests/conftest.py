@@ -10,6 +10,7 @@ from ikea_api_wrapped.types import (
     DeliveryOptionDict,
     GetDeliveryServicesResponse,
     ParsedItem,
+    PurchaseHistoryItemDict,
     PurchaseInfoDict,
     UnavailableItemDict,
 )
@@ -423,6 +424,24 @@ mock_delivery_services = GetDeliveryServicesResponse(
     cannot_add=["50366596"],
 )
 
+mock_purchase_history = [
+    PurchaseHistoryItemDict(
+        datetime="2021-04-19T10:12:00Z",
+        datetime_formatted="19 апреля 2021, 13:12",
+        price=8326.0,
+        purchase_id=11111111,
+        status="IN_PROGRESS",
+        store="Интернет-магазин",
+    ),
+    PurchaseHistoryItemDict(
+        datetime="2021-04-14T18:16:25Z",
+        datetime_formatted="14 апреля 2021, 21:16",
+        price=0,
+        purchase_id=111111110,
+        status="COMPLETED",
+        store="Интернет-магазин",
+    ),
+]
 
 mock_purchase_info = PurchaseInfoDict(
     purchase_date="2021-04-19",
@@ -433,9 +452,9 @@ mock_purchase_info = PurchaseInfoDict(
 
 
 def patch_get_delivery_services(monkeypatch: pytest.MonkeyPatch):
-    mock_get_delivery_services: Callable[
-        [Any, Any, Any], Any
-    ] = lambda api, items, zip_code: mock_delivery_services
+    def mock_get_delivery_services(api: Any, items: Any, zip_code: Any):
+        return mock_delivery_services
+
     monkeypatch.setattr(
         ikea_api_wrapped, "get_delivery_services", mock_get_delivery_services
     )
@@ -443,7 +462,6 @@ def patch_get_delivery_services(monkeypatch: pytest.MonkeyPatch):
 
 @pytest.fixture
 def purchase_order(sales_order: SalesOrder, monkeypatch: pytest.MonkeyPatch):
-
     sales_order.set_child_items()
     if not doc_exists(sales_order.doctype, sales_order.name):
         sales_order.db_insert()
@@ -499,30 +517,20 @@ def commission_settings():
     )
 
 
-mock_token = (
-    "eyJhbGciOiJSUzIre8NiIsInR5cCI6IkpXVCIsImtpZCI6ImVxSFFLR3duR3"
-    + "hfV3dJZkx0RGpaeDA5MTUzS2xSam5fVE1nVUlMYlJ5RncifQ.eyJpc3MiOiJ"
-    + "odHRwczovL2FwaS5pbmdrYS5pa2VhLmNvbS9ndWVzdCIsInN1YiI6ImRiOWU"
-    + "yMzg3LTU3ZDAtNGZiYS1iNzhjLTdiZmYwOWEyMGJlNCIsInJldGFpbFVuaXQ"
-    + "iOiJydSIsImlhdCI6MTYyOTcyOTE2MiwiZXhwIjoxNjMyMzIxMTYyfQ.UAkv"
-    + "ZmlX9sj8Hgve1kkq7tcf73-aDshLusxnAsW-1-9izS14cPGehzX47-MyResL"
-    + "jwlr7W70t0jMjL8ihdgj5aVSl-W3UVw_tt8FfO60b-GDfMt_vCAyAk2N9lts"
-    + "n7Ql5NiQXeTM6NVDLCCBM27FAUuTiDVEJc-F7WgmXWip4nE"
-)
+mock_token = "some_mock_token"  # nosec
 
 
 @pytest.fixture
 def ikea_settings(monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setattr(ikea_api.auth, "get_guest_token", lambda: mock_token)
-    mock_get_authorized_token: Callable[
-        [Any, Any], str
-    ] = lambda username, password: mock_token
+    mock_get_authorized_token: Callable[[Any, Any], str] = lambda _, __: mock_token
     monkeypatch.setattr(
         ikea_api.auth, "get_authorized_token", mock_get_authorized_token
     )
 
     doc = get_doc(IkeaSettings)
     doc.zip_code = "101000"
+    doc.username = doc.password = "lalalallalllala"
     doc.save()
     return doc
 

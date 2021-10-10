@@ -16,11 +16,14 @@ Authorized Token Expiration,Истечение срока действия ав�
 Available,Доступно
 Available Actual,Доступный фактический
 Available Purchased,Доступный закупленный
+Assets,Активы
 Bank,Банк
 Bank Account,Банковский счёт
 Basic Info,Основная информация
+Balance,Баланс
 Bot Token,Токен бота
 Can only deliver Sales Orders that have delivery status To Deliver: {},Можно доставить только те заказы, у которых статус доставки — Доставить: {}
+Can only add compensation for submitted document,Можно добавить компенсацию только для подтверждённого документа
 Can't add child item that contains child items,Нельзя добавить дочерний товар в дочерний товар
 Can fetch items specs only if status is Draft,"Загрузить новую информацию о товарах можно, только если статус заказа — Черновик"
 Can't fetch items specs if order is from Available Stock,"Нельзя загрузить новую информацию о товарах, если он из доступного запаса"
@@ -45,6 +48,7 @@ Choose Stock Type,Выберите тип запаса
 Choose combinations to split,"Выберите комбинации, которые нужно разделить"
 Choose items first,Сначала выберите товары
 Choose order,Выберите заказ
+Combinations,Комбинации
 Combinations are split,Комбинации разделены
 Comfort Core,Ядро Комфорта
 Comfort User,Пользователь Комфорта
@@ -52,6 +56,8 @@ Comfort,Комфорт
 Commission,Комиссия
 Commission Range,Диапазон комиссии
 Commission Settings,Настройки комиссии
+Compensation,Компенсация
+Cost of Goods Sold,Проданные товары
 Cost of Goods Sold Account,Счёт проданных товаров
 Credit,Кредит
 Customer,Клиент
@@ -61,6 +67,7 @@ Customer Group Name,Название группы клиентов
 Debit,Дебет
 Default Accounts,Счета по умолчанию
 Delivered,Доставлено
+Delivery,Доставка
 Delivery Account,Счёт доставки заказов
 Delivery Cost,Стоимость доставки
 Delivery Options,Способы доставки
@@ -76,6 +83,7 @@ Discount,Скидка
 Edit Commission,Изменить комиссию
 Enter Bot Token first,Сначала введите токен бота
 Enter login and password in Ikea Settings,Введите логин и пароль в Настройках ИКЕА
+Enter Zip Code in Ikea Settings,Введите почтовый индекс в Настройках ИКЕА
 Entities,Сущности
 Every stop should have address,Каждая остановка должна иметь адрес
 Every stop should have city,Каждая остановка должна иметь город
@@ -102,11 +110,13 @@ Ikea Settings,Настройки ИКЕА
 Income,Доход
 Information about item updated,Информация о товаре обновлена
 Information about items updated,Информация о товарах обновлена
-Installation,Установка
-Installation Account,Счёт установки
+Installation,Сборка
+Installation Account,Счёт сборки
 Insufficient stock for Item {},Недостаточный запас товара {}
 Invalid category URL,Неверная ссылка на категорию
 Inventory Account,Счёт инвентаря
+Inventory,Инвентарь
+In Progress,В работе
 Is Group,Является группой
 Item,Товар
 Item Categories,Категории товара
@@ -148,10 +158,14 @@ Percentage shouldn't be zero,Процент не может быть равен 
 Pickup order Message,Сообщение о выдаче
 Pickup List,Список на выдачу
 Posting Date,Дата публикации
+Prepaid Inventory,Предоплаченный инвентарь
 Prepaid Inventory Account,Счёт предоплаченного инвентаря
 Price,Цена
+Profit/Loss,Прибыль/убыток
 Profit and Loss Statement,Отчет о прибылях и убытках
+Purchase Compensations,Компенсации закупок
 Purchase Compensations Account,Счёт компенсации закупок
+Purchase Delivery,Доставка закупок
 Purchase Delivery Account,Счёт доставки закупок
 Purchase Order,Закупка
 Purchase Order Delivery Option,Способ доставки закупки
@@ -171,8 +185,11 @@ Receipt added,Накладная добавлена
 Required,Требуется
 Reserved Actual,Зарезервированный доступный
 Reserved Purchased,Зарезервированный закупленный
+Returns,Возвраты
 Returned Paid Amount,Возвращённая оплаченная сумма
-Sales Account,Счёт заказов
+Sales,Продажи
+Sales Account,Счёт продаж
+Sales Compensations,Компенсация заказов
 Sales Compensations Account,Счёт компенсаций заказов
 Sales Order,Заказ
 Sales Order Child Item,Дочерние товары заказа
@@ -183,7 +200,7 @@ Sales Order should be not Сancelled to add Payment,"Заказ не может 
 Sales Order should be not Сancelled to add Receipt,"Заказ не может быть отменён, чтобы добавить накладную"
 Sales Order should be submitted,Заказ должен быть подтверждён
 Sales Order {} has no delivery service,В заказе {} нет доставки
-Sales Order {} has no installation service,В заказе {} нет установки
+Sales Order {} has no installation service,В заказе {} нет сборки
 Sales Orders,Заказы
 Sales Orders Cost,Стоимость заказов
 Sales Return,Возврат заказа
@@ -219,6 +236,7 @@ Total Amount,Общая сумма
 Total Quantity,Общее кол-во
 Total Weight,Общий вес
 Totals,Итоги
+Total Profit This Year,Общая прибыль за этот год
 Transactions,Операции
 Unavailable Items,Недоступные товары
 Unpaid,Не оплачено
@@ -232,7 +250,7 @@ Weight,Вес
 Invalid VK URL,Неверная ссылка VK
 Zip Code,Почтовый индекс
 image,изображение
-FRAPPE CORRECTIONS,
+FRAPPE CORRECTIONS ______________________________________________________________________________________,
 Search or type a command (Ctrl + G),Поиск
 Reports & Masters,Основное
 Submitted,Подтверждено
@@ -313,6 +331,7 @@ View,Вид
 Successfully Submitted!,Успешно подтверждено!
 Amend,Возобновить
 Workspace,Зона
+Workspaces,Зоны
 Add,Добавить
 Delete All,Удалить все
 Are you sure you want to delete the attachment?,"Вы уверены, что хотите удалить вложение?"
@@ -458,3 +477,6 @@ Select Network Printer,Выберите принтер в сети
 Printer,Принтер
 Previous Document,Предыдущий документ
 Next Document,Следующий документ
+Search for {0},Искать {0}
+{0} List,Список {0}
+{0} Tree,Дерево {0}

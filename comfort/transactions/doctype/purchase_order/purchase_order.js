@@ -279,9 +279,8 @@ comfort.PurchaseOrderController = frappe.ui.form.Controller.extend({
             } else {
               frappe.prompt(
                 {
-                  label: __(
-                    "Can't receive purchase history, enter order number"
-                  ),
+                  // prettier-ignore
+                  label: __("Can't receive purchase history, enter order number"),
                   fieldname: "purchase_id",
                   fieldtype: "Int",
                   reqd: 1,

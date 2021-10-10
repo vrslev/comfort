@@ -10,6 +10,8 @@ from ikea_api_wrapped.types import NoDeliveryOptionsAvailableError, ParsedItem
 
 import frappe
 from comfort import (
+    ValidationError,
+    _,
     count_qty,
     counters_are_same,
     doc_exists,
@@ -28,27 +30,31 @@ from comfort.entities.doctype.item_category.item_category import ItemCategory
 from frappe.utils import get_files_path
 
 
-def get_delivery_services(items: dict[str, int]):  # pragma: no cover
+def get_delivery_services(items: dict[str, int]):
     api = get_guest_api()
-    zip_code: str = get_cached_value("Ikea Settings", "Ikea Settings", "zip_code")
+    zip_code: str | None = get_cached_value(
+        "Ikea Settings", "Ikea Settings", "zip_code"
+    )
+    if not zip_code:
+        raise ValidationError(_("Enter Zip Code in Ikea Settings"))
     try:
         return ikea_api_wrapped.get_delivery_services(api, items, zip_code)
     except NoDeliveryOptionsAvailableError:
         frappe.msgprint("Нет доступных способов доставки", alert=True, indicator="red")
 
 
-def add_items_to_cart(items: dict[str, int], authorize: bool):  # pragma: no cover
+def add_items_to_cart(items: dict[str, int], authorize: bool):
     api = get_authorized_api() if authorize else get_guest_api()
     ikea_api_wrapped.add_items_to_cart(api, items)
 
 
 @frappe.whitelist()
-def get_purchase_history():  # pragma: no cover
+def get_purchase_history():
     return ikea_api_wrapped.get_purchase_history(get_authorized_api())
 
 
 @frappe.whitelist()
-def get_purchase_info(purchase_id: int, use_lite_id: bool):  # pragma: no cover
+def get_purchase_info(purchase_id: int, use_lite_id: bool):
     email: str | None = None
     if use_lite_id:
         email = get_cached_value("Ikea Settings", "Ikea Settings", "username")

@@ -1,8 +1,18 @@
 from types import SimpleNamespace
+from typing import Any
 
-from ikea_api_wrapped.types import ParsedItem
+import ikea_api_wrapped
+import pytest
+from ikea_api import IkeaApi
+from ikea_api_wrapped.types import NoDeliveryOptionsAvailableError, ParsedItem
 
-from comfort import count_qty, counters_are_same, get_all, get_doc
+import frappe.exceptions
+from comfort import count_qty, counters_are_same, get_all, get_doc, get_value
+from comfort.comfort_core.doctype.ikea_settings.ikea_settings import (
+    IkeaSettings,
+    get_authorized_api,
+    get_guest_api,
+)
 from comfort.comfort_core.ikea import (
     _child_items_are_same,
     _create_item,
@@ -10,9 +20,88 @@ from comfort.comfort_core.ikea import (
     _get_items_to_fetch,
     _make_item_category,
     _make_items_from_child_items_if_not_exist,
+    add_items_to_cart,
+    get_delivery_services,
+    get_purchase_history,
+    get_purchase_info,
 )
 from comfort.entities.doctype.item.item import Item
 from comfort.entities.doctype.item_category.item_category import ItemCategory
+from tests.conftest import (
+    mock_delivery_services,
+    mock_purchase_history,
+    patch_get_delivery_services,
+)
+
+
+def test_get_delivery_services_no_zip_code(ikea_settings: IkeaSettings):
+    ikea_settings.zip_code = None
+    ikea_settings.save()
+    with pytest.raises(
+        frappe.exceptions.ValidationError, match="Enter Zip Code in Ikea Settings"
+    ):
+        get_delivery_services({})
+
+
+@pytest.mark.usefixtures("ikea_settings")
+def test_get_delivery_services_no_error(monkeypatch: pytest.MonkeyPatch):
+    patch_get_delivery_services(monkeypatch)
+    assert get_delivery_services({}) == mock_delivery_services
+
+
+def test_get_delivery_services_error(
+    monkeypatch: pytest.MonkeyPatch, ikea_settings: IkeaSettings
+):
+    def new_mock_delivery_services(api: IkeaApi, items: Any, zip_code: Any):
+        assert api._token == get_guest_api()._token
+        assert zip_code == ikea_settings.zip_code
+        raise NoDeliveryOptionsAvailableError
+
+    monkeypatch.setattr(
+        ikea_api_wrapped, "get_delivery_services", new_mock_delivery_services
+    )
+    assert get_delivery_services({}) is None
+
+
+@pytest.mark.parametrize("authorize", (True, False))
+@pytest.mark.usefixtures("ikea_settings")
+def test_add_items_to_cart(monkeypatch: pytest.MonkeyPatch, authorize: bool):
+    myapi = get_authorized_api() if authorize else get_guest_api()
+
+    def mock_add_items_to_cart(api: IkeaApi, items: Any):
+        assert api._token == myapi._token
+
+    monkeypatch.setattr(ikea_api_wrapped, "add_items_to_cart", mock_add_items_to_cart)
+    add_items_to_cart({}, authorize)
+
+
+@pytest.mark.usefixtures("ikea_settings")
+def test_get_purchase_history(monkeypatch: pytest.MonkeyPatch):
+    def mock_get_purchase_history(api: IkeaApi):
+        assert api._token == get_authorized_api()._token
+        return mock_purchase_history
+
+    monkeypatch.setattr(
+        ikea_api_wrapped, "get_purchase_history", mock_get_purchase_history
+    )
+    assert get_purchase_history() == mock_purchase_history
+
+
+@pytest.mark.parametrize("use_lite_id", (True, False))
+@pytest.mark.usefixtures("ikea_settings")
+def test_get_purchase_info(monkeypatch: pytest.MonkeyPatch, use_lite_id: bool):
+    exp_purchase_id = 111111110
+
+    def mock_get_purchase_info(api: IkeaApi, purchase_id: int, email: str):
+        assert api._token == get_authorized_api()._token
+        assert purchase_id == exp_purchase_id
+        if use_lite_id:
+            assert email == get_value("Ikea Settings", None, "username")
+        else:
+            assert email is None
+
+    monkeypatch.setattr(ikea_api_wrapped, "get_purchase_info", mock_get_purchase_info)
+    get_purchase_info(exp_purchase_id, use_lite_id)
 
 
 def test_make_item_category_not_exists(parsed_item: ParsedItem):

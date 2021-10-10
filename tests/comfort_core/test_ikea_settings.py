@@ -44,7 +44,7 @@ def test_get_guest_api_update(
 
 
 def test_get_guest_api_no_update(ikea_settings: IkeaSettings):
-    new_token, new_expiration = "fff", add_to_date(None, days=25)  # nosec
+    new_token, new_expiration = "fff", add_to_date(None, days=25)
     ikea_settings.guest_token = new_token
     ikea_settings.guest_token_expiration = new_expiration
     ikea_settings.save()
@@ -65,7 +65,6 @@ def test_get_guest_api_return():
 def test_get_authorized_api_update(
     ikea_settings: IkeaSettings, token: str | None, expiration: datetime | None
 ):
-    ikea_settings.username = ikea_settings.password = "lalalalalalala"
     ikea_settings.authorized_token = token  # type: ignore
     ikea_settings.authorized_token_expiration = expiration  # type: ignore
     ikea_settings.save()
@@ -79,8 +78,7 @@ def test_get_authorized_api_update(
 
 
 def test_get_authorized_api_no_update(ikea_settings: IkeaSettings):
-    ikea_settings.username = ikea_settings.password = "lalalalalalala"
-    new_token, new_expiration = "fff", add_to_date(None, hours=5)  # nosec
+    new_token, new_expiration = "fff", add_to_date(None, hours=5)
     ikea_settings.authorized_token = new_token
     ikea_settings.authorized_token_expiration = new_expiration
     ikea_settings.save()
@@ -92,14 +90,14 @@ def test_get_authorized_api_no_update(ikea_settings: IkeaSettings):
     )
 
 
-def test_get_authorized_api_return(ikea_settings: IkeaSettings):
-    ikea_settings.username = ikea_settings.password = "lalalalalalala"
-    ikea_settings.save()
+@pytest.mark.usefixtures("ikea_settings")
+def test_get_authorized_api_return():
     assert get_authorized_api().reveal_token() == mock_token
 
 
-@pytest.mark.usefixtures("ikea_settings")
-def test_get_authorized_api_raises_on_login_data_missing():
+def test_get_authorized_api_raises_on_login_data_missing(ikea_settings: IkeaSettings):
+    ikea_settings.username = ikea_settings.password = None  # type: ignore
+    ikea_settings.save()
     with pytest.raises(
         ValidationError, match="Enter login and password in Ikea Settings"
     ):

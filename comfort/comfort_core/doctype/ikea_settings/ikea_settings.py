@@ -10,13 +10,13 @@ from frappe.utils import add_to_date, get_datetime, now_datetime
 
 
 class IkeaSettings(TypedDocument):
-    username: str
-    password: str
-    zip_code: str
-    authorized_token: str
-    authorized_token_expiration: datetime | str
-    guest_token: str
-    guest_token_expiration: datetime | str
+    username: str | None
+    password: str | None
+    zip_code: str | None
+    authorized_token: str | None
+    authorized_token_expiration: datetime | str | None
+    guest_token: str | None
+    guest_token_expiration: datetime | str | None
 
     def on_change(self):
         self.clear_cache()
