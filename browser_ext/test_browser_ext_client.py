@@ -111,15 +111,16 @@ def test_send_to_server(
 
     exp_msg = f"{config.url}/sales-order/SO-2021-00001"
 
-    def mock_post_json(
-        self: CustomFrappeClient, method: str, data: dict[str, Any] = {}  # type: ignore
+    def mock_post_request(
+        self: CustomFrappeClient, data: dict[str, Any] = {}  # type: ignore
     ) -> Any:
-        assert method == "comfort.integrations.browser_ext.main"
-        assert data == send_to_server_args
+        new_data = dict(send_to_server_args)
+        new_data["cmd"] = "comfort.integrations.browser_ext.main"
+        assert data == new_data
         return exp_msg
 
     monkeypatch.setattr(
-        comfort_browser_ext.CustomFrappeClient, "post_json", mock_post_json
+        comfort_browser_ext.CustomFrappeClient, "post_request", mock_post_request
     )
     assert (
         send_to_server(
