@@ -20,6 +20,7 @@ Assets,Активы
 Bank,Банк
 Bank Account,Банковский счёт
 Basic Info,Основная информация
+Balance,Баланс
 Bot Token,Токен бота
 Can only deliver Sales Orders that have delivery status To Deliver: {},Можно доставить только те заказы, у которых статус доставки — Доставить: {}
 Can only add compensation for submitted document,Можно добавить компенсацию только для подтверждённого документа
