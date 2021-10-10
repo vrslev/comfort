@@ -10,6 +10,7 @@ from ikea_api_wrapped.types import (
     DeliveryOptionDict,
     GetDeliveryServicesResponse,
     ParsedItem,
+    PurchaseHistoryItemDict,
     PurchaseInfoDict,
     UnavailableItemDict,
 )
@@ -423,6 +424,24 @@ mock_delivery_services = GetDeliveryServicesResponse(
     cannot_add=["50366596"],
 )
 
+mock_purchase_history = [
+    PurchaseHistoryItemDict(
+        datetime="2021-04-19T10:12:00Z",
+        datetime_formatted="19 апреля 2021, 13:12",
+        price=8326.0,
+        purchase_id=11111111,
+        status="IN_PROGRESS",
+        store="Интернет-магазин",
+    ),
+    PurchaseHistoryItemDict(
+        datetime="2021-04-14T18:16:25Z",
+        datetime_formatted="14 апреля 2021, 21:16",
+        price=0,
+        purchase_id=111111110,
+        status="COMPLETED",
+        store="Интернет-магазин",
+    ),
+]
 
 mock_purchase_info = PurchaseInfoDict(
     purchase_date="2021-04-19",
@@ -514,15 +533,14 @@ mock_token = (
 @pytest.fixture
 def ikea_settings(monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setattr(ikea_api.auth, "get_guest_token", lambda: mock_token)
-    mock_get_authorized_token: Callable[
-        [Any, Any], str
-    ] = lambda username, password: mock_token
+    mock_get_authorized_token: Callable[[Any, Any], str] = lambda _, __: mock_token
     monkeypatch.setattr(
         ikea_api.auth, "get_authorized_token", mock_get_authorized_token
     )
 
     doc = get_doc(IkeaSettings)
     doc.zip_code = "101000"
+    doc.username = doc.password = "lalalallalllala"
     doc.save()
     return doc
 
