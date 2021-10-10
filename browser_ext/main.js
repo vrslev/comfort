@@ -77,7 +77,7 @@ function execute_python_script(customer_name, vk_url, html) {
   cur_app.doShellScript(
     [
       "cd",
-      "~/github/comfort-browser-ext",
+      "~/Library/Services/comfort",
       "&&",
       "venv/bin/python",
       "-m",
