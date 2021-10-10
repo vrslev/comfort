@@ -80,21 +80,17 @@ def get_config(directory: str):
     return Config(**config[PACKAGE_NAME])
 
 
-class CustomFrappeClient(FrappeClient):  # pragma: no cover
+class CustomFrappeClient(FrappeClient):
     url: str
 
     def preprocess(self, params: dict[str, Any]) -> dict[str, Any]:
-        return super().preprocess(params)  # type: ignore
+        return super().preprocess(params)
 
     def post_process(self, response: Response) -> Any:
-        return super().post_process(response)  # type: ignore
+        return super().post_process(response)
 
-    def post_json(self, method: str, data: dict[str, Any]) -> Any:
-        return self.post_process(
-            self.session.post(
-                f"{self.url}/api/method/{method}/", data=self.preprocess(data)
-            )
-        )
+    def post_request(self, data: dict[str, Any]) -> Any:
+        return super().post_request(data)
 
 
 class CustomFrappeException(Exception):
@@ -116,14 +112,13 @@ def send_to_server(
     client = CustomFrappeClient(
         url=config.url, api_key=config.api_key, api_secret=config.api_secret
     )
-    return client.post_json(
-        "comfort.integrations.browser_ext.main",
-        data={
-            "customer_name": customer_name,
-            "vk_url": vk_url,
-            "item_codes": item_codes,
-        },
-    )
+    payload = {
+        "cmd": "comfort.integrations.browser_ext.main",
+        "customer_name": customer_name,
+        "vk_url": vk_url,
+        "item_codes": item_codes,
+    }
+    return client.post_request(payload)
 
 
 class Arguments(Namespace):
