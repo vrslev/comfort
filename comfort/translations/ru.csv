@@ -161,6 +161,7 @@ Posting Date,Дата публикации
 Prepaid Inventory,Предоплаченный инвентарь
 Prepaid Inventory Account,Счёт предоплаченного инвентаря
 Price,Цена
+Profit/Loss,Прибыль/убыток
 Profit and Loss Statement,Отчет о прибылях и убытках
 Purchase Compensations,Компенсации закупок
 Purchase Compensations Account,Счёт компенсации закупок
@@ -235,6 +236,7 @@ Total Amount,Общая сумма
 Total Quantity,Общее кол-во
 Total Weight,Общий вес
 Totals,Итоги
+Total Profit This Year,Общая прибыль за этот год
 Transactions,Операции
 Unavailable Items,Недоступные товары
 Unpaid,Не оплачено
