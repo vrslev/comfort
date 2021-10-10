@@ -452,9 +452,9 @@ mock_purchase_info = PurchaseInfoDict(
 
 
 def patch_get_delivery_services(monkeypatch: pytest.MonkeyPatch):
-    mock_get_delivery_services: Callable[
-        [Any, Any, Any], Any
-    ] = lambda api, items, zip_code: mock_delivery_services
+    def mock_get_delivery_services(api: Any, items: Any, zip_code: Any):
+        return mock_delivery_services
+
     monkeypatch.setattr(
         ikea_api_wrapped, "get_delivery_services", mock_get_delivery_services
     )

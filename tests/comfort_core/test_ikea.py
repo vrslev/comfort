@@ -6,6 +6,7 @@ import pytest
 from ikea_api import IkeaApi
 from ikea_api_wrapped.types import NoDeliveryOptionsAvailableError, ParsedItem
 
+import frappe.exceptions
 from comfort import count_qty, counters_are_same, get_all, get_doc, get_value
 from comfort.comfort_core.doctype.ikea_settings.ikea_settings import (
     IkeaSettings,
@@ -31,6 +32,15 @@ from tests.conftest import (
     mock_purchase_history,
     patch_get_delivery_services,
 )
+
+
+def test_get_delivery_services_no_zip_code(ikea_settings: IkeaSettings):
+    ikea_settings.zip_code = None
+    ikea_settings.save()
+    with pytest.raises(
+        frappe.exceptions.ValidationError, match="Enter Zip Code in Ikea Settings"
+    ):
+        get_delivery_services({})
 
 
 @pytest.mark.usefixtures("ikea_settings")

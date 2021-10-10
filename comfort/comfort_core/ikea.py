@@ -10,6 +10,8 @@ from ikea_api_wrapped.types import NoDeliveryOptionsAvailableError, ParsedItem
 
 import frappe
 from comfort import (
+    ValidationError,
+    _,
     count_qty,
     counters_are_same,
     doc_exists,
@@ -30,7 +32,11 @@ from frappe.utils import get_files_path
 
 def get_delivery_services(items: dict[str, int]):
     api = get_guest_api()
-    zip_code: str = get_cached_value("Ikea Settings", "Ikea Settings", "zip_code")
+    zip_code: str | None = get_cached_value(
+        "Ikea Settings", "Ikea Settings", "zip_code"
+    )
+    if not zip_code:
+        raise ValidationError(_("Enter Zip Code in Ikea Settings"))
     try:
         return ikea_api_wrapped.get_delivery_services(api, items, zip_code)
     except NoDeliveryOptionsAvailableError:
