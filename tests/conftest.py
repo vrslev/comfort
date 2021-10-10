@@ -462,7 +462,6 @@ def patch_get_delivery_services(monkeypatch: pytest.MonkeyPatch):
 
 @pytest.fixture
 def purchase_order(sales_order: SalesOrder, monkeypatch: pytest.MonkeyPatch):
-
     sales_order.set_child_items()
     if not doc_exists(sales_order.doctype, sales_order.name):
         sales_order.db_insert()
@@ -518,16 +517,7 @@ def commission_settings():
     )
 
 
-mock_token = (
-    "eyJhbGciOiJSUzIre8NiIsInR5cCI6IkpXVCIsImtpZCI6ImVxSFFLR3duR3"
-    + "hfV3dJZkx0RGpaeDA5MTUzS2xSam5fVE1nVUlMYlJ5RncifQ.eyJpc3MiOiJ"
-    + "odHRwczovL2FwaS5pbmdrYS5pa2VhLmNvbS9ndWVzdCIsInN1YiI6ImRiOWU"
-    + "yMzg3LTU3ZDAtNGZiYS1iNzhjLTdiZmYwOWEyMGJlNCIsInJldGFpbFVuaXQ"
-    + "iOiJydSIsImlhdCI6MTYyOTcyOTE2MiwiZXhwIjoxNjMyMzIxMTYyfQ.UAkv"
-    + "ZmlX9sj8Hgve1kkq7tcf73-aDshLusxnAsW-1-9izS14cPGehzX47-MyResL"
-    + "jwlr7W70t0jMjL8ihdgj5aVSl-W3UVw_tt8FfO60b-GDfMt_vCAyAk2N9lts"
-    + "n7Ql5NiQXeTM6NVDLCCBM27FAUuTiDVEJc-F7WgmXWip4nE"
-)
+mock_token = "some_mock_token"  # nosec
 
 
 @pytest.fixture
