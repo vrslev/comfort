@@ -3,7 +3,6 @@ FROM python:3.9-slim-buster
 
 ARG ARCH=amd64
 ENV PYTHONUNBUFFERED 1
-ENV NODE_VERSION=14.17.6
 
 RUN apt-get update && \
   apt-get install --no-install-recommends -y \
@@ -30,7 +29,6 @@ RUN apt-get update && \
   # For psycopg2
   libpq-dev \
   # For arm64 python wheel builds
-  # TODO: If ARM after installing gcc and g++ purge it: https://github.com/getsentry/sentry/blob/master/docker/Dockerfile
   && if [ "$(uname -m)" = "aarch64" ]; then apt-get install --no-install-recommends -y gcc g++; fi \
   # Detect arch, download and install wkhtmltox
   && if [ "$(uname -m)" = "aarch64" ]; then export ARCH=arm64; fi \
@@ -61,6 +59,7 @@ RUN git clone --depth 1 -b develop https://github.com/frappe/frappe_docker ~/fra
 USER frappe
 
 # Install nvm with node
+ENV NODE_VERSION=14.18.0
 ENV NVM_DIR=/home/frappe/.nvm
 ENV PATH="/home/frappe/.nvm/versions/node/v${NODE_VERSION}/bin/:${PATH}"
 RUN wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash \
