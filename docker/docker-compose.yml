@@ -3,6 +3,7 @@ version: "3"
 services:
   traefik:
     image: traefik:2.5
+    restart: on-failure
     command:
       - --providers.docker=true
       - --providers.docker.exposedbydefault=false
@@ -14,13 +15,15 @@ services:
       - --certificatesResolvers.myResolver.acme.httpChallenge.entrypoint=web
       - --certificatesResolvers.myResolver.acme.email=${LETSENCRYPT_EMAIL}
       - --certificatesResolvers.myResolver.acme.storage=/letsencrypt/acme.json
+    depends_on:
+      - nginx
     ports:
       - 80:80
       - 443:443
     volumes:
       - cert-vol:/letsencrypt
       - /var/run/docker.sock:/var/run/docker.sock:ro
-    userns_mode: "host"
+    userns_mode: host
 
   nginx:
     image: cr.yandex/crpdmuh1072ntg30t18g/comfort-nginx:${COMFORT_VERSION}
@@ -33,6 +36,11 @@ services:
     environment:
       FRAPPE_PY: app
       FRAPPE_SOCKETIO: socketio
+    depends_on:
+      app:
+        condition: service_healthy
+      socketio:
+        condition: service_healthy
     labels:
       - traefik.enable=true
       # SITE_NAME and SITES variables from frappe_docker should be for Nginx config.
@@ -46,48 +54,26 @@ services:
       - sites-vol:/var/www/html/sites:rw
       - assets-vol:/assets:rw
 
-  mariadb:
-    # TODO: Healthchecks: https://docs.github.com/en/actions/using-containerized-services/creating-postgresql-service-containers
-    image: mariadb:10.6
-    restart: on-failure
-    command:
-      - --character-set-server=utf8mb4
-      - --collation-server=utf8mb4_unicode_ci
-      - --skip-character-set-client-handshake
-      - --skip-innodb-read-only-compressed # Temporary fix for MariaDB 10.6
-    environment:
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
-      # Sometimes db initialization takes longer than 10 seconds and site-creator goes away.
-      # Frappe doesn't use CONVERT_TZ() function that requires time zone info, so we can just skip it.
-      MYSQL_INITDB_SKIP_TZINFO: 1
-    volumes:
-      - mariadb-vol:/var/lib/mysql
-
-  site-creator:
-    image: cr.yandex/crpdmuh1072ntg30t18g/comfort-worker:${COMFORT_VERSION}
-    command: new
-    environment:
-      SITE_NAME: ${DOMAIN}
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
-      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
-      INSTALL_APPS: comfort
-      SENTRY_DSN: ${SENTRY_DSN}
-    depends_on:
-      - mariadb
-      - redis-cache
-      - redis-queue
-    volumes:
-      - sites-vol:/home/frappe/frappe-bench/sites:rw
-      - logs-vol:/home/frappe/frappe-bench/logs:rw
-
   app:
     image: cr.yandex/crpdmuh1072ntg30t18g/comfort-worker:${COMFORT_VERSION}
     restart: on-failure
+    healthcheck:
+      test: wget http://0.0.0.0:8000 -O - 2>&1 | grep 'NOT FOUND' || exit 1
+      interval: 1s
     build:
       context: ..
       dockerfile: docker/worker.Dockerfile
       args:
         FRAPPE_VERSION: ${FRAPPE_VERSION}
+    depends_on:
+      mariadb:
+        condition: service_healthy
+      redis-cache:
+        condition: service_started
+      redis-queue:
+        condition: service_started
+      redis-socketio:
+        condition: service_started
     environment:
       MARIADB_HOST: mariadb
       REDIS_CACHE: redis-cache:6379
@@ -101,34 +87,50 @@ services:
       - assets-vol:/home/frappe/frappe-bench/sites/assets:rw
       - logs-vol:/home/frappe/frappe-bench/logs:rw
 
-  redis-socketio:
-    image: redis:alpine
-    restart: on-failure
-    volumes:
-      - redis-socketio-vol:/data
-
-  socketio:
-    image: frappe/frappe-socketio:${FRAPPE_VERSION}
-    restart: on-failure
+  site-creator:
+    image: cr.yandex/crpdmuh1072ntg30t18g/comfort-worker:${COMFORT_VERSION}
+    command: new
+    environment:
+      SITE_NAME: ${DOMAIN}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      INSTALL_APPS: comfort
+      SENTRY_DSN: ${SENTRY_DSN}
     depends_on:
-      - redis-socketio
+      - app
     volumes:
       - sites-vol:/home/frappe/frappe-bench/sites:rw
       - logs-vol:/home/frappe/frappe-bench/logs:rw
 
-  redis-cache:
-    image: redis:alpine
-    command:
-      - --save ""
+  socketio:
+    image: frappe/frappe-socketio:${FRAPPE_VERSION}
     restart: on-failure
-    volumes:
-      - redis-cache-vol:/data
+    healthcheck:
+      test: |
+        cd /home/frappe/frappe-bench/apps/frappe
+        echo "
+          var io = require('socket.io-client');
+          var socket = io('http://127.0.0.1:9000', {reconnection: false, timeout: 5000});
+          socket.on('connect', function() {
+              socket.close();
+          });
 
-  redis-queue:
-    image: redis:alpine
-    restart: on-failure
+          function error(data) {
+              socket.disconnect();
+              console.log('Connected!')
+          }
+
+          socket.on('connect_error', error);
+          socket.on('connect_timeout', error);
+          socket.on('error', error);
+          socket.on('disconnect', error);
+        " | node - | grep "Connected!" || exit 1
+      interval: 1s
+    depends_on:
+      - app
     volumes:
-      - redis-queue-vol:/data
+      - sites-vol:/home/frappe/frappe-bench/sites:rw
+      - logs-vol:/home/frappe/frappe-bench/logs:rw
 
   worker-default:
     image: cr.yandex/crpdmuh1072ntg30t18g/comfort-worker:${COMFORT_VERSION}
@@ -138,8 +140,7 @@ services:
       WORKER_TYPE: default
       SENTRY_DSN: ${SENTRY_DSN}
     depends_on:
-      - redis-queue
-      - redis-cache
+      - app
     volumes:
       - sites-vol:/home/frappe/frappe-bench/sites:rw
       - logs-vol:/home/frappe/frappe-bench/logs:rw
@@ -152,8 +153,7 @@ services:
       WORKER_TYPE: short
       SENTRY_DSN: ${SENTRY_DSN}
     depends_on:
-      - redis-queue
-      - redis-cache
+      - app
     volumes:
       - sites-vol:/home/frappe/frappe-bench/sites:rw
       - logs-vol:/home/frappe/frappe-bench/logs:rw
@@ -166,8 +166,7 @@ services:
       WORKER_TYPE: long
       SENTRY_DSN: ${SENTRY_DSN}
     depends_on:
-      - redis-queue
-      - redis-cache
+      - app
     volumes:
       - sites-vol:/home/frappe/frappe-bench/sites:rw
       - logs-vol:/home/frappe/frappe-bench/logs:rw
@@ -179,11 +178,49 @@ services:
     environment:
       SENTRY_DSN: ${SENTRY_DSN}
     depends_on:
-      - redis-queue
-      - redis-cache
+      - app
     volumes:
       - sites-vol:/home/frappe/frappe-bench/sites:rw
       - logs-vol:/home/frappe/frappe-bench/logs:rw
+
+  mariadb:
+    image: mariadb:10.6
+    restart: on-failure
+    healthcheck:
+      test: mysqladmin ping -h localhost --password=${DB_PASSWORD}
+      interval: 1s
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --skip-character-set-client-handshake
+      - --skip-innodb-read-only-compressed # Temporary fix for MariaDB 10.6
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      # Sometimes db initialization takes longer than 10 seconds and site-creator goes away.
+      # Frappe doesn't use CONVERT_TZ() function that requires time zone info, so we can just skip it.
+      MYSQL_INITDB_SKIP_TZINFO: 1
+    volumes:
+      - mariadb-vol:/var/lib/mysql
+
+  redis-socketio:
+    image: redis:alpine
+    restart: on-failure
+    volumes:
+      - redis-socketio-vol:/data
+
+  redis-cache:
+    image: redis:alpine
+    restart: on-failure
+    command:
+      - --save ""
+    volumes:
+      - redis-cache-vol:/data
+
+  redis-queue:
+    image: redis:alpine
+    restart: on-failure
+    volumes:
+      - redis-queue-vol:/data
 
 volumes:
   mariadb-vol:
