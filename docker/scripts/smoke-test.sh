@@ -1,4 +1,3 @@
-#!/bin/bash
 set -e
 
 ULINE="\e[1m\e[4m"
@@ -40,5 +39,9 @@ docker-compose -p $PROJECT_NAME up -d
 bash scripts/check-health.sh
 pingSite
 
-echo -e "${NEWLINE}${ULINE}Prune Containers${ENDULINE}"
-docker-compose -p $PROJECT_NAME down -v --remove-orphans
+if [ -z $CI ]; then
+  echo -e "${NEWLINE}${ULINE}Prune Containers${ENDULINE}"
+  docker-compose -p $PROJECT_NAME down -v --remove-orphans
+fi
+
+rm -rf .env

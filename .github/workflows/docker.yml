@@ -12,7 +12,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 15
 
     steps:
       - uses: actions/checkout@v2
@@ -23,71 +23,57 @@ jobs:
           username: oauth
           password: ${{ secrets.YANDEX_TOKEN }}
 
-      - name: Set up build args
-        run: echo FRAPPE_VERSION=$(awk -F '"' '/reqd_frappe_version/{print $2}' comfort/hooks.py) >>$GITHUB_ENV
-
       - name: Nginx meta
         id: nginx-meta
         uses: docker/metadata-action@v3
         with:
           images: cr.yandex/crpdmuh1072ntg30t18g/comfort-nginx
+          bake-target: nginx
 
       - name: Worker meta
         id: worker-meta
         uses: docker/metadata-action@v3
         with:
           images: cr.yandex/crpdmuh1072ntg30t18g/comfort-worker
+          bake-target: worker
 
-      - name: Build Nginx image
-        uses: docker/build-push-action@v2
-        with:
-          file: docker/nginx.Dockerfile
-          build-args: FRAPPE_VERSION=${{ env.FRAPPE_VERSION }}
-          pull: true
-          load: true
-          cache-from: type=gha
-          cache-to: type=gha
-          tags: ${{ steps.nginx-meta.outputs.tags }}
-          labels: ${{ steps.nginx-meta.outputs.labels }}
+      - name: Merge metas
+        id: meta
+        run: |
+          dicts="$(cat $NGINX_BAKE_FILE | jq .target) $(cat $WORKER_BAKE_FILE | jq .target)"
+          targets="$(echo $dicts | jq -s add)"
+          res="$(echo '{"target": {}}' | jq ".target += ${targets}")"
+          echo "$res"
+          bake_file_path=/tmp/worker-nginx-meta.json
+          touch /tmp/worker-nginx-meta.json
+          echo "$res" > /tmp/worker-nginx-meta.json
+          echo "::set-output name=bake-file::/tmp/worker-nginx-meta.json"
+        env:
+          NGINX_BAKE_FILE: ${{ steps.nginx-meta.outputs.bake-file }}
+          WORKER_BAKE_FILE: ${{ steps.worker-meta.outputs.bake-file }}
 
-      - name: Build Worker image
-        uses: docker/build-push-action@v2
+      - name: Set up build args
+        run: |
+          echo FRAPPE_VERSION=$(awk -F '"' '/reqd_frappe_version/{print $2}' comfort/hooks.py) >>$GITHUB_ENV
+          echo COMFORT_VERSION=${{ fromJSON(steps.nginx-meta.outputs.json).labels['org.opencontainers.image.version'] }} >>$GITHUB_ENV
+
+      - name: Build images
+        uses: docker/bake-action@master
         with:
-          file: docker/worker.Dockerfile
-          build-args: FRAPPE_VERSION=${{ env.FRAPPE_VERSION }}
-          pull: true
+          files: |
+            ./docker-bake.hcl
+            ${{ steps.meta.outputs.bake-file }}
           load: true
-          cache-from: type=gha
-          cache-to: type=gha
-          tags: ${{ steps.worker-meta.outputs.tags }}
-          labels: ${{ steps.worker-meta.outputs.labels }}
 
       - name: Smoke Test
-        run: |
-          export COMFORT_VERSION=${{ fromJSON(steps.nginx-meta.outputs.json).labels['org.opencontainers.image.version'] }}
-          cd docker
-          bash scripts/smoke-test.sh
+        working-directory: docker
+        run: bash scripts/smoke-test.sh
 
-      - name: Push Nginx image
+      - name: Push images
         if: github.event_name != 'pull_request'
-        uses: docker/build-push-action@v2
+        uses: docker/bake-action@master
         with:
-          file: docker/nginx.Dockerfile
-          build-args: FRAPPE_VERSION=${{ env.FRAPPE_VERSION }}
+          files: |
+            ./docker-bake.hcl
+            ${{ steps.meta.outputs.bake-file }}
           push: true
-          cache-from: type=gha
-          cache-to: type=gha
-          tags: ${{ steps.nginx-meta.outputs.tags }}
-          labels: ${{ steps.nginx-meta.outputs.labels }}
-
-      - name: Push Worker image
-        if: github.event_name != 'pull_request'
-        uses: docker/build-push-action@v2
-        with:
-          file: docker/worker.Dockerfile
-          build-args: FRAPPE_VERSION=${{ env.FRAPPE_VERSION }}
-          push: true
-          cache-from: type=gha
-          cache-to: type=gha
-          tags: ${{ steps.worker-meta.outputs.tags }}
-          labels: ${{ steps.worker-meta.outputs.labels }}
