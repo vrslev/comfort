@@ -2,30 +2,18 @@ import { init, setUser } from "@sentry/browser";
 import { Integrations } from "@sentry/tracing";
 
 export function init_sentry() {
-  if (
-    localStorage.sentry_dsn == "null" ||
-    localStorage.sentry_release == "null"
-  ) {
-    frappe.call({
-      method: "comfort.integrations.sentry.get_info",
-      callback: (r) => {
-        if (!r.message) return;
-        localStorage.sentry_dsn = r.message.dsn;
-        localStorage.sentry_release = r.message.release;
-        localStorage.sentry_user = r.message.user;
-      },
-    });
-  }
-
-  if (localStorage.sentry_dsn != "null") {
-    init({
-      dsn: localStorage.sentry_dsn,
-      release: localStorage.sentry_release,
-      integrations: [new Integrations.BrowserTracing()],
-      tracesSampleRate: 1.0,
-    });
-    if (frappe.session.user_email) {
-      setUser({ email: frappe.session.user_email });
-    }
-  }
+  frappe.call({
+    method: "comfort.integrations.sentry.get_info",
+    callback: (r) => {
+      init({
+        dsn: r.message.sentry_dsn,
+        release: r.message.release,
+        integrations: [new Integrations.BrowserTracing()],
+        tracesSampleRate: 1.0,
+      });
+      if (frappe.session.user_email) {
+        setUser({ email: frappe.session.user_email });
+      }
+    },
+  });
 }
