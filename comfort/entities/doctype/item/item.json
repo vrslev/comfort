@@ -97,7 +97,7 @@
  "index_web_pages_for_search": 1,
  "links": [],
  "max_attachments": 1,
- "modified": "2021-08-31 22:08:16.146716",
+ "modified": "2021-10-11 15:10:57.918550",
  "modified_by": "Administrator",
  "module": "Entities",
  "name": "Item",
@@ -112,6 +112,8 @@
    "write": 1
   },
   {
+   "create": 1,
+   "delete": 1,
    "read": 1,
    "role": "Comfort User",
    "write": 1
