@@ -30,6 +30,7 @@ while [[ -z "${site_creator_log}" ]]; do
   echo "Waiting for site creation"
   site_creator_log=$(eval "$cmd")
 done
+echo $site_creator_log
 echo "Site created"
 
 docker stop frappe_doctor
