@@ -64,8 +64,7 @@ jobs:
 
       - name: Smoke Test
         run: |
-          # TODO: Should I use version from setup.py?
-          export COMFORT_VERSION=${GITHUB_REF##*/}
+          export COMFORT_VERSION=${{ fromJSON(steps.nginx-meta.outputs.json).labels['org.opencontainers.image.version'] }}
           cd docker
           bash scripts/smoke-test.sh
 
