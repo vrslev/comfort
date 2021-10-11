@@ -59,7 +59,7 @@ services:
     restart: on-failure
     healthcheck:
       test: wget http://0.0.0.0:8000 -O - 2>&1 | grep 'NOT FOUND' || exit 1
-      interval: 1s
+      retries: 15
     build:
       context: ..
       dockerfile: docker/worker.Dockerfile
@@ -126,6 +126,7 @@ services:
           socket.on('disconnect', error);
         " | node - | grep "Connected!" || exit 1
       interval: 1s
+      retries: 15
     depends_on:
       - app
     volumes:
@@ -188,7 +189,7 @@ services:
     restart: on-failure
     healthcheck:
       test: mysqladmin ping -h localhost --password=${DB_PASSWORD}
-      interval: 1s
+      retries: 15
     command:
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_unicode_ci
