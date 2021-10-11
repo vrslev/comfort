@@ -3,6 +3,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.5.3 (2021-10-11)
+### Fix
+* **Sales Order:** Copying messages ([`d1f8e10`](https://github.com/vrslev/comfort/commit/d1f8e10dbaa0cc76e05b9b57a28a3235513293a2))
+
 ## v0.5.2 (2021-10-11)
 ### Fix
 * Permissions ([`3e31e9d`](https://github.com/vrslev/comfort/commit/3e31e9d416ab0d5b208a36a42db387d0ff1d3b48))
