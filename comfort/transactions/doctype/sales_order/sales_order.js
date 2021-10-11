@@ -218,31 +218,45 @@ comfort.SalesOrderController = frappe.ui.form.Controller.extend({
       });
     }
 
+    async function copy_to_clipboard_from_endpoint(endpoint) {
+      async function get_msg() {
+        var r = await cur_frm.call({
+          method: endpoint,
+          doc: cur_frm.doc,
+        });
+        return await r.message;
+      }
+
+      try {
+        navigator.clipboard.write([
+          // eslint-disable-next-line no-undef
+          new ClipboardItem({ "text/plain": get_msg() }),
+        ]);
+      } catch (e) {
+        // Chrome: https://bugs.chromium.org/p/chromium/issues/detail?id=1014310
+        navigator.clipboard.write([
+          // eslint-disable-next-line no-undef
+          new ClipboardItem({
+            "text/plain": new Blob([await get_msg()], { type: "text/plain" }),
+          }),
+        ]);
+      }
+
+      frappe.show_alert({
+        indicator: "green",
+        message: __("Copied to clipboard."),
+      });
+    }
+
     if (!this.frm.is_new() && this.frm.doc.docstatus == 0) {
       this.frm.add_custom_button(__("Check order Message"), () => {
-        this.frm.call({
-          method: "generate_check_order_message",
-          doc: this.frm.doc,
-          callback: (r) => {
-            if (r.message) {
-              copy_to_clipboard(r.message);
-            }
-          },
-        });
+        copy_to_clipboard_from_endpoint("generate_check_order_message");
       });
     }
 
     if (this.frm.doc.delivery_status == "To Deliver") {
       this.frm.add_custom_button(__("Pickup order Message"), () => {
-        this.frm.call({
-          method: "generate_pickup_order_message",
-          doc: this.frm.doc,
-          callback: (r) => {
-            if (r.message) {
-              copy_to_clipboard(r.message);
-            }
-          },
-        });
+        copy_to_clipboard_from_endpoint("generate_pickup_order_message");
       });
     }
 
@@ -642,20 +656,6 @@ function quick_add_items(text) {
 
     recalculate_global_item_totals(cur_frm);
     refresh_field("items");
-  });
-}
-
-function copy_to_clipboard(message) {
-  let input = $("<textarea>");
-  $("body").append(input);
-  input.val(message).select();
-
-  document.execCommand("copy");
-  input.remove();
-
-  frappe.show_alert({
-    indicator: "green",
-    message: __("Copied to clipboard."),
   });
 }
 
