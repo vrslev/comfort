@@ -3,6 +3,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.5.1 (2021-10-11)
+### Fix
+* **Sentry:** Did not initialize ([`279b197`](https://github.com/vrslev/comfort/commit/279b197fa30455e7ec790cc823717007e47f83ee))
+
 ## v0.5.0 (2021-10-10)
 ### Feature
 * **Purchase Order:** Fetch items specs before submit ([`9ae1940`](https://github.com/vrslev/comfort/commit/9ae19401a825dba90d9a47e47606f82b355a6bfb))
