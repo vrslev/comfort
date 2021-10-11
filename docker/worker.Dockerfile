@@ -3,7 +3,6 @@ FROM python:3.9-slim-buster
 
 ARG ARCH=amd64
 ENV PYTHONUNBUFFERED 1
-ENV NODE_VERSION=14.17.6
 
 RUN apt-get update && \
   apt-get install --no-install-recommends -y \
@@ -60,6 +59,7 @@ RUN git clone --depth 1 -b develop https://github.com/frappe/frappe_docker ~/fra
 USER frappe
 
 # Install nvm with node
+ENV NODE_VERSION=14.18.0
 ENV NVM_DIR=/home/frappe/.nvm
 ENV PATH="/home/frappe/.nvm/versions/node/v${NODE_VERSION}/bin/:${PATH}"
 RUN wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash \
