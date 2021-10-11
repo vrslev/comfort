@@ -1,4 +1,3 @@
-#!/bin/bash
 set -e
 
 ULINE="\e[1m\e[4m"
@@ -29,9 +28,9 @@ while [[ -z "${site_creator_log}" ]]; do
   sleep 3
   echo "Waiting for site creation"
   site_creator_log=$(eval "$cmd")
+  echo "$site_creator_log"
 done
-echo $site_creator_log
 echo "Site created"
 
-docker stop frappe_doctor
-docker rm frappe_doctor
+docker stop frappe_doctor >/dev/null
+docker rm frappe_doctor >/dev/null
