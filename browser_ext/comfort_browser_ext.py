@@ -7,6 +7,7 @@ import sys
 from argparse import ArgumentParser, Namespace
 from configparser import ConfigParser
 from dataclasses import dataclass
+from html import unescape
 from importlib.metadata import distribution
 from subprocess import check_call  # nosec
 from typing import Any
@@ -22,9 +23,7 @@ from requests import Response
 PACKAGE_NAME = "comfort_browser_ext"
 
 
-def unshorten_item_urls(html: str):
-    soup = BeautifulSoup(html, "html.parser")
-
+def unshorten_item_urls(soup: BeautifulSoup):
     for btn_tag in soup.find_all(re.compile("a|img|button")):
         btn_tag: BeautifulSoup
         url: str | None = btn_tag.get("data-link-url")  # type: ignore
@@ -41,7 +40,8 @@ def unshorten_item_urls(html: str):
 
 
 def get_item_codes(html: str):
-    text = unshorten_item_urls(html).get_text()
+    soup = BeautifulSoup(unescape(html), "html.parser")
+    text = unshorten_item_urls(soup).get_text()
     return ikea_api_wrapped.parse_item_codes(text)
 
 

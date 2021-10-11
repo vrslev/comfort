@@ -39,35 +39,35 @@ function get_vk_url() {
   return url;
 }
 
-function get_html() {
-  function get_selected_html() {
-    var html = "";
-    if (typeof window.getSelection != "undefined") {
-      var sel = window.getSelection();
-      if (sel.rangeCount) {
-        var container = document.createElement("div");
-        for (var i = 0, len = sel.rangeCount; i < len; ++i) {
-          container.appendChild(sel.getRangeAt(i).cloneContents());
-        }
-        html = container.innerHTML;
-      }
-    } else if (typeof document.selection != "undefined") {
-      if (document.selection.type == "Text") {
-        html = document.selection.createRange().htmlText;
-      }
-    }
-    return html;
-  }
-  var html = exec(get_selected_html);
-  if (!html) {
-    html = " ";
-  }
-  return html;
+function escape_html(text) {
+  if (!text.match(/\w|\d/)) return "None";
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 }
 
-function escape_quotes(text) {
-  if (!text) return;
-  text.replace('"', '"');
+function get_html() {
+  function get_selected_html() {
+    var sel = window.getSelection();
+    if (sel.rangeCount) {
+      var container = document.createElement("div");
+      for (let i = 0; i < sel.rangeCount; i++) {
+        container.appendChild(sel.getRangeAt(i).cloneContents());
+      }
+      return container.innerHTML;
+    } else {
+      return "None";
+    }
+  }
+  var html = exec(get_selected_html);
+  return escape_html(html);
+}
+
+function quote(text) {
+  if (!text) return " ";
   return `"${text}"`;
 }
 
@@ -82,9 +82,9 @@ function execute_python_script(customer_name, vk_url, html) {
       "venv/bin/python",
       "-m",
       "comfort_browser_ext",
-      escape_quotes(customer_name),
-      escape_quotes(vk_url),
-      escape_quotes(html),
+      quote(customer_name),
+      quote(vk_url),
+      quote(escape_html(html)),
     ].join(" ")
   );
 }
