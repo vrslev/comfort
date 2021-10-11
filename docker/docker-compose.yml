@@ -37,10 +37,8 @@ services:
       FRAPPE_PY: app
       FRAPPE_SOCKETIO: socketio
     depends_on:
-      app:
-        condition: service_healthy
-      socketio:
-        condition: service_healthy
+      - app
+      - socketio
     labels:
       - traefik.enable=true
       # SITE_NAME and SITES variables from frappe_docker should be for Nginx config.
@@ -57,9 +55,6 @@ services:
   app:
     image: cr.yandex/crpdmuh1072ntg30t18g/comfort-worker:${COMFORT_VERSION}
     restart: on-failure
-    healthcheck:
-      test: wget http://0.0.0.0:8000 -O - 2>&1 | grep 'NOT FOUND' || exit 1
-      retries: 15
     build:
       context: ..
       dockerfile: docker/worker.Dockerfile
@@ -105,28 +100,6 @@ services:
   socketio:
     image: frappe/frappe-socketio:${FRAPPE_VERSION}
     restart: on-failure
-    healthcheck:
-      test: |
-        cd /home/frappe/frappe-bench/apps/frappe
-        echo "
-          var io = require('socket.io-client');
-          var socket = io('http://127.0.0.1:9000', {reconnection: false, timeout: 5000});
-          socket.on('connect', function() {
-              socket.close();
-          });
-
-          function error(data) {
-              socket.disconnect();
-              console.log('Connected!')
-          }
-
-          socket.on('connect_error', error);
-          socket.on('connect_timeout', error);
-          socket.on('error', error);
-          socket.on('disconnect', error);
-        " | node - | grep "Connected!" || exit 1
-      interval: 1s
-      retries: 15
     depends_on:
       - app
     volumes:
@@ -189,6 +162,7 @@ services:
     restart: on-failure
     healthcheck:
       test: mysqladmin ping -h localhost --password=${DB_PASSWORD}
+      interval: 1s
       retries: 15
     command:
       - --character-set-server=utf8mb4
