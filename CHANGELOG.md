@@ -3,6 +3,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.5.2 (2021-10-11)
+### Fix
+* Permissions ([`3e31e9d`](https://github.com/vrslev/comfort/commit/3e31e9d416ab0d5b208a36a42db387d0ff1d3b48))
+
 ## v0.5.1 (2021-10-11)
 ### Fix
 * **Sentry:** Did not initialize ([`279b197`](https://github.com/vrslev/comfort/commit/279b197fa30455e7ec790cc823717007e47f83ee))
