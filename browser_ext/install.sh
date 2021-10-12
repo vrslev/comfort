@@ -21,4 +21,4 @@ pip install -e $dir/comfort
 # Create config
 cd $dir/comfort
 python -m comfort_browser_ext || true
-open $dir/comfort/config.ini
+open -e $dir/comfort/config.ini
