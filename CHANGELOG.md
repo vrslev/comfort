@@ -3,6 +3,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.6.0 (2021-10-12)
+### Feature
+* Empty commit ([`f9fd7dd`](https://github.com/vrslev/comfort/commit/f9fd7dd492e787672dd870370372def805dae9db))
+
 ## v0.5.3 (2021-10-11)
 ### Fix
 * **Sales Order:** Copying messages ([`d1f8e10`](https://github.com/vrslev/comfort/commit/d1f8e10dbaa0cc76e05b9b57a28a3235513293a2))
