@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from copy import deepcopy
 from datetime import datetime, timedelta
+from types import SimpleNamespace
 from typing import Callable, Literal
 
 import pytest
@@ -26,6 +27,7 @@ from comfort.transactions.doctype.purchase_order_item_to_sell.purchase_order_ite
 )
 from comfort.transactions.doctype.sales_order.sales_order import (
     SalesOrder,
+    _SplitOrderItem,
     get_sales_orders_not_in_purchase_order,
     has_linked_delivery_trip,
     validate_params_from_available_stock,
@@ -807,6 +809,71 @@ def test_get_pickup_order_message_context_not_has_delivery(sales_order: SalesOrd
     sales_order.validate()
     context = sales_order._get_pickup_order_message_context()
     assert context["has_delivery"] == False
+
+
+def test_validate_split_order_counters_are_same(sales_order: SalesOrder):
+    counter = count_qty(sales_order.items)
+    with pytest.raises(
+        ValidationError, match="Can't split Sales Order and include all the items"
+    ):
+        sales_order._validate_split_order(counter)
+
+
+def test_validate_split_order_no_such_item(sales_order: SalesOrder):
+    counter = count_qty(sales_order.items)
+    item_code = "random item code"
+    counter[item_code] = 10
+
+    with pytest.raises(ValidationError, match=f"No Item {item_code} in Sales Order"):
+        sales_order._validate_split_order(counter)
+
+
+def test_validate_split_order_insufficient_qty(sales_order: SalesOrder):
+    counter = count_qty(sales_order.items)
+    item_code = list(counter.keys())[0]
+    qty_before = counter[item_code]
+    counter[item_code] += 1
+    qty_after = counter[item_code]
+
+    with pytest.raises(
+        ValidationError,
+        match=f"Insufficient quantity for Item {item_code}. Available: {qty_before}, you have: {qty_after}",
+    ):
+        sales_order._validate_split_order(counter)
+
+
+def test_split_order(sales_order: SalesOrder):
+    # Remove items and move child items to ordinary items
+    sales_order.set_child_items()
+    sales_order.items = []
+    sales_order.extend(
+        "items",
+        [
+            {"item_code": child.item_code, "qty": child.qty}
+            for child in sales_order.child_items
+        ],
+    )
+    sales_order.insert()
+
+    counter_before = count_qty(sales_order.items)
+
+    item_code, qty = list(count_qty(sales_order.items).items())[0]
+    items_to_split: list[_SplitOrderItem] = [{"item_code": item_code, "qty": qty}]
+
+    new_doc_name = sales_order.split_order(items_to_split)
+
+    assert sales_order.edit_commission == True
+    exp_counter = counter_before.copy()
+    del exp_counter[item_code]
+    assert count_qty(sales_order.items) == exp_counter
+
+    new_doc = get_doc(SalesOrder, new_doc_name)
+    assert new_doc.customer == sales_order.customer
+    assert count_qty(new_doc.items) == count_qty(
+        (SimpleNamespace(**items_to_split[0]),)
+    )
+    assert new_doc.commission
+    assert new_doc.edit_commission == True
 
 
 def test_has_linked_delivery_trip_true(sales_order: SalesOrder):
