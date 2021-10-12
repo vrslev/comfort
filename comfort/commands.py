@@ -38,6 +38,7 @@ def _cleanup():
     )
     for doctype in doctypes:
         if doctype.issingle:  # type: ignore
+            # TODO: Use frappe.db.delete
             frappe.db.sql("DELETE FROM tabSingles WHERE doctype=%s", (doctype.name,))
         else:
             frappe.db.sql(f"DELETE FROM `tab{doctype.name}`")  # nosec

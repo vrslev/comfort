@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+from collections import Counter
 from datetime import datetime, timedelta
 from types import SimpleNamespace
 from typing import Any, Iterable, Literal, TypedDict
@@ -14,6 +15,7 @@ from comfort import (
     ValidationError,
     _,
     count_qty,
+    counters_are_same,
     doc_exists,
     get_all,
     get_cached_doc,
@@ -45,12 +47,17 @@ from ..sales_order_item.sales_order_item import SalesOrderItem
 from ..sales_order_service.sales_order_service import SalesOrderService
 
 
+class _SplitOrderItem(TypedDict):
+    item_code: str
+    qty: int
+
+
 class SalesOrder(TypedDocument):
     doctype: Literal["Sales Order"]
 
     customer: str
-    items: list[SalesOrderItem]
-    services: list[SalesOrderService]
+    items: list[SalesOrderItem] = []
+    services: list[SalesOrderService] = []
     commission: int
     edit_commission: bool
     discount: int
@@ -62,7 +69,7 @@ class SalesOrder(TypedDocument):
     service_amount: int
     total_weight: float
     margin: int
-    child_items: list[SalesOrderChildItem]
+    child_items: list[SalesOrderChildItem] = []
     status: Literal["Draft", "In Progress", "Completed", "Cancelled"]
     payment_status: Literal["", "Unpaid", "Partially Paid", "Paid", "Overpaid"]
     per_paid: float
@@ -705,6 +712,53 @@ class SalesOrder(TypedDocument):
                 )
             )
         self.save()
+
+    def _validate_split_order(self, qty_counter: Counter[str]):
+        cur_counter = count_qty(self.items)
+
+        if counters_are_same(cur_counter, qty_counter):
+            raise ValidationError(
+                _("Can't split Sales Order and include all the items")
+            )
+
+        for item_code, qty in qty_counter.items():
+            if item_code not in cur_counter:
+                raise ValidationError(_("No Item {} in Sales Order").format(item_code))
+            if cur_counter[item_code] < qty:
+                raise ValidationError(
+                    _(
+                        "Insufficient quantity for Item {}. Available: {}, you have: {}"
+                    ).format(item_code, cur_counter[item_code], qty)
+                )
+
+    @frappe.whitelist()
+    def split_order(self, items: list[_SplitOrderItem]):
+        objectified_items = [SimpleNamespace(**i) for i in items]
+        new_counter = count_qty(objectified_items)
+
+        self._validate_split_order(new_counter)
+
+        for item in self.items:
+            item.qty -= new_counter[item.item_code]
+            del new_counter[item.item_code]
+        self.edit_commission = True
+
+        doc = new_doc(SalesOrder)
+        doc.extend(
+            "items",
+            [
+                {"item_code": item_code, "qty": qty}
+                # Creating new counter because old one is modified
+                for item_code, qty in count_qty(objectified_items).items()
+            ],
+        )
+        doc.customer = self.customer
+        doc.validate()
+        doc.edit_commission = True
+
+        self.save()
+        doc.save()
+        return doc.name
 
 
 @frappe.whitelist()
