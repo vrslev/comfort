@@ -13,6 +13,9 @@ class TelegramSettings(TypedDocument):
     bot_token: str | None
     chat_id: str | None
 
+    def on_change(self):
+        self.clear_cache()
+
 
 def get_bot():
     token: str | None = get_value("Telegram Settings", None, "bot_token")
