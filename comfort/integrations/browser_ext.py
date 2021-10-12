@@ -4,8 +4,8 @@ import re
 
 import frappe
 from comfort import doc_exists, get_doc, get_value, new_doc
-from comfort.comfort_core.ikea import fetch_items
 from comfort.entities.doctype.customer.customer import Customer, parse_vk_id
+from comfort.integrations.ikea import fetch_items
 from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
 from frappe.model.rename_doc import rename_doc
 from frappe.utils import get_url_to_form

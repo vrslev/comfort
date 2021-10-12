@@ -1,7 +1,7 @@
 import frappe
 from comfort import _, get_all
-from comfort.comfort_core.ikea import fetch_items
 from comfort.entities.doctype.item.item import Item
+from comfort.integrations.ikea import fetch_items
 
 
 @frappe.whitelist()

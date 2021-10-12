@@ -13,7 +13,9 @@ from comfort.comfort_core.doctype.ikea_settings.ikea_settings import (
     get_authorized_api,
     get_guest_api,
 )
-from comfort.comfort_core.ikea import (
+from comfort.entities.doctype.item.item import Item
+from comfort.entities.doctype.item_category.item_category import ItemCategory
+from comfort.integrations.ikea import (
     _child_items_are_same,
     _create_item,
     _create_item_categories,
@@ -25,8 +27,6 @@ from comfort.comfort_core.ikea import (
     get_purchase_history,
     get_purchase_info,
 )
-from comfort.entities.doctype.item.item import Item
-from comfort.entities.doctype.item_category.item_category import ItemCategory
 from tests.conftest import (
     mock_delivery_services,
     mock_purchase_history,

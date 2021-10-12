@@ -205,7 +205,7 @@ comfort.PurchaseOrderController = frappe.ui.form.Controller.extend({
         }
 
         frappe.call({
-          method: "comfort.comfort_core.ikea.get_purchase_info",
+          method: "comfort.integrations.ikea.get_purchase_info",
           args: {
             purchase_id: purchase_id,
             use_lite_id: use_lite_id,
@@ -244,7 +244,7 @@ comfort.PurchaseOrderController = frappe.ui.form.Controller.extend({
       .call({ method: "fetch_items_specs", doc: this.frm.doc })
       .then(() => {
         frappe.call({
-          method: "comfort.comfort_core.ikea.get_purchase_history",
+          method: "comfort.integrations.ikea.get_purchase_history",
           freeze: true,
           callback: (r) => {
             if (r.message && r.message.length > 0) {

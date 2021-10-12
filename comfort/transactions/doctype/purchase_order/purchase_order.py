@@ -21,13 +21,13 @@ from comfort import (
     group_by_attr,
     maybe_json,
 )
-from comfort.comfort_core.ikea import (
+from comfort.entities.doctype.child_item.child_item import ChildItem
+from comfort.finance import create_payment
+from comfort.integrations.ikea import (
     add_items_to_cart,
     fetch_items,
     get_delivery_services,
 )
-from comfort.entities.doctype.child_item.child_item import ChildItem
-from comfort.finance import create_payment
 from comfort.stock import create_checkout, create_receipt
 from comfort.transactions import AnyChildItem, delete_empty_items, merge_same_items
 from frappe.utils.data import add_to_date, getdate, now_datetime, today
