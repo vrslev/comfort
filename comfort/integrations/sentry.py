@@ -36,6 +36,7 @@ def _get_user_email() -> str | None:
         return frappe.get_value("User", frappe.session.user, "email")  # type: ignore
 
 
+# TODO: Don't catch validation errors by sentry
 def _init_sentry():  # pragma: no cover
     info = get_info()
     sentry_sdk.init(
