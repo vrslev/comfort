@@ -25,4 +25,3 @@ jobs:
           access_key_id: ${{ secrets.S3_BACKUP_ACCESS_KEY_ID }}
           secret_access_key: ${{ secrets.S3_BACKUP_SECRET_ACCESS_KEY }}
           endpoint_url: ${{ secrets.S3_BACKUP_ENDPOINT_URL }}
-
