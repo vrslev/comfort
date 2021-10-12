@@ -337,13 +337,13 @@ comfort.SalesOrderController = frappe.ui.form.Controller.extend({
 
           var dialog = new frappe.ui.Dialog({
             title: __("Choose combinations to split"),
+            size: "large",
             fields: [
               {
                 fieldname: "combinations",
                 fieldtype: "Table",
                 label: __("Combinations"),
                 cannot_add_rows: true,
-                size: "large",
                 reqd: 1,
                 data: [],
                 fields: fields,
@@ -408,6 +408,97 @@ comfort.SalesOrderController = frappe.ui.form.Controller.extend({
       }
     }
 
+    label = __("Split Order");
+    if (this.frm.doc.docstatus == 0) {
+      add_grid_button_to_the_right(
+        this.frm.fields_dict.items.grid,
+        label,
+        () => {
+          const fields = [
+            {
+              fieldtype: "Link",
+              fieldname: "item_code",
+              options: "Item",
+              in_list_view: 1,
+              label: __("Item Code"),
+              columns: 4,
+            },
+            {
+              fieldtype: "Int",
+              fieldname: "qty",
+              in_list_view: 1,
+              label: __("Qty"),
+              columns: 1,
+            },
+          ];
+
+          var dialog = new frappe.ui.Dialog({
+            title: __("Choose Items"),
+            size: "large",
+            fields: [
+              {
+                fieldname: "items",
+                fieldtype: "Table",
+                label: __("Items"),
+                cannot_add_rows: true,
+                reqd: 1,
+                data: this.frm.doc.items.map((item) => {
+                  return {
+                    item_code: item.item_code,
+                    item_name: item.item_name,
+                    qty: item.qty,
+                  };
+                }),
+                fields: fields,
+              },
+            ],
+            primary_action_label: __("Submit"),
+            primary_action: () => {
+              this.frm.call({
+                method: "split_order",
+                doc: this.frm.doc,
+                args: {
+                  items: dialog.fields_dict.items.grid
+                    .get_selected_children()
+                    .filter((i) => i.__checked)
+                    .map((i) => {
+                      return { item_code: i.item_code, qty: i.qty };
+                    }),
+                },
+                callback: (r) => {
+                  dialog.hide();
+                  if (!r.message) return;
+
+                  console.log(r.message);
+                  frappe.dom.freeze();
+                  this.frm.reload_doc();
+                  frappe.show_alert({
+                    message: __("Order is split"),
+                    indicator: "green",
+                  });
+                  frappe.set_route("sales-order", r.message).then(() => {
+                    frappe.utils.scroll_to(0);
+                    frappe.dom.unfreeze();
+                  });
+                },
+              });
+            },
+          });
+
+          // dialog.fields_dict.items.grid.display_status = "Read";
+          dialog.fields_dict.items.grid.wrapper
+            .find('[data-fieldname="item_code"]')
+            .unbind("click");
+          dialog.fields_dict.items.grid.grid_buttons.hide();
+          dialog.show();
+        }
+      );
+    } else {
+      let btn = this.frm.fields_dict.items.grid.custom_buttons[label];
+      if (btn) {
+        btn.addClass("hidden");
+      }
+    }
     // Add Open in VK button
     frappe.db
       .get_value("Customer", this.frm.doc.customer, "vk_url")
