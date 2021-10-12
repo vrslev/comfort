@@ -25,6 +25,7 @@ Bot Token,Токен бота
 Can only deliver Sales Orders that have delivery status To Deliver: {},Можно доставить только те заказы, у которых статус доставки — Доставить: {}
 Can only add compensation for submitted document,Можно добавить компенсацию только для подтверждённого документа
 Can't add child item that contains child items,Нельзя добавить дочерний товар в дочерний товар
+Can't split Sales Order and include all the items,Нельзя разделить заказ и включить все товары в новый
 Can fetch items specs only if status is Draft,"Загрузить новую информацию о товарах можно, только если статус заказа — Черновик"
 Can't fetch items specs if order is from Available Stock,"Нельзя загрузить новую информацию о товарах, если он из доступного запаса"
 "Can't receive purchase history, enter order number","Не удалось загрузить историю закупок, введите номер закупки"
@@ -136,6 +137,7 @@ My Profile,Мой профиль
 My Settings,Мои настройки
 New Account name,Новое название счёта
 Selected Purchase Order has no Items To Sell,В выбранной закупке нет товаров на продажу
+No Item {} in Sales Order,В заказе нет товара {}
 No Items in Available Actual stock,Нет товаров в доступном фактическом запасе
 No items to add available,"Нет товаров, которые можно добавить"
 No satisfying commission found,Не найдено удовлетворительной комиссии
@@ -143,6 +145,7 @@ Not allowed to cancel Sales Return,Не разрешено отменять во
 Not in Purchase Order,Не в закупке
 Old Parent,Предыдущий родитель
 Order Confirmation No,Номер подтверждения заказа
+Order is split,Заказ разделён
 Overpaid,Переплачено
 Paid,Оплачено
 Paid Amount,Оплаченная сумма
@@ -212,6 +215,7 @@ Service Amount,Сумма услуг
 Service Provider,Поставщик услуг
 Services,Услуги
 Split Combinations,Разделить комбинации
+Split Order,Разделить заказ
 Status of Purchase Order should be To Receive,Статус закупки должен быть Получить
 Status should be To Receive or Completed,Статус должен быть Получить или Завершено
 Stock,Запасы
