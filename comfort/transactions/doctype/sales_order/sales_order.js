@@ -135,89 +135,6 @@ comfort.SalesOrderController = frappe.ui.form.Controller.extend({
       }
     }
 
-    if (
-      this.frm.doc.docstatus == 0 &&
-      this.frm.doc.child_items &&
-      this.frm.doc.child_items.length > 0
-    ) {
-      this.frm.add_custom_button(__("Split Combinations"), () => {
-        const fields = [
-          {
-            fieldtype: "Link",
-            fieldname: "item_code",
-            options: "Item",
-            in_list_view: 1,
-            label: __("Item Code"),
-          },
-        ];
-
-        var dialog = new frappe.ui.Dialog({
-          title: __("Choose combinations to split"),
-          fields: [
-            {
-              fieldname: "combinations",
-              fieldtype: "Table",
-              label: __("Combinations"),
-              cannot_add_rows: true,
-              size: "large",
-              reqd: 1,
-              data: [],
-              fields: fields,
-            },
-          ],
-          primary_action_label: __("Save"),
-          primary_action: () => {
-            this.frm.call({
-              doc: this.frm.doc,
-              method: "split_combinations",
-              freeze: 1,
-              args: {
-                combos_docnames: dialog.fields_dict.combinations.grid
-                  .get_selected_children()
-                  .filter((d) => d.__checked)
-                  .map((d) => d.name),
-                save: true,
-              },
-              callback: () => {
-                dialog.hide();
-                frappe.show_alert({
-                  message: __("Combinations are split"),
-                  indicator: "green",
-                });
-              },
-            });
-          },
-        });
-
-        let parent_items = this.frm.doc.child_items.map(
-          (child) => child.parent_item_code
-        );
-        this.frm.doc.items.forEach((item) => {
-          if (parent_items.includes(item.item_code)) {
-            dialog.fields_dict.combinations.df.data.push({
-              name: item.name,
-              item_code: item.item_code,
-              item_name: item.item_name,
-            });
-          }
-        });
-        dialog.fields_dict.combinations.grid.refresh();
-
-        if (
-          !this.frm.doc.child_items ||
-          this.frm.doc.child_items.length == 0 ||
-          dialog.fields_dict.combinations.grid.data.length == 0
-        ) {
-          frappe.msgprint("В заказе нет комбинаций");
-          return;
-        }
-
-        dialog.fields_dict.combinations.grid.display_status = "Read";
-        dialog.fields_dict.combinations.grid.grid_buttons.hide();
-        dialog.show();
-      });
-    }
-
     async function copy_to_clipboard_from_endpoint(endpoint) {
       async function get_msg() {
         var r = await cur_frm.call({
@@ -358,29 +275,13 @@ comfort.SalesOrderController = frappe.ui.form.Controller.extend({
       });
     }
 
-    let grid = this.frm.fields_dict.items.grid;
-    let label = __("Fetch items specs");
-
-    if (
-      !this.frm.is_new() &&
-      this.frm.doc.docstatus == 0 &&
-      !this.frm.doc.from_available_stock
-    ) {
-      // Add "Fetch items specs" button
+    function add_grid_button_to_the_right(grid, label, action) {
       let wrapper = grid.wrapper.find('div[class="text-right"]')[0];
-
-      let action = () => {
-        this.frm.call({
-          method: "fetch_items_specs",
-          doc: this.frm.doc,
-          freeze: 1,
-        });
-      };
-
       let btn = grid.custom_buttons[label];
+
       if (!btn) {
         btn = $(
-          `<button class="btn btn-xs btn-secondary style="margin-right: 4px;">${label}</button>`
+          `<button class="btn btn-xs btn-secondary" style="margin-right: 4px;">${label}</button>`
         )
           .appendTo(wrapper)
           .on("click", action);
@@ -388,8 +289,120 @@ comfort.SalesOrderController = frappe.ui.form.Controller.extend({
       } else {
         btn.removeClass("hidden");
       }
+    }
+
+    let label = __("Fetch items specs");
+    if (
+      !this.frm.is_new() &&
+      this.frm.doc.docstatus == 0 &&
+      !this.frm.doc.from_available_stock
+    ) {
+      add_grid_button_to_the_right(
+        this.frm.fields_dict.items.grid,
+        label,
+        () => {
+          this.frm.call({
+            method: "fetch_items_specs",
+            doc: this.frm.doc,
+            freeze: 1,
+          });
+        }
+      );
     } else {
-      let btn = grid.custom_buttons[label];
+      let btn = this.frm.fields_dict.items.grid.custom_buttons[label];
+      if (btn) {
+        btn.addClass("hidden");
+      }
+    }
+
+    label = __("Split Combinations");
+    if (
+      this.frm.doc.docstatus == 0 &&
+      this.frm.doc.child_items &&
+      this.frm.doc.child_items.length > 0
+    ) {
+      add_grid_button_to_the_right(
+        this.frm.fields_dict.items.grid,
+        __("Split Combinations"),
+        () => {
+          const fields = [
+            {
+              fieldtype: "Link",
+              fieldname: "item_code",
+              options: "Item",
+              in_list_view: 1,
+              label: __("Item Code"),
+            },
+          ];
+
+          var dialog = new frappe.ui.Dialog({
+            title: __("Choose combinations to split"),
+            fields: [
+              {
+                fieldname: "combinations",
+                fieldtype: "Table",
+                label: __("Combinations"),
+                cannot_add_rows: true,
+                size: "large",
+                reqd: 1,
+                data: [],
+                fields: fields,
+              },
+            ],
+            primary_action_label: __("Save"),
+            primary_action: () => {
+              this.frm.call({
+                doc: this.frm.doc,
+                method: "split_combinations",
+                freeze: 1,
+                args: {
+                  combos_docnames: dialog.fields_dict.combinations.grid
+                    .get_selected_children()
+                    .filter((d) => d.__checked)
+                    .map((d) => d.name),
+                  save: true,
+                },
+                callback: () => {
+                  dialog.hide();
+                  frappe.show_alert({
+                    message: __("Combinations are split"),
+                    indicator: "green",
+                  });
+                },
+              });
+            },
+          });
+
+          let parent_items = this.frm.doc.child_items.map(
+            (child) => child.parent_item_code
+          );
+          this.frm.doc.items.forEach((item) => {
+            if (parent_items.includes(item.item_code)) {
+              dialog.fields_dict.combinations.df.data.push({
+                name: item.name,
+                item_code: item.item_code,
+                item_name: item.item_name,
+              });
+            }
+          });
+          dialog.fields_dict.combinations.grid.refresh();
+
+          if (
+            !this.frm.doc.child_items ||
+            this.frm.doc.child_items.length == 0 ||
+            dialog.fields_dict.combinations.grid.data.length == 0
+          ) {
+            frappe.msgprint("В заказе нет комбинаций");
+            return;
+          }
+
+          dialog.fields_dict.combinations.grid.display_status = "Read";
+          dialog.fields_dict.combinations.grid.grid_buttons.hide();
+          dialog.show();
+        }
+      );
+    } else {
+      let btn = this.frm.fields_dict.items.grid.custom_buttons[label];
       if (btn) {
         btn.addClass("hidden");
       }
