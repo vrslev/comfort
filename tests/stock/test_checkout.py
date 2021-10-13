@@ -36,8 +36,3 @@ def test_set_purchase_draft_status(checkout: Checkout, purchase_order: PurchaseO
     checkout.set_purchase_draft_status()
     purchase_order.reload()
     assert purchase_order.status == "Draft"
-
-
-# TODO
-# -                doc._get_items_in_sales_orders(True),
-# +                doc._get_items_in_sales_orders(False),
