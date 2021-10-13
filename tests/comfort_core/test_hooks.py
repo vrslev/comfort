@@ -24,6 +24,7 @@ def test_set_currency_symbol():
 
 
 def test_add_app_name():
+    frappe.db.set_value("System Settings", None, "app_name", "frappe")
     _add_app_name()
     assert get_value("System Settings", None, "app_name") == "Comfort"
 
@@ -39,18 +40,3 @@ def test_set_default_date_and_number_format():
 def test_disable_signup():
     _disable_signup()
     assert int(get_value("Website Settings", None, "disable_signup")) == 1
-
-
-# TODO: Cover comfort.comfort_core.hooks.get_standard_queries
-
-# TODO: Cover hooks presence
-# -after_install = "comfort.comfort_core.hooks.after_install"
-# +after_install = None
-
-# TODO: Cover doctype override
-# -override_doctype_class = {"DocType": "comfort.comfort_core.hooks.CustomDocType"}
-# +override_doctype_class = {"XXDocTypeXX": "comfort.comfort_core.hooks.CustomDocType"}
-
-# TODO: Cover treeviews
-# -treeviews = ["Account"]
-# +treeviews = ["XXAccountXX"]
