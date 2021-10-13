@@ -21,8 +21,7 @@ def _generate_new_customer_name(name: str):  # TODO: Transfer to autoname
             else:
                 name = f"{name} 2"
         else:
-            break
-    return name
+            return name
 
 
 def _create_customer(name: str, vk_url: str):
