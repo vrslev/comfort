@@ -17,9 +17,9 @@ from frappe import ValidationError
         None,
     ),
 )
-def test_validate_url(item_category: ItemCategory, url: str | None):
+def test_item_category_validate(item_category: ItemCategory, url: str | None):
     item_category.url = url
-    item_category.validate_url()
+    item_category.validate()
 
 
 @pytest.mark.parametrize(
@@ -36,7 +36,9 @@ def test_validate_url(item_category: ItemCategory, url: str | None):
         "https://example.com/category/-11844",
     ),
 )
-def test_validate_url_raises_on_wrong_url(item_category: ItemCategory, url: str | None):
+def test_item_category_validate_raises_on_wrong_url(
+    item_category: ItemCategory, url: str | None
+):
     item_category.url = url
     with pytest.raises(ValidationError, match="Invalid category URL"):
-        item_category.validate_url()
+        item_category.validate()
