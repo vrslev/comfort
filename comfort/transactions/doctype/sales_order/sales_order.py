@@ -156,7 +156,7 @@ class SalesOrder(TypedDocument):
         child_items = get_all(
             ChildItem,
             fields=("parent as parent_item_code", "item_code", "item_name", "qty"),
-            filters={"parent": ("in", (d.item_code for d in self.items))},
+            filters={"parent": ("in", (i.item_code for i in self.items))},
         )
 
         item_codes_to_qty = count_qty(self.items)
