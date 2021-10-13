@@ -96,11 +96,11 @@ class PurchaseOrder(TypedDocument):
             values=(this_month,),
         )
 
-        new_cart_number: int = 1
         if carts_in_this_month:
             matches = re.findall(r"-(\d+)", carts_in_this_month[0][0])
-            latest_cart_number: str | int = matches[0] if matches else 0
-            new_cart_number = int(latest_cart_number) + 1
+            new_cart_number = int(matches[0]) + 1
+        else:
+            new_cart_number = 1
 
         self.name = f"{this_month}-{new_cart_number}"
 
