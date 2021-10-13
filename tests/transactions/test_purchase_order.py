@@ -376,17 +376,12 @@ def test_purchase_order_before_insert(purchase_order: PurchaseOrder):
 
 @pytest.mark.usefixtures("ikea_settings")
 def test_purchase_order_before_submit(purchase_order: PurchaseOrder):
-    # TODO:
-    # -        self.delivery_options = []
-    # +        self.delivery_options = None
-    # -        self.cannot_add_items = None
-    # +        self.cannot_add_items = ""
     purchase_order.status = "Draft"
     purchase_order.get_delivery_services()
     purchase_order.before_submit()
 
-    assert not purchase_order.delivery_options
-    assert not purchase_order.cannot_add_items
+    assert purchase_order.delivery_options == []
+    assert purchase_order.cannot_add_items is None
     assert purchase_order.status == "To Receive"
 
 
@@ -421,6 +416,3 @@ def test_add_purchase_info_and_submit_info_not_loaded(purchase_order: PurchaseOr
     assert purchase_order.delivery_cost == delivery_cost
     assert purchase_order.order_confirmation_no == purchase_id
     assert purchase_order.docstatus == 1
-
-
-# TODO: Cover submit_sales_orders_and_update_statuses
