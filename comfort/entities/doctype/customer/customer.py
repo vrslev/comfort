@@ -47,7 +47,7 @@ class Customer(TypedDocument):
         self.vk_id = parse_vk_id(self.vk_url)
         self.update_info_from_vk()
 
-    def update_info_from_vk(self):  # TODO: Cover
+    def update_info_from_vk(self):
         if self.vk_id is None:
             return
         users = _get_vk_users_for_customers((self,))
@@ -79,8 +79,8 @@ def update_all_customers_from_vk():
     customers = get_all(Customer, fields=("name", "vk_id"))
     users = _get_vk_users_for_customers(customers)
     for customer_values in customers:
-        if customer_values.vk_id is None or customer_values.vk_id not in users:
+        if customer_values.vk_id not in users:
             continue
         doc = get_doc(Customer, customer_values.name)
-        _update_customer_from_vk_user(doc, users[customer_values.vk_id])
+        _update_customer_from_vk_user(doc, users[customer_values.vk_id])  # type: ignore
         doc.save()
