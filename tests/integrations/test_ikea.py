@@ -6,6 +6,7 @@ import pytest
 from ikea_api import IkeaApi
 from ikea_api_wrapped.types import NoDeliveryOptionsAvailableError, ParsedItem
 
+import comfort.integrations.ikea
 import frappe.exceptions
 from comfort import count_qty, counters_are_same, get_all, get_doc, get_value
 from comfort.comfort_core.doctype.ikea_settings.ikea_settings import (
@@ -16,13 +17,16 @@ from comfort.comfort_core.doctype.ikea_settings.ikea_settings import (
 from comfort.entities.doctype.item.item import Item
 from comfort.entities.doctype.item_category.item_category import ItemCategory
 from comfort.integrations.ikea import (
+    FetchItemsResult,
     _child_items_are_same,
     _create_item,
     _create_item_categories,
+    _fetch_child_items,
     _get_items_to_fetch,
     _make_item_category,
     _make_items_from_child_items_if_not_exist,
     add_items_to_cart,
+    fetch_items,
     get_delivery_services,
     get_purchase_history,
     get_purchase_info,
@@ -251,3 +255,112 @@ def test_create_item_categories(parsed_item: ParsedItem):
     _create_item_categories(items)
     categories_in_db = {c.name for c in get_all(ItemCategory)}
     assert len({new_category, parsed_item["category_name"]} ^ categories_in_db) == 0
+
+
+@pytest.mark.parametrize("force_update", (True, False))
+def test_fetch_child_items(monkeypatch: pytest.MonkeyPatch, force_update: bool):
+    exp_result = "some items"
+    exp_child_items = ["1248129", "124812958"]
+
+    def mock_fetch_items(item_codes: list[str], force_update: bool):
+        assert item_codes == exp_child_items
+        assert force_update == force_update
+        return exp_result
+
+    monkeypatch.setattr(comfort.integrations.ikea, "fetch_items", mock_fetch_items)
+    assert (
+        _fetch_child_items(
+            [{"child_items": [{"item_code": i} for i in exp_child_items]}],  # type: ignore
+            force_update,
+        )
+        == exp_result
+    )
+
+
+def test_fetch_items_no_items_to_fetch(monkeypatch: pytest.MonkeyPatch):
+    def mock_get_items_to_fetch(item_codes: list[str], force_update: bool) -> list[Any]:
+        return []
+
+    monkeypatch.setattr(
+        comfort.integrations.ikea, "_get_items_to_fetch", mock_get_items_to_fetch
+    )
+    assert fetch_items([], True) == FetchItemsResult(unsuccessful=[], successful=[])
+
+
+@pytest.mark.parametrize("input_force_update", (True, False))
+def test_fetch_items_main(monkeypatch: pytest.MonkeyPatch, input_force_update: bool):
+    called_get_items_to_fetch = False
+    called_get_items = False
+    called_create_item_categories = False
+    called_fetch_child_items = False
+    called_make_items_from_child_items_if_not_exist = False
+    called_create_item = False
+
+    input_item_codes = ["123"]
+    items_to_fetch = ["012", "123"]
+    parsed_items = [{"item_code": "123"}]
+
+    def mock_get_items_to_fetch(item_codes: list[str], force_update: bool):
+        assert item_codes == input_item_codes
+        assert force_update == input_force_update
+        nonlocal called_get_items_to_fetch
+        called_get_items_to_fetch = True
+        return items_to_fetch
+
+    def mock_get_items(item_codes: list[str]):
+        assert item_codes == items_to_fetch
+        nonlocal called_get_items
+        called_get_items = True
+        return parsed_items
+
+    def mock_create_item_categories(items: list[Any]):
+        assert items == parsed_items
+        nonlocal called_create_item_categories
+        called_create_item_categories = True
+
+    def mock_fetch_child_items(items: list[Any], force_update: bool):
+        assert items == parsed_items
+        assert force_update == input_force_update
+        nonlocal called_fetch_child_items
+        called_fetch_child_items = True
+
+    def mock_make_items_from_child_items_if_not_exist(item: Any):
+        assert item == parsed_items[0]
+        nonlocal called_make_items_from_child_items_if_not_exist
+        called_make_items_from_child_items_if_not_exist = True
+
+    def mock_called_create_item(item: Any):
+        assert item == parsed_items[0]
+        nonlocal called_create_item
+        called_create_item = True
+
+    monkeypatch.setattr(
+        comfort.integrations.ikea, "_get_items_to_fetch", mock_get_items_to_fetch
+    )
+    monkeypatch.setattr(ikea_api_wrapped, "get_items", mock_get_items)
+    monkeypatch.setattr(
+        comfort.integrations.ikea,
+        "_create_item_categories",
+        mock_create_item_categories,
+    )
+    monkeypatch.setattr(
+        comfort.integrations.ikea, "_fetch_child_items", mock_fetch_child_items
+    )
+    monkeypatch.setattr(
+        comfort.integrations.ikea,
+        "_make_items_from_child_items_if_not_exist",
+        mock_make_items_from_child_items_if_not_exist,
+    )
+    monkeypatch.setattr(
+        comfort.integrations.ikea, "_create_item", mock_called_create_item
+    )
+
+    resp = fetch_items(input_item_codes, input_force_update)
+    assert resp == FetchItemsResult(unsuccessful=["012"], successful=["123"])
+
+    assert called_get_items_to_fetch
+    assert called_get_items
+    assert called_create_item_categories
+    assert called_fetch_child_items
+    assert called_make_items_from_child_items_if_not_exist
+    assert called_create_item

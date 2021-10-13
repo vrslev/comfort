@@ -145,7 +145,7 @@ def _create_item_categories(items: list[ParsedItem]):
         _make_item_category(*category)
 
 
-def _fetch_child_items(items: list[ParsedItem], force_update: bool):  # TODO: Cover
+def _fetch_child_items(items: list[ParsedItem], force_update: bool):
     items_to_fetch: list[str] = []
     for item in items:
         for child in item["child_items"]:
@@ -158,12 +158,10 @@ class FetchItemsResult(TypedDict):
     successful: list[str]
 
 
-def fetch_items(  # TODO: Cover
-    item_codes: str | int | list[str], force_update: bool
-) -> FetchItemsResult:
+def fetch_items(item_codes: str | int | list[str], force_update: bool):
     items_to_fetch = _get_items_to_fetch(item_codes, force_update)
     if not items_to_fetch:
-        return {"unsuccessful": [], "successful": []}
+        return FetchItemsResult(unsuccessful=[], successful=[])
 
     parsed_items = ikea_api_wrapped.get_items(items_to_fetch)
 
@@ -176,7 +174,7 @@ def fetch_items(  # TODO: Cover
         _create_item(parsed_item)
         fetched_item_codes.append(parsed_item["item_code"])
 
-    return {
-        "successful": [i for i in items_to_fetch if i in fetched_item_codes],
-        "unsuccessful": [i for i in items_to_fetch if i not in fetched_item_codes],
-    }
+    return FetchItemsResult(
+        successful=[i for i in items_to_fetch if i in fetched_item_codes],
+        unsuccessful=[i for i in items_to_fetch if i not in fetched_item_codes],
+    )
