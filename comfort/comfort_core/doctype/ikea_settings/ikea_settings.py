@@ -22,7 +22,7 @@ class IkeaSettings(TypedDocument):
         self.clear_cache()
 
 
-def convert_to_datetime(datetime_str: datetime | str) -> datetime:  # pragma: no cover
+def convert_to_datetime(datetime_str: datetime | str) -> datetime:
     return get_datetime(datetime_str)  # type: ignore
 
 

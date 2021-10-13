@@ -7,6 +7,7 @@ import pytest
 
 from comfort.comfort_core.doctype.ikea_settings.ikea_settings import (
     IkeaSettings,
+    convert_to_datetime,
     get_authorized_api,
     get_guest_api,
 )
@@ -21,10 +22,25 @@ def is_same_date(first: Any, second: Any):
     )
 
 
+test_date = datetime(year=2021, month=10, day=13)
+
+
+@pytest.mark.parametrize(
+    ("input", "output"),
+    (
+        (test_date, test_date),
+        ("2021-10-13", test_date),
+    ),
+)
+def test_convert_to_datetime(input: str | datetime, output: datetime):
+    assert convert_to_datetime(input) == output
+
+
 _testdata = ("token", "expiration"), (
     (None, None),
     ("sometoken", None),
     ("sometoken", datetime.now()),
+    (None, datetime.now()),
 )
 
 
@@ -95,26 +111,22 @@ def test_get_authorized_api_return():
     assert get_authorized_api().reveal_token() == mock_token
 
 
-def test_get_authorized_api_raises_on_login_data_missing(ikea_settings: IkeaSettings):
-    ikea_settings.username = ikea_settings.password = None  # type: ignore
+@pytest.mark.parametrize(
+    ("username", "password"),
+    (
+        ("user", None),
+        (None, "password"),
+        (None, None),
+    ),
+)
+def test_get_authorized_api_raises_on_login_data_missing(
+    ikea_settings: IkeaSettings, username: str | None, password: str | None
+):
+    ikea_settings.username = username
+    ikea_settings.password = password
     ikea_settings.save()
+
     with pytest.raises(
         ValidationError, match="Enter login and password in Ikea Settings"
     ):
         get_authorized_api()
-
-
-# TODO
-# -        or convert_to_datetime(doc.guest_token_expiration) <= now_datetime()
-# +        or convert_to_datetime(doc.guest_token_expiration) < now_datetime()
-# TODO
-#      if (
-# -        doc.guest_token is None
-# -        or doc.guest_token_expiration is None
-# +        doc.guest_token is None and doc.guest_token_expiration is None
-# TODO
-# -        or convert_to_datetime(doc.authorized_token_expiration) <= now_datetime()
-# +        or convert_to_datetime(doc.authorized_token_expiration) < now_datetime()
-# TODO
-# -        if doc.username is None or password is None:
-# +        if doc.username is None and password is None:
