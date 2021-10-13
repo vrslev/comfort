@@ -21,10 +21,11 @@ def test_validate_to_amounts_are_not_zero_not_raise_on_last_row(
     commission_settings.validate_to_amounts_are_not_zero()
 
 
+@pytest.mark.parametrize("range_idx", (0, 1))
 def test_validate_to_amounts_are_not_zero_raises_on_zero_amount(
-    commission_settings: CommissionSettings,
+    commission_settings: CommissionSettings, range_idx: int
 ):
-    commission_settings.ranges[0].to_amount = 0
+    commission_settings.ranges[range_idx].to_amount = 0
 
     with pytest.raises(
         ValidationError, match="To Amount shouldn't be zero except last row"
@@ -41,17 +42,18 @@ def test_validate_to_amounts_are_not_zero_raises_on_zero_percentage(
         commission_settings.validate_to_amounts_are_not_zero()
 
 
+@pytest.mark.parametrize("to_amount", (200, 300))
 def test_validate_to_amounts_order_raises_on_wrong_order(
-    commission_settings: CommissionSettings,
+    commission_settings: CommissionSettings, to_amount: int
 ):
-    commission_settings.ranges[0].to_amount = 300
+    commission_settings.ranges[0].to_amount = to_amount
     with pytest.raises(
         ValidationError, match="To Amounts should be in ascending order"
     ):
         commission_settings.validate_to_amounts_order()
 
 
-def test_validate_to_amounts_order(commission_settings: CommissionSettings):
+def test_validate_to_amounts_order_not_raises(commission_settings: CommissionSettings):
     commission_settings.validate_to_amounts_order()
 
 
@@ -89,12 +91,3 @@ def test_get_commission_percentage_raises_on_none(
     commission_settings.insert()
     with pytest.raises(ValidationError, match="Amount should be more that zero"):
         return commission_settings.get_commission_percentage(None)
-
-
-# TODO
-# -        for c in self.ranges[:-1]:
-# +        for c in self.ranges[:+1]:
-# +        for c in self.ranges[:-2]:
-# TODO
-# -            if c.to_amount > self.ranges[idx + 1].to_amount:
-# +            if c.to_amount >= self.ranges[idx + 1].to_amount:
