@@ -118,19 +118,13 @@ class SalesOrder(TypedDocument):
             "Stock Entry",
         ]
 
-        # TODO: Make (of find) generic `cancel_for` function
-        payments = get_all(
-            Payment, {"voucher_type": self.doctype, "voucher_no": self.name}
-        )
-        for payment in payments:
-            payment = get_doc(Payment, payment.name)
-            payment.cancel()
-        receipts = get_all(
-            Receipt, {"voucher_type": self.doctype, "voucher_no": self.name}
-        )
-        for receipt in receipts:
-            receipt = get_doc(Receipt, receipt.name)
-            receipt.cancel()
+        payload = {"voucher_type": self.doctype, "voucher_no": self.name}
+
+        for payment in get_all(Payment, payload):
+            get_doc(Payment, payment.name).cancel()
+
+        for receipt in get_all(Receipt, payload):
+            get_doc(Receipt, receipt.name).cancel()
 
     def before_update_after_submit(self):  # pragma: no cover
         self._validate_services_not_changed()
