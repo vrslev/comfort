@@ -5,6 +5,7 @@ import os.path
 import re
 import sys
 from argparse import ArgumentParser, Namespace
+from base64 import b64encode
 from configparser import ConfigParser
 from dataclasses import dataclass
 from html import unescape
@@ -12,13 +13,11 @@ from importlib.metadata import distribution
 from subprocess import check_call  # nosec
 from typing import Any
 
-import frappeclient.frappeclient
 import ikea_api_wrapped
+import requests
 import sentry_sdk
 import sentry_sdk.utils
 from bs4 import BeautifulSoup
-from frappeclient import FrappeClient
-from requests import Response
 
 PACKAGE_NAME = "comfort_browser_ext"
 
@@ -80,20 +79,7 @@ def get_config(directory: str):
     return Config(**config[PACKAGE_NAME])
 
 
-class CustomFrappeClient(FrappeClient):
-    url: str
-
-    def preprocess(self, params: dict[str, Any]) -> dict[str, Any]:
-        return super().preprocess(params)
-
-    def post_process(self, response: Response) -> Any:
-        return super().post_process(response)
-
-    def post_request(self, data: dict[str, Any]) -> Any:
-        return super().post_request(data)
-
-
-class CustomFrappeException(Exception):
+class FrappeException(Exception):
     def __init__(self, *args: object):
         if len(args) == 1 and isinstance(args[0], str):
             try:  # Try to parse traceback from server
@@ -103,22 +89,55 @@ class CustomFrappeException(Exception):
         super().__init__(args)
 
 
-frappeclient.frappeclient.FrappeException = CustomFrappeException
+class FrappeApi:
+    def __init__(self, url: str, api_key: str, api_secret: str):
+        self.url = url
+        self._session = requests.Session()
+        self._authenticate(api_key, api_secret)
+
+    def _authenticate(self, api_key: str, api_secret: str):
+        token = b64encode(f"{api_key}:{api_secret}".encode()).decode()
+        self._session.headers["Authorization"] = f"Basic {token}"
+
+    def _dump_payload(self, payload: dict[str, Any]):
+        for key, value in payload.items():
+            if isinstance(value, (dict, list)):
+                payload[key] = json.dumps(value)
+        return payload
+
+    def _handle_response(self, response: requests.Response):
+        try:
+            rjson: dict[str, Any] = response.json()
+        except ValueError:
+            raise ValueError(response.text)
+
+        if exc := rjson.get("exc"):
+            raise FrappeException(exc)
+        if "message" in rjson:
+            return rjson["message"]
+        elif "data" in rjson:
+            return rjson["data"]
+        else:
+            raise NotImplementedError
+
+    def post(self, **payload: Any):
+        response = self._session.post(self.url, json=self._dump_payload(payload))
+        return self._handle_response(response)
 
 
 def send_to_server(
     config: Config, customer_name: str, vk_url: str, item_codes: list[str]
-):
-    client = CustomFrappeClient(
-        url=config.url, api_key=config.api_key, api_secret=config.api_secret
+) -> str:
+    return FrappeApi(
+        url=config.url,
+        api_key=config.api_key,
+        api_secret=config.api_secret,
+    ).post(
+        cmd="comfort.integrations.browser_ext.main",
+        customer_name=customer_name,
+        vk_url=vk_url,
+        item_codes=item_codes,
     )
-    payload = {
-        "cmd": "comfort.integrations.browser_ext.main",
-        "customer_name": customer_name,
-        "vk_url": vk_url,
-        "item_codes": item_codes,
-    }
-    return client.post_request(payload)
 
 
 class Arguments(Namespace):

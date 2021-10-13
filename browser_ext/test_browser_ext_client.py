@@ -2,17 +2,21 @@ from __future__ import annotations
 
 import pathlib
 import re
+from base64 import b64encode
 from configparser import ConfigParser
 from typing import Any, Callable, TypedDict
 
 import comfort_browser_ext
 import pytest
+import requests
+import responses
 import sentry_sdk
 import sentry_sdk.utils
 from comfort_browser_ext import (
     PACKAGE_NAME,
     Config,
-    CustomFrappeClient,
+    FrappeApi,
+    FrappeException,
     get_config,
     get_item_codes,
     init_sentry,
@@ -101,6 +105,105 @@ sentry_dsn =
     assert get_config(dir_path_str) == config
 
 
+def test_frappe_exception_success():
+    exp_resp = "some exc"
+    with pytest.raises(FrappeException, match=exp_resp):
+        raise FrappeException(f'["{exp_resp}"]')
+
+
+def test_frappe_exception_fails():
+    exp_resp = "some exc"
+    with pytest.raises(FrappeException, match=exp_resp):
+        raise FrappeException(exp_resp)
+
+
+def test_frappe_api_init():
+    url = "https://example.com"
+    api_key = "my_api_key"
+    api_secret = "my_api_secret"  # nosec
+    client = FrappeApi(url, api_key, api_secret)
+    assert client.url == url
+    assert type(client._session) == requests.Session
+    assert "Authorization" in client._session.headers
+
+
+@pytest.fixture
+def frappe_api():
+    return FrappeApi("https://example.com", "", "")
+
+
+def test_frappe_api_authenticate(frappe_api: FrappeApi):
+    api_key = "my_api_key"
+    api_secret = "my_api_secret"  # nosec
+    frappe_api._authenticate(api_key, api_secret)
+    assert (
+        frappe_api._session.headers["Authorization"]
+        == f"Basic {b64encode(f'{api_key}:{api_secret}'.encode()).decode()}"
+    )
+
+
+def test_frappe_api_dump_payload_dict(frappe_api: FrappeApi):
+    payload = frappe_api._dump_payload({"key": {"key": "value"}})
+    assert payload == {"key": '{"key": "value"}'}
+
+
+def test_frappe_api_dump_payload_list(frappe_api: FrappeApi):
+    payload = frappe_api._dump_payload({"key": ["value1", "value2"]})
+    assert payload == {"key": '["value1", "value2"]'}
+
+
+@responses.activate
+def test_frappe_api_handle_response_not_json(frappe_api: FrappeApi):
+    exp_resp = "some NOT json"
+    responses.add(responses.GET, "https://example.com", body=exp_resp)
+    response = requests.get("https://example.com")
+    with pytest.raises(ValueError, match="some NOT json"):
+        frappe_api._handle_response(response)
+
+
+@responses.activate
+def test_frappe_api_handle_response_exc(frappe_api: FrappeApi):
+    exp_resp = "some exc"
+    responses.add(responses.GET, "https://example.com", json={"exc": f'["{exp_resp}"]'})
+    response = requests.get("https://example.com")
+    with pytest.raises(FrappeException, match=exp_resp):
+        frappe_api._handle_response(response)
+
+
+@responses.activate
+@pytest.mark.parametrize("key", ("message", "data"))
+def test_frappe_api_handle_response_message_data(frappe_api: FrappeApi, key: str):
+    exp_resp = "some response"
+    responses.add(responses.GET, "https://example.com", json={key: exp_resp})
+    response = requests.get("https://example.com")
+    assert frappe_api._handle_response(response) == exp_resp
+
+
+@responses.activate
+def test_frappe_api_handle_response_not_implemented(frappe_api: FrappeApi):
+    responses.add(
+        responses.GET, "https://example.com", json={"randomkey": "randomvalue"}
+    )
+    response = requests.get("https://example.com")
+    with pytest.raises(NotImplementedError):
+        frappe_api._handle_response(response)
+
+
+@responses.activate
+def test_frappe_api_post(monkeypatch: pytest.MonkeyPatch, frappe_api: FrappeApi):
+    exp_resp = "some response"
+    exp_payload = {"key": "value"}
+
+    class MockFrappeApi(FrappeApi):
+        def _dump_payload(self, payload: dict[str, Any]):
+            assert payload == exp_payload
+            return super()._dump_payload(payload)
+
+    monkeypatch.setattr(comfort_browser_ext, "FrappeApi", MockFrappeApi)
+    responses.add(responses.POST, frappe_api.url, json={"message": exp_resp})
+    assert frappe_api.post(**exp_payload)
+
+
 def test_send_to_server(
     monkeypatch: pytest.MonkeyPatch,
     config: Config,
@@ -111,17 +214,13 @@ def test_send_to_server(
 
     exp_msg = f"{config.url}/sales-order/SO-2021-00001"
 
-    def mock_post_request(
-        self: CustomFrappeClient, data: dict[str, Any] = {}  # type: ignore
-    ) -> Any:
+    def mock_post(self: FrappeApi, **data: Any):
         new_data = dict(send_to_server_args)
         new_data["cmd"] = "comfort.integrations.browser_ext.main"
         assert data == new_data
         return exp_msg
 
-    monkeypatch.setattr(
-        comfort_browser_ext.CustomFrappeClient, "post_request", mock_post_request
-    )
+    monkeypatch.setattr(FrappeApi, "post", mock_post)
     assert (
         send_to_server(
             config,
