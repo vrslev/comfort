@@ -180,11 +180,21 @@ def test_set_completed_status(delivery_trip: DeliveryTrip):
     assert delivery_trip.status == "Completed"
 
 
-def test_make_route_url(delivery_trip: DeliveryTrip):
-    assert (
-        _make_route_url(delivery_trip.stops[0].city, delivery_trip.stops[0].address)
-        == "https://yandex.ru/maps/10849/severodvinsk/?text=Moscow+Arbat%2C+1"
-    )
+@pytest.mark.parametrize(
+    ("city", "address", "exp_url"),
+    (
+        ("Moscow", "Arbat, 1", "Moscow+Arbat%2C+1"),
+        (None, "Arbat, 1", "Arbat%2C+1"),
+        ("Moscow", None, "Moscow"),
+    ),
+)
+def test_make_route_url_str(city: str, address: str, exp_url: str):
+    base_url = "https://yandex.ru/maps/10849/severodvinsk/?text="
+    assert _make_route_url(city, address) == base_url + exp_url
+
+
+def test_make_route_url_none():
+    assert _make_route_url(None, None) == None
 
 
 delivery_and_and_installation_test_data = (
