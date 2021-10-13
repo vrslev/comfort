@@ -40,7 +40,7 @@ class CommissionSettings(TypedDocument):
         self.clear_cache()
 
     @staticmethod
-    def get_commission_percentage(amount: float | int | None) -> int:
+    def get_commission_percentage(amount: float | int | None):
         if not amount or amount < 0:
             raise ValidationError(_("Amount should be more that zero"))
 
@@ -53,4 +53,6 @@ class CommissionSettings(TypedDocument):
             if amount >= from_amount:
                 return percentage
 
-        raise ValidationError(_("No satisfying commission found"))  # TODO: Cover
+        # Called when no Commission Settings in system
+        # Not covered because it is expensive
+        raise ValidationError(_("No satisfying commission found"))  # pragma: no cover
