@@ -32,3 +32,9 @@ treeviews = ["Account"]
 global_search_doctypes = _get_global_search_doctypes()
 
 reqd_frappe_version = "v13.12.1"
+
+scheduler_events = {
+    "weekly": [
+        "comfort.entities.doctype.customer.customer.update_all_customers_from_vk"
+    ],
+}
