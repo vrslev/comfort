@@ -22,9 +22,6 @@ def get_pymethods(files: list[str]):
     all_matches: list[str] = []
     re_match_string = re.compile(r".*?\"comfort[\w+.]+\"")
     re_match_method = re.compile(r"\"(comfort[\w+.]+)\"")
-    # TODO: Regex is wrong. Passes:
-    # -    ("Customer", "Item", "Purchase Order", "Sales Order")
-    # +    ("Customer", "Item", "Purchase Order", "XXSales OrderXX")
     for file in files:
         with open(file) as f:
             matches = re_match_string.findall(f.read())

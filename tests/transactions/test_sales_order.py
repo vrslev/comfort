@@ -402,6 +402,7 @@ def test_modify_purchase_order_for_from_available_stock_available_purchased(
     sales_order: SalesOrder, purchase_order: PurchaseOrder
 ):
     purchase_order.sales_orders = []
+    purchase_order.items_to_sell[0].qty = 1
     purchase_order.db_insert()
     purchase_order.update_children()
     sales_order.items = []
