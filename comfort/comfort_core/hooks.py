@@ -110,6 +110,7 @@ def get_global_search_doctypes():  # pragma: no cover
         "Ikea Settings",
         "Telegram Settings",
         "Finance Settings",
+        "Vk Api Settings",
         "Vk Form Settings",
     ]
     return {
