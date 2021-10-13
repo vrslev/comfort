@@ -159,7 +159,7 @@ class DeliveryTrip(TypedDocument):
 
     @frappe.whitelist()
     def render_telegram_message(self) -> str:
-        return frappe.render_template(
+        return frappe.render_template(  # type: ignore
             template="stock/doctype/delivery_trip/telegram_template.j2",
             context=self._get_template_context(),
             is_path=True,
@@ -190,13 +190,18 @@ class DeliveryTrip(TypedDocument):
         self._add_receipts_to_sales_orders()
 
 
-def _make_route_url(
-    city: str | None, address: str | None
-):  # TODO: Test with None values
-    if city or address:
-        url = "https://yandex.ru/maps/10849/severodvinsk/?"
-        params = {"text": f"{city} {address}"}
-        return url + urlencode(params)
+def _make_route_url(city: str | None, address: str | None):
+    if city and address:
+        text = f"{city} {address}"
+    elif city:
+        text = city
+    elif address:
+        text = address
+    else:
+        return
+
+    url = "https://yandex.ru/maps/10849/severodvinsk/?"
+    return url + urlencode({"text": text})
 
 
 def _get_items_for_order(sales_order_name: str):  # pragma: no cover
