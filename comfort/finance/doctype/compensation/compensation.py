@@ -25,5 +25,5 @@ class Compensation(TypedDocument):
         create_gl_entry(self.doctype, self.name, accounts[0], 0, self.amount)
         create_gl_entry(self.doctype, self.name, accounts[1], self.amount, 0)
 
-    def on_cancel(self):  # TODO: Cover
+    def on_cancel(self):  # pragma: no cover
         cancel_gl_entries_for(self.doctype, self.name)

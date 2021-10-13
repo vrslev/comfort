@@ -37,16 +37,16 @@ class Return(TypedDocument):
     items: list[SalesReturnItem] | list[PurchaseReturnItem]
 
     @property
-    def _voucher(self) -> Any:
+    def _voucher(self) -> Any:  # pragma: no cover
         pass
 
-    def _calculate_returned_paid_amount(self):
+    def _calculate_returned_paid_amount(self):  # pragma: no cover
         pass
 
-    def _validate_voucher_statuses(self):
+    def _validate_voucher_statuses(self):  # pragma: no cover
         pass
 
-    def _get_all_items(self) -> Any:
+    def _get_all_items(self) -> Any:  # pragma: no cover
         pass
 
     def delete_empty_items(self):
