@@ -158,7 +158,7 @@ class DeliveryTrip(TypedDocument):
         return context
 
     @frappe.whitelist()
-    def render_telegram_message(self) -> str | None:
+    def render_telegram_message(self) -> str:
         return frappe.render_template(
             template="stock/doctype/delivery_trip/telegram_template.j2",
             context=self._get_template_context(),
@@ -184,7 +184,7 @@ class DeliveryTrip(TypedDocument):
                 doc.add_receipt()
 
     @frappe.whitelist()
-    def set_completed_status(self):  # TODO: Cover
+    def set_completed_status(self):
         self.status = "Completed"
         self.db_update()
         self._add_receipts_to_sales_orders()
