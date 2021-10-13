@@ -201,7 +201,7 @@ class PurchaseReturn(Return):
             self.doctype, self.name, stock_type, self.items, reverse_qty=True
         )
 
-    def before_submit(self):  # pragma: no cover
+    def before_submit(self):
         orders_to_items = self._allocate_items()
         self._make_sales_returns(orders_to_items)
         self._modify_voucher(orders_to_items)

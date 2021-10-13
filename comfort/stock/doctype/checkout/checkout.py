@@ -31,6 +31,6 @@ class Checkout(TypedDocument):
     def set_purchase_draft_status(self):
         frappe.db.set_value("Purchase Order", self.purchase_order, "status", "Draft")
 
-    def before_cancel(self):  # pragma: no cover
+    def before_cancel(self):  # TODO: Cover
         cancel_stock_entries_for(self.doctype, self.name)
         self.set_purchase_draft_status()

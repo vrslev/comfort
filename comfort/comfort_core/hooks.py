@@ -3,6 +3,7 @@ from typing import Any
 
 import frappe
 import frappe.defaults
+from comfort import get_doc
 from comfort.finance.chart_of_accounts import initialize_accounts
 from frappe.core.doctype.doctype.doctype import DocType
 from frappe.geo.doctype.currency.currency import Currency
@@ -23,7 +24,7 @@ def load_metadata():
 
 
 def _set_currency_symbol():
-    doc: Currency = frappe.get_doc("Currency", "RUB")  # type: ignore
+    doc = get_doc(Currency, "RUB")
     doc.update({"symbol": "₽", "enabled": True})
     doc.save()
     frappe.db.set_default("currency", "RUB")
@@ -77,7 +78,7 @@ class CustomDocType(DocType):  # pragma: no cover
         make_boilerplate("controller._py", self)
 
 
-def get_global_search_doctypes():  # pragma: no cover
+def get_global_search_doctypes():
     _doctypes_in_global_search = [
         #
         # Major doctypes

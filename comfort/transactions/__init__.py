@@ -37,16 +37,16 @@ class Return(TypedDocument):
     items: list[SalesReturnItem] | list[PurchaseReturnItem]
 
     @property
-    def _voucher(self) -> Any:  # pragma: no cover
+    def _voucher(self) -> Any:
         pass
 
-    def _calculate_returned_paid_amount(self):  # pragma: no cover
+    def _calculate_returned_paid_amount(self):
         pass
 
-    def _validate_voucher_statuses(self):  # pragma: no cover
+    def _validate_voucher_statuses(self):
         pass
 
-    def _get_all_items(self) -> Any:  # pragma: no cover
+    def _get_all_items(self) -> Any:
         pass
 
     def delete_empty_items(self):
@@ -59,7 +59,7 @@ class Return(TypedDocument):
             item.amount = item.qty * item.rate
 
     @frappe.whitelist()
-    def calculate(self):  # pragma: no cover
+    def calculate(self):
         self._calculate_item_values()
         self._calculate_returned_paid_amount()
 
@@ -144,7 +144,7 @@ class Return(TypedDocument):
         if len([i for i in self._get_remaining_qtys(self._get_all_items())]) == 0:
             raise ValidationError(_("Can't return all items"))
 
-    def validate(self):  # pragma: no cover
+    def validate(self):
         self.delete_empty_items()
         self._validate_voucher_statuses()
         self._validate_not_all_items_returned()

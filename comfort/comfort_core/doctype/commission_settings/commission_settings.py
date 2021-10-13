@@ -30,7 +30,7 @@ class CommissionSettings(TypedDocument):
             range_.from_amount = previous_to_amount + 1
             previous_to_amount = range_.to_amount
 
-    def validate(self):  # pragma: no cover
+    def validate(self):
         self.validate_to_amounts_are_not_zero()
         self.validate_last_to_amount_is_zero()
         self.validate_to_amounts_order()
@@ -53,4 +53,4 @@ class CommissionSettings(TypedDocument):
             if amount >= from_amount:
                 return percentage
 
-        raise ValidationError(_("No satisfying commission found"))  # pragma: no cover
+        raise ValidationError(_("No satisfying commission found"))  # TODO: Cover

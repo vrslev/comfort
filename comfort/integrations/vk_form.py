@@ -69,9 +69,9 @@ def _create_vk_group_dialog_url(group_id: int, user_id: int):
     return f"https://vk.com/gim{group_id}?sel={user_id}"
 
 
-def _create_customer(
+def _create_customer(  # TODO: Cover
     first_name: str, last_name: str, group_id: int, user_id: int
-):  # pragma: no cover
+):
     from comfort.integrations.browser_ext import _create_customer
 
     name = _get_customer_name(first_name, last_name)
@@ -129,7 +129,7 @@ def process_form(form: dict[Any, Any]):
 
 
 @frappe.whitelist(allow_guest=True)
-def main():  # pragma: no cover
+def main():  # TODO: Cover
     frappe.local.session.user = frappe.local.session.sid = "Administrator"
     try:
         process_form(frappe.form_dict)  # type: ignore

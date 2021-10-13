@@ -104,7 +104,7 @@ class PurchaseOrder(TypedDocument):
 
         self.name = f"{this_month}-{new_cart_number}"
 
-    def validate(self):  # pragma: no cover
+    def validate(self):
         self._validate_not_empty()
         self._delete_sales_order_duplicates()
         delete_empty_items(self, "items_to_sell")
@@ -125,7 +125,7 @@ class PurchaseOrder(TypedDocument):
         self.cannot_add_items = None
         self.status = "To Receive"
 
-    def on_submit(self):  # pragma: no cover
+    def on_submit(self):
         self._create_payment()
         self._create_checkout()
         self._submit_sales_orders_and_update_statuses()
@@ -206,7 +206,7 @@ class PurchaseOrder(TypedDocument):
             self.sales_orders_cost + self.items_to_sell_cost + self.delivery_cost
         )
 
-    def calculate(self):  # pragma: no cover
+    def calculate(self):
         self._calculate_items_to_sell_cost()
         self._calculate_sales_orders_cost()
         self._calculate_total_weight()
@@ -295,7 +295,7 @@ class PurchaseOrder(TypedDocument):
             )
         self.db_update_all()
 
-    def _submit_sales_orders_and_update_statuses(self):  # pragma: no cover
+    def _submit_sales_orders_and_update_statuses(self):
         for o in self.sales_orders:
             doc = get_doc(SalesOrder, o.sales_order_name)
             doc.set_statuses()
@@ -305,11 +305,11 @@ class PurchaseOrder(TypedDocument):
     def _create_payment(self):
         create_payment(self.doctype, self.name, self.total_amount, paid_with_cash=False)
 
-    def _create_checkout(self):  # pragma: no cover
+    def _create_checkout(self):
         create_checkout(self.name)
 
     @frappe.whitelist()
-    def fetch_items_specs(self):
+    def fetch_items_specs(self):  # TODO: Cover
         items: list[AnyChildItem] = list(self.get_items_to_sell(False))
         items += self.get_items_in_sales_orders(False)
         fetched_items = fetch_items([i.item_code for i in items], force_update=True)[
@@ -339,11 +339,11 @@ class PurchaseOrder(TypedDocument):
         self.submit()
 
     @frappe.whitelist()
-    def checkout(self):  # pragma: no cover
+    def checkout(self):  # TODO: Cover
         add_items_to_cart(self._get_templated_items_for_api(False), authorize=True)
 
     @frappe.whitelist()
-    def add_receipt(self):  # pragma: no cover
+    def add_receipt(self):  # TODO: Cover
         create_receipt(self.doctype, self.name)
         self.status = "Completed"
         self.db_update()

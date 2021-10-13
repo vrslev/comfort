@@ -204,7 +204,7 @@ def _make_route_url(city: str | None, address: str | None):
     return url + urlencode({"text": text})
 
 
-def _get_items_for_order(sales_order_name: str):  # pragma: no cover
+def _get_items_for_order(sales_order_name: str):
     doc = get_doc(SalesOrder, sales_order_name)
     return [
         {

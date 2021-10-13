@@ -11,27 +11,22 @@ class StockBalanceFilters(TypedDict):
     stock_type: StockTypes
 
 
-def execute(filters: StockBalanceFilters):  # pragma: no cover
-    return get_columns(), get_data(filters)
-
-
-def get_columns():  # pragma: no cover
-    return [
-        {
-            "fieldname": "item_code",
-            "fieldtype": "Link",
-            "label": "Item",
-            "options": "Item",
-            "width": 500,
-        },
-        {"fieldname": "item_name", "hidden": 1},
-        {
-            "fieldname": "qty",
-            "fieldtype": "Int",
-            "label": "Quantity",
-            "width": 100,
-        },
-    ]
+columns = [
+    {
+        "fieldname": "item_code",
+        "fieldtype": "Link",
+        "label": "Item",
+        "options": "Item",
+        "width": 500,
+    },
+    {"fieldname": "item_name", "hidden": 1},
+    {
+        "fieldname": "qty",
+        "fieldtype": "Int",
+        "label": "Quantity",
+        "width": 100,
+    },
+]
 
 
 def get_data(filters: StockBalanceFilters):
@@ -50,3 +45,7 @@ def get_data(filters: StockBalanceFilters):
         }
         for item_code, qty in balance.items()
     ]
+
+
+def execute(filters: StockBalanceFilters):  # pragma: no cover
+    return columns, get_data(filters)

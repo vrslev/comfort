@@ -86,7 +86,7 @@ class SalesOrder(TypedDocument):
     # Hooks #
     #########
 
-    def validate(self):  # pragma: no cover
+    def validate(self):
         self._validate_from_available_stock()
 
         delete_empty_items(self, "items")
@@ -97,7 +97,7 @@ class SalesOrder(TypedDocument):
         self.calculate()
         self.set_statuses()
 
-    def before_submit(self):
+    def before_submit(self):  # pragma: no cover
         self.edit_commission = True
         if self.from_available_stock:
             self._modify_purchase_order_for_from_available_stock()
@@ -226,7 +226,7 @@ class SalesOrder(TypedDocument):
             self.items_cost + self.margin + self.service_amount - self.discount
         )
 
-    def calculate(self):  # pragma: no cover
+    def calculate(self):
         """Calculate all things that are calculable."""
         self._calculate_item_totals()
         self._calculate_service_amount()
@@ -438,7 +438,7 @@ class SalesOrder(TypedDocument):
 
         self.status = status
 
-    def set_statuses(self):  # pragma: no cover
+    def set_statuses(self):
         """Set statuses according to current Sales Order and linked Purchase Order states."""
         self.set_paid_and_pending_per_amount()
         self._set_payment_status()
@@ -451,17 +451,17 @@ class SalesOrder(TypedDocument):
         self._calculate_margin()
 
     @frappe.whitelist()
-    def add_payment(self, paid_amount: int, cash: bool):
+    def add_payment(self, paid_amount: int, cash: bool):  # TODO: Cover
         if self.docstatus == 2:
             raise ValidationError(
                 _("Sales Order should be not Сancelled to add Payment")
             )
-        create_payment(self.doctype, self.name, paid_amount, cash)  # pragma: no cover
-        self.set_statuses()  # pragma: no cover
-        self.db_update()  # pragma: no cover
+        create_payment(self.doctype, self.name, paid_amount, cash)
+        self.set_statuses()
+        self.db_update()
 
     @frappe.whitelist()
-    def add_receipt(self):
+    def add_receipt(self):  # TODO: Cover
         if self.docstatus == 2:
             raise ValidationError(
                 _("Sales Order should be not Сancelled to add Receipt")
@@ -471,9 +471,9 @@ class SalesOrder(TypedDocument):
                 _("Delivery Status Sales Order should be To Deliver to add Receipt")
             )
 
-        create_receipt(self.doctype, self.name)  # pragma: no cover
-        self.set_statuses()  # pragma: no cover
-        self.db_update()  # pragma: no cover
+        create_receipt(self.doctype, self.name)
+        self.set_statuses()
+        self.db_update()
 
     @frappe.whitelist()
     def split_combinations(self, combos_docnames: Iterable[str], save: bool):
@@ -534,7 +534,7 @@ class SalesOrder(TypedDocument):
         }
 
     @frappe.whitelist()
-    def generate_check_order_message(self) -> str:  # pragma: no cover
+    def generate_check_order_message(self) -> str:  # TODO: Cover
         return frappe.render_template(  # type: ignore
             template="transactions/doctype/sales_order/check_order_message.j2",
             is_path=True,
@@ -575,7 +575,7 @@ class SalesOrder(TypedDocument):
         }
 
     @frappe.whitelist()
-    def generate_pickup_order_message(self) -> str:  # pragma: no cover
+    def generate_pickup_order_message(self) -> str:  # TODO: Cover
         return frappe.render_template(  # type: ignore
             template="transactions/doctype/sales_order/pickup_order_message.j2",
             is_path=True,

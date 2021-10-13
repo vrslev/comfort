@@ -5,7 +5,7 @@ from comfort.integrations.ikea import fetch_items
 
 
 @frappe.whitelist()
-def get_items(item_codes: str):  # pragma: no cover
+def get_items(item_codes: str):  # TODO: Cover
     response = fetch_items(item_codes, force_update=True)
     if response["unsuccessful"]:
         frappe.msgprint(

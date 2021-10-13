@@ -47,7 +47,7 @@ class Customer(TypedDocument):
         self.vk_id = parse_vk_id(self.vk_url)
         self.update_info_from_vk()
 
-    def update_info_from_vk(self):  # pragma: no cover
+    def update_info_from_vk(self):  # TODO: Cover
         if self.vk_id is None:
             return
         users = _get_vk_users_for_customers((self,))

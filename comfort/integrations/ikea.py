@@ -145,7 +145,7 @@ def _create_item_categories(items: list[ParsedItem]):
         _make_item_category(*category)
 
 
-def _fetch_child_items(items: list[ParsedItem], force_update: bool):  # pragma: no cover
+def _fetch_child_items(items: list[ParsedItem], force_update: bool):  # TODO: Cover
     items_to_fetch: list[str] = []
     for item in items:
         for child in item["child_items"]:
@@ -153,14 +153,14 @@ def _fetch_child_items(items: list[ParsedItem], force_update: bool):  # pragma: 
     return fetch_items(items_to_fetch, force_update=force_update)
 
 
-class FetchItemsResult(TypedDict):  # pragma: no cover
+class FetchItemsResult(TypedDict):
     unsuccessful: list[str]
     successful: list[str]
 
 
-def fetch_items(
+def fetch_items(  # TODO: Cover
     item_codes: str | int | list[str], force_update: bool
-) -> FetchItemsResult:  # pragma: no cover
+) -> FetchItemsResult:
     items_to_fetch = _get_items_to_fetch(item_codes, force_update)
     if not items_to_fetch:
         return {"unsuccessful": [], "successful": []}
