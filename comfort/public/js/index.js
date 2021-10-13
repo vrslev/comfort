@@ -4,7 +4,7 @@ init_sentry();
 
 frappe.provide("comfort");
 
-var DONT_REMOVE_SIDEBAR_IN_DOCTYPES = ["Item"];
+var DONT_REMOVE_SIDEBAR_IN_DOCTYPES = ["Item", "Customer"];
 
 // Remove sidebar in Form view
 $(document).on("form-load", () => {
