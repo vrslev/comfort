@@ -3,6 +3,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.6.1 (2021-10-13)
+### Fix
+* **Settings:** Clear cache on change ([`55a3269`](https://github.com/vrslev/comfort/commit/55a326994f12fdf364bfaad4534bd2ad44856284))
+
 ## v0.6.0 (2021-10-12)
 ### Feature
 * Empty commit ([`f9fd7dd`](https://github.com/vrslev/comfort/commit/f9fd7dd492e787672dd870370372def805dae9db))
