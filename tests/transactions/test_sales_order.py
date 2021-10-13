@@ -55,27 +55,21 @@ def test_update_items_from_db(sales_order: SalesOrder):
         assert i.weight == doc.weight
 
 
-def test_set_child_items_no_items_set(sales_order: SalesOrder):
+def test_set_child_items_not_set(sales_order: SalesOrder):
     sales_order.items = []
     sales_order.set_child_items()
-    assert not sales_order.child_items
+    assert sales_order.child_items == []
 
 
-def test_set_child_items_items_set(sales_order: SalesOrder, item: Item):
+def test_set_child_items_set(sales_order: SalesOrder, item: Item):
+    sales_order.items[0].qty = 2
     sales_order.set_child_items()
 
     item_code_qty_pairs = count_qty(sales_order.child_items).items()
-    exp_item_code_qty_pairs = count_qty(item.child_items).items()
-    # TODO
-    # -        self.child_items = []
-    # +        self.child_items = None
-    # TODO
-    # -            d.qty = d.qty * item_codes_to_qty[d.parent_item_code]
-    # +            d.qty = d.qty / item_codes_to_qty[d.parent_item_code]
-    # TODO
-    # -        base_margin = self.items_cost * self.commission / 100
-    # +        base_margin = self.items_cost * self.commission / 101
-    for p in exp_item_code_qty_pairs:
+    for child in item.child_items:
+        child.qty = child.qty * sales_order.items[0].qty
+
+    for p in count_qty(item.child_items).items():
         assert p in item_code_qty_pairs
 
 
@@ -216,11 +210,11 @@ def test_calculate_commission_items_cost_is_zero(sales_order: SalesOrder):
     assert sales_order.commission == None
 
 
-def test_calculate_margin_zero_if_items_cost_is_zero(sales_order: SalesOrder):
-    # TODO
-    # -        if self.items_cost <= 0:
-    # +        if self.items_cost <= 1:
-    sales_order.items_cost = 0
+@pytest.mark.parametrize("items_cost", (0, -10))
+def test_calculate_margin_zero_if_items_cost_is_zero_or_less(
+    sales_order: SalesOrder, items_cost: int
+):
+    sales_order.items_cost = items_cost
     sales_order._calculate_margin()
     assert sales_order.margin == 0
 
@@ -564,12 +558,6 @@ def test_set_payment_status_with_cancelled_status(sales_order: SalesOrder):
 def test_set_payment_status(
     sales_order: SalesOrder, per_paid: int, expected_status: str
 ):
-    # TODO
-    # -        elif self.per_paid > 100:
-    # +        elif self.per_paid > 101:
-    # TODO:
-    # -        elif self.per_paid > 0:
-    # +        elif self.per_paid > 1:
     sales_order.per_paid = per_paid
     sales_order._set_payment_status()
     assert sales_order.payment_status == expected_status
@@ -637,6 +625,8 @@ def test_set_delivery_status_from_available_actual_stock(
     (
         (0, None, None, "Draft"),
         (1, "Paid", "Delivered", "Completed"),
+        (1, "Paid", None, "In Progress"),
+        (1, None, "Delivered", "In Progress"),
         (1, None, None, "In Progress"),
         (2, None, None, "Cancelled"),
     ),
@@ -648,9 +638,6 @@ def test_set_document_status(
     delivery_status: str | None,
     expected_status: Literal["Draft", "In Progress", "Completed", "Cancelled"],
 ):
-    # TODO
-    # -            if self.payment_status == "Paid" and self.delivery_status == "Delivered":
-    # +            if self.payment_status == "Paid" or self.delivery_status == "Delivered":
     sales_order.docstatus = docstatus
     sales_order.payment_status = payment_status  # type: ignore
     sales_order.delivery_status = delivery_status  # type: ignore
@@ -733,17 +720,6 @@ def test_split_combinations(sales_order: SalesOrder, save: bool):
     assert doc_was_saved if save else not doc_was_saved
 
 
-# TODO
-# @@ -235,7 +235,7 @@
-#          self.set_statuses()
-
-#      def before_submit(self):
-# -        self.edit_commission = True
-# +        self.edit_commission = False
-# +        self.edit_commission = None
-
-#      def before_cancel(self):  # pragma: no cover
-#          self.set_statuses()
 def test_get_customer_first_name_valid(sales_order: SalesOrder):
     assert sales_order._get_customer_first_name() == "Pavel"
 
