@@ -36,7 +36,6 @@ def _get_user_email() -> str | None:
         return frappe.get_value("User", frappe.session.user, "email")  # type: ignore
 
 
-# TODO: Don't catch validation errors by sentry
 def _init_sentry():  # pragma: no cover
     info = get_info()
     sentry_sdk.init(
@@ -44,7 +43,10 @@ def _init_sentry():  # pragma: no cover
         release=info["release"],
         integrations=[RedisIntegration(), RqIntegration()],
         traces_sample_rate=1.0,
-        ignore_errors=[redis.exceptions.ConnectionError],
+        ignore_errors=[
+            redis.exceptions.ConnectionError,
+            frappe.exceptions.ValidationError,
+        ],
     )
     sentry_sdk.set_user({"email": _get_user_email()})
 
