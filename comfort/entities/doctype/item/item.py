@@ -43,7 +43,7 @@ class ItemMethods:
             self.item_name = self.item_code
 
     def calculate_weight(self):
-        if not (self.child_items and len(self.child_items) > 0):
+        if not self.child_items:
             return
 
         items = get_all(
