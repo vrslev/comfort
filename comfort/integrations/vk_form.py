@@ -129,11 +129,10 @@ def process_form(form: dict[Any, Any]):
 
 
 @frappe.whitelist(allow_guest=True)
-def main():  # TODO: Cover
-    frappe.local.session.user = frappe.local.session.sid = "Administrator"
+def main():
+    frappe.session.user = frappe.session.sid = "Administrator"
     try:
         process_form(frappe.form_dict)  # type: ignore
     except Exception as e:
         sentry_sdk.capture_exception(e)
-
     return Response("ok")
