@@ -138,7 +138,9 @@ def test_get_template_context(delivery_trip: DeliveryTrip):
 
 def test_render_telegram_message(delivery_trip: DeliveryTrip):
     delivery_trip.set_new_name()
-    delivery_trip.render_telegram_message()
+    msg = delivery_trip.render_telegram_message()
+    assert msg is not None
+    assert "telegram_template.j2" not in msg
 
 
 @pytest.mark.parametrize("insert_receipt_before", (True, False))
@@ -242,11 +244,3 @@ def test_prepare_message_for_telegram():
     assert (
         _prepare_message_for_telegram("<br><br>\n\n   &nbsp;&nbsp;&nbsp;") == "\n\n    "
     )
-
-
-# TODO
-# -            if stop.installation and not res["installation"]:
-# +            if stop.installation or not res["installation"]:
-# TODO
-# -            is_path=True,
-# +            is_path=False,
