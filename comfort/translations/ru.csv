@@ -140,6 +140,7 @@ Selected Purchase Order has no Items To Sell,В выбранной закупк�
 No Item {} in Sales Order,В заказе нет товара {}
 No Items in Available Actual stock,Нет товаров в доступном фактическом запасе
 No items to add available,"Нет товаров, которые можно добавить"
+No available delivery options,Нет доступных способов доставки
 No satisfying commission found,Не найдено удовлетворительной комиссии
 Not allowed to cancel Sales Return,Не разрешено отменять возврат заказа
 Not in Purchase Order,Не в закупке
@@ -484,3 +485,6 @@ Next Document,Следующий документ
 Search for {0},Искать {0}
 {0} List,Список {0}
 {0} Tree,Дерево {0}
+App Service Token,
+Enter VK App service token in Vk Api Settings,
+Vk Api Settings,
