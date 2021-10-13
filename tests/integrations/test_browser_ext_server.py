@@ -102,6 +102,8 @@ def test_create_sales_order_no_items():
     assert _create_sales_order("John Johnson", []) is None
 
 
+# patch Customer object to disable vk info fetching
+@pytest.mark.usefixtures("customer")
 def test_get_url_to_reference_doc_with_items(
     monkeypatch: pytest.MonkeyPatch,
     item_no_children: Item,
@@ -120,6 +122,7 @@ def test_get_url_to_reference_doc_with_items(
     )
 
 
+@pytest.mark.usefixtures("customer")
 def test_get_url_to_reference_doc_no_items():
     customer_name = "John Johnson"
     customer = _create_customer(customer_name, "https://vk.com/im?sel=1")
