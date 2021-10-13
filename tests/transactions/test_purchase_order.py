@@ -165,8 +165,7 @@ def test_calculate_total_weight(
         as_list=True,
     )
     exp_total_weight = res[0][0] or 0 + sum(
-        i.weight * i.qty
-        for i in purchase_order.items_to_sell  # TODO: This passes * is replaced with /
+        i.weight * i.qty for i in purchase_order.items_to_sell
     )
     assert purchase_order.total_weight == exp_total_weight
 
@@ -228,7 +227,6 @@ def test_get_items_to_sell_split_combinations(purchase_order: PurchaseOrder):
 def test_get_items_in_sales_orders_with_empty_sales_orders(
     purchase_order: PurchaseOrder,
 ):
-    # TODO: If set items = child_items instead of items += child_items, then test passes
     purchase_order.sales_orders = []
     items = purchase_order.get_items_in_sales_orders(split_combinations=False)
     assert items == []
@@ -283,13 +281,6 @@ def test_get_templated_items_for_api(
 @pytest.mark.usefixtures("ikea_settings")
 def test_clear_delivery_options(purchase_order: PurchaseOrder):
     purchase_order.get_delivery_services()
-    # TODO: Cover this method properly
-    # -        templated_items = self._get_templated_items_for_api(split_combinations=True)
-    # +        templated_items = self._get_templated_items_for_api(split_combinations=False)
-    # -        templated_items = self._get_templated_items_for_api(split_combinations=True)
-    # +        templated_items = None
-    # -                    "type": option["delivery_type"],
-    # +                    "XXtypeXX": option["delivery_type"],
     purchase_order._clear_delivery_options()
     assert len(purchase_order.delivery_options) == 0
     assert not get_all(PurchaseOrderDeliveryOption, limit_page_length=1)
@@ -354,12 +345,9 @@ def get_this_month_ru_name():
     return months_number_to_name[now_datetime().month]
 
 
-def test_autoname_purchase_orders_exist_in_this_month(purchase_order: PurchaseOrder):
-    # TODO:
-    # -            latest_cart_number: str | int = matches[0] if matches else 0
-    # +            latest_cart_number: str | int = matches[0] if matches else 1
-
-    # TODO: Parametrize
+def test_autoname_purchase_orders_exist_in_this_month_right_name(
+    purchase_order: PurchaseOrder,
+):
     this_month = get_this_month_ru_name()
     get_doc(PurchaseOrder, {"name": f"{this_month}-1"}).db_insert()
     purchase_order.autoname()
