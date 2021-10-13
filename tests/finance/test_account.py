@@ -72,9 +72,3 @@ def test_add_node():
         )
         is not None
     )
-
-
-# TODO
-# -            account.balance = v[0].balance if v and v[0] and v[0].get("balance") else 0
-# +            account.balance = v[0].balance if v or v[0] and v[0].get("balance") else 0
-# +            account.balance = v[0].balance if v and v[0] and v[0].get("balance") else 1

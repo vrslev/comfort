@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from types import SimpleNamespace
 from typing import Any
 
 import frappe
@@ -28,12 +27,12 @@ def get_children(doctype: str, parent: str = "", is_root: bool = False):
     )
     for account in accounts:
         if not account.expandable:
-            v: list[SimpleNamespace] = get_all(  # type: ignore
+            v: list[Any] = get_all(
                 GLEntry,
                 fields="SUM(debit) - SUM(credit) as balance",
                 filters={"account": account.value, "docstatus": ("!=", 2)},
             )
-            account.balance = v[0].balance if v and v[0] and v[0].get("balance") else 0
+            account.balance = v[0].balance or 0
     return accounts
 
 
