@@ -160,6 +160,9 @@ def vk_form_settings():
 
 
 @pytest.mark.usefixtures("vk_form_settings")
+@pytest.mark.usefixtures(
+    "customer"
+)  # patch Customer object to disable vk info fetching
 def test_process_form(
     monkeypatch: pytest.MonkeyPatch,
     item_no_children: Item,

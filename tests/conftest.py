@@ -16,6 +16,7 @@ from ikea_api_wrapped.types import (
 )
 from pymysql import OperationalError
 
+import comfort.entities.doctype.customer.customer
 import frappe
 from comfort import TypedDocument, doc_exists, get_doc
 from comfort.comfort_core.doctype.commission_settings.commission_settings import (
@@ -25,6 +26,7 @@ from comfort.comfort_core.doctype.ikea_settings.ikea_settings import IkeaSetting
 from comfort.comfort_core.doctype.telegram_settings.telegram_settings import (
     TelegramSettings,
 )
+from comfort.comfort_core.doctype.vk_api_settings.vk_api_settings import VkApiSettings
 from comfort.entities.doctype.customer.customer import Customer
 from comfort.entities.doctype.item.item import Item
 from comfort.entities.doctype.item_category.item_category import ItemCategory
@@ -78,7 +80,14 @@ def db_transaction(db_instance: MariaDBDatabase):
 
 
 @pytest.fixture
-def customer():
+def customer(monkeypatch: pytest.MonkeyPatch):
+    class Customer(comfort.entities.doctype.customer.customer.Customer):
+        def update_info_from_vk(self):
+            return
+
+    monkeypatch.setattr(
+        comfort.entities.doctype.customer.customer, "Customer", Customer
+    )
     return get_doc(
         Customer,
         {
@@ -761,3 +770,11 @@ def purchase_return(purchase_order: PurchaseOrder, sales_order: SalesOrder):
             ],
         },
     )
+
+
+@pytest.fixture
+def vk_api_settings():
+    doc = get_doc(VkApiSettings)
+    doc.app_service_token = "some_test_app_service_token"
+    doc.save()
+    return doc
