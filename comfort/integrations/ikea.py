@@ -44,6 +44,7 @@ def get_delivery_services(items: dict[str, int]):
 
 
 def add_items_to_cart(items: dict[str, int], authorize: bool):
+    # TODO: Validate items len > 0: https://sentry.io/organizations/lev-lj/issues/2712743184/?query=is%3Aunresolved
     api = get_authorized_api() if authorize else get_guest_api()
     ikea_api_wrapped.add_items_to_cart(api, items)
 
