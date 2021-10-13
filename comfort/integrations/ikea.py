@@ -1,10 +1,8 @@
 from __future__ import annotations
 
-import asyncio
 from types import SimpleNamespace
 from typing import Any, TypedDict
 
-import aiohttp
 import ikea_api_wrapped
 from ikea_api_wrapped.types import NoDeliveryOptionsAvailableError, ParsedItem
 
@@ -27,7 +25,6 @@ from comfort.comfort_core.doctype.ikea_settings.ikea_settings import (
 from comfort.entities.doctype.child_item.child_item import ChildItem
 from comfort.entities.doctype.item.item import Item
 from comfort.entities.doctype.item_category.item_category import ItemCategory
-from frappe.utils import get_files_path
 
 
 def get_delivery_services(items: dict[str, int]):
@@ -95,6 +92,7 @@ def _create_item(parsed_item: ParsedItem):
         doc.url = parsed_item["url"]
         doc.rate = parsed_item["price"]
         doc.weight = parsed_item["weight"]
+        doc.image = parsed_item["image_url"]
         if not _child_items_are_same(doc.child_items, parsed_item["child_items"]):
             doc.child_items = []
             doc.extend("child_items", parsed_item["child_items"])
@@ -112,6 +110,7 @@ def _create_item(parsed_item: ParsedItem):
         doc.url = parsed_item["url"]
         doc.rate = parsed_item["price"]
         doc.weight = parsed_item["weight"]
+        doc.image = parsed_item["image_url"]
         doc.child_items = []
         doc.extend("child_items", parsed_item["child_items"])
         doc.item_categories = []
@@ -153,60 +152,6 @@ def _fetch_child_items(items: list[ParsedItem], force_update: bool):  # pragma: 
     return fetch_items(items_to_fetch, force_update=force_update)
 
 
-def _save_image(item_code: str, content: bytes):  # pragma: no cover
-    file_name = f"{item_code}.jpg"
-    with open(get_files_path(file_name), "wb+") as f:
-        f.write(content)
-    frappe.db.set_value("Item", item_code, "image", f"/files/{file_name}")
-
-
-class ImageItem(TypedDict):  # pragma: no cover
-    item_code: str
-    image_url: str
-
-
-def download_images(items: list[ImageItem]):  # pragma: no cover
-    async def fetch(session: aiohttp.ClientSession, item: ImageItem):
-        async with session.get(item["image_url"]) as r:
-            content = await r.content.read()
-        _save_image(item["item_code"], content)
-
-    async def main(items: list[ImageItem]):
-        async with aiohttp.ClientSession() as session:
-            tasks = [fetch(session, item) for item in items]
-            return await asyncio.gather(*tasks)
-
-    item_codes = [item["item_code"] for item in items]
-    items_have_image: list[str] = [
-        item.item_code
-        for item in get_all(
-            Item,
-            fields=("item_code", "image"),
-            filters={"item_code": ("in", item_codes)},
-        )
-        if item.image
-    ]
-
-    items_to_fetch = [item for item in items if item not in items_have_image]
-    if not items_to_fetch:
-        return
-
-    asyncio.run(main(items_to_fetch))
-    frappe.db.commit()
-
-
-def _schedule_download_images(parsed_items: list[ParsedItem]):  # pragma: no cover
-    frappe.enqueue(
-        download_images,
-        queue="short",
-        items=[
-            {"item_code": item["item_code"], "image_url": item["image_url"]}
-            for item in parsed_items
-            if item["image_url"]
-        ],
-    )
-
-
 class FetchItemsResult(TypedDict):  # pragma: no cover
     unsuccessful: list[str]
     successful: list[str]
@@ -229,8 +174,6 @@ def fetch_items(
         _make_items_from_child_items_if_not_exist(parsed_item)
         _create_item(parsed_item)
         fetched_item_codes.append(parsed_item["item_code"])
-
-    _schedule_download_images(parsed_items)
 
     return {
         "successful": [i for i in items_to_fetch if i in fetched_item_codes],
