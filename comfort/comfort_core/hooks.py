@@ -30,7 +30,7 @@ def _set_currency_symbol():
     frappe.db.set_default("currency_precision", 0)
 
 
-def _add_app_name():  # TODO: Make normal tests (insert another value before testing this)
+def _add_app_name():
     frappe.db.set_value("System Settings", None, "app_name", "Comfort")
 
 
