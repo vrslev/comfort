@@ -11,12 +11,12 @@ from comfort.integrations.vk_api import User, VkApi
 
 
 @overload
-def parse_vk_id(vk_url: str) -> str:  # pragma: no cover
+def parse_vk_id(vk_url: str) -> str:
     ...
 
 
 @overload
-def parse_vk_id(vk_url: None) -> None:  # pragma: no cover
+def parse_vk_id(vk_url: None) -> None:
     ...
 
 
@@ -28,9 +28,7 @@ def parse_vk_id(vk_url: str | None):
     if "vk.com" in parsed_url.netloc and "im" in parsed_url.path:
         query = parse_qs(parsed_url.query)
         if "sel" in query:
-            vk_id = query["sel"][0]
-            if vk_id and int(vk_id):
-                return vk_id
+            return query["sel"][0]
 
     raise ValidationError(_("Invalid VK URL"))
 
