@@ -108,11 +108,6 @@ def test_cancel_stock_entries_for(receipt_sales: Receipt):
         assert entry.docstatus == 2
 
 
-# TODO
-# -        {"voucher_type": doctype, "voucher_no": name, "docstatus": ("!=", 2)},
-# +        {"voucher_type": doctype, "voucher_no": name, "docstatus": ("!=", 3)},
-
-
 @pytest.mark.parametrize(
     ("qty_sets", "expected_res"),
     (

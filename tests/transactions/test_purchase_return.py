@@ -275,9 +275,7 @@ def test_purchase_return_split_combinations_in_voucher(purchase_return: Purchase
     ]
 
 
-def test_purchase_return_modify_voucher(
-    purchase_return: PurchaseReturn,
-):  # TODO: This needs more of integration test
+def test_purchase_return_modify_voucher(purchase_return: PurchaseReturn):
     prev_qty_counter = count_qty(purchase_return._voucher.get_items_to_sell(True))
     orders_to_items = purchase_return._allocate_items()
     purchase_return._modify_voucher(orders_to_items)
