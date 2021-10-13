@@ -71,8 +71,6 @@ class ValidationError(Exception):
         )
 
 
-# TODO: Cover all frappe function replacements
-# TODO: Context manager for get_doc and _new_doc
 class TypedDocument(Document):
     name: str
     doctype: str

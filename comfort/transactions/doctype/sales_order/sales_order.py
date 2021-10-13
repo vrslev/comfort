@@ -317,43 +317,6 @@ class SalesOrder(TypedDocument):
         doc.update_children()
 
     def _make_stock_entries_for_from_available_stock(self):
-        """
-        If from Available Purchased:
-            via Checkout
-            Available Purchased -> Reserved Purchased
-        If from Available Actual:
-            via Receipt
-            Available Actual -> Reserved Actual
-
-        After making this stock entries Sales Order becomes regular Sales Order i. e. everything else is as usual
-        Are GL Entries required? No!
-
-        # TODO: Set statuses
-            solution: by modifying Purchase Order
-        # TODO: Modify Purchase Order
-        On cancel:
-            On cancel Sales Return is being created which handles items transfer from Reserved to Available
-
-        # TODO: Is adding items from multiple Purchase orders allowed in case of actual stock?
-
-
-        If we don't change Purchase Order's items to sell, Purchase Return might work!
-        But then it is not that comfy
-
-
-        If Sales Order is from Available Actual stock then it goes out of Purchase Order print format which I was worried about.
-
-        So,
-        If Available Purchased:
-            modify Purchase Order (items to sell -> purchase order sales order)
-            make Stock Entries
-
-        If Available Actual:
-            make Stock Entries # TODO: Which entries to make? How to reverse it on cancel? How change statuses?
-
-        Possibly better way to make sales order from actual stock is to change stock type in Sales Receipt
-
-        """
         if not self.from_available_stock:
             return
 

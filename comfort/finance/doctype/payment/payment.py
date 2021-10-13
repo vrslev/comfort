@@ -6,8 +6,6 @@ from comfort import TypedDocument, ValidationError, _, get_doc, get_value
 from comfort.finance import cancel_gl_entries_for, create_gl_entry, get_account
 from comfort.transactions import OrderTypes
 
-# TODO: Allow to change Cash/Bank after submit
-
 
 class Payment(TypedDocument):
     doctype: Literal["Payment"]

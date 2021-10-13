@@ -41,7 +41,7 @@ class SalesReturn(Return):
             self.__voucher = get_doc(SalesOrder, self.sales_order)
         return self.__voucher
 
-    def _calculate_returned_paid_amount(self):  # TODO: Why is this not used?
+    def _calculate_returned_paid_amount(self):
         self._modify_voucher()
         self._voucher.set_paid_and_pending_per_amount()
         self.returned_paid_amount = (
@@ -152,7 +152,6 @@ class SalesReturn(Return):
         if purchase_order_name is None:
             # If Sales Order is from Available Actual stock
             # then it is not linked to any Purchase Order
-            # TODO: Cover
             return
         doc = get_doc(PurchaseOrder, purchase_order_name)
         doc.extend(
