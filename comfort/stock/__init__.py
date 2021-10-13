@@ -4,14 +4,13 @@ from typing import Any, Literal
 
 from comfort import count_qty, get_all, get_doc, new_doc
 from comfort.stock.doctype.stock_entry_item.stock_entry_item import StockEntryItem
-from comfort.transactions import OrderTypes
 
 StockTypes = Literal[
     "Reserved Actual", "Available Actual", "Reserved Purchased", "Available Purchased"
 ]
 
 
-def create_receipt(doctype: OrderTypes, name: str):
+def create_receipt(doctype: Literal["Sales Order", "Purchase Order"], name: str):
     from comfort.stock.doctype.receipt.receipt import Receipt
 
     doc = new_doc(Receipt)

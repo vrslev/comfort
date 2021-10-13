@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections import Counter
 from types import SimpleNamespace
-from typing import Any, Callable, Literal, TypedDict, TypeVar, Union
+from typing import Any, Callable, TypedDict, TypeVar, Union
 
 import frappe
 from comfort import TypedDocument, ValidationError, _, count_qty, get_all, group_by_attr
@@ -23,7 +23,6 @@ from .doctype.sales_return_item.sales_return_item import SalesReturnItem
 AnyChildItem = Union[
     SalesOrderItem, SalesOrderChildItem, ChildItem, PurchaseOrderItemToSell
 ]
-OrderTypes = Literal["Sales Order", "Purchase Order"]  # pragma: no cover
 
 
 class _ReturnAddItemsPayloadItem(TypedDict):
