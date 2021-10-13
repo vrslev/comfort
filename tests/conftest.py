@@ -43,7 +43,6 @@ from comfort.transactions.doctype.sales_return.sales_return import SalesReturn
 from frappe.database.mariadb.database import MariaDBDatabase
 
 TEST_SITE_NAME = "tests"
-# TODO: Better way to get hard coded doc names. E.g: "SO-2021-0001" valid only in 2021
 
 
 def patch_frappe_document():
@@ -495,7 +494,7 @@ def purchase_order(sales_order: SalesOrder, monkeypatch: pytest.MonkeyPatch):
             "items_to_sell": [
                 {
                     "item_code": "29128569",
-                    "qty": 1,
+                    "qty": 2,
                 }
             ],
         },
