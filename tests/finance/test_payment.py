@@ -11,13 +11,17 @@ from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
 from frappe import ValidationError
 
 
-def test_payment_validate(payment_sales: Payment):
-    # TODO
-    # -        if self.amount <= 0:
-    # +        if self.amount <= 1:
-    payment_sales.amount = 0
+@pytest.mark.parametrize("amount", (0, -10))
+def test_payment_validate_raises(payment_sales: Payment, amount: int):
+    payment_sales.amount = amount
     with pytest.raises(ValidationError, match="Amount should be more that zero"):
         payment_sales.validate()
+
+
+@pytest.mark.parametrize("amount", (0.5, 1000))
+def test_payment_validate_not_raises(payment_sales: Payment, amount: float | int):
+    payment_sales.amount = amount  # type: ignore
+    payment_sales.validate()
 
 
 def test_new_gl_entry(payment_sales: Payment):
@@ -89,49 +93,6 @@ def test_make_categories_invoice_gl_entries(
     exp_delivery_amount: int,
     exp_installation_amount: int,
 ):
-    # # TODO
-    # -                delivery_amount += s.rate
-    # +                delivery_amount = s.rate
-    # TODO
-    # -                installation_amount += s.rate
-    # +                installation_amount = s.rate
-    # TODO
-    # -            if amount == 0:
-    # +            if amount == 1:
-    # TODO
-    # @@ -60,7 +60,7 @@
-    #              ("installation", installation_amount),
-    #          ):
-    #              if amount == 0:
-    # -                continue
-    # +                break
-    # TODO
-    # -            elif amount > remaining_amount:
-    # +            elif amount >= remaining_amount:
-    # TODO
-    #              elif amount > remaining_amount:
-    # -                self._new_gl_entry(accounts_name, 0, remaining_amount)
-    # +                self._new_gl_entry(accounts_name, 1, remaining_amount)
-    # TODO
-    #              elif amount > remaining_amount:
-    #                  self._new_gl_entry(accounts_name, 0, remaining_amount)
-    #                  remaining_amount = 0
-    # -                break
-    # +                continue
-    # TODO
-    # -        if remaining_amount > 0:
-    # +        if remaining_amount >= 0:
-    # +        if remaining_amount > 1:
-    # TODO
-    # -            self._new_gl_entry("sales", 0, remaining_amount)
-    # +            self._new_gl_entry("sales", 1, remaining_amount)
-    # TODO
-    # -        if purchase_delivery > 0:
-    # +        if purchase_delivery >= 0:
-    # +        if purchase_delivery > 1:
-    # TODO
-    # -            self._new_gl_entry("purchase_delivery", purchase_delivery, 0)
-    # +            self._new_gl_entry("purchase_delivery", purchase_delivery, 1)
     sales_order.total_amount = 5800
     sales_order.service_amount = 800
     sales_order.db_update_all()
