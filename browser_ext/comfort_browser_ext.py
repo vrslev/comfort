@@ -39,7 +39,7 @@ def unshorten_item_urls(soup: BeautifulSoup):
 
 
 def get_item_codes(html: str):
-    soup = BeautifulSoup(unescape(html), "html.parser")
+    soup = BeautifulSoup(unescape(unescape(html)), "html.parser")
     text = unshorten_item_urls(soup).get_text()
     return ikea_api_wrapped.parse_item_codes(text)
 
