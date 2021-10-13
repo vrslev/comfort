@@ -40,7 +40,7 @@ def get_delivery_services(items: dict[str, int]):
     try:
         return ikea_api_wrapped.get_delivery_services(api, items, zip_code)
     except NoDeliveryOptionsAvailableError:
-        frappe.msgprint("Нет доступных способов доставки", alert=True, indicator="red")
+        frappe.msgprint(_("No available delivery options"), alert=True, indicator="red")
 
 
 def add_items_to_cart(items: dict[str, int], authorize: bool):
@@ -90,7 +90,7 @@ def _child_items_are_same(old_child_items: list[ChildItem], new_child_items: lis
 
 
 def _create_item(parsed_item: ParsedItem):
-    if doc_exists("Item", parsed_item["item_code"]):  # TODO: Update only if doc changed
+    if doc_exists("Item", parsed_item["item_code"]):
         doc = get_doc(Item, parsed_item["item_code"])
         doc.item_name = parsed_item["name"]
         doc.url = parsed_item["url"]

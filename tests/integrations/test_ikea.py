@@ -251,10 +251,3 @@ def test_create_item_categories(parsed_item: ParsedItem):
     _create_item_categories(items)
     categories_in_db = {c.name for c in get_all(ItemCategory)}
     assert len({new_category, parsed_item["category_name"]} ^ categories_in_db) == 0
-
-
-# TODO: Test and make translatable
-# -        frappe.msgprint("Нет доступных способов доставки", alert=True, indicator="red")
-# +        frappe.msgprint("Нет доступных способов доставки", alert=False, indicator="red")
-
-# TODO: Test adding item properly
