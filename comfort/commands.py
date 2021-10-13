@@ -38,10 +38,11 @@ def _cleanup():
     )
     for doctype in doctypes:
         if doctype.issingle:  # type: ignore
-            # TODO: Use frappe.db.delete
-            frappe.db.sql("DELETE FROM tabSingles WHERE doctype=%s", (doctype.name,))
+            if "Settings" in doctype.name:  # type: ignore
+                continue
+            frappe.db.delete("Singles", {"doctype": doctype.name})
         else:
-            frappe.db.sql(f"DELETE FROM `tab{doctype.name}`")  # nosec
+            frappe.db.delete(doctype.name)  # type: ignore
 
     after_install()
     sync_fixtures(app_name)
@@ -69,7 +70,7 @@ def _make_customer():
         "customer_group": "Friends",
     }
     if not doc_exists(doc["doctype"], doc["name"]):
-        Customer(doc).insert()
+        Customer(doc).db_insert()
 
 
 def _make_commission_settings():
