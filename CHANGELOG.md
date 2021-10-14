@@ -3,6 +3,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.8.0 (2021-10-14)
+### Feature
+* Merge pull request #47 from vrslev/tests ([`242af32`](https://github.com/vrslev/comfort/commit/242af3218abaa3ea2fb0f395bf78a1545437fb4b))
+
 ## v0.7.2 (2021-10-14)
 ### Fix
 * **IKEA:** Circular import ([`45a0f9d`](https://github.com/vrslev/comfort/commit/45a0f9d4276e63f1c2d5212391f57713027f9fa6))
