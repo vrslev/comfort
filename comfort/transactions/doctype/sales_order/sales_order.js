@@ -526,7 +526,15 @@ comfort.SalesOrderController = frappe.ui.form.Controller.extend({
       let pasted_data = clipboard_data.getData("Text");
       if (!pasted_data) return;
 
-      quick_add_items(pasted_data);
+      comfort.quick_add_items(
+        pasted_data,
+        "items",
+        (doctype, docname) => {
+          calculate_item_amount(cur_frm, doctype, docname);
+          calculate_item_total_weight(cur_frm, doctype, docname);
+        },
+        recalculate_global_item_totals
+      );
     });
   },
 
@@ -735,38 +743,6 @@ function calculate_service_amount() {
     total = 0;
   }
   cur_frm.set_value("service_amount", total);
-}
-
-function quick_add_items(text) {
-  comfort.get_items(text).then((values) => {
-    for (var v of values) {
-      let doc = cur_frm.add_child("items", {
-        item_code: v.item_code,
-        item_name: v.item_name,
-        qty: 1,
-        rate: v.rate,
-        weight: v.weight,
-      });
-      calculate_item_amount(cur_frm, doc.doctype, doc.name);
-      calculate_item_total_weight(cur_frm, doc.doctype, doc.name);
-    }
-
-    let grid = cur_frm.fields_dict.items.grid;
-
-    // loose focus from current row
-    grid.add_new_row(null, null, true);
-    grid.grid_rows[grid.grid_rows.length - 1].toggle_editable_row();
-
-    for (var i = grid.grid_rows.length; i--; ) {
-      let doc = grid.grid_rows[i].doc;
-      if (!(doc.item_name && doc.item_code)) {
-        grid.grid_rows[i].remove();
-      }
-    }
-
-    recalculate_global_item_totals(cur_frm);
-    refresh_field("items");
-  });
 }
 
 $.extend(cur_frm.cscript, new comfort.SalesOrderController({ frm: cur_frm }));

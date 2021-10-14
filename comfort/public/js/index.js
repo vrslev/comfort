@@ -78,6 +78,39 @@ comfort.get_items = (item_codes) => {
   return promise;
 };
 
+comfort.quick_add_items = (text, field, item_callback, callback) => {
+  comfort.get_items(text).then((values) => {
+    for (var v of values) {
+      let doc = cur_frm.add_child(field, {
+        item_code: v.item_code,
+        item_name: v.item_name,
+        qty: 1,
+        rate: v.rate,
+        weight: v.weight,
+      });
+      item_callback(doc.doctype, doc.name);
+    }
+
+    let grid = cur_frm.fields_dict[field].grid;
+
+    // loose focus from current row
+    grid.add_new_row(null, null, true);
+    grid.grid_rows[grid.grid_rows.length - 1].toggle_editable_row();
+
+    for (var i = grid.grid_rows.length; i--; ) {
+      let doc = grid.grid_rows[i].doc;
+      if (!doc.item_code) {
+        grid.grid_rows[i].remove();
+      }
+    }
+
+    if (callback) {
+      callback(cur_frm);
+    }
+    refresh_field(field);
+  });
+};
+
 // From ERPNext
 frappe.form.link_formatters["Item"] = (value, doc) => {
   if (
