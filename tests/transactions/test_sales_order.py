@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from copy import deepcopy
+from copy import copy, deepcopy
 from datetime import datetime, timedelta
 from types import SimpleNamespace
 from typing import Callable, Literal
@@ -8,6 +8,7 @@ from typing import Callable, Literal
 import pytest
 from ikea_api_wrapped import format_item_code
 
+import comfort.transactions.doctype.sales_order.sales_order
 import frappe
 from comfort import count_qty, counters_are_same, get_all, get_doc, get_value
 from comfort.comfort_core.doctype.commission_settings.commission_settings import (
@@ -17,6 +18,7 @@ from comfort.entities.doctype.child_item.child_item import ChildItem
 from comfort.entities.doctype.item.item import Item
 from comfort.finance import create_payment
 from comfort.finance.doctype.payment.payment import Payment
+from comfort.integrations.ikea import FetchItemsResult
 from comfort.stock.doctype.checkout.checkout import Checkout
 from comfort.stock.doctype.delivery_stop.delivery_stop import DeliveryStop
 from comfort.stock.doctype.receipt.receipt import Receipt
@@ -786,6 +788,69 @@ def test_get_pickup_order_message_context_not_has_delivery(sales_order: SalesOrd
     sales_order.validate()
     context = sales_order._get_pickup_order_message_context()
     assert context["has_delivery"] == False
+
+
+def test_sales_order_fetch_items_specs_raises_on_from_available_stock(
+    sales_order: SalesOrder,
+):
+    sales_order.from_available_stock = "Available Purchased"
+    sales_order.db_insert()
+    with pytest.raises(
+        ValidationError,
+        match="Can't fetch items specs if order is from Available Stock",
+    ):
+        sales_order.fetch_items_specs()
+
+
+@pytest.mark.parametrize("status", ("In Progress", "Completed", "Cancelled"))
+def test_sales_order_fetch_items_specs_raises_on_not_draft(
+    sales_order: SalesOrder, status: Literal["In Progress", "Completed", "Cancelled"]
+):
+    sales_order.status = status
+    sales_order.db_insert()
+    with pytest.raises(
+        ValidationError, match="Can fetch items specs only if status is Draft"
+    ):
+        sales_order.fetch_items_specs()
+
+
+@pytest.mark.parametrize(
+    ("successful", "unsuccessful"),
+    ((["29128569"], ["10014030"]), (["29128569", "10014030"], [])),
+)
+def test_sales_order_fetch_items_specs_passes(
+    monkeypatch: pytest.MonkeyPatch,
+    sales_order: SalesOrder,
+    successful: list[str],
+    unsuccessful: list[str],
+):
+    called_fetch_items = False
+
+    def mock_fetch_items(item_codes: list[str], force_update: bool):
+        assert force_update == True
+        assert item_codes == [i.item_code for i in sales_order.items]
+        nonlocal called_fetch_items
+        called_fetch_items = True
+        return FetchItemsResult(successful=successful, unsuccessful=unsuccessful)
+
+    monkeypatch.setattr(
+        comfort.transactions.doctype.sales_order.sales_order,
+        "fetch_items",
+        mock_fetch_items,
+    )
+
+    sales_order.insert()
+    sales_order.reload()
+    doc_before = copy(sales_order)
+
+    sales_order.fetch_items_specs()
+    assert called_fetch_items
+    sales_order.reload()
+    assert sales_order.as_dict() != doc_before.as_dict()
+    if unsuccessful:
+        assert f"Cannot fetch those items: {', '.join(unsuccessful)}" in str(
+            frappe.message_log  # type: ignore
+        )
 
 
 def test_validate_split_order_counters_are_same(sales_order: SalesOrder):
