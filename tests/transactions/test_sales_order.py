@@ -670,7 +670,7 @@ def test_sales_order_on_cancel(sales_order: SalesOrder):
         assert all(doc.docstatus == 2 for doc in docs)
 
 
-def test_add_payment_raises_on_cancelled(sales_order: SalesOrder):
+def test_add_payment_raises(sales_order: SalesOrder):
     sales_order.docstatus = 2
     with pytest.raises(
         ValidationError,
@@ -679,22 +679,41 @@ def test_add_payment_raises_on_cancelled(sales_order: SalesOrder):
         sales_order.add_payment(100, True)
 
 
-def test_add_receipt_raises_on_cancelled(sales_order: SalesOrder):
-    sales_order.docstatus = 2
-    with pytest.raises(
-        ValidationError,
-        match="Sales Order should be not Сancelled to add Receipt",
-    ):
-        sales_order.add_receipt()
+def test_add_payment_passes(sales_order: SalesOrder):
+    sales_order.insert()
+    sales_order.add_payment(100, True)
+    payments = get_all(
+        Payment,
+        {"voucher_type": sales_order.doctype, "voucher_no": sales_order.name},
+    )
+    assert len(payments) == 1
 
 
-def test_add_receipt_raises_on_delivered(sales_order: SalesOrder):
-    sales_order.delivery_status = "Delivered"
+@pytest.mark.parametrize(
+    "delivery_status", ("", "To Purchase", "Purchased", "Delivered")
+)
+def test_add_receipt_raises_on_wrong_delivery_status(
+    sales_order: SalesOrder,
+    delivery_status: Literal["", "To Purchase", "Purchased", "Delivered"],
+):
+    sales_order.delivery_status = delivery_status
     with pytest.raises(
         ValidationError,
         match="Delivery Status Sales Order should be To Deliver to add Receipt",
     ):
         sales_order.add_receipt()
+
+
+def test_add_receipt_passes(sales_order: SalesOrder):
+    sales_order.insert()
+    sales_order.db_set("delivery_status", "To Deliver")
+    sales_order.add_receipt()
+    receipts = get_all(
+        Receipt,
+        {"voucher_type": sales_order.doctype, "voucher_no": sales_order.name},
+    )
+    assert len(receipts) == 1
+    assert sales_order.delivery_status == "Delivered"
 
 
 @pytest.mark.parametrize("save", (True, False))

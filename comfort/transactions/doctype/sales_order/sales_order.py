@@ -130,7 +130,7 @@ class SalesOrder(TypedDocument):
         self.set_statuses()
         self._create_cancel_sales_return()
 
-    def on_cancel(self):  # TODO: Cover
+    def on_cancel(self):
         self.ignore_linked_doctypes = [
             "Purchase Order",
             "Sales Return",
@@ -473,7 +473,7 @@ class SalesOrder(TypedDocument):
         self._calculate_margin()
 
     @frappe.whitelist()
-    def add_payment(self, paid_amount: int, cash: bool):  # TODO: Cover
+    def add_payment(self, paid_amount: int, cash: bool):
         if self.docstatus == 2:
             raise ValidationError(
                 _("Sales Order should be not Сancelled to add Payment")
@@ -483,11 +483,7 @@ class SalesOrder(TypedDocument):
         self.db_update()
 
     @frappe.whitelist()
-    def add_receipt(self):  # TODO: Cover
-        if self.docstatus == 2:
-            raise ValidationError(
-                _("Sales Order should be not Сancelled to add Receipt")
-            )
+    def add_receipt(self):
         if self.delivery_status != "To Deliver":
             raise ValidationError(
                 _("Delivery Status Sales Order should be To Deliver to add Receipt")
