@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import re
 from collections import Counter
 from datetime import datetime, timedelta
@@ -468,11 +469,6 @@ class SalesOrder(TypedDocument):
         self._set_document_status()
 
     @frappe.whitelist()
-    def calculate_commission_and_margin(self):  # pragma: no cover
-        self._calculate_commission()
-        self._calculate_margin()
-
-    @frappe.whitelist()
     def add_payment(self, paid_amount: int, cash: bool):
         if self.docstatus == 2:
             raise ValidationError(
@@ -778,3 +774,11 @@ def validate_params_from_available_stock(
     elif from_available_stock == "Available Actual":
         if not get_stock_balance(from_available_stock):
             raise ValidationError(_("No Items in Available Actual stock"))
+
+
+@frappe.whitelist()
+def calculate_commission_and_margin(doc: str):
+    sales_order = SalesOrder(json.loads(doc))
+    sales_order._calculate_commission()
+    sales_order._calculate_margin()
+    return {"commission": sales_order.commission, "margin": sales_order.margin}

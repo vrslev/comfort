@@ -532,13 +532,13 @@ comfort.SalesOrderController = frappe.ui.form.Controller.extend({
 
   commission() {
     if (this.frm.doc.edit_commission == 1) {
-      apply_commission_and_margin();
+      calculate_commission_and_margin();
     }
   },
 
   edit_commission() {
     if (this.frm.doc.edit_commission == 0) {
-      apply_commission_and_margin();
+      calculate_commission_and_margin();
     }
   },
 
@@ -551,7 +551,7 @@ comfort.SalesOrderController = frappe.ui.form.Controller.extend({
   },
 
   items_cost() {
-    apply_commission_and_margin();
+    calculate_commission_and_margin();
   },
 
   service_amount() {
@@ -569,11 +569,18 @@ function calculate_total_amount() {
   );
 }
 
-function apply_commission_and_margin() {
-  cur_frm.call({
-    doc: cur_frm.doc,
-    method: "calculate_commission_and_margin",
-    callback: () => {
+function calculate_commission_and_margin() {
+  // Using custom method because when user removes items or order in bulk
+  // everything goes wrong
+  frappe.call({
+    method:
+      "comfort.transactions.doctype.sales_order.sales_order.calculate_commission_and_margin",
+    args: {
+      doc: cur_frm.doc,
+    },
+    callback: (r) => {
+      cur_frm.set_value("commission", r.message.commission);
+      cur_frm.set_value("margin", r.message.margin);
       calculate_total_amount();
     },
   });

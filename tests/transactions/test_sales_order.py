@@ -33,6 +33,7 @@ from comfort.transactions.doctype.sales_order.sales_order import (
     _CheckAvailabilityCannotAddItem,
     _CheckAvailabilityDeliveryOptionItem,
     _SplitOrderItem,
+    calculate_commission_and_margin,
     get_sales_orders_not_in_purchase_order,
     has_linked_delivery_trip,
     validate_params_from_available_stock,
@@ -1242,3 +1243,12 @@ def test_params_validate_from_available_stock_available_actual_passes(
 ):
     patch_get_stock_balance(monkeypatch, {"10014030": 1})
     validate_params_from_available_stock("Available Actual", None)
+
+
+def test_calculate_commission_and_margin(sales_order: SalesOrder):
+    sales_order.insert()
+    resp = calculate_commission_and_margin(sales_order.as_json())
+    sales_order._calculate_commission()
+    sales_order._calculate_margin()
+    assert resp["commission"] == sales_order.commission
+    assert resp["margin"] == sales_order.margin

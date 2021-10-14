@@ -13,7 +13,10 @@ from comfort import count_qty, get_all, get_doc, get_value, group_by_attr
 from comfort.entities.doctype.child_item.child_item import ChildItem
 from comfort.integrations.ikea import FetchItemsResult
 from comfort.transactions import AnyChildItem
-from comfort.transactions.doctype.purchase_order.purchase_order import PurchaseOrder
+from comfort.transactions.doctype.purchase_order.purchase_order import (
+    PurchaseOrder,
+    calculate_total_weight,
+)
 from comfort.transactions.doctype.purchase_order_delivery_option.purchase_order_delivery_option import (
     PurchaseOrderDeliveryOption,
 )
@@ -530,3 +533,10 @@ def test_purchas_order_add_receipt(
     assert purchase_order.status == "Completed"
     assert called_create_receipt
     assert called_submit_sales_orders_and_update_statuses
+
+
+def test_purchase_order_calculate_total_weight_frontend(purchase_order: PurchaseOrder):
+    purchase_order.insert()
+    total_weight = calculate_total_weight(purchase_order.as_json())
+    purchase_order._calculate_total_weight()
+    assert total_weight == purchase_order.total_weight

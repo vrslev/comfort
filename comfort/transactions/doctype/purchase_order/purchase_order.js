@@ -478,7 +478,18 @@ function calculate_sales_orders_cost() {
 }
 
 function calculate_total_weight() {
-  return cur_frm.call({ doc: cur_frm.doc, method: "_calculate_total_weight" });
+  // Using custom method because when user removes items or order in bulk
+  // everything goes wrong
+  return frappe.call({
+    method:
+      "comfort.transactions.doctype.purchase_order.purchase_order.calculate_total_weight",
+    args: {
+      doc: cur_frm.doc,
+    },
+    callback: (r) => {
+      cur_frm.set_value("total_weight", r.message);
+    },
+  });
 }
 
 frappe.ui.form.on("Purchase Order Item To Sell", {
