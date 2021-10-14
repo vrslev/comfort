@@ -1,14 +1,17 @@
 from __future__ import annotations
 
 import json
+from copy import copy
 from typing import Any, Callable
 
 import ikea_api_wrapped
 import pytest
 
+import comfort.transactions.doctype.purchase_order.purchase_order
 import frappe
 from comfort import count_qty, get_all, get_doc, get_value, group_by_attr
 from comfort.entities.doctype.child_item.child_item import ChildItem
+from comfort.integrations.ikea import FetchItemsResult
 from comfort.transactions import AnyChildItem
 from comfort.transactions.doctype.purchase_order.purchase_order import PurchaseOrder
 from comfort.transactions.doctype.purchase_order_delivery_option.purchase_order_delivery_option import (
@@ -17,6 +20,7 @@ from comfort.transactions.doctype.purchase_order_delivery_option.purchase_order_
 from comfort.transactions.doctype.purchase_order_item_to_sell.purchase_order_item_to_sell import (
     PurchaseOrderItemToSell,
 )
+from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
 from comfort.transactions.doctype.sales_order_child_item.sales_order_child_item import (
     SalesOrderChildItem,
 )
@@ -391,6 +395,64 @@ def test_purchase_order_before_cancel(purchase_order: PurchaseOrder):
     assert purchase_order.status == "Cancelled"
 
 
+@pytest.mark.parametrize(
+    "sales_order_item,item_to_sell,sales_order_should_change",
+    (("10014030", "29128569", True), ("29128569", "10014030", False)),
+)
+def test_purchase_order_fetch_items_specs(
+    monkeypatch: pytest.MonkeyPatch,
+    purchase_order: PurchaseOrder,
+    sales_order: SalesOrder,
+    sales_order_item: str,
+    item_to_sell: str,
+    sales_order_should_change: bool,
+):
+    exp_item_codes = ["10014030", "29128569"]
+
+    called_fetch_items = False
+
+    def mock_fetch_items(item_codes: list[str], force_update: bool):
+        assert force_update == True
+        assert not set(item_codes) ^ set(exp_item_codes)
+
+        nonlocal called_fetch_items
+        called_fetch_items = True
+
+        return FetchItemsResult(unsuccessful=["29128569"], successful=["10014030"])
+
+    monkeypatch.setattr(
+        comfort.transactions.doctype.purchase_order.purchase_order,
+        "fetch_items",
+        mock_fetch_items,
+    )
+
+    sales_order.reload()
+    sales_order.items = []
+    sales_order.append("items", {"item_code": sales_order_item, "qty": 1})
+    sales_order.save()
+    purchase_order.items_to_sell = []
+    purchase_order.append("items_to_sell", {"item_code": item_to_sell, "qty": 1})
+    purchase_order.insert()
+
+    purchase_order.reload()
+    purchase_order_before = copy(purchase_order)
+    sales_order.reload()
+    sales_order_before = copy(sales_order)
+
+    purchase_order.fetch_items_specs()
+
+    assert called_fetch_items
+    purchase_order.reload()
+    sales_order.reload()
+    assert purchase_order.as_dict() != purchase_order_before.as_dict()
+    if sales_order_should_change:
+        assert sales_order.as_dict() != sales_order_before.as_dict()
+    else:
+        assert sales_order.as_dict() == sales_order_before.as_dict()
+
+    assert "Information about items updated" in str(frappe.message_log)  # type: ignore
+
+
 def test_add_purchase_info_and_submit_info_loaded(purchase_order: PurchaseOrder):
     purchase_order.db_insert()
     purchase_id = "111111110"
@@ -416,3 +478,55 @@ def test_add_purchase_info_and_submit_info_not_loaded(purchase_order: PurchaseOr
     assert purchase_order.delivery_cost == delivery_cost
     assert purchase_order.order_confirmation_no == purchase_id
     assert purchase_order.docstatus == 1
+
+
+def test_purchase_order_checkout(
+    monkeypatch: pytest.MonkeyPatch, purchase_order: PurchaseOrder
+):
+    called_add_items_to_cart = False
+
+    def mock_add_items_to_cart(items: dict[str, int], authorize: bool):
+        assert authorize == True
+        assert items == purchase_order._get_templated_items_for_api(False)
+        nonlocal called_add_items_to_cart
+        called_add_items_to_cart = True
+
+    monkeypatch.setattr(
+        comfort.transactions.doctype.purchase_order.purchase_order,
+        "add_items_to_cart",
+        mock_add_items_to_cart,
+    )
+    purchase_order.checkout()
+    assert called_add_items_to_cart
+
+
+def test_purchas_order_add_receipt(
+    monkeypatch: pytest.MonkeyPatch, purchase_order: PurchaseOrder
+):
+    purchase_order.name = "test"
+    called_create_receipt = False
+    called_submit_sales_orders_and_update_statuses = False
+
+    def mock_create_receipt(doctype: str, name: str):
+        assert doctype == purchase_order.doctype
+        assert name == purchase_order.name
+        nonlocal called_create_receipt
+        called_create_receipt = True
+
+    monkeypatch.setattr(
+        comfort.transactions.doctype.purchase_order.purchase_order,
+        "create_receipt",
+        mock_create_receipt,
+    )
+
+    class MockPurchaseOrder(PurchaseOrder):
+        def _submit_sales_orders_and_update_statuses(self):
+            nonlocal called_submit_sales_orders_and_update_statuses
+            called_submit_sales_orders_and_update_statuses = True
+
+    purchase_order = MockPurchaseOrder(purchase_order.as_dict())
+
+    purchase_order.add_receipt()
+    assert purchase_order.status == "Completed"
+    assert called_create_receipt
+    assert called_submit_sales_orders_and_update_statuses

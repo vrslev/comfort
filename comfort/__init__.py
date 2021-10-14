@@ -9,9 +9,6 @@ from comfort.integrations import sentry
 from frappe import _ as _gettext
 from frappe.model.document import Document
 
-_T = TypeVar("_T")
-
-
 sentry.init()
 
 
@@ -31,6 +28,9 @@ def count_qty(
 
 def counters_are_same(first: Counter[str], second: Counter[str]):
     return len(set(first.items()).symmetric_difference(set(second.items()))) == 0
+
+
+_T = TypeVar("_T")
 
 
 def group_by_attr(data: Iterable[_T], attr: str = "item_code") -> dict[Any, list[_T]]:
@@ -118,13 +118,13 @@ class TypedDocument(Document):
         )
 
 
-_T_c = TypeVar("_T_c", bound=Document)
+_T_doc = TypeVar("_T_doc", bound=Document)
 
 
 def _resolve_doctype_from_class(cls: type[Document]):
     doctype = cls.__name__
     if doctype == "DocType":
-        return doctype
+        return doctype  # pragma: no cover
 
     for i in range(len(doctype) - 1)[::-1]:
         if doctype[i].isupper() and doctype[i + 1].islower():
@@ -135,7 +135,7 @@ def _resolve_doctype_from_class(cls: type[Document]):
     return doctype
 
 
-def get_doc(cls: type[_T_c], *args: Any, **kwargs: Any) -> _T_c:
+def get_doc(cls: type[_T_doc], *args: Any, **kwargs: Any) -> _T_doc:
     doctype = _resolve_doctype_from_class(cls)
     if args and isinstance(args[0], dict):
         args[0]["doctype"] = doctype
@@ -145,7 +145,7 @@ def get_doc(cls: type[_T_c], *args: Any, **kwargs: Any) -> _T_c:
     return frappe.get_doc(doctype, *args, **kwargs)  # type: ignore
 
 
-def get_all(cls: type[_T_c], *args: Any, **kwargs: Any) -> list[_T_c]:
+def get_all(cls: type[_T_doc], *args: Any, **kwargs: Any) -> list[_T_doc]:
     return frappe.get_all(_resolve_doctype_from_class(cls), *args, **kwargs)
 
 
@@ -165,11 +165,11 @@ def get_value(
     )
 
 
-def new_doc(cls: type[_T_c]) -> _T_c:
+def new_doc(cls: type[_T_doc]) -> _T_doc:
     return frappe.new_doc(_resolve_doctype_from_class(cls))  # type: ignore
 
 
-def get_cached_doc(cls: type[_T_c], name: str | None = None) -> _T_c:
+def get_cached_doc(cls: type[_T_doc], name: str | None = None) -> _T_doc:
     doctype = _resolve_doctype_from_class(cls)
     if name is None:
         name = doctype
@@ -193,5 +193,5 @@ def doc_exists(
     return frappe.db.exists(dt=doctype, dn=name)  # type: ignore
 
 
-def copy_doc(doc: _T_c, ignore_no_copy: bool = True) -> _T_c:
+def copy_doc(doc: _T_doc, ignore_no_copy: bool = True) -> _T_doc:
     return frappe.copy_doc(doc, ignore_no_copy=ignore_no_copy)  # type: ignore

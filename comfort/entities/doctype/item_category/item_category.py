@@ -9,10 +9,8 @@ class ItemCategory(TypedDocument):
     category_name: str
     url: str | None
 
-    def validate(self):  # pragma: no cover
-        self.validate_url()
-
-    def validate_url(self):
-        if self.url:
-            if len(re.findall(r"ikea.com/\w+/\w+/cat/-\d+", self.url)) == 0:
-                raise ValidationError(_("Invalid category URL"))
+    def validate(self):
+        if not self.url:
+            return
+        if len(re.findall(r"ikea.com/\w+/\w+/cat/-\d+", self.url)) == 0:
+            raise ValidationError(_("Invalid category URL"))

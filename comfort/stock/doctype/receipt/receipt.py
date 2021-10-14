@@ -7,7 +7,6 @@ from comfort import TypedDocument, get_doc, get_value
 from comfort.entities.doctype.child_item.child_item import ChildItem
 from comfort.finance import cancel_gl_entries_for, create_gl_entry, get_account
 from comfort.stock import cancel_stock_entries_for, create_stock_entry
-from comfort.transactions import OrderTypes
 from comfort.transactions.doctype.purchase_order_item_to_sell.purchase_order_item_to_sell import (
     PurchaseOrderItemToSell,
 )
@@ -27,7 +26,7 @@ if TYPE_CHECKING:
 
 class Receipt(TypedDocument):
     doctype: Literal["Receipt"]
-    voucher_type: OrderTypes
+    voucher_type: Literal["Sales Order", "Purchase Order"]
     voucher_no: str
 
     __voucher: SalesOrder | PurchaseOrder | None = None
@@ -59,7 +58,7 @@ class Receipt(TypedDocument):
             self.create_purchase_gl_entries()
             self.create_purchase_stock_entries()
 
-    def on_cancel(self):  # pragma: no cover
+    def on_cancel(self):
         cancel_gl_entries_for(self.doctype, self.name)
         cancel_stock_entries_for(self.doctype, self.name)
         self.set_status_in_sales_order()

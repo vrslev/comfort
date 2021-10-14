@@ -6,6 +6,8 @@ from types import SimpleNamespace
 import pytest
 import responses
 
+import comfort.entities.doctype.customer.customer
+from comfort import new_doc
 from comfort.entities.doctype.customer.customer import (
     Customer,
     _get_vk_users_for_customers,
@@ -71,6 +73,48 @@ def test_customer_validate(customer: Customer):
     assert called
 
 
+@pytest.mark.parametrize(("vk_id", "exp_called"), (("248934423", True), (None, False)))
+def test_update_info_from_vk(
+    monkeypatch: pytest.MonkeyPatch, customer: Customer, vk_id: str, exp_called: bool
+):
+    customer = Customer(customer.as_dict())  # Customer is patched in conftest
+
+    first_called = False
+    second_called = False
+    exp_user = "User"
+
+    def mock_get_vk_users_for_customers(customers: tuple[Customer]):
+        nonlocal first_called
+        first_called = True
+        return {customer.vk_id: exp_user}
+
+    def mock_update_customer_from_vk_user(customer: Customer, user: str):
+        nonlocal second_called
+        second_called = True
+        assert user == exp_user
+
+    monkeypatch.setattr(
+        comfort.entities.doctype.customer.customer,
+        "_get_vk_users_for_customers",
+        mock_get_vk_users_for_customers,
+    )
+    monkeypatch.setattr(
+        comfort.entities.doctype.customer.customer,
+        "_update_customer_from_vk_user",
+        mock_update_customer_from_vk_user,
+    )
+
+    customer.vk_id = vk_id
+    customer.update_info_from_vk()
+
+    if exp_called:
+        assert first_called
+        assert second_called
+    else:
+        assert not first_called
+        assert not second_called
+
+
 @responses.activate
 @pytest.mark.usefixtures("vk_api_settings")
 def test_get_vk_users_for_customers():
@@ -133,6 +177,9 @@ def test_update_customer_from_vk_user_city(customer: Customer):
 @pytest.mark.usefixtures("vk_api_settings")
 def test_update_all_customers_from_vk_with_vk_id(customer: Customer):
     customer.db_insert()
+    doc = new_doc(Customer)
+    doc.name = "Test Name"
+    doc.db_insert()
 
     image = "https://example.com/image.jpg"
     city = "Moscow"

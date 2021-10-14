@@ -1,13 +1,15 @@
 from __future__ import annotations
 
-from copy import deepcopy
+from copy import copy, deepcopy
 from datetime import datetime, timedelta
 from types import SimpleNamespace
-from typing import Callable, Literal
+from typing import Any, Callable, Literal
 
 import pytest
 from ikea_api_wrapped import format_item_code
+from ikea_api_wrapped.types import DeliveryOptionDict, UnavailableItemDict
 
+import comfort.transactions.doctype.sales_order.sales_order
 import frappe
 from comfort import count_qty, counters_are_same, get_all, get_doc, get_value
 from comfort.comfort_core.doctype.commission_settings.commission_settings import (
@@ -17,6 +19,7 @@ from comfort.entities.doctype.child_item.child_item import ChildItem
 from comfort.entities.doctype.item.item import Item
 from comfort.finance import create_payment
 from comfort.finance.doctype.payment.payment import Payment
+from comfort.integrations.ikea import FetchItemsResult
 from comfort.stock.doctype.checkout.checkout import Checkout
 from comfort.stock.doctype.delivery_stop.delivery_stop import DeliveryStop
 from comfort.stock.doctype.receipt.receipt import Receipt
@@ -27,6 +30,8 @@ from comfort.transactions.doctype.purchase_order_item_to_sell.purchase_order_ite
 )
 from comfort.transactions.doctype.sales_order.sales_order import (
     SalesOrder,
+    _CheckAvailabilityCannotAddItem,
+    _CheckAvailabilityDeliveryOptionItem,
     _SplitOrderItem,
     get_sales_orders_not_in_purchase_order,
     has_linked_delivery_trip,
@@ -40,6 +45,7 @@ from comfort.transactions.doctype.sales_order_item.sales_order_item import (
 )
 from comfort.transactions.doctype.sales_return.sales_return import SalesReturn
 from frappe import ValidationError
+from tests.conftest import mock_delivery_services
 
 
 def test_update_items_from_db(sales_order: SalesOrder):
@@ -664,7 +670,7 @@ def test_sales_order_on_cancel(sales_order: SalesOrder):
         assert all(doc.docstatus == 2 for doc in docs)
 
 
-def test_add_payment_raises_on_cancelled(sales_order: SalesOrder):
+def test_add_payment_raises(sales_order: SalesOrder):
     sales_order.docstatus = 2
     with pytest.raises(
         ValidationError,
@@ -673,22 +679,41 @@ def test_add_payment_raises_on_cancelled(sales_order: SalesOrder):
         sales_order.add_payment(100, True)
 
 
-def test_add_receipt_raises_on_cancelled(sales_order: SalesOrder):
-    sales_order.docstatus = 2
-    with pytest.raises(
-        ValidationError,
-        match="Sales Order should be not Сancelled to add Receipt",
-    ):
-        sales_order.add_receipt()
+def test_add_payment_passes(sales_order: SalesOrder):
+    sales_order.insert()
+    sales_order.add_payment(100, True)
+    payments = get_all(
+        Payment,
+        {"voucher_type": sales_order.doctype, "voucher_no": sales_order.name},
+    )
+    assert len(payments) == 1
 
 
-def test_add_receipt_raises_on_delivered(sales_order: SalesOrder):
-    sales_order.delivery_status = "Delivered"
+@pytest.mark.parametrize(
+    "delivery_status", ("", "To Purchase", "Purchased", "Delivered")
+)
+def test_add_receipt_raises_on_wrong_delivery_status(
+    sales_order: SalesOrder,
+    delivery_status: Literal["", "To Purchase", "Purchased", "Delivered"],
+):
+    sales_order.delivery_status = delivery_status
     with pytest.raises(
         ValidationError,
         match="Delivery Status Sales Order should be To Deliver to add Receipt",
     ):
         sales_order.add_receipt()
+
+
+def test_add_receipt_passes(sales_order: SalesOrder):
+    sales_order.insert()
+    sales_order.db_set("delivery_status", "To Deliver")
+    sales_order.add_receipt()
+    receipts = get_all(
+        Receipt,
+        {"voucher_type": sales_order.doctype, "voucher_no": sales_order.name},
+    )
+    assert len(receipts) == 1
+    assert sales_order.delivery_status == "Delivered"
 
 
 @pytest.mark.parametrize("save", (True, False))
@@ -746,6 +771,13 @@ def test_get_check_order_message_context(sales_order: SalesOrder):
     assert context["total_amount"] == sales_order.total_amount
 
 
+def test_generate_check_order_message(sales_order: SalesOrder):
+    sales_order.validate()
+    msg = sales_order.generate_check_order_message()
+    assert msg is not None
+    assert "check_order_message.j2" not in msg
+
+
 def test_get_pickup_order_message_context(sales_order: SalesOrder):
     MONTHS = {
         1: "января",
@@ -786,6 +818,276 @@ def test_get_pickup_order_message_context_not_has_delivery(sales_order: SalesOrd
     sales_order.validate()
     context = sales_order._get_pickup_order_message_context()
     assert context["has_delivery"] == False
+
+
+def test_generate_pickup_order_message(sales_order: SalesOrder):
+    sales_order.validate()
+    msg = sales_order.generate_pickup_order_message()
+    assert msg is not None
+    assert "pickup_order_message.j2" not in msg
+
+
+def test_get_services_for_check_availability_no_delivery_options(
+    monkeypatch: pytest.MonkeyPatch, sales_order: SalesOrder
+):
+    def new_get_delivery_services(items: Any):
+        pass
+
+    monkeypatch.setattr(
+        comfort.transactions.doctype.sales_order.sales_order,
+        "get_delivery_services",
+        new_get_delivery_services,
+    )
+
+    frappe.message_log = []
+    items = count_qty(sales_order.get_items_with_splitted_combinations())
+    assert sales_order._get_services_for_check_availability(items) is None
+    assert frappe.message_log == []
+
+
+def test_get_services_for_check_availability_no_unavailble_items(
+    monkeypatch: pytest.MonkeyPatch,
+    sales_order: SalesOrder,
+):
+    def new_get_delivery_services(items: Any):
+        resp = deepcopy(mock_delivery_services)
+        resp["cannot_add"] = []
+        for option in resp["delivery_options"]:
+            option["unavailable_items"] = []
+        return resp
+
+    monkeypatch.setattr(
+        comfort.transactions.doctype.sales_order.sales_order,
+        "get_delivery_services",
+        new_get_delivery_services,
+    )
+
+    items = count_qty(sales_order.get_items_with_splitted_combinations())
+    assert sales_order._get_services_for_check_availability(items) is None
+    assert "All items available" in str(frappe.message_log)  # type: ignore
+
+
+@pytest.mark.parametrize(
+    ("cannot_add_appear", "unavailable_items_appear"),
+    (
+        (True, False),
+        (False, True),
+        (True, True),
+    ),
+)
+def test_get_services_for_check_availability_with_unavailable_items(
+    monkeypatch: pytest.MonkeyPatch,
+    sales_order: SalesOrder,
+    cannot_add_appear: bool,
+    unavailable_items_appear: bool,
+):
+    resp = deepcopy(mock_delivery_services)
+    if not cannot_add_appear:
+        resp["cannot_add"] = []
+    if not unavailable_items_appear:
+        for option in resp["delivery_options"]:
+            option["unavailable_items"] = []
+
+    def new_get_delivery_services(items: Any):
+        return resp
+
+    monkeypatch.setattr(
+        comfort.transactions.doctype.sales_order.sales_order,
+        "get_delivery_services",
+        new_get_delivery_services,
+    )
+
+    frappe.message_log = []
+    items = count_qty(sales_order.get_items_with_splitted_combinations())
+    assert sales_order._get_services_for_check_availability(items) == resp
+    assert frappe.message_log == []
+
+
+def test_check_availability_options_items(
+    monkeypatch: pytest.MonkeyPatch, sales_order: SalesOrder
+):
+    item = sales_order.items[0]
+
+    def new_get_delivery_services(items: Any):
+        resp = deepcopy(mock_delivery_services)
+        resp["cannot_add"] = []
+        resp["delivery_options"] = resp["delivery_options"][:1]
+        resp["delivery_options"][0]["unavailable_items"] = [
+            UnavailableItemDict(item_code=item.item_code, available_qty=0)
+        ]
+        resp["delivery_options"].append(
+            DeliveryOptionDict(
+                delivery_date=None,
+                delivery_type="test",
+                price=0,
+                service_provider=None,
+                unavailable_items=[],
+            )
+        )
+        return resp
+
+    monkeypatch.setattr(
+        comfort.transactions.doctype.sales_order.sales_order,
+        "get_delivery_services",
+        new_get_delivery_services,
+    )
+
+    resp = sales_order.check_availability()
+    assert resp is not None
+    assert len(resp["options"]) == 1
+    option = resp["options"][0]
+    assert len(option["items"]) == 1
+    assert option["items"][0] == _CheckAvailabilityDeliveryOptionItem(
+        item_code=item.item_code,
+        item_name=item.item_name,
+        available_qty=0,
+        required_qty=item.qty,
+    )
+
+
+@pytest.mark.parametrize(
+    ("service_provider", "delivery_type", "exp_delivery_type"),
+    (
+        ("Provider", "Type", "Type (Provider)"),
+        (None, "Type", "Type"),
+    ),
+)
+def test_check_availability_options_delivery_type(
+    monkeypatch: pytest.MonkeyPatch,
+    sales_order: SalesOrder,
+    service_provider: str | None,
+    delivery_type: str,
+    exp_delivery_type: str,
+):
+    def new_get_delivery_services(items: Any):
+        resp = deepcopy(mock_delivery_services)
+        resp["cannot_add"] = []
+        resp["delivery_options"] = resp["delivery_options"][:1]
+        option = resp["delivery_options"][0]
+        option["service_provider"] = service_provider
+        option["delivery_type"] = delivery_type
+        option["unavailable_items"] = [
+            UnavailableItemDict(
+                item_code=sales_order.items[0].item_code, available_qty=0
+            )
+        ]
+        return resp
+
+    monkeypatch.setattr(
+        comfort.transactions.doctype.sales_order.sales_order,
+        "get_delivery_services",
+        new_get_delivery_services,
+    )
+
+    resp = sales_order.check_availability()
+    assert resp is not None
+    assert resp["options"][0]["delivery_type"] == exp_delivery_type
+
+
+def test_check_availability_options_cannot_add(
+    monkeypatch: pytest.MonkeyPatch,
+    sales_order: SalesOrder,
+):
+    item = sales_order.items[0]
+
+    def new_get_delivery_services(items: Any):
+        resp = deepcopy(mock_delivery_services)
+        resp["cannot_add"] = [item.item_code]
+        resp["delivery_options"] = resp["delivery_options"][:1]
+        resp["delivery_options"][0]["unavailable_items"] = []
+        return resp
+
+    monkeypatch.setattr(
+        comfort.transactions.doctype.sales_order.sales_order,
+        "get_delivery_services",
+        new_get_delivery_services,
+    )
+
+    resp = sales_order.check_availability()
+    assert resp is not None
+    assert len(resp["cannot_add"]) == 1
+    assert resp["cannot_add"][0] == _CheckAvailabilityCannotAddItem(
+        item_code=item.item_code, item_name=item.item_name
+    )
+
+
+def test_check_availability_no_delivery_services(
+    monkeypatch: pytest.MonkeyPatch,
+    sales_order: SalesOrder,
+):
+    def new_get_delivery_services(items: Any):
+        pass
+
+    monkeypatch.setattr(
+        comfort.transactions.doctype.sales_order.sales_order,
+        "get_delivery_services",
+        new_get_delivery_services,
+    )
+
+    assert sales_order.check_availability() is None
+
+
+def test_sales_order_fetch_items_specs_raises_on_from_available_stock(
+    sales_order: SalesOrder,
+):
+    sales_order.from_available_stock = "Available Purchased"
+    sales_order.db_insert()
+    with pytest.raises(
+        ValidationError,
+        match="Can't fetch items specs if order is from Available Stock",
+    ):
+        sales_order.fetch_items_specs()
+
+
+@pytest.mark.parametrize("status", ("In Progress", "Completed", "Cancelled"))
+def test_sales_order_fetch_items_specs_raises_on_not_draft(
+    sales_order: SalesOrder, status: Literal["In Progress", "Completed", "Cancelled"]
+):
+    sales_order.status = status
+    sales_order.db_insert()
+    with pytest.raises(
+        ValidationError, match="Can fetch items specs only if status is Draft"
+    ):
+        sales_order.fetch_items_specs()
+
+
+@pytest.mark.parametrize(
+    ("successful", "unsuccessful"),
+    ((["29128569"], ["10014030"]), (["29128569", "10014030"], [])),
+)
+def test_sales_order_fetch_items_specs_passes(
+    monkeypatch: pytest.MonkeyPatch,
+    sales_order: SalesOrder,
+    successful: list[str],
+    unsuccessful: list[str],
+):
+    called_fetch_items = False
+
+    def mock_fetch_items(item_codes: list[str], force_update: bool):
+        assert force_update == True
+        assert item_codes == [i.item_code for i in sales_order.items]
+        nonlocal called_fetch_items
+        called_fetch_items = True
+        return FetchItemsResult(successful=successful, unsuccessful=unsuccessful)
+
+    monkeypatch.setattr(
+        comfort.transactions.doctype.sales_order.sales_order,
+        "fetch_items",
+        mock_fetch_items,
+    )
+
+    sales_order.insert()
+    sales_order.reload()
+    doc_before = copy(sales_order)
+
+    sales_order.fetch_items_specs()
+    assert called_fetch_items
+    sales_order.reload()
+    assert sales_order.as_dict() != doc_before.as_dict()
+    if unsuccessful:
+        assert f"Cannot fetch those items: {', '.join(unsuccessful)}" in str(
+            frappe.message_log  # type: ignore
+        )
 
 
 def test_validate_split_order_counters_are_same(sales_order: SalesOrder):

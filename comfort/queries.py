@@ -44,7 +44,7 @@ def _format_sales_order_query(result: list[Any]):  # pragma: no cover
         result[3] = _format_money(result[3])
 
 
-_QUERY_FORMATTERS = {  # pragma: no cover
+_QUERY_FORMATTERS = {
     "Item": _format_item_query,
     "Purchase Order": _format_purchase_order_query,
     "Sales Order": _format_sales_order_query,
@@ -100,7 +100,7 @@ def default_query(
     return query
 
 
-def get_standard_queries(doctypes: Iterable[str]):  # pragma: no cover
+def get_standard_queries(doctypes: Iterable[str]):
     query_name = default_query.__module__ + "." + default_query.__name__
     return {d: query_name for d in doctypes}
 

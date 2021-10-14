@@ -201,7 +201,7 @@ Sales Order Item,Товары заказа
 Sales Order Name,Название заказа
 Sales Order Service,Услуги заказа
 Sales Order should be not Сancelled to add Payment,"Заказ не может быть отменён, чтобы добавить платёж"
-Sales Order should be not Сancelled to add Receipt,"Заказ не может быть отменён, чтобы добавить накладную"
+"Sales Order should be Submitted to add Receipt","Заказ должен быть подтверждён, чтобы добавить накладную"
 Sales Order should be submitted,Заказ должен быть подтверждён
 Sales Order {} has no delivery service,В заказе {} нет доставки
 Sales Order {} has no installation service,В заказе {} нет сборки

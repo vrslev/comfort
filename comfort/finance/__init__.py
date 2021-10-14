@@ -4,7 +4,6 @@ from typing import Literal
 
 from comfort import ValidationError, _, get_all, get_cached_value, get_doc, new_doc
 from comfort.finance.doctype.gl_entry.gl_entry import GLEntry
-from comfort.transactions import OrderTypes
 
 
 def get_account(field_name: str) -> str:
@@ -52,8 +51,11 @@ def cancel_gl_entries_for(
 
 
 def create_payment(
-    doctype: OrderTypes, name: str, amount: int, paid_with_cash: bool
-):  # TODO: For consistency, pass whole doc to capture real state of the doc
+    doctype: Literal["Sales Order", "Purchase Order"],
+    name: str,
+    amount: int,
+    paid_with_cash: bool,
+):
     from comfort.finance.doctype.payment.payment import Payment
 
     doc = new_doc(Payment)

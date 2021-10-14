@@ -7,35 +7,21 @@ import frappe
 from comfort import _, get_all, group_by_attr
 from comfort.finance.doctype.account.account import Account
 
-
-def execute(filters: dict[str, str]):  # pragma: no cover
-    data = get_data(filters)
-    income, expense, profit_loss = get_income_expense_profit_loss_totals(data)
-    return (
-        get_columns(),
-        data,
-        None,
-        get_chart_data(filters, income, expense, profit_loss),
-        get_report_summary(income, expense, profit_loss),
-    )
-
-
-def get_columns():  # pragma: no cover
-    return [
-        {
-            "fieldname": "name",
-            "label": "Account",
-            "fieldtype": "Link",
-            "options": "Account",
-            "width": 300,
-        },
-        {
-            "fieldname": "total",
-            "label": "Total",
-            "fieldtype": "Currency",
-            "width": 150,
-        },
-    ]
+columns = [
+    {
+        "fieldname": "name",
+        "label": "Account",
+        "fieldtype": "Link",
+        "options": "Account",
+        "width": 300,
+    },
+    {
+        "fieldname": "total",
+        "label": "Total",
+        "fieldtype": "Currency",
+        "width": 150,
+    },
+]
 
 
 def _get_parent_children_accounts_map() -> dict[str | None, list[AccountWithTotal]]:
@@ -145,3 +131,15 @@ def get_report_summary(income: int, expense: int, profit_loss: int):
             "datatype": "Currency",
         },
     ]
+
+
+def execute(filters: dict[str, str]):  # pragma: no cover
+    data = get_data(filters)
+    income, expense, profit_loss = get_income_expense_profit_loss_totals(data)
+    return (
+        columns,
+        data,
+        None,
+        get_chart_data(filters, income, expense, profit_loss),
+        get_report_summary(income, expense, profit_loss),
+    )

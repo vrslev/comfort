@@ -30,7 +30,7 @@ class CommissionSettings(TypedDocument):
             range_.from_amount = previous_to_amount + 1
             previous_to_amount = range_.to_amount
 
-    def validate(self):  # pragma: no cover
+    def validate(self):
         self.validate_to_amounts_are_not_zero()
         self.validate_last_to_amount_is_zero()
         self.validate_to_amounts_order()
@@ -40,7 +40,7 @@ class CommissionSettings(TypedDocument):
         self.clear_cache()
 
     @staticmethod
-    def get_commission_percentage(amount: float | int | None) -> int:
+    def get_commission_percentage(amount: float | int | None):
         if not amount or amount < 0:
             raise ValidationError(_("Amount should be more that zero"))
 
@@ -53,4 +53,6 @@ class CommissionSettings(TypedDocument):
             if amount >= from_amount:
                 return percentage
 
+        # Called when no Commission Settings in system
+        # Not covered because it is expensive
         raise ValidationError(_("No satisfying commission found"))  # pragma: no cover

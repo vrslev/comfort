@@ -1,8 +1,14 @@
 from __future__ import annotations
 
+from copy import copy
+from typing import Any
+
 import pytest
+import sentry_sdk
+from werkzeug import Response
 
 import comfort.integrations.vk_form
+import frappe
 from comfort import count_qty, doc_exists, get_doc
 from comfort.comfort_core.doctype.commission_settings.commission_settings import (
     CommissionSettings,
@@ -17,6 +23,7 @@ from comfort.integrations.vk_form import (
     _create_vk_group_dialog_url,
     _get_customer_name,
     _get_delivery_service,
+    main,
     process_form,
 )
 from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
@@ -177,3 +184,61 @@ def test_process_form(
     assert doc.customer
     assert doc.items
     assert doc.services
+
+
+def test_vk_form_main_whitelisted():
+    frappe.is_whitelisted(main)
+
+
+def test_vk_form_main_success(monkeypatch: pytest.MonkeyPatch):
+    called_process_form = False
+
+    form_dict = {"test": "test"}
+
+    def mock_process_form(form: dict[Any, Any]):
+        assert form == frappe.form_dict == form_dict
+        nonlocal called_process_form
+        called_process_form = True
+
+    monkeypatch.setattr(comfort.integrations.vk_form, "process_form", mock_process_form)
+
+    user_before = copy(frappe.session.user)  # type: ignore
+    frappe.session.user = "Guest"
+    frappe.form_dict = form_dict
+    resp = main()
+
+    assert frappe.session.user == "Administrator"
+    assert frappe.session.sid == "Administrator"
+    frappe.session.user = user_before
+    assert called_process_form
+    assert type(resp) == Response
+    assert resp.get_data(as_text=True) == "ok"
+
+
+def test_vk_form_main_failure(monkeypatch: pytest.MonkeyPatch):
+    called_process_form = False
+    called_capture_exception = False
+
+    def mock_process_form(form: dict[Any, Any]):
+        nonlocal called_process_form
+        called_process_form = True
+        raise ValueError
+
+    def mock_capture_exception(error: Exception):
+        nonlocal called_capture_exception
+        called_capture_exception = True
+        assert type(error) == ValueError
+
+    monkeypatch.setattr(comfort.integrations.vk_form, "process_form", mock_process_form)
+    monkeypatch.setattr(sentry_sdk, "capture_exception", mock_capture_exception)
+
+    user_before = copy(frappe.session.user)  # type: ignore
+    frappe.session.user = "Guest"
+    resp = main()
+    assert frappe.session.user == "Administrator"
+    assert frappe.session.sid == "Administrator"
+    frappe.session.user = user_before
+    assert called_process_form
+    assert called_capture_exception
+    assert type(resp) == Response
+    assert resp.get_data(as_text=True) == "ok"

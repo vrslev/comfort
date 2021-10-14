@@ -4,13 +4,12 @@ from typing import Literal
 
 from comfort import TypedDocument, ValidationError, _, get_doc, get_value
 from comfort.finance import cancel_gl_entries_for, create_gl_entry, get_account
-from comfort.transactions import OrderTypes
 
 
 class Payment(TypedDocument):
     doctype: Literal["Payment"]
 
-    voucher_type: OrderTypes
+    voucher_type: Literal["Sales Order", "Purchase Order"]
     voucher_no: str
     amount: int
     paid_with_cash: bool
@@ -78,7 +77,7 @@ class Payment(TypedDocument):
         account_field = self._resolve_cash_or_bank()
         self._new_gl_entry(account_field, self.amount, 0)
 
-    def create_sales_gl_entries(self):  # pragma: no cover
+    def create_sales_gl_entries(self):
         amounts = self._get_amounts_for_sales_gl_entries()
         self._create_categories_sales_gl_entries(**amounts)
         self._create_income_sales_gl_entry()
@@ -102,16 +101,13 @@ class Payment(TypedDocument):
             self._new_gl_entry(cash_or_bank, 0, purchase_delivery)
             self._new_gl_entry("purchase_delivery", purchase_delivery, 0)
 
-    def create_gl_entries(self):  # pragma: no cover
+    def before_submit(self):
         if self.voucher_type == "Sales Order":
             self.create_sales_gl_entries()
         elif self.voucher_type == "Purchase Order":
             self.create_purchase_gl_entries()
 
-    def before_submit(self):  # pragma: no cover
-        self.create_gl_entries()
-
-    def cancel_gl_entries(self):  # pragma: no cover
+    def cancel_gl_entries(self):
         cancel_gl_entries_for(self.doctype, self.name)
 
     def set_status_in_sales_order(self):
@@ -122,6 +118,6 @@ class Payment(TypedDocument):
             doc.set_statuses()
             doc.db_update()
 
-    def on_cancel(self):  # pragma: no cover
+    def on_cancel(self):
         self.cancel_gl_entries()
         self.set_status_in_sales_order()
