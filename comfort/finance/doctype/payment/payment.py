@@ -101,13 +101,13 @@ class Payment(TypedDocument):
             self._new_gl_entry(cash_or_bank, 0, purchase_delivery)
             self._new_gl_entry("purchase_delivery", purchase_delivery, 0)
 
-    def before_submit(self):  # TODO: Cover
+    def before_submit(self):
         if self.voucher_type == "Sales Order":
             self.create_sales_gl_entries()
         elif self.voucher_type == "Purchase Order":
             self.create_purchase_gl_entries()
 
-    def cancel_gl_entries(self):  # TODO: Cover
+    def cancel_gl_entries(self):
         cancel_gl_entries_for(self.doctype, self.name)
 
     def set_status_in_sales_order(self):
@@ -118,6 +118,6 @@ class Payment(TypedDocument):
             doc.set_statuses()
             doc.db_update()
 
-    def on_cancel(self):  # TODO: Cover
+    def on_cancel(self):
         self.cancel_gl_entries()
         self.set_status_in_sales_order()

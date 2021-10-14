@@ -69,9 +69,7 @@ def _create_vk_group_dialog_url(group_id: int, user_id: int):
     return f"https://vk.com/gim{group_id}?sel={user_id}"
 
 
-def _create_customer(  # TODO: Cover
-    first_name: str, last_name: str, group_id: int, user_id: int
-):
+def _create_customer(first_name: str, last_name: str, group_id: int, user_id: int):
     from comfort.integrations.browser_ext import _create_customer
 
     name = _get_customer_name(first_name, last_name)
