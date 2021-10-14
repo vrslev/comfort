@@ -46,7 +46,11 @@ comfort.PurchaseOrderController = frappe.ui.form.Controller.extend({
         let pasted_data = clipboard_data.getData("Text");
         if (!pasted_data) return;
 
-        quick_add_items(pasted_data);
+        comfort.quick_add_items(
+          pasted_data,
+          "items_to_sell",
+          calculate_item_amount
+        );
       });
   },
 
@@ -307,36 +311,6 @@ comfort.PurchaseOrderController = frappe.ui.form.Controller.extend({
     calculate_total_amount();
   },
 });
-
-function quick_add_items(text) {
-  comfort.get_items(text).then((values) => {
-    values.forEach((v) => {
-      let doc = cur_frm.add_child("items_to_sell", {
-        item_code: v.item_code,
-        item_name: v.item_name,
-        qty: 1,
-        rate: v.rate,
-        weight: v.weight,
-      });
-      calculate_item_amount(doc.doctype, doc.name);
-    });
-  });
-
-  let grid = cur_frm.fields_dict.items_to_sell.grid;
-
-  // loose focus from current row
-  grid.add_new_row(null, null, true);
-  grid.grid_rows[grid.grid_rows.length - 1].toggle_editable_row();
-
-  for (let i = grid.grid_rows.length; i--; ) {
-    let doc = grid.grid_rows[i].doc;
-    if (!(doc.item_name && doc.item_code)) {
-      grid.grid_rows[i].remove();
-    }
-  }
-
-  refresh_field("items_to_sell");
-}
 
 function create_unavailable_items_table(response) {
   let orders_to_customers = {};
