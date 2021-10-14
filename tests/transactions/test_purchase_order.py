@@ -478,3 +478,55 @@ def test_add_purchase_info_and_submit_info_not_loaded(purchase_order: PurchaseOr
     assert purchase_order.delivery_cost == delivery_cost
     assert purchase_order.order_confirmation_no == purchase_id
     assert purchase_order.docstatus == 1
+
+
+def test_purchase_order_checkout(
+    monkeypatch: pytest.MonkeyPatch, purchase_order: PurchaseOrder
+):
+    called_add_items_to_cart = False
+
+    def mock_add_items_to_cart(items: dict[str, int], authorize: bool):
+        assert authorize == True
+        assert items == purchase_order._get_templated_items_for_api(False)
+        nonlocal called_add_items_to_cart
+        called_add_items_to_cart = True
+
+    monkeypatch.setattr(
+        comfort.transactions.doctype.purchase_order.purchase_order,
+        "add_items_to_cart",
+        mock_add_items_to_cart,
+    )
+    purchase_order.checkout()
+    assert called_add_items_to_cart
+
+
+def test_purchas_order_add_receipt(
+    monkeypatch: pytest.MonkeyPatch, purchase_order: PurchaseOrder
+):
+    purchase_order.name = "test"
+    called_create_receipt = False
+    called_submit_sales_orders_and_update_statuses = False
+
+    def mock_create_receipt(doctype: str, name: str):
+        assert doctype == purchase_order.doctype
+        assert name == purchase_order.name
+        nonlocal called_create_receipt
+        called_create_receipt = True
+
+    monkeypatch.setattr(
+        comfort.transactions.doctype.purchase_order.purchase_order,
+        "create_receipt",
+        mock_create_receipt,
+    )
+
+    class MockPurchaseOrder(PurchaseOrder):
+        def _submit_sales_orders_and_update_statuses(self):
+            nonlocal called_submit_sales_orders_and_update_statuses
+            called_submit_sales_orders_and_update_statuses = True
+
+    purchase_order = MockPurchaseOrder(purchase_order.as_dict())
+
+    purchase_order.add_receipt()
+    assert purchase_order.status == "Completed"
+    assert called_create_receipt
+    assert called_submit_sales_orders_and_update_statuses

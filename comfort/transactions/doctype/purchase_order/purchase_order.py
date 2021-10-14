@@ -309,7 +309,7 @@ class PurchaseOrder(TypedDocument):
         create_checkout(self.name)
 
     @frappe.whitelist()
-    def fetch_items_specs(self):  # TODO: Cover
+    def fetch_items_specs(self):
         items: list[AnyChildItem] = list(self.get_items_to_sell(False))
         items += self.get_items_in_sales_orders(False)
         item_codes = [i.item_code for i in items]
@@ -338,11 +338,11 @@ class PurchaseOrder(TypedDocument):
         self.submit()
 
     @frappe.whitelist()
-    def checkout(self):  # TODO: Cover
+    def checkout(self):
         add_items_to_cart(self._get_templated_items_for_api(False), authorize=True)
 
     @frappe.whitelist()
-    def add_receipt(self):  # TODO: Cover
+    def add_receipt(self):
         create_receipt(self.doctype, self.name)
         self.status = "Completed"
         self.db_update()
