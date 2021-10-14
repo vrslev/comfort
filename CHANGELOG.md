@@ -3,6 +3,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.2 (2021-10-14)
+### Fix
+* **IKEA:** Circular import ([`45a0f9d`](https://github.com/vrslev/comfort/commit/45a0f9d4276e63f1c2d5212391f57713027f9fa6))
+
 ## v0.7.1 (2021-10-13)
 ### Fix
 * **IKEA:** Add translation in `get_delivery_services` ([`755cae7`](https://github.com/vrslev/comfort/commit/755cae7948514c4e00bdabe55e2591092de52518))
