@@ -178,3 +178,20 @@ def fetch_items(item_codes: str | int | list[str], force_update: bool):
         successful=[i for i in items_to_fetch if i in fetched_item_codes],
         unsuccessful=[i for i in items_to_fetch if i not in fetched_item_codes],
     )
+
+
+@frappe.whitelist()
+def get_items(item_codes: str):  # pragma: no cover
+    """Fetch items, show message about unsuccessful ones and retrieve basic information about fetched items."""
+    response = fetch_items(item_codes, force_update=True)
+    if response["unsuccessful"]:
+        frappe.msgprint(
+            _("Cannot fetch those items: {}").format(
+                ", ".join(response["unsuccessful"])
+            )
+        )
+    return get_all(
+        Item,
+        fields=("item_code", "item_name", "rate", "weight"),
+        filters={"item_code": ("in", response["successful"])},
+    )

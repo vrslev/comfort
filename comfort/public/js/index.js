@@ -61,7 +61,7 @@ comfort.get_items = (item_codes) => {
     let isResolved = false;
     /* eslint-enable */
     frappe.call({
-      method: "comfort.comfort_core.get_items",
+      method: "comfort.integrations.ikea.get_items",
       args: { item_codes: item_codes },
       callback: (r) => {
         frappe.dom.unfreeze();
