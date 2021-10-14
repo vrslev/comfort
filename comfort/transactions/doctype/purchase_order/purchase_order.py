@@ -384,3 +384,10 @@ class PurchaseOrder(TypedDocument):
                     }
                 )
         return res or None
+
+
+@frappe.whitelist()
+def calculate_total_weight(doc: str):
+    purchase_order = PurchaseOrder(json.loads(doc))
+    purchase_order._calculate_total_weight()
+    return purchase_order.total_weight
