@@ -312,19 +312,18 @@ class PurchaseOrder(TypedDocument):
     def fetch_items_specs(self):  # TODO: Cover
         items: list[AnyChildItem] = list(self.get_items_to_sell(False))
         items += self.get_items_in_sales_orders(False)
-        fetched_items = fetch_items([i.item_code for i in items], force_update=True)[
-            "successful"
-        ]
+        item_codes = [i.item_code for i in items]
+        fetched_item_codes = fetch_items(item_codes, force_update=True)["successful"]
 
         for po_sales_order in self.sales_orders:
             sales_order = get_doc(SalesOrder, po_sales_order.sales_order_name)
-            if any(i.item_code in fetched_items for i in sales_order.items):
+            if any(i.item_code in fetched_item_codes for i in sales_order.items):
                 sales_order.save()
 
+        # Update Items to Sell if changed and also update Sales Orders
         self.save()
+
         frappe.msgprint(_("Information about items updated"), alert=True)
-        # if any(i.item_code in fetched_items for i in self.items_to_sell):
-        #     self.validate()
 
     @frappe.whitelist()
     def add_purchase_info_and_submit(

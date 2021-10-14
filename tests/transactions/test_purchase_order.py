@@ -1,14 +1,17 @@
 from __future__ import annotations
 
 import json
+from copy import copy
 from typing import Any, Callable
 
 import ikea_api_wrapped
 import pytest
 
+import comfort.transactions.doctype.purchase_order.purchase_order
 import frappe
 from comfort import count_qty, get_all, get_doc, get_value, group_by_attr
 from comfort.entities.doctype.child_item.child_item import ChildItem
+from comfort.integrations.ikea import FetchItemsResult
 from comfort.transactions import AnyChildItem
 from comfort.transactions.doctype.purchase_order.purchase_order import PurchaseOrder
 from comfort.transactions.doctype.purchase_order_delivery_option.purchase_order_delivery_option import (
@@ -17,6 +20,7 @@ from comfort.transactions.doctype.purchase_order_delivery_option.purchase_order_
 from comfort.transactions.doctype.purchase_order_item_to_sell.purchase_order_item_to_sell import (
     PurchaseOrderItemToSell,
 )
+from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
 from comfort.transactions.doctype.sales_order_child_item.sales_order_child_item import (
     SalesOrderChildItem,
 )
@@ -389,6 +393,64 @@ def test_purchase_order_before_cancel(purchase_order: PurchaseOrder):
     purchase_order.status = "Draft"
     purchase_order.before_cancel()
     assert purchase_order.status == "Cancelled"
+
+
+@pytest.mark.parametrize(
+    "sales_order_item,item_to_sell,sales_order_should_change",
+    (("10014030", "29128569", True), ("29128569", "10014030", False)),
+)
+def test_purchase_order_fetch_items_specs(
+    monkeypatch: pytest.MonkeyPatch,
+    purchase_order: PurchaseOrder,
+    sales_order: SalesOrder,
+    sales_order_item: str,
+    item_to_sell: str,
+    sales_order_should_change: bool,
+):
+    exp_item_codes = ["10014030", "29128569"]
+
+    called_fetch_items = False
+
+    def mock_fetch_items(item_codes: list[str], force_update: bool):
+        assert force_update == True
+        assert not set(item_codes) ^ set(exp_item_codes)
+
+        nonlocal called_fetch_items
+        called_fetch_items = True
+
+        return FetchItemsResult(unsuccessful=["29128569"], successful=["10014030"])
+
+    monkeypatch.setattr(
+        comfort.transactions.doctype.purchase_order.purchase_order,
+        "fetch_items",
+        mock_fetch_items,
+    )
+
+    sales_order.reload()
+    sales_order.items = []
+    sales_order.append("items", {"item_code": sales_order_item, "qty": 1})
+    sales_order.save()
+    purchase_order.items_to_sell = []
+    purchase_order.append("items_to_sell", {"item_code": item_to_sell, "qty": 1})
+    purchase_order.insert()
+
+    purchase_order.reload()
+    purchase_order_before = copy(purchase_order)
+    sales_order.reload()
+    sales_order_before = copy(sales_order)
+
+    purchase_order.fetch_items_specs()
+
+    assert called_fetch_items
+    purchase_order.reload()
+    sales_order.reload()
+    assert purchase_order.as_dict() != purchase_order_before.as_dict()
+    if sales_order_should_change:
+        assert sales_order.as_dict() != sales_order_before.as_dict()
+    else:
+        assert sales_order.as_dict() == sales_order_before.as_dict()
+
+    assert "Information about items updated" in str(frappe.message_log)  # type: ignore
 
 
 def test_add_purchase_info_and_submit_info_loaded(purchase_order: PurchaseOrder):
