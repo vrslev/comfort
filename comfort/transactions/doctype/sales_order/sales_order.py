@@ -52,6 +52,28 @@ class _SplitOrderItem(TypedDict):
     qty: int
 
 
+class _CheckAvailabilityDeliveryOptionItem(TypedDict):
+    item_code: str
+    item_name: str | None
+    available_qty: int
+    required_qty: int
+
+
+class _CheckAvailabilityDeliveryOption(TypedDict):
+    delivery_type: str
+    items: list[_CheckAvailabilityDeliveryOptionItem]
+
+
+class _CheckAvailabilityCannotAddItem(TypedDict):
+    item_code: str
+    item_name: str | None
+
+
+class _CheckAvailabilityResponse(TypedDict):
+    options: list[_CheckAvailabilityDeliveryOption]
+    cannot_add: list[_CheckAvailabilityCannotAddItem]
+
+
 class SalesOrder(TypedDocument):
     doctype: Literal["Sales Order"]
 
@@ -534,7 +556,7 @@ class SalesOrder(TypedDocument):
         }
 
     @frappe.whitelist()
-    def generate_check_order_message(self) -> str:  # TODO: Cover
+    def generate_check_order_message(self) -> str:
         return frappe.render_template(  # type: ignore
             template="transactions/doctype/sales_order/check_order_message.j2",
             is_path=True,
@@ -575,50 +597,44 @@ class SalesOrder(TypedDocument):
         }
 
     @frappe.whitelist()
-    def generate_pickup_order_message(self) -> str:  # TODO: Cover
+    def generate_pickup_order_message(self) -> str:
         return frappe.render_template(  # type: ignore
             template="transactions/doctype/sales_order/pickup_order_message.j2",
             is_path=True,
             context=self._get_pickup_order_message_context(),
         )
 
+    def _get_services_for_check_availability(self, qty_counter: Counter[str]):
+        delivery_services = get_delivery_services(qty_counter)
+
+        if delivery_services is None:
+            return  # Caught NoDeliveryOptionsAvailableError
+
+        if delivery_services["cannot_add"]:
+            return delivery_services
+        if any(
+            option["unavailable_items"]
+            for option in delivery_services["delivery_options"]
+        ):
+            return delivery_services
+
+        frappe.msgprint(
+            _("All items available"),
+            alert=True,
+            indicator="green",
+        )
+
     @frappe.whitelist()
-    def check_availability(self):  # TODO: Cover
+    def check_availability(self):
         items_with_splitted_combos = self.get_items_with_splitted_combinations()
         qty_counter = count_qty(items_with_splitted_combos)
         grouped_items: dict[
             str, list[SalesOrderItem | SalesOrderChildItem]
         ] = group_by_attr(items_with_splitted_combos)
-        delivery_services = get_delivery_services(qty_counter)
 
-        if delivery_services is None or (
-            not delivery_services["cannot_add"]
-            and not any(
-                option["unavailable_items"]
-                for option in delivery_services["delivery_options"]
-            )
-        ):
-            return frappe.msgprint(
-                _("All items available"), alert=True, indicator="green"
-            )
-
-        class CheckAvailabilityDeliveryOptionItem(TypedDict):
-            item_code: str
-            item_name: str | None
-            available_qty: int
-            required_qty: int
-
-        class CheckAvailabilityDeliveryOption(TypedDict):
-            delivery_type: str
-            items: list[CheckAvailabilityDeliveryOptionItem]
-
-        class CheckAvailabilityCannotAddItem(TypedDict):
-            item_code: str
-            item_name: str | None
-
-        class CheckAvailabilityResponse(TypedDict):
-            options: list[CheckAvailabilityDeliveryOption]
-            cannot_add: list[CheckAvailabilityCannotAddItem]
+        delivery_services = self._get_services_for_check_availability(qty_counter)
+        if delivery_services is None:
+            return
 
         def _get_delivery_type(option: DeliveryOptionDict):
             if option["service_provider"] and option["delivery_type"]:
@@ -627,7 +643,7 @@ class SalesOrder(TypedDocument):
 
         def _get_items(option: DeliveryOptionDict):
             return [
-                CheckAvailabilityDeliveryOptionItem(
+                _CheckAvailabilityDeliveryOptionItem(
                     item_code=item["item_code"],
                     item_name=grouped_items[item["item_code"]][0].item_name,
                     available_qty=item["available_qty"],
@@ -636,24 +652,25 @@ class SalesOrder(TypedDocument):
                 for item in option["unavailable_items"]
             ]
 
-        return CheckAvailabilityResponse(
-            options=[
-                CheckAvailabilityDeliveryOption(
-                    delivery_type=_get_delivery_type(option), items=_get_items(option)
-                )
-                for option in delivery_services["delivery_options"]
-                if option["unavailable_items"]
-            ],
-            cannot_add=[
-                CheckAvailabilityCannotAddItem(
-                    item_code=item_code, item_name=grouped_items[item_code][0].item_name
-                )
-                for item_code in delivery_services["cannot_add"]
-            ],
-        )
+        options = [
+            _CheckAvailabilityDeliveryOption(
+                delivery_type=_get_delivery_type(option), items=_get_items(option)
+            )
+            for option in delivery_services["delivery_options"]
+            if option["unavailable_items"]
+        ]
+
+        cannot_add = [
+            _CheckAvailabilityCannotAddItem(
+                item_code=item_code, item_name=grouped_items[item_code][0].item_name
+            )
+            for item_code in delivery_services["cannot_add"]
+        ]
+
+        return _CheckAvailabilityResponse(options=options, cannot_add=cannot_add)
 
     @frappe.whitelist()
-    def fetch_items_specs(self):  # TODO: Cover
+    def fetch_items_specs(self):
         if self.from_available_stock:
             raise ValidationError(
                 _("Can't fetch items specs if order is from Available Stock")
