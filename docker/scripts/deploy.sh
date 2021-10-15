@@ -1,8 +1,9 @@
 #!/bin/bash
 set -e
 
+docker system prune -a -f
 docker-compose pull
-docker-compose up -d --force-recreate --no-build
+docker-compose up -d --force-recreate --no-build --remove-orphans
 
 PROJECT_NAME=comfort bash scripts/check-health.sh
 
