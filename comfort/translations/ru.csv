@@ -118,7 +118,7 @@ Information about item updated,Информация о товаре обновл
 Information about items updated,Информация о товарах обновлена
 Installation,Сборка
 Installation Account,Счёт сборки
-Insufficient stock for Item {},Недостаточный запас товара {}
+"Insufficient stock for Item {}. Required: {}, available: {}","Недостаточный запас товара {}. Требуется: {} шт, доступно: {} шт"
 Invalid category URL,Неверная ссылка на категорию
 Inventory Account,Счёт инвентаря
 Inventory,Инвентарь
