@@ -66,6 +66,7 @@
    "options": "Sales Order Service"
   },
   {
+   "default": "0",
    "fieldname": "commission",
    "fieldtype": "Percent",
    "label": "Commission",
@@ -265,7 +266,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-10-02 13:49:43.742389",
+ "modified": "2021-10-15 06:13:40.749994",
  "modified_by": "Administrator",
  "module": "Transactions",
  "name": "Sales Order",

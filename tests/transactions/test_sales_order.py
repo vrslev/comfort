@@ -1245,10 +1245,19 @@ def test_params_validate_from_available_stock_available_actual_passes(
     validate_params_from_available_stock("Available Actual", None)
 
 
-def test_calculate_commission_and_margin(sales_order: SalesOrder):
+def test_calculate_commission_and_margin_items_cost_set(sales_order: SalesOrder):
     sales_order.insert()
     resp = calculate_commission_and_margin(sales_order.as_json())
     sales_order._calculate_commission()
     sales_order._calculate_margin()
     assert resp["commission"] == sales_order.commission
     assert resp["margin"] == sales_order.margin
+
+
+def test_calculate_commission_and_margin_items_cost_not_set(sales_order: SalesOrder):
+    sales_order.insert()
+    sales_order.commission = sales_order.margin = 0
+    sales_order.items_cost = 0
+    resp = calculate_commission_and_margin(sales_order.as_json())
+    assert resp["commission"] == 0
+    assert resp["margin"] == 0

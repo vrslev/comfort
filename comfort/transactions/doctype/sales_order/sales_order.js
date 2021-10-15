@@ -595,6 +595,12 @@ function calculate_commission_and_margin() {
 }
 
 function set_per_paid_and_pending_amount() {
+  if (
+    cur_frm.doc.total_amount == undefined ||
+    cur_frm.doc.paid_amount == undefined
+  )
+    return;
+
   cur_frm.set_value(
     "pending_amount",
     cur_frm.doc.total_amount - cur_frm.doc.paid_amount
