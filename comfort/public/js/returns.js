@@ -1,5 +1,3 @@
-// TODO: Add button "Update Return Paid Amount" in case transactions changed
-
 comfort.ReturnController = frappe.ui.form.Controller.extend({
   setup() {
     this.patch_toolbar_set_page_actions();
