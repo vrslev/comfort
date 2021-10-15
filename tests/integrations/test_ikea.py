@@ -7,7 +7,6 @@ from ikea_api import IkeaApi
 from ikea_api_wrapped.types import NoDeliveryOptionsAvailableError, ParsedItem
 
 import comfort.integrations.ikea
-import frappe.exceptions
 from comfort import count_qty, counters_are_same, get_all, get_doc, get_value
 from comfort.comfort_core.doctype.ikea_settings.ikea_settings import (
     IkeaSettings,
@@ -32,6 +31,7 @@ from comfort.integrations.ikea import (
     get_purchase_history,
     get_purchase_info,
 )
+from frappe.exceptions import ValidationError
 from tests.conftest import (
     mock_delivery_services,
     mock_purchase_history,
@@ -39,19 +39,25 @@ from tests.conftest import (
 )
 
 
+@pytest.mark.usefixtures("ikea_settings")
+def test_get_delivery_services_no_items():
+    with pytest.raises(
+        ValidationError, match="No items selected to check delivery services"
+    ):
+        get_delivery_services({})
+
+
 def test_get_delivery_services_no_zip_code(ikea_settings: IkeaSettings):
     ikea_settings.zip_code = None
     ikea_settings.save()
-    with pytest.raises(
-        frappe.exceptions.ValidationError, match="Enter Zip Code in Ikea Settings"
-    ):
-        get_delivery_services({})
+    with pytest.raises(ValidationError, match="Enter Zip Code in Ikea Settings"):
+        get_delivery_services({"14251253": 1})
 
 
 @pytest.mark.usefixtures("ikea_settings")
 def test_get_delivery_services_no_error(monkeypatch: pytest.MonkeyPatch):
     patch_get_delivery_services(monkeypatch)
-    assert get_delivery_services({}) == mock_delivery_services
+    assert get_delivery_services({"14251253": 1}) == mock_delivery_services
 
 
 def test_get_delivery_services_error(
@@ -65,19 +71,25 @@ def test_get_delivery_services_error(
     monkeypatch.setattr(
         ikea_api_wrapped, "get_delivery_services", new_mock_delivery_services
     )
-    assert get_delivery_services({}) is None
+    assert get_delivery_services({"14251253": 1}) is None
 
 
 @pytest.mark.parametrize("authorize", (True, False))
 @pytest.mark.usefixtures("ikea_settings")
-def test_add_items_to_cart(monkeypatch: pytest.MonkeyPatch, authorize: bool):
+def test_add_items_to_cart_with_items(monkeypatch: pytest.MonkeyPatch, authorize: bool):
     myapi = get_authorized_api() if authorize else get_guest_api()
 
     def mock_add_items_to_cart(api: IkeaApi, items: Any):
         assert api._token == myapi._token
 
     monkeypatch.setattr(ikea_api_wrapped, "add_items_to_cart", mock_add_items_to_cart)
-    add_items_to_cart({}, authorize)
+    add_items_to_cart({"14251253": 1}, authorize)
+
+
+@pytest.mark.usefixtures("ikea_settings")
+def test_add_items_to_cart_no_items():
+    with pytest.raises(ValidationError, match="No items selected to add to cart"):
+        add_items_to_cart({}, authorize=False)
 
 
 @pytest.mark.usefixtures("ikea_settings")
