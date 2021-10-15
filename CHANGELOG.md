@@ -3,6 +3,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.9.0 (2021-10-15)
+### Feature
+* **IKEA:** Add authorization server and client ([`536b7b1`](https://github.com/vrslev/comfort/commit/536b7b1c85983860648db06bd207ed4780c8b74c))
+
 ## v0.8.1 (2021-10-14)
 ### Fix
 * **Quick Add Items:** Show added row in PO, don't add empty rows in SO ([`34dbde6`](https://github.com/vrslev/comfort/commit/34dbde6fb249357782df483a381af7b8bccc0887))
