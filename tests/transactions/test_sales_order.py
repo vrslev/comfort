@@ -1170,7 +1170,7 @@ def test_has_linked_delivery_trip_false(sales_order: SalesOrder):
 def test_get_sales_orders_not_in_purchase_order_main(purchase_order: PurchaseOrder):
     purchase_order.db_insert()
     purchase_order.db_update_all()
-    new_sales_order = new_doc(SalesOrder)
+    new_sales_order = get_doc(SalesOrder, {"name": "mytestname"})
     new_sales_order.db_insert()
 
     res = get_sales_orders_not_in_purchase_order()
