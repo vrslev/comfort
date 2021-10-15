@@ -55,25 +55,30 @@ if (location.href.match("/app/home$" && !frappe.boot.developer_mode)) {
 }
 
 comfort.get_items = (item_codes) => {
-  // TODO: Fix freeze
-  var promise = new Promise((resolve) => {
-    /* eslint-disable */
-    let isResolved = false;
-    /* eslint-enable */
-    frappe.call({
-      method: "comfort.integrations.ikea.get_items",
-      args: { item_codes: item_codes },
-      callback: (r) => {
+  var promise = new Promise((resolve, reject) => {
+    let is_resolved = false;
+    frappe
+      .call({
+        method: "comfort.integrations.ikea.get_items",
+        args: { item_codes: item_codes },
+        callback: (r) => {
+          is_resolved = true;
+          frappe.dom.unfreeze();
+          resolve(r.message);
+        },
+      })
+      .fail((r) => {
+        is_resolved = true;
         frappe.dom.unfreeze();
-        isResolved = true;
-        resolve(r.message);
-      },
-    });
-    // setTimeout(() => {
-    //   if (!isResolved) {
-    //     frappe.dom.freeze();
-    //   }
-    // }, 1000);
+        reject(r);
+      });
+
+    // Freeze if fetch take a long time
+    setTimeout(() => {
+      if (!is_resolved) {
+        frappe.dom.freeze();
+      }
+    }, 1000);
   });
   return promise;
 };
