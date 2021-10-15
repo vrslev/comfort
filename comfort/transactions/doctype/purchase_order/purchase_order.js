@@ -314,9 +314,11 @@ comfort.PurchaseOrderController = frappe.ui.form.Controller.extend({
 
 function create_unavailable_items_table(response) {
   let orders_to_customers = {};
-  cur_frm.doc.sales_orders.forEach((o) => {
-    orders_to_customers[o.sales_order_name] = o.customer;
-  });
+  if (cur_frm.doc.sales_orders) {
+    cur_frm.doc.sales_orders.forEach((o) => {
+      orders_to_customers[o.sales_order_name] = o.customer;
+    });
+  }
 
   let data = response.map((item) => {
     return {
@@ -432,6 +434,12 @@ function calculate_total_amount() {
 }
 
 frappe.ui.form.on("Purchase Order Sales Order", {
+  sales_order_name() {
+    calculate_total_weight().then(() => {
+      calculate_sales_orders_cost();
+    });
+  },
+
   total_amount() {
     calculate_sales_orders_cost();
   },
@@ -445,9 +453,11 @@ frappe.ui.form.on("Purchase Order Sales Order", {
 
 function calculate_sales_orders_cost() {
   let sales_orders_cost = 0;
-  cur_frm.doc.sales_orders.forEach((o) => {
-    sales_orders_cost += o.total_amount;
-  });
+  if (cur_frm.doc.sales_orders) {
+    cur_frm.doc.sales_orders.forEach((o) => {
+      sales_orders_cost += o.total_amount || 0;
+    });
+  }
   cur_frm.set_value("sales_orders_cost", sales_orders_cost);
 }
 
@@ -506,16 +516,20 @@ function calculate_item_amount(cdt, cdn) {
 
 function calculate_items_to_sell_cost() {
   let items_to_sell = 0;
-  cur_frm.doc.items_to_sell.forEach((item) => {
-    items_to_sell += item.amount;
-  });
+  if (cur_frm.doc.items_to_sell) {
+    cur_frm.doc.items_to_sell.forEach((item) => {
+      items_to_sell += item.amount || 0;
+    });
+  }
   cur_frm.set_value("items_to_sell_cost", items_to_sell);
 }
 
 function clear_sales_orders_from_localstorage() {
-  cur_frm.doc.sales_orders.forEach((s) => {
-    frappe.model.remove_from_locals("Sales Order", s.sales_order_name);
-  });
+  if (cur_frm.doc.sales_orders) {
+    cur_frm.doc.sales_orders.forEach((s) => {
+      frappe.model.remove_from_locals("Sales Order", s.sales_order_name);
+    });
+  }
 }
 
 $.extend(
