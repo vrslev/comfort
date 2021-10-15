@@ -145,6 +145,8 @@ Selected Purchase Order has no Items To Sell,В выбранной закупк�
 No Item {} in Sales Order,В заказе нет товара {}
 No Items in Available Actual stock,Нет товаров в доступном фактическом запасе
 No items to add available,"Нет товаров, которые можно добавить"
+No items selected to add to cart,Нет выбрано товаров для добавления в корзину
+No items selected to check delivery services,Нет выбрано товаров для проверки наличия
 No available delivery options,Нет доступных способов доставки
 No satisfying commission found,Не найдено удовлетворительной комиссии
 Not allowed to cancel Sales Return,Не разрешено отменять возврат заказа
