@@ -45,8 +45,6 @@ from ..sales_order.sales_order import SalesOrder
 from ..sales_order_child_item.sales_order_child_item import SalesOrderChildItem
 from ..sales_order_item.sales_order_item import SalesOrderItem
 
-# TODO: Validate that this Purchase Order is the only one that contains current Sales Orders
-
 
 class PurchaseOrder(TypedDocument):
     doctype: Literal["Purchase Order"]
