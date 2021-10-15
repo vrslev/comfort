@@ -14,13 +14,12 @@ from comfort.transactions.doctype.purchase_order_sales_order.purchase_order_sale
 from comfort.transactions.doctype.sales_order.sales_order import (
     validate_params_from_available_stock,
 )
-from frappe.desk.reportview import get_filters_cond, get_match_cond
 from frappe.model.meta import Meta
-from frappe.utils import unique
+from frappe.utils import fmt_money, unique
 
 
-def _format_money(money: str | int | float):
-    return f"{int(money)} ₽"
+def _format_money(money: str | int | float) -> str:  # type: ignore
+    return fmt_money(money, precision=0) + " ₽"
 
 
 def _format_weight(weight: int | float):
@@ -51,17 +50,12 @@ _QUERY_FORMATTERS = {
 }
 
 
-def _get_fields(
-    doctype: str, fields: list[Any] | None = None
-) -> list[Any]:  # pragma: no cover
-    # From ERPNext
-    if fields is None:
-        fields = []
+def _get_fields(doctype: str, fields: list[str]) -> list[str]:  # pragma: no cover
     meta: Meta = frappe.get_meta(doctype)
-    search_fields: list[Any] = meta.get_search_fields()
-    fields.extend(search_fields)
+    search_fields: list[str] = meta.get_search_fields()
+    fields.extend(search_fields)  # type: ignore
 
-    title_field: Any = meta.get("title_field")
+    title_field: str | None = meta.get("title_field")  # type: ignore
     if title_field and not title_field.strip() in fields:
         fields.insert(1, title_field.strip())
 
@@ -78,26 +72,26 @@ def default_query(
     page_len: int,
     filters: dict[Any, Any],
 ):
-    conditions = []
-    fields = _get_fields(doctype, ["name"])
+    fields = _get_fields(doctype, [searchfield, "name"])
 
-    query: list[list[Any]] = frappe.db.sql(  # type: ignore
-        f"""
-        SELECT {", ".join(fields)} FROM `tab{doctype}`
-        WHERE {searchfield} LIKE %(txt)s
-        {get_filters_cond(doctype, filters, conditions)}
-        {get_match_cond(doctype)}
-
-        ORDER BY modified DESC
-        LIMIT {start}, {page_len}
-        """,
-        {"txt": "%%%s%%" % txt},
+    resp: tuple[tuple[Any, ...], ...] = frappe.get_all(  # type: ignore
+        doctype=doctype,
+        fields=fields,
+        filters=filters,
+        or_filters=[(field, "like", "%%%s%%" % txt) for field in fields],
+        order_by="modified DESC",
+        limit_start=start,
+        limit_page_length=page_len,
         as_list=True,
     )
+
+    results: list[list[Any]] = [list(result) for result in resp]
+
     if doctype in _QUERY_FORMATTERS:
-        for result in query:
+        for result in results:
             _QUERY_FORMATTERS[doctype](result)
-    return query
+
+    return results
 
 
 def get_standard_queries(doctypes: Iterable[str]):
