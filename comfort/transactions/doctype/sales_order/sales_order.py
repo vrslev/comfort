@@ -5,7 +5,7 @@ import re
 from collections import Counter
 from datetime import datetime, timedelta
 from types import SimpleNamespace
-from typing import Any, Iterable, Literal, TypedDict
+from typing import Any, Literal, TypedDict
 
 from ikea_api_wrapped import format_item_code
 from ikea_api_wrapped.types import DeliveryOptionDict
@@ -493,8 +493,7 @@ class SalesOrder(TypedDocument):
         self.db_update()
 
     @frappe.whitelist()
-    def split_combinations(self, combos_docnames: Iterable[str], save: bool):
-        # TODO: Check if there's any child items with this item_codes before removing them. Otherwise throw ValidationError
+    def split_combinations(self, combos_docnames: list[str], save: bool):
         combos_docnames = list(set(combos_docnames))
 
         items_to_remove: list[SalesOrderItem] = []
@@ -740,15 +739,13 @@ def has_linked_delivery_trip(sales_order_name: str):
 
 @frappe.whitelist()
 def get_sales_orders_not_in_purchase_order():
-    # TODO: Validate status so completed orders from actual stock are good
     po_sales_orders = get_all(PurchaseOrderSalesOrder, "sales_order_name")
-    return [
-        s.name
-        for s in get_all(
-            SalesOrder,
-            {"name": ("not in", (s.sales_order_name for s in po_sales_orders))},
-        )
-    ]
+    filters = {
+        "name": ("not in", (s.sales_order_name for s in po_sales_orders)),
+        # Frappe makes Select fields with no value "" instead of None
+        "from_available_stock": "",
+    }
+    return [s.name for s in get_all(SalesOrder, filters=filters)]
 
 
 @frappe.whitelist()

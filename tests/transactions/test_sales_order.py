@@ -11,7 +11,7 @@ from ikea_api_wrapped.types import DeliveryOptionDict, UnavailableItemDict
 
 import comfort.transactions.doctype.sales_order.sales_order
 import frappe
-from comfort import count_qty, counters_are_same, get_all, get_doc, get_value
+from comfort import count_qty, counters_are_same, get_all, get_doc, get_value, new_doc
 from comfort.comfort_core.doctype.commission_settings.commission_settings import (
     CommissionSettings,
 )
@@ -1167,18 +1167,33 @@ def test_has_linked_delivery_trip_false(sales_order: SalesOrder):
     assert not has_linked_delivery_trip(sales_order.name)
 
 
-def test_get_sales_orders_not_in_purchase_order(
-    sales_order: SalesOrder, purchase_order: PurchaseOrder
-):
+def test_get_sales_orders_not_in_purchase_order_main(purchase_order: PurchaseOrder):
     purchase_order.db_insert()
     purchase_order.db_update_all()
-    new_name = "random_name"
-    new_sales_order = get_doc(SalesOrder, {"name": new_name})
+    new_sales_order = new_doc(SalesOrder)
     new_sales_order.db_insert()
 
     res = get_sales_orders_not_in_purchase_order()
-    assert sales_order.name not in res
+    assert purchase_order.sales_orders[0].sales_order_name not in res
     assert new_sales_order.name in res
+
+
+@pytest.mark.parametrize(
+    "from_available_stock", ("Available Purchased", "Available Actual")
+)
+def test_get_sales_orders_not_in_purchase_order_from_available_stock(
+    sales_order: SalesOrder,
+    from_available_stock: Literal["Available Purchased", "Available Actual"],
+):
+    sales_order.insert()
+
+    new_sales_order = new_doc(SalesOrder)
+    new_sales_order.from_available_stock = from_available_stock
+    new_sales_order.db_insert()
+
+    res = get_sales_orders_not_in_purchase_order()
+    assert sales_order.name in res
+    assert new_sales_order.name not in res
 
 
 def test_params_validate_from_available_stock_not_from_available_stock(
