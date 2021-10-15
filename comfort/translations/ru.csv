@@ -9,6 +9,7 @@ Add Sales Orders or Items to Sell,Добавьте заказы или това�
 All items are available for this delivery option,Все товары доступны для этого способа доставки
 All items available,Все товары доступны для заказа
 Amount should be more that zero,Сумма должна быть больше нуля
+App Service Token,Сервисный токен приложения
 Are you sure you want to mark this Purchase Order as delivered?,"Вы уверены, что хотите отметить эту закупку как доставленную?"
 Are you sure you want to mark this Sales Order as delivered?,"Вы уверены, что хотите отметить этот заказ как доставленный?"
 Authorized Token,Авторизированный токен
@@ -82,8 +83,11 @@ Delivery to Apartment,Доставка до квартиры
 Delivery to Entrance,Доставка до подъезда
 Discount,Скидка
 Edit Commission,Изменить комиссию
+Endpoint,Адрес
+Enter endpoint and secret key in Ikea Authorization Server Settings,Введите адрес и секретный ключ в настройках сервера авторизации ИКЕА
 Enter Bot Token first,Сначала введите токен бота
 Enter login and password in Ikea Settings,Введите логин и пароль в Настройках ИКЕА
+Enter VK App service token in Vk Api Settings,Введите сервисный токен приложения VK в настройках VK API
 Enter Zip Code in Ikea Settings,Введите почтовый индекс в Настройках ИКЕА
 Entities,Сущности
 Every stop should have address,Каждая остановка должна иметь адрес
@@ -107,6 +111,7 @@ Get Chat ID first,Сначала получите ID чата
 Get Delivery Services,Получить способы доставки
 Guest Token,Токен гостя
 Guest Token Expiration,Истечение срока действия токена гостя
+Ikea Authorization Server Settings,Настройки сервера авторизации ИКЕА
 Ikea Settings,Настройки ИКЕА
 Income,Доход
 Information about item updated,Информация о товаре обновлена
@@ -245,6 +250,7 @@ Total Profit This Year,Общая прибыль за этот год
 Transactions,Операции
 Unavailable Items,Недоступные товары
 Unpaid,Не оплачено
+Vk Api Settings,Настройки VK API
 Vk Form Settings,Настройки формы VK
 VK ID,VK ID
 VK URL,Ссылка VK
@@ -485,6 +491,3 @@ Next Document,Следующий документ
 Search for {0},Искать {0}
 {0} List,Список {0}
 {0} Tree,Дерево {0}
-App Service Token,
-Enter VK App service token in Vk Api Settings,
-Vk Api Settings,
