@@ -101,6 +101,7 @@
    "read_only": 1
   },
   {
+   "default": "0",
    "fieldname": "delivery_cost",
    "fieldtype": "Currency",
    "label": "Delivery Cost",
@@ -153,6 +154,7 @@
    "search_index": 1
   },
   {
+   "default": "0",
    "fieldname": "sales_orders_cost",
    "fieldtype": "Currency",
    "label": "Sales Orders Cost",
@@ -201,7 +203,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2021-08-31 22:17:53.455295",
+ "modified": "2021-10-15 04:30:49.316256",
  "modified_by": "Administrator",
  "module": "Transactions",
  "name": "Purchase Order",
