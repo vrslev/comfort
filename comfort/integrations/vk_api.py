@@ -19,7 +19,7 @@ class VkApi:
 
     def _get_service_token_from_settings(self):
         token: str | None = get_value("Vk Api Settings", fieldname="app_service_token")
-        if token is None:
+        if not token:
             raise ValidationError(_("Enter VK App service token in Vk Api Settings"))
         self.service_token = token
 
