@@ -6,6 +6,7 @@ import frappe.defaults
 from comfort import get_doc
 from comfort.finance.chart_of_accounts import initialize_accounts
 from frappe.core.doctype.doctype.doctype import DocType
+from frappe.core.doctype.system_settings.system_settings import SystemSettings
 from frappe.geo.doctype.currency.currency import Currency
 from frappe.modules import make_boilerplate
 
@@ -23,34 +24,35 @@ def load_metadata():
     return app_name, app_title, app_description, app_publisher, app_version
 
 
-def _set_currency_symbol():
+def _set_currency():
     doc = get_doc(Currency, "RUB")
     doc.update({"symbol": "₽", "enabled": True})
     doc.save()
     frappe.db.set_default("currency", "RUB")
-    frappe.db.set_default("currency_precision", 0)
 
 
-def _add_app_name():
-    frappe.db.set_value("System Settings", None, "app_name", "Comfort")
-
-
-def _set_default_date_and_number_format():
-    date_format = "dd.mm.yyyy"
-    frappe.db.set_default("date_format", date_format)
-    frappe.db.set_value("System Settings", None, "date_format", date_format)
-    frappe.db.set_value("System Settings", None, "number_format", "#.###,##")
+def _update_system_settings():  # pragma: no cover
+    doc = get_doc(SystemSettings)
+    doc.app_name = "Comfort"  # type: ignore
+    doc.date_format = "dd.mm.yyyy"  # type: ignore  # Accepted Russian date format
+    doc.number_format = "# ###.##"  # type: ignore  # Accepted Russian money format # type: ignore
+    doc.session_expiry = (  # type: ignore
+        "720:00"  # Sensible session expiry. Default is 6 hours which is too short
+    )
+    doc.currency_precision = 0  # type: ignore  # Don't deal with cents
+    doc.flags.ignore_mandatory = True  # Helps on fresh site
+    doc.save()
 
 
 def _disable_signup():
+    # Don't want strangers
     frappe.db.set_value("Website Settings", None, "disable_signup", 1)
 
 
 def after_install():  # pragma: no cover
     initialize_accounts()
-    _set_currency_symbol()
-    _add_app_name()
-    _set_default_date_and_number_format()
+    _set_currency()
+    _update_system_settings()
     _disable_signup()
 
 
