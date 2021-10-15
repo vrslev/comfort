@@ -1,0 +1,13 @@
+version: "3"
+services:
+  app:
+    image: cr.yandex/crpdmuh1072ntg30t18g/ikea-authorization-server:${VERSION}
+    platform: linux/amd64
+    build: .
+    environment:
+      PORT: 8000
+      SECRET_KEY: BkilT9yfx3WUY9uCf0OWxX8agz36Q4l5NAWzpq7ZRSk=
+      IN_DOCKER: 0
+      SENTRY_DSN:
+    ports:
+      - 8000:8000

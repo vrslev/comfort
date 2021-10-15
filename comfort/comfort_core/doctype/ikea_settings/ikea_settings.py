@@ -50,9 +50,10 @@ def get_authorized_api():
     ):
         if doc.username is None or password is None:
             raise ValidationError(_("Enter login and password in Ikea Settings"))
-        doc.authorized_token = ikea_api.auth.get_authorized_token(
-            doc.username, password
-        )
+
+        from comfort.integrations.ikea_authorization_server import main
+
+        doc.authorized_token = main(doc.username, password)
         doc.authorized_token_expiration = add_to_date(None, hours=24)
         doc.save()
 
