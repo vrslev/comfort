@@ -51,7 +51,7 @@ from ..sales_order_item.sales_order_item import SalesOrderItem
 class PurchaseOrder(TypedDocument):
     doctype: Literal["Purchase Order"]
 
-    delivery_options: list[PurchaseOrderDeliveryOption]
+    delivery_options: list[PurchaseOrderDeliveryOption] = []
     cannot_add_items: str | None
     posting_date: datetime
     order_confirmation_no: str
@@ -61,8 +61,8 @@ class PurchaseOrder(TypedDocument):
     delivery_cost: int
     total_weight: float
     items_to_sell_cost: int
-    sales_orders: list[PurchaseOrderSalesOrder]
-    items_to_sell: list[PurchaseOrderItemToSell]
+    sales_orders: list[PurchaseOrderSalesOrder] = []
+    items_to_sell: list[PurchaseOrderItemToSell] = []
     status: Literal["Draft", "To Receive", "Completed", "Cancelled"]
 
     #########
