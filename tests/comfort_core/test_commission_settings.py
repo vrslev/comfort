@@ -1,5 +1,6 @@
 import pytest
 
+from comfort import get_doc
 from comfort.comfort_core.doctype.commission_settings.commission_settings import (
     CommissionSettings,
 )
@@ -64,6 +65,11 @@ def test_set_from_amounts(commission_settings: CommissionSettings):
     for range_ in commission_settings.ranges:
         assert range_.from_amount == previous_to_amount + 1
         previous_to_amount = range_.to_amount
+
+
+def test_commission_settings_validate_empty_doc():
+    doc = get_doc(CommissionSettings)
+    doc.validate()
 
 
 @pytest.mark.parametrize(

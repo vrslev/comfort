@@ -31,6 +31,9 @@ class CommissionSettings(TypedDocument):
             previous_to_amount = range_.to_amount
 
     def validate(self):
+        if not self.ranges:
+            return
+
         self.validate_to_amounts_are_not_zero()
         self.validate_last_to_amount_is_zero()
         self.validate_to_amounts_order()

@@ -232,7 +232,6 @@ class SalesOrder(TypedDocument):
 
     def _calculate_commission(self):
         """Calculate commission based rules set in Commission Settings if `edit_commission` is False."""
-        # TODO: Issues when Commission Settings have no ranges and when Edit commission
         if self.items_cost and not self.edit_commission:
             self.commission = CommissionSettings.get_commission_percentage(
                 self.items_cost
