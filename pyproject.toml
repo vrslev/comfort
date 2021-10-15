@@ -85,7 +85,7 @@ commit_subject = "сhore: Update version to {version}"
 upload_to_pypi = false
 
 [tool.pytest.ini_options]
-addopts = ["--showlocals"]
+addopts = []
 filterwarnings = [
   "ignore:bleach-whitelist has been renamed bleach-allowlist",
   "ignore:the imp module is deprecated in favour of importlib:DeprecationWarning"
