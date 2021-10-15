@@ -40,7 +40,10 @@ def test_validate_delivery_statuses_in_orders_raises(delivery_trip: DeliveryTrip
         delivery_trip._validate_delivery_statuses_in_orders()
 
 
-def test_delivery_trip_update_sales_orders_from_db(delivery_trip: DeliveryTrip):
+@pytest.mark.parametrize("with_services", (True, False))
+def test_delivery_trip_update_sales_orders_from_db(
+    delivery_trip: DeliveryTrip, with_services: bool
+):
     stop = delivery_trip.stops[0]
     stop.customer = None  # type: ignore
     stop.address = None
@@ -51,8 +54,9 @@ def test_delivery_trip_update_sales_orders_from_db(delivery_trip: DeliveryTrip):
     stop.installation = None  # type: ignore
 
     sales_order = get_doc(SalesOrder, stop.sales_order)
-    sales_order.pending_amount = 2000
-    sales_order.db_update()
+    if not with_services:
+        sales_order.services = []
+    sales_order.save()
     services_resp = _get_delivery_and_installation_from_services(sales_order.services)
 
     customer = get_doc(Customer, sales_order.customer)
@@ -64,7 +68,7 @@ def test_delivery_trip_update_sales_orders_from_db(delivery_trip: DeliveryTrip):
     assert stop.pending_amount == sales_order.pending_amount
     assert stop.city == customer.city
     assert stop.delivery_type == services_resp["delivery_type"]
-    assert stop.installation == services_resp["installation"]
+    assert bool(stop.installation) == services_resp["installation"]
 
 
 @pytest.mark.parametrize(
