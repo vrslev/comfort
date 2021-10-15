@@ -60,7 +60,7 @@ runs:
             SECRET_ACCESS_KEY=$SECRET_ACCESS_KEY \
             ENDPOINT_URL=$ENDPOINT_URL \
             bash scripts/backup.sh
-          rm -rf scripts/backup.sh
+          rm -rf scripts
       env:
         BUCKET_NAME: ${{ inputs.bucket_name }}
         REGION: ${{ inputs.region }}
