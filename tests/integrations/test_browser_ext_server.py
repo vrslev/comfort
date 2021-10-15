@@ -3,7 +3,7 @@ import re
 import pytest
 
 import comfort.integrations.browser_ext
-from comfort import count_qty, new_doc
+from comfort import count_qty
 from comfort.comfort_core.doctype.commission_settings.commission_settings import (
     CommissionSettings,
 )
@@ -12,33 +12,8 @@ from comfort.entities.doctype.item.item import Item
 from comfort.integrations.browser_ext import (
     _create_customer,
     _create_sales_order,
-    _generate_new_customer_name,
     _get_url_to_reference_doc,
 )
-
-
-def test_generate_new_customer_name_not_exists():
-    name = "John Johnson"
-    assert _generate_new_customer_name(name) == name
-
-
-@pytest.mark.parametrize(
-    ("input", "exp_output"),
-    (
-        ("John Johnson", "John Johnson 2"),
-        ("John Johnson 2", "John Johnson 3"),
-        ("John Johnson 9", "John Johnson 10"),
-        ("John Johnson 10", "John Johnson 11"),
-        ("John Johnson 19", "John Johnson 20"),
-        ("John Johnson 99", "John Johnson 100"),
-    ),
-)
-def test_generate_new_customer_name_exists(input: str, exp_output: str):
-    doc = new_doc(Customer)
-    doc.name = input
-    doc.db_insert()
-
-    assert _generate_new_customer_name(input) == exp_output
 
 
 def test_create_customer_exists_same_name(customer: Customer):

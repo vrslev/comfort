@@ -1,27 +1,12 @@
 from __future__ import annotations
 
-import re
-
 import frappe
-from comfort import doc_exists, get_doc, get_value, new_doc
+from comfort import get_doc, get_value, new_doc
 from comfort.entities.doctype.customer.customer import Customer, parse_vk_id
 from comfort.integrations.ikea import fetch_items
 from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
 from frappe.model.rename_doc import rename_doc
 from frappe.utils import get_url_to_form
-
-
-def _generate_new_customer_name(name: str):  # TODO: Transfer to autoname
-    regex = re.compile(r" (\d+)$")
-    while True:
-        if doc_exists("Customer", name):
-            if matches := regex.findall(name):
-                idx = int(matches[0]) + 1
-                name = f"{regex.sub('', name)} {str(idx)}"
-            else:
-                name = f"{name} 2"
-        else:
-            return name
 
 
 def _create_customer(name: str, vk_url: str):
@@ -30,7 +15,6 @@ def _create_customer(name: str, vk_url: str):
             doc_name: str = rename_doc("Customer", doc_name, name)  # type: ignore
         doc = get_doc(Customer, doc_name)
     else:
-        name = _generate_new_customer_name(name)
         doc = new_doc(Customer)
         doc.name = name
         doc.vk_url = vk_url

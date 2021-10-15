@@ -1,9 +1,10 @@
 from __future__ import annotations
 
+import re
 from typing import Iterable, Literal, overload
 from urllib.parse import parse_qs, urlparse
 
-from comfort import TypedDocument, ValidationError, _, get_all, get_doc
+from comfort import TypedDocument, ValidationError, _, doc_exists, get_all, get_doc
 from comfort.integrations.vk_api import User, VkApi
 
 # TODO: Validate phone number
@@ -42,6 +43,18 @@ class Customer(TypedDocument):
     phone: str | None
     city: str | None
     address: str | None
+
+    def before_insert(self):
+        # Find and set unique name (with number suffix if needed)
+        regex = re.compile(r" (\d+)$")
+        while True:
+            if not doc_exists("Customer", self.name):
+                break
+            if matches := regex.findall(self.name):
+                idx = int(matches[0]) + 1
+                self.name = f"{regex.sub('', self.name)} {str(idx)}"
+            else:
+                self.name = f"{self.name} 2"
 
     def validate(self):
         self.vk_id = parse_vk_id(self.vk_url)
