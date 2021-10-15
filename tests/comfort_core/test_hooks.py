@@ -1,12 +1,6 @@
 import frappe
 from comfort import get_doc, get_value
-from comfort.comfort_core.hooks import (
-    _add_app_name,
-    _disable_signup,
-    _set_currency_symbol,
-    _set_default_date_and_number_format,
-    load_metadata,
-)
+from comfort.comfort_core.hooks import _disable_signup, _set_currency, load_metadata
 from frappe.geo.doctype.currency.currency import Currency
 
 
@@ -15,28 +9,15 @@ def test_load_metadata():
         assert isinstance(value, str)
 
 
-def test_set_currency_symbol():
-    _set_currency_symbol()
+def test_set_currency():
+    _set_currency()
     doc = get_doc(Currency, "RUB")
-    doc.update({"symbol": "₽", "enabled": True})
+    assert doc.symbol == "₽"  # type: ignore
+    assert doc.enabled  # type: ignore
     assert frappe.db.get_default("currency") == "RUB"
-    assert int(frappe.db.get_default("currency_precision")) == 0  # type: ignore
-
-
-def test_add_app_name():
-    frappe.db.set_value("System Settings", None, "app_name", "frappe")
-    _add_app_name()
-    assert get_value("System Settings", None, "app_name") == "Comfort"
-
-
-def test_set_default_date_and_number_format():
-    _set_default_date_and_number_format()
-    date_format = "dd.mm.yyyy"
-    assert frappe.db.get_default("date_format") == date_format
-    assert get_value("System Settings", None, "date_format") == date_format
-    assert get_value("System Settings", None, "number_format") == "#.###,##"
 
 
 def test_disable_signup():
+    frappe.db.set_value("Website Settings", None, "disable_signup", 0)
     _disable_signup()
     assert int(get_value("Website Settings", None, "disable_signup")) == 1
