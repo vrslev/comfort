@@ -16,7 +16,6 @@ frappe.ui.form.on("Delivery Trip", {
       frm.doc.stops.forEach((order) => {
         if (order.sales_order) cur_sales_orders.push(order.sales_order);
       });
-      // TODO: Info about order doesn't update
       return {
         filters: {
           name: ["not in", cur_sales_orders],
