@@ -191,9 +191,11 @@ class SalesOrder(TypedDocument):
     def _validate_from_available_stock(self):
         if not self.from_available_stock:
             return
+
         validate_params_from_available_stock(
             self.from_available_stock, self.from_purchase_order
         )
+
         order_counter = count_qty(self.get_items_with_splitted_combinations())
 
         if self.from_available_stock == "Available Actual":
@@ -208,8 +210,10 @@ class SalesOrder(TypedDocument):
 
         for item_code, qty in order_counter.items():
             if stock_counter[item_code] < qty:
-                raise ValidationError(  # TODO: More meaningful error message
-                    _("Insufficient stock for Item {}").format(item_code)
+                raise ValidationError(
+                    _(
+                        "Insufficient stock for Item {}. Required: {}, available: {}"
+                    ).format(item_code, stock_counter[item_code], qty)
                 )
 
     def _calculate_item_totals(self):
