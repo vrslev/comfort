@@ -4,6 +4,8 @@ from types import SimpleNamespace
 from typing import Any, TypedDict
 
 import ikea_api_wrapped
+import sentry_sdk
+from ikea_api.errors import ItemFetchError
 from ikea_api_wrapped.types import NoDeliveryOptionsAvailableError, ParsedItem
 
 import frappe
@@ -183,7 +185,24 @@ def fetch_items(item_codes: str | int | list[str], force_update: bool):
 @frappe.whitelist()
 def get_items(item_codes: str):  # pragma: no cover
     """Fetch items, show message about unsuccessful ones and retrieve basic information about fetched items."""
-    response = fetch_items(item_codes, force_update=True)
+    try:
+        response = fetch_items(item_codes, force_update=True)
+    except ItemFetchError as e:
+        if not (
+            e.args
+            and isinstance(e.args[0], list)
+            and len(e.args[0]) > 0  # type: ignore
+            and isinstance(e.args[0][0], str)
+        ):
+            raise
+
+        # If error has this format: ItemFetchError(["item_code", ...])
+        if unsuccessful := ikea_api_wrapped.parse_item_codes(e.args[0]):  # type: ignore
+            response = FetchItemsResult(unsuccessful=unsuccessful, successful=[])
+            sentry_sdk.capture_exception(e)
+        else:
+            raise
+
     if response["unsuccessful"]:
         frappe.msgprint(
             _("Cannot fetch those items: {}").format(
