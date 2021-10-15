@@ -7,6 +7,7 @@ import pytest
 import responses
 
 import comfort.entities.doctype.customer.customer
+import frappe
 from comfort import new_doc
 from comfort.entities.doctype.customer.customer import (
     Customer,
@@ -101,6 +102,22 @@ def test_customer_validate(customer: Customer):
     assert called
 
 
+@pytest.mark.usefixtures("vk_api_settings")
+def test_vk_service_token_in_settings_true():
+    frappe.message_log = []
+    res = Customer._vk_service_token_in_settings(object())  # type: ignore
+    assert res
+    assert frappe.message_log == []
+
+
+def test_vk_service_token_in_settings_false():
+    frappe.message_log = []
+    res = Customer._vk_service_token_in_settings(object())  # type: ignore
+    assert not res
+    assert "Enter VK App service token in Vk Api Settings" in str(frappe.message_log)  # type: ignore
+
+
+@pytest.mark.usefixtures("vk_api_settings")
 @pytest.mark.parametrize(("vk_id", "exp_called"), (("248934423", True), (None, False)))
 def test_update_info_from_vk(
     monkeypatch: pytest.MonkeyPatch, customer: Customer, vk_id: str, exp_called: bool

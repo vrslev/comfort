@@ -4,10 +4,18 @@ import re
 from typing import Iterable, Literal, overload
 from urllib.parse import parse_qs, urlparse
 
-from comfort import TypedDocument, ValidationError, _, doc_exists, get_all, get_doc
+import frappe
+from comfort import (
+    TypedDocument,
+    ValidationError,
+    _,
+    doc_exists,
+    get_all,
+    get_doc,
+    get_value,
+)
 from comfort.integrations.vk_api import User, VkApi
 
-# TODO: Validate phone number
 # TODO: Fix vk_url: https://vk.com/im?peers=1111111&sel=111111 (keep only "sel" part)
 
 
@@ -60,9 +68,20 @@ class Customer(TypedDocument):
         self.vk_id = parse_vk_id(self.vk_url)
         self.update_info_from_vk()
 
+    def _vk_service_token_in_settings(self):
+        token: str | None = get_value("Vk Api Settings", fieldname="app_service_token")
+        if token:
+            return True
+        else:
+            frappe.msgprint(_("Enter VK App service token in Vk Api Settings"))
+            return False
+
     def update_info_from_vk(self):
         if self.vk_id is None:
             return
+        if not self._vk_service_token_in_settings():
+            return
+
         users = _get_vk_users_for_customers((self,))
         _update_customer_from_vk_user(self, users[self.vk_id])
 
