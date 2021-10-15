@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import frappe
 from comfort import get_doc, get_value, new_doc
-from comfort.entities.doctype.customer.customer import Customer, parse_vk_id
+from comfort.entities.doctype.customer.customer import Customer, parse_vk_url
 from comfort.integrations.ikea import fetch_items
 from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
 from frappe.model.rename_doc import rename_doc
@@ -10,7 +10,7 @@ from frappe.utils import get_url_to_form
 
 
 def _create_customer(name: str, vk_url: str):
-    if doc_name := get_value("Customer", {"vk_id": parse_vk_id(vk_url)}):
+    if doc_name := get_value("Customer", {"vk_id": parse_vk_url(vk_url).vk_id}):
         if doc_name != name:
             doc_name: str = rename_doc("Customer", doc_name, name)  # type: ignore
         doc = get_doc(Customer, doc_name)
