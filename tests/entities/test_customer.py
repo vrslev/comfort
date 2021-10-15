@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from copy import copy
 from types import SimpleNamespace
+from typing import Any
 
 import pytest
 import responses
@@ -9,11 +10,12 @@ import responses
 import comfort.entities.doctype.customer.customer
 import frappe
 from comfort import new_doc
+from comfort.comfort_core.doctype.vk_api_settings.vk_api_settings import VkApiSettings
 from comfort.entities.doctype.customer.customer import (
     Customer,
     _get_vk_users_for_customers,
     _update_customer_from_vk_user,
-    parse_vk_id,
+    parse_vk_url,
     update_all_customers_from_vk,
 )
 from comfort.integrations.vk_api import User, VkApi
@@ -30,11 +32,28 @@ acceptable_vk_urls = (
     None,
 )
 expected_vk_ids = ("1", "1", "18392044", "1", "1", "18392044", None)
+expected_vk_urls = (
+    "im?sel=1",
+    "im?sel=1",
+    "im?sel=18392044",
+    "gim?sel=1",
+    "gim?sel=1",
+    "gim?sel=18392044",
+    None,
+)
 
 
-@pytest.mark.parametrize("vk_url,vk_id", zip(acceptable_vk_urls, expected_vk_ids))
-def test_parse_vk_id_passes(vk_url: str | None, vk_id: str | None):
-    assert parse_vk_id(vk_url) == vk_id
+@pytest.mark.parametrize(
+    ("vk_url", "vk_id", "new_url"),
+    zip(acceptable_vk_urls, expected_vk_ids, expected_vk_urls),
+)
+def test_parse_vk_id_passes(vk_url: str | None, vk_id: str | None, new_url: str | None):
+    res = parse_vk_url(vk_url)
+    if vk_url is None:
+        assert res is None
+    else:
+        assert res.vk_id == vk_id  # type: ignore
+        assert res.vk_url == f"https://vk.com/{new_url}"  # type: ignore
 
 
 @pytest.mark.parametrize(
@@ -57,7 +76,7 @@ def test_parse_vk_id_passes(vk_url: str | None, vk_id: str | None):
 )
 def test_parse_vk_id_raises(vk_url: str):
     with pytest.raises(ValidationError, match="Invalid VK URL"):
-        parse_vk_id(vk_url)
+        parse_vk_url(vk_url)
 
 
 def test_customer_before_insert_not_extsts(customer: Customer):
@@ -117,23 +136,34 @@ def test_vk_service_token_in_settings_false():
     assert "Enter VK App service token in Vk Api Settings" in str(frappe.message_log)  # type: ignore
 
 
-@pytest.mark.usefixtures("vk_api_settings")
-@pytest.mark.parametrize(("vk_id", "exp_called"), (("248934423", True), (None, False)))
+@pytest.mark.parametrize(
+    ("vk_id", "with_service_token", "exp_called"),
+    (("248934423", True, True), ("248934423", False, False), (None, True, False)),
+)
 def test_update_info_from_vk(
-    monkeypatch: pytest.MonkeyPatch, customer: Customer, vk_id: str, exp_called: bool
+    monkeypatch: pytest.MonkeyPatch,
+    customer: Customer,
+    vk_api_settings: VkApiSettings,
+    vk_id: str,
+    with_service_token: bool,
+    exp_called: bool,
 ):
-    customer = Customer(customer.as_dict())  # Customer is patched in conftest
+    customer = Customer(customer.as_dict())  # Customer class is patched in conftest
+
+    if not with_service_token:
+        vk_api_settings.app_service_token = None
+        vk_api_settings.save()
 
     first_called = False
     second_called = False
     exp_user = "User"
 
-    def mock_get_vk_users_for_customers(customers: tuple[Customer]):
+    def mock_get_vk_users_for_customers(_: Any):
         nonlocal first_called
         first_called = True
         return {customer.vk_id: exp_user}
 
-    def mock_update_customer_from_vk_user(customer: Customer, user: str):
+    def mock_update_customer_from_vk_user(_: Any, user: str):
         nonlocal second_called
         second_called = True
         assert user == exp_user

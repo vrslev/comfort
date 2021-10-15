@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import re
-from typing import Iterable, Literal, overload
+from typing import Iterable, Literal, NamedTuple, overload
 from urllib.parse import parse_qs, urlparse
 
 import frappe
@@ -16,20 +16,23 @@ from comfort import (
 )
 from comfort.integrations.vk_api import User, VkApi
 
-# TODO: Fix vk_url: https://vk.com/im?peers=1111111&sel=111111 (keep only "sel" part)
+
+class ParseVkUrlResponse(NamedTuple):
+    vk_id: str
+    vk_url: str
 
 
 @overload
-def parse_vk_id(vk_url: str) -> str:
+def parse_vk_url(vk_url: str) -> ParseVkUrlResponse:
     ...
 
 
 @overload
-def parse_vk_id(vk_url: None) -> None:
+def parse_vk_url(vk_url: None) -> None:
     ...
 
 
-def parse_vk_id(vk_url: str | None):
+def parse_vk_url(vk_url: str | None):
     if not vk_url:
         return
 
@@ -37,7 +40,10 @@ def parse_vk_id(vk_url: str | None):
     if "vk.com" in parsed_url.netloc and "im" in parsed_url.path:
         query = parse_qs(parsed_url.query)
         if "sel" in query:
-            return query["sel"][0]
+            vk_id = query["sel"][0]
+            is_group_dialog = "gim" in parsed_url.path
+            new_url = f"https://vk.com/{'g' if is_group_dialog else ''}im?sel={vk_id}"
+            return ParseVkUrlResponse(vk_id, new_url)
 
     raise ValidationError(_("Invalid VK URL"))
 
@@ -65,7 +71,8 @@ class Customer(TypedDocument):
                 self.name = f"{self.name} 2"
 
     def validate(self):
-        self.vk_id = parse_vk_id(self.vk_url)
+        if self.vk_url:
+            self.vk_id, self.vk_url = parse_vk_url(self.vk_url)
         self.update_info_from_vk()
 
     def _vk_service_token_in_settings(self):
