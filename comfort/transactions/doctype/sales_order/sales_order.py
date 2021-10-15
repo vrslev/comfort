@@ -783,6 +783,7 @@ def validate_params_from_available_stock(
 @frappe.whitelist()
 def calculate_commission_and_margin(doc: str):
     sales_order = SalesOrder(json.loads(doc))
-    sales_order._calculate_commission()
-    sales_order._calculate_margin()
+    if sales_order.items_cost:
+        sales_order._calculate_commission()
+        sales_order._calculate_margin()
     return {"commission": sales_order.commission, "margin": sales_order.margin}
