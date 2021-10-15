@@ -100,11 +100,12 @@ class DeliveryTrip(TypedDocument):
         )
 
         for stop in self.stops:
-            services = _get_delivery_and_installation_from_services(
-                grouped_services[stop.sales_order]
-            )
-            stop.delivery_type = services["delivery_type"]
-            stop.installation = services["installation"]
+            if services := grouped_services.get(stop.sales_order):
+                delivery_and_installation = (
+                    _get_delivery_and_installation_from_services(services)
+                )
+                stop.delivery_type = delivery_and_installation["delivery_type"]
+                stop.installation = delivery_and_installation["installation"]
 
             customer = grouped_customers[stop.customer][0]
             stop.address = customer.address
@@ -126,7 +127,7 @@ class DeliveryTrip(TypedDocument):
 
     def _validate_orders_have_delivery_services(self):
         for stop in self.stops:
-            if stop.delivery_type is None:
+            if not stop.delivery_type:
                 raise ValidationError(
                     _("Sales Order {} has no delivery service").format(stop.sales_order)
                 )
