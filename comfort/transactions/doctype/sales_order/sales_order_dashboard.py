@@ -11,7 +11,7 @@ def get_data():
             {
                 "items": [
                     "Purchase Order",
-                    "Sales Return",  # TODO: Validate delivery status before showing "+" button
+                    "Sales Return",
                 ]
             },
             {"items": ["Delivery Trip", "Receipt"]},
