@@ -23,8 +23,8 @@ comfort.PurchaseOrderController = frappe.ui.form.Controller.extend({
       };
     });
 
+    // Duplicate in refresh
     this.frm.fields_dict.sales_orders.grid.get_docfield(
-      // TODO: Do this on refresh
       "sales_order_name"
     ).only_select = 1;
   },
@@ -65,6 +65,10 @@ comfort.PurchaseOrderController = frappe.ui.form.Controller.extend({
     if (this.frm.doc.docstatus == 2) {
       this.frm.custom_make_buttons["Purchase Return"] = "Purchase Return";
     }
+    // Duplicate in setup_sales_order_query
+    this.frm.fields_dict.sales_orders.grid.get_docfield(
+      "sales_order_name"
+    ).only_select = 1;
   },
 
   setup_buttons() {
