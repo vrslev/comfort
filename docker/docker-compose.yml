@@ -28,11 +28,6 @@ services:
   nginx:
     image: cr.yandex/crpdmuh1072ntg30t18g/comfort-nginx:${COMFORT_VERSION}
     restart: on-failure
-    build:
-      context: ..
-      dockerfile: docker/nginx.Dockerfile
-      args:
-        FRAPPE_VERSION: ${FRAPPE_VERSION}
     environment:
       FRAPPE_PY: app
       FRAPPE_SOCKETIO: socketio
@@ -55,11 +50,6 @@ services:
   app:
     image: cr.yandex/crpdmuh1072ntg30t18g/comfort-worker:${COMFORT_VERSION}
     restart: on-failure
-    build:
-      context: ..
-      dockerfile: docker/worker.Dockerfile
-      args:
-        FRAPPE_VERSION: ${FRAPPE_VERSION}
     depends_on:
       mariadb:
         condition: service_healthy
