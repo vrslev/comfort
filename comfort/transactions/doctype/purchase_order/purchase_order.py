@@ -349,7 +349,7 @@ class PurchaseOrder(TypedDocument):
         self._submit_sales_orders_and_update_statuses()
 
     @frappe.whitelist()
-    def get_unavailable_items_in_cart_by_orders(  # TODO: It renders with duplicates
+    def get_unavailable_items_in_cart_by_orders(
         self, unavailable_items: list[dict[str, str | int]]
     ):  # pragma: no cover
         all_items: list[Any] = []

@@ -59,6 +59,34 @@ def test_parse_vk_id_raises(vk_url: str):
         parse_vk_id(vk_url)
 
 
+def test_customer_before_insert_not_extsts(customer: Customer):
+    name = "John Johnson"
+    customer.name = copy(name)
+    customer.before_insert()
+    assert customer.name == name
+
+
+@pytest.mark.parametrize(
+    ("input", "exp_output"),
+    (
+        ("John Johnson", "John Johnson 2"),
+        ("John Johnson 2", "John Johnson 3"),
+        ("John Johnson 9", "John Johnson 10"),
+        ("John Johnson 10", "John Johnson 11"),
+        ("John Johnson 19", "John Johnson 20"),
+        ("John Johnson 99", "John Johnson 100"),
+    ),
+)
+def test_customer_before_insert_exists(customer: Customer, input: str, exp_output: str):
+    doc = new_doc(Customer)
+    doc.name = copy(input)
+    doc.db_insert()
+
+    customer.name = copy(input)
+    customer.before_insert()
+    assert customer.name == exp_output
+
+
 def test_customer_validate(customer: Customer):
     called = False
 
