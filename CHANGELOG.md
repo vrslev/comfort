@@ -3,6 +3,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.10.1 (2021-10-16)
+### Fix
+* **Profit and Loss report:** Intermediate calculations ([`9b7cc71`](https://github.com/vrslev/comfort/commit/9b7cc71b7ce6801de20970a7ca053d50649c9172))
+
 ## v0.10.0 (2021-10-15)
 ### Feature
 * Extend session expiry to 30 days; use better number format ([`265d9d9`](https://github.com/vrslev/comfort/commit/265d9d92ac7abe9d9b84a95f3ee28342c0a15bca))
