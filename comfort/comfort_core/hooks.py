@@ -9,6 +9,7 @@ from frappe.core.doctype.doctype.doctype import DocType
 from frappe.core.doctype.system_settings.system_settings import SystemSettings
 from frappe.geo.doctype.currency.currency import Currency
 from frappe.modules import make_boilerplate
+from frappe.website.doctype.website_settings.website_settings import WebsiteSettings
 
 
 def load_metadata():
@@ -45,13 +46,16 @@ def _update_system_settings():  # pragma: no cover
 
 
 def _disable_signup():
-    # Don't want strangers
-    frappe.db.set_value("Website Settings", None, "disable_signup", 1)
+    doc = get_doc(WebsiteSettings)
+    doc.disable_signup = True  # type: ignore  # Don't want strangers
+    doc.home_page = "login"
+    doc.save()
 
 
 def after_install():  # pragma: no cover
     initialize_accounts()
     _set_currency()
+    after_migrate()
 
 
 def after_migrate():  # pragma: no cover
