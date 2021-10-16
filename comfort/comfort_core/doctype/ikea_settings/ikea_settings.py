@@ -5,6 +5,7 @@ from datetime import datetime
 import ikea_api
 import ikea_api.auth
 
+import frappe
 from comfort import TypedDocument, ValidationError, _, get_cached_doc
 from frappe.utils import add_to_date, get_datetime, now_datetime
 
@@ -51,9 +52,14 @@ def get_authorized_api():
         if doc.username is None or password is None:
             raise ValidationError(_("Enter login and password in Ikea Settings"))
 
-        from comfort.integrations.ikea_authorization_server import main
+        if frappe.conf.developer_mode:
+            token = ikea_api.auth.get_authorized_token(doc.username, password)
+        else:
+            from comfort.integrations.ikea_authorization_server import main
 
-        doc.authorized_token = main(doc.username, password)
+            token = main(doc.username, password)
+
+        doc.authorized_token = token
         doc.authorized_token_expiration = add_to_date(None, hours=24)
         doc.save()
 
