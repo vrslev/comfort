@@ -5,6 +5,7 @@ from typing import Any
 
 import pytest
 
+import frappe
 from comfort.comfort_core.doctype.ikea_settings.ikea_settings import (
     IkeaSettings,
     convert_to_datetime,
@@ -77,10 +78,15 @@ def test_get_guest_api_return():
     assert get_guest_api().reveal_token() == mock_token
 
 
+@pytest.mark.parametrize("dev_mode", (True, False))
 @pytest.mark.parametrize(*_testdata)
 def test_get_authorized_api_update(
-    ikea_settings: IkeaSettings, token: str | None, expiration: datetime | None
+    ikea_settings: IkeaSettings,
+    token: str | None,
+    expiration: datetime | None,
+    dev_mode: bool,
 ):
+    frappe.conf.developer_mode = dev_mode
     ikea_settings.authorized_token = token  # type: ignore
     ikea_settings.authorized_token_expiration = expiration  # type: ignore
     ikea_settings.save()
