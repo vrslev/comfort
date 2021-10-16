@@ -3,6 +3,9 @@
 
 <!--next-version-placeholder-->
 
+## v0.12.0 (2021-10-16)
+
+
 ## v0.11.0 (2021-10-16)
 ### Feature
 * **Sales Order:** Add Purchase Order filter ([`54f0748`](https://github.com/vrslev/comfort/commit/54f07484983069411da7ee6c99452fd7d7d82c39))
