@@ -14,6 +14,7 @@ from frappe import ValidationError
         "https://www.ikea.com/ru/ru/cat/-11844",
         "https://www.ikea.com/ru/ru/cat/-154",
         "https://www.ikea.com/us/en/cat/-11844",
+        "https://www.ikea.com/ru/ru/cat/komplekty-postelnogo-belya-10680/",
         None,
     ),
 )
@@ -28,9 +29,6 @@ def test_item_category_validate(item_category: ItemCategory, url: str | None):
         "ikea.com",
         "https://ikea.com/cat/-11844",
         "https://ikea.com/ru/cat/-11844",
-        "https://www.ikea.com/ru/ru/cat/",
-        "https://www.ikea.com/ru/ru/cat/11844",
-        "https://www.ikea.com/ru/ru/cat/-sometext",
         "https://ikea.com/ru/ru/category/-11844",
         "https://ikea.com/category/-11844",
         "https://example.com/category/-11844",
