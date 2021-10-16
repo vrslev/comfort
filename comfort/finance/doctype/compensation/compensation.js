@@ -15,5 +15,9 @@ frappe.ui.form.on("Compensation", {
   },
   refresh(frm) {
     frm.get_docfield("voucher_no").only_select = 1;
+
+    if (frm.doc.status == "Draft") {
+      frm.page.set_primary_action("Received", () => frm.savesubmit());
+    }
   },
 });

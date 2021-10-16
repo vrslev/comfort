@@ -7,13 +7,21 @@ from comfort.finance import cancel_gl_entries_for, create_gl_entry, get_account
 class Compensation(TypedDocument):
     doctype: Literal["Compensation"]
     voucher_type: Literal["Purchase Order", "Sales Order"]
+    status: Literal["Draft", "Received", "Cancelled"]
     voucher_no: str
     amount: int
     paid_with_cash: bool
 
-    def validate(self):
+    def validate_docstatus(self):
         if int(get_value(self.voucher_type, self.voucher_no, "docstatus")) != 1:
             raise ValidationError(_("Can only add compensation for submitted document"))
+
+    def set_status(self):
+        self.status = {0: "Draft", 1: "Received", 2: "Cancelled"}[self.docstatus]  # type: ignore
+
+    def validate(self):
+        self.validate_docstatus()
+        self.set_status()
 
     def before_submit(self):
         bank_or_cash = get_account("cash" if self.paid_with_cash else "bank")

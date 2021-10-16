@@ -24,6 +24,15 @@ frappe.listview_settings["Purchase Order"] = {
   },
 };
 
+frappe.listview_settings["Compensation"] = {
+  add_fields: ["status"],
+  get_indicator: (doc) => {
+    if (doc.status == "Received") {
+      return [__(doc.status), "green"];
+    }
+  },
+};
+
 frappe.listview_settings["Customer"] = {
   hide_name_column: true,
 };

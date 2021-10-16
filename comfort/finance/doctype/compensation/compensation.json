@@ -13,6 +13,7 @@
   "amount",
   "paid_with_cash",
   "section_break",
+  "status",
   "amended_from"
  ],
  "fields": [
@@ -63,12 +64,21 @@
    "fieldname": "paid_with_cash",
    "fieldtype": "Check",
    "label": "Paid With Cash"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Status",
+   "options": "\nDraft\nReceived\nCancelled",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-10-11 15:12:57.986230",
+ "modified": "2021-10-16 19:56:17.391802",
  "modified_by": "Administrator",
  "module": "Finance",
  "name": "Compensation",
@@ -89,6 +99,7 @@
    "write": 1
   }
  ],
+ "search_fields": "voucher_no",
  "sort_field": "modified",
  "sort_order": "DESC",
  "track_changes": 1
