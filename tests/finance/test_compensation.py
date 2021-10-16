@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Literal
+
 import pytest
 
 import frappe
@@ -12,7 +14,7 @@ from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
 
 
 @pytest.mark.parametrize("docstatus", (0, 2))
-def test_compensation_validate_raises(docstatus: int):
+def test_compensation_validate_docstatus_raises(docstatus: int):
     ref_doc = new_doc(SalesOrder)
     ref_doc.docstatus = docstatus
     ref_doc.db_insert()
@@ -28,7 +30,7 @@ def test_compensation_validate_raises(docstatus: int):
         doc.validate()
 
 
-def test_compensation_validate_passes():
+def test_compensation_validate_docstatus_passes():
     ref_doc = new_doc(SalesOrder)
     ref_doc.docstatus = 1
     ref_doc.db_insert()
@@ -37,6 +39,18 @@ def test_compensation_validate_passes():
     doc.voucher_type = ref_doc.doctype
     doc.voucher_no = ref_doc.name
     doc.validate()
+
+
+@pytest.mark.parametrize(
+    ("docstatus", "exp_status"), ((0, "Draft"), (1, "Received"), (2, "Cancelled"))
+)
+def test_compensation_set_status(
+    docstatus: int, exp_status: Literal["Draft", "Received", "Cancelled"]
+):
+    doc = new_doc(Compensation)
+    doc.docstatus = docstatus
+    doc.set_status()
+    assert doc.status == exp_status
 
 
 @pytest.mark.parametrize(
