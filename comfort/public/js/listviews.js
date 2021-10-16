@@ -24,6 +24,14 @@ frappe.listview_settings["Purchase Order"] = {
   },
 };
 
+frappe.listview_settings["Customer"] = {
+  hide_name_column: true,
+};
+
+frappe.listview_settings["Item"] = {
+  hide_name_column: true,
+};
+
 frappe.listview_settings["Sales Order"] = {
   add_fields: ["status"],
   get_indicator: (doc) => {
@@ -37,70 +45,75 @@ frappe.listview_settings["Sales Order"] = {
   },
   onload(list) {
     substitute_status_colours();
-    add_not_in_po_check(list);
+    add_not_in_purchase_order_filter(list);
+    add_purchase_order_filter(list);
+    add_from_available_stock_button(list);
     list.page.sidebar.remove();
-    list.page.set_secondary_action(
-      __("Add Sales Order from Available Stock"),
-      () => {
-        frappe.prompt(
-          {
-            label: __("Stock Type"),
-            fieldname: "stock_type",
-            fieldtype: "Select",
-            options: "Available Purchased\nAvailable Actual",
-            reqd: 1,
-            default: "Available Purchased",
-          },
-          ({ stock_type }) => {
-            function create_doc(purchase_order) {
-              let data = { from_available_stock: stock_type };
-              if (purchase_order) {
-                data.from_purchase_order = purchase_order;
-              }
-              frappe
-                .call({
-                  method:
-                    "comfort.transactions.doctype.sales_order.sales_order.validate_params_from_available_stock",
-                  args: data,
-                })
-                .then(() => {
-                  frappe.new_doc("Sales Order", {}, (doc) => {
-                    Object.assign(doc, data);
-                  });
-                });
-            }
-
-            if (stock_type == "Available Purchased") {
-              let prompt = frappe.prompt(
-                {
-                  label: __("Purchase Order"),
-                  fieldname: "purchase_order",
-                  fieldtype: "Link",
-                  options: "Purchase Order",
-                  reqd: 1,
-                  only_select: 1,
-                },
-                ({ purchase_order }) => create_doc(purchase_order),
-                __("Choose Purchase Order")
-              );
-              prompt.fields[0].get_query = () => {
-                return {
-                  filters: {
-                    status: "To Receive",
-                  },
-                };
-              };
-            } else {
-              create_doc();
-            }
-          },
-          __("Choose Stock Type")
-        );
-      },
-      "small-add"
-    );
   },
 };
+
+function add_from_available_stock_button(list) {
+  list.page.set_secondary_action(
+    __("Add Sales Order from Available Stock"),
+    () => {
+      frappe.prompt(
+        {
+          label: __("Stock Type"),
+          fieldname: "stock_type",
+          fieldtype: "Select",
+          options: "Available Purchased\nAvailable Actual",
+          reqd: 1,
+          default: "Available Purchased",
+        },
+        ({ stock_type }) => {
+          function create_doc(purchase_order) {
+            let data = { from_available_stock: stock_type };
+            if (purchase_order) {
+              data.from_purchase_order = purchase_order;
+            }
+            frappe
+              .call({
+                method:
+                  "comfort.transactions.doctype.sales_order.sales_order.validate_params_from_available_stock",
+                args: data,
+              })
+              .then(() => {
+                frappe.new_doc("Sales Order", {}, (doc) => {
+                  Object.assign(doc, data);
+                });
+              });
+          }
+
+          if (stock_type == "Available Purchased") {
+            let prompt = frappe.prompt(
+              {
+                label: __("Purchase Order"),
+                fieldname: "purchase_order",
+                fieldtype: "Link",
+                options: "Purchase Order",
+                reqd: 1,
+                only_select: 1,
+              },
+              ({ purchase_order }) => create_doc(purchase_order),
+              __("Choose Purchase Order")
+            );
+            prompt.fields[0].get_query = () => {
+              return {
+                filters: {
+                  status: "To Receive",
+                },
+              };
+            };
+          } else {
+            create_doc();
+          }
+        },
+        __("Choose Stock Type")
+      );
+    },
+    "small-add"
+  );
+}
 
 function substitute_status_colours() {
   var old_guess_colour = frappe.utils.guess_colour;
@@ -126,18 +139,18 @@ function substitute_status_colours() {
   };
 }
 
-function add_not_in_po_check(list) {
-  function clear_not_in_po_filter() {
-    list.filter_area.filter_list.filters
-      .filter((d) => d.fieldname == "name" && d.condition == "in")
-      .forEach((d) => d.remove());
-  }
+function clear_name_filter() {
+  cur_list.filter_area.filter_list.filters
+    .filter((d) => d.fieldname == "name" && d.condition == "in")
+    .forEach((d) => d.remove());
+}
 
-  clear_not_in_po_filter();
+function add_not_in_purchase_order_filter(list) {
+  clear_name_filter();
   list.filter_area.filter_list.apply();
 
   async function change() {
-    clear_not_in_po_filter();
+    clear_name_filter();
 
     if (check.get_value() == 1) {
       await frappe.call({
@@ -149,7 +162,7 @@ function add_not_in_po_check(list) {
             "name",
             "in",
             r.message,
-            true
+            true // hidden
           );
         },
       });
@@ -173,10 +186,47 @@ function add_not_in_po_check(list) {
   delete list.page.fields_dict["not_in_po"]; // To skip main call for all items
 }
 
-frappe.listview_settings["Customer"] = {
-  hide_name_column: true,
-};
+function add_purchase_order_filter(list) {
+  clear_name_filter();
+  list.filter_area.filter_list.apply();
 
-frappe.listview_settings["Item"] = {
-  hide_name_column: true,
-};
+  async function change() {
+    clear_name_filter();
+
+    let value = field.get_value();
+    if (value) {
+      await frappe.call({
+        method:
+          "comfort.transactions.doctype.sales_order.sales_order.get_sales_orders_in_purchase_order",
+        args: {
+          purchase_order_name: value,
+        },
+        callback: (r) => {
+          list.filter_area.filter_list.add_filter(
+            "Sales Order",
+            "name",
+            "in",
+            r.message,
+            true // hidden
+          );
+        },
+      });
+    }
+    list.filter_area.filter_list.on_change();
+  }
+
+  var field = list.page.add_field(
+    {
+      label: __("Purchase Order"),
+      fieldname: "purchase_order",
+      fieldtype: "Link",
+      options: "Purchase Order",
+      change() {
+        change();
+      },
+    },
+    list.filter_area.standard_filters_wrapper
+  );
+
+  delete list.page.fields_dict["purchase_order"]; // To skip main call for all items
+}

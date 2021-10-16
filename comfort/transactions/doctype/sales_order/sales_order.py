@@ -749,6 +749,16 @@ def get_sales_orders_not_in_purchase_order():
 
 
 @frappe.whitelist()
+def get_sales_orders_in_purchase_order(purchase_order_name: str):
+    po_sales_orders = get_all(
+        PurchaseOrderSalesOrder,
+        fields="sales_order_name",
+        filters={"parent": ("in", purchase_order_name)},
+    )
+    return [s.sales_order_name for s in po_sales_orders]
+
+
+@frappe.whitelist()
 def validate_params_from_available_stock(
     from_available_stock: Literal["Available Purchased", "Available Actual"] | None,
     from_purchase_order: str | None = None,
