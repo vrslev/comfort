@@ -25,14 +25,11 @@ columns = [
 
 
 def _get_parent_children_accounts_map() -> dict[str | None, list[AccountWithTotal]]:
-    accounts: list[AccountWithTotal] = get_all(Account, ("name", "parent_account"))  # type: ignore
-    acceptable_parents = ("Income", "Expense")
-    to_remove: list[AccountWithTotal] = []
-    for account in accounts:
-        if account.parent_account is None and account.name not in acceptable_parents:
-            to_remove.append(account)
-    for account in to_remove:
-        accounts.remove(account)
+    accounts: list[AccountWithTotal] = get_all(  # type: ignore
+        Account,
+        fields=("name", "parent_account"),
+        filters={"name": ("not in", ("Bank", "Cash"))},  # probably temporary fix
+    )
     return group_by_attr(accounts, "parent_account")
 
 
@@ -61,7 +58,7 @@ def _get_account_balance_map(filters: dict[str, str]):
     )
     account_balance_map: defaultdict[str | None, int] = defaultdict(int)
     for entry in entries:
-        account_balance_map[entry.account] += abs(entry.balance)
+        account_balance_map[entry.account] += -entry.balance
     return account_balance_map
 
 
@@ -90,22 +87,28 @@ def get_data(filters: dict[str, str]):  # pragma: no cover
     _calculate_total_in_parent_accounts(
         account_balance_map, parent_children_map, accounts
     )
+    for account in accounts:
+        account.total = abs(account.total)
     return accounts
 
 
-def get_income_expense_profit_loss_totals(data: list[AccountWithTotal]):
+def get_profit_loss_totals(data: list[AccountWithTotal]):
     income: int = 0
     expense: int = 0
+    assets: int = 0
     for account in data:
         if account.name == "Income":
             income = account.total
         elif account.name == "Expense":
             expense = account.total
-    return income, expense, income - expense
+        elif account.name == "Assets":
+            assets = account.total
+
+    return income, expense, assets, income - expense - assets
 
 
 def get_chart_data(
-    filters: dict[str, str], income: int, expense: int, profit_loss: int
+    filters: dict[str, str], income: int, expense: int, assets: int, profit_loss: int
 ):
     return {
         "data": {
@@ -113,6 +116,7 @@ def get_chart_data(
             "datasets": [
                 {"name": _("Income"), "values": [income]},
                 {"name": _("Expense"), "values": [expense]},
+                {"name": _("Assets"), "values": [assets]},
                 {"name": _("Profit/Loss"), "values": [profit_loss]},
             ],
         },
@@ -120,10 +124,11 @@ def get_chart_data(
     }
 
 
-def get_report_summary(income: int, expense: int, profit_loss: int):
+def get_report_summary(income: int, expense: int, assets: int, profit_loss: int):
     return [
         {"value": income, "label": _("Income"), "datatype": "Currency"},
         {"value": expense, "label": _("Expense"), "datatype": "Currency"},
+        {"value": assets, "label": _("Assets"), "datatype": "Currency"},
         {
             "value": profit_loss,
             "indicator": "Green" if profit_loss >= 0 else "Red",
@@ -135,11 +140,11 @@ def get_report_summary(income: int, expense: int, profit_loss: int):
 
 def execute(filters: dict[str, str]):  # pragma: no cover
     data = get_data(filters)
-    income, expense, profit_loss = get_income_expense_profit_loss_totals(data)
+    income, expense, assets, profit_loss = get_profit_loss_totals(data)
     return (
         columns,
         data,
         None,
-        get_chart_data(filters, income, expense, profit_loss),
-        get_report_summary(income, expense, profit_loss),
+        get_chart_data(filters, income, expense, assets, profit_loss),
+        get_report_summary(income, expense, assets, profit_loss),
     )
