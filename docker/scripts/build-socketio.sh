@@ -1,6 +1,9 @@
 set -e
 
 source .env
+
+set -x
+
 dir=/tmp/frappe_docker
 git clone --depth 1 https://github.com/frappe/frappe_docker $dir
 docker build $dir \

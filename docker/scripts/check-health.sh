@@ -1,4 +1,5 @@
 set -e
+set -x
 
 ULINE="\e[1m\e[4m"
 ENDULINE="\e[0m"

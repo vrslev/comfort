@@ -1,5 +1,5 @@
-#!/bin/bash
 set -e
+set -x
 
 docker system prune -a -f
 docker-compose pull

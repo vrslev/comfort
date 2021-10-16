@@ -6,7 +6,6 @@
 # $SECRET_ACCESS_KEY
 # $ENDPOINT_URL
 
-#!/bin/bash
 set -e
 
 if [[ -z "$(docker network ls | grep comfort_default)" ]]; then
@@ -14,6 +13,8 @@ if [[ -z "$(docker network ls | grep comfort_default)" ]]; then
 fi
 
 export $(cat .env)
+
+set -x
 
 WORKER_IMAGE=cr.yandex/crpdmuh1072ntg30t18g/comfort-worker:$COMFORT_VERSION
 
