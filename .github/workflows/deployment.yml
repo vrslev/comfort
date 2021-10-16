@@ -7,7 +7,7 @@ on:
 
 jobs:
   backup:
-    uses: .github/workflows/backup.yml@${{github.ref}}
+    uses: vrslev/comfort/.github/workflows/backup.yml@${{github.ref}}
 
   # deploy:
   #   runs-on: ubuntu-latest
