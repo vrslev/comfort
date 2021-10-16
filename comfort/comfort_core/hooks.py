@@ -52,6 +52,9 @@ def _disable_signup():
 def after_install():  # pragma: no cover
     initialize_accounts()
     _set_currency()
+
+
+def after_migrate():  # pragma: no cover
     _update_system_settings()
     _disable_signup()
 
