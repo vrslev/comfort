@@ -78,7 +78,7 @@ reportImplicitStringConcatenation = "warning"
 # reportUnusedCoroutine
 
 [tool.semantic_release]
-branch = "prod"
+branch = "main"
 version_variable = "setup.py:__version__"
 build_command = "pip install build && python -m build"
 commit_subject = "сhore: Update version to {version}"
