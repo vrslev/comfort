@@ -538,6 +538,7 @@ def ikea_settings(monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setattr(
         comfort.integrations.ikea_authorization_server, "main", mock_main
     )
+    monkeypatch.setattr(ikea_api.auth, "get_authorized_token", mock_main)
 
     doc = get_doc(IkeaSettings)
     doc.zip_code = "101000"
