@@ -21,6 +21,7 @@ fixtures = [
 ]
 
 after_install = "comfort.comfort_core.hooks.after_install"
+after_migrate = "comfort.comfort_core.hooks.after_migrate"
 boot_session = "comfort.comfort_core.hooks.extend_boot_session"
 override_doctype_class = {"DocType": "comfort.comfort_core.hooks.CustomDocType"}
 
