@@ -34,6 +34,7 @@ from comfort.transactions.doctype.sales_order.sales_order import (
     _CheckAvailabilityDeliveryOptionItem,
     _SplitOrderItem,
     calculate_commission_and_margin,
+    get_sales_orders_in_purchase_order,
     get_sales_orders_not_in_purchase_order,
     has_linked_delivery_trip,
     validate_params_from_available_stock,
@@ -1193,6 +1194,19 @@ def test_get_sales_orders_not_in_purchase_order_from_available_stock(
 
     res = get_sales_orders_not_in_purchase_order()
     assert sales_order.name in res
+    assert new_sales_order.name not in res
+
+
+def test_get_sales_orders_in_purchase_order(purchase_order: PurchaseOrder):
+    purchase_order.db_insert()
+    purchase_order.update_children()
+
+    new_sales_order = new_doc(SalesOrder)
+    new_sales_order.name = "mytestname"
+    new_sales_order.db_insert()
+
+    res = get_sales_orders_in_purchase_order(purchase_order.name)
+    assert purchase_order.sales_orders[0].sales_order_name in res
     assert new_sales_order.name not in res
 
 
