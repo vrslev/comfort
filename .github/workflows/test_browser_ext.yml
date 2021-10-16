@@ -1,0 +1,36 @@
+name: Test Browser Extension
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - browser_ext/**
+  pull_request:
+    paths:
+      - browser_ext/**
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: browser_ext
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+
+      - uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: pip-${{ hashFiles('browser_ext/setup.py') }}
+
+      - name: Install
+        run: pip install .[dev]
+
+      - name: Test
+        run: pytest --color=yes
