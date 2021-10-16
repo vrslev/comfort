@@ -1,11 +1,6 @@
 name: Test
 
 on:
-  pull_request:
-    paths:
-      - "**.py"
-      - "**.json"
-      - "!docker/scripts/**"
   workflow_dispatch:
   push:
     branches:
@@ -14,6 +9,15 @@ on:
       - "**.py"
       - "**.json"
       - "!docker/scripts/**"
+      - "!authorization_server/**"
+      - "!browser_ext/**"
+  pull_request:
+    paths:
+      - "**.py"
+      - "**.json"
+      - "!docker/scripts/**"
+      - "!authorization_server/**"
+      - "!browser_ext/**"
 
 jobs:
   test:
@@ -42,12 +46,13 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ~/.cache/pip
-          key: pip-${{ hashFiles('**/setup.cfg') }}
+          key: pip-${{ hashFiles('./setup.py') }}
 
       - name: Install dependencies
         run: |
-          sudo apt-get install redis-server
-          pip install -U frappe-bench
+          sudo apt-get install redis-server &
+          pip install -U frappe-bench &
+          wait
 
       - name: Configure MariaDB
         run: |
@@ -73,26 +78,20 @@ jobs:
           sed -i 's/redis_socketio:/# redis_socketio:/g' Procfile
           bench set-config -g developer_mode 1
 
-      - name: Install Comfort
+      - name: Install and create site
         run: |
           cd ~/frappe-bench
           bench get-app $GITHUB_WORKSPACE --skip-assets
-          env/bin/pip install -U -e apps/comfort[dev]
 
-      - name: Install browser extension
-        run: |
-          cd ~/frappe-bench
-          env/bin/pip install -U -e apps/comfort/browser_ext
-
-      - name: Create site
-        run: |
-          cd ~/frappe-bench
           bench new-site tests \
             --mariadb-root-password 123 \
             --no-mariadb-socket \
             --admin-password admin \
             --install-app comfort \
-            --verbose
+            --verbose &
+          env/bin/pip install -U -e apps/comfort[dev] &
+
+          wait
 
       - name: Run tests
         run: |
@@ -101,5 +100,5 @@ jobs:
 
           source env/bin/activate
           cd apps/comfort
-          pytest -v --color=yes
+          pytest tests --color=yes
           exit
