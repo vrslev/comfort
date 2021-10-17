@@ -10,7 +10,7 @@ setup(
     zip_safe=False,
     py_modules=["comfort_browser_ext"],
     install_requires=[
-        "ikea-api-wrapped@git+https://github.com/vrslev/ikea-api-wrapped.git@v0.4.1",
+        "ikea-api-wrapped==0.4.1",
         "beautifulsoup4==4.10.0",
         "sentry-sdk==1.4.3",
     ],
