@@ -30,7 +30,7 @@ from comfort.integrations.ikea import (
 )
 from comfort.stock import create_checkout, create_receipt
 from comfort.transactions import AnyChildItem, delete_empty_items, merge_same_items
-from frappe.utils.data import add_to_date, getdate, now_datetime, today
+from frappe.utils.data import getdate, now_datetime, today
 
 from ..purchase_order_delivery_option.purchase_order_delivery_option import (
     PurchaseOrderDeliveryOption,
@@ -53,7 +53,7 @@ class PurchaseOrder(TypedDocument):
     cannot_add_items: str | None
     posting_date: datetime
     order_confirmation_no: str
-    schedule_date: datetime
+    schedule_date: datetime | None
     total_amount: int
     sales_orders_cost: int
     delivery_cost: int
@@ -327,9 +327,8 @@ class PurchaseOrder(TypedDocument):
     def add_purchase_info_and_submit(
         self, purchase_id: str, purchase_info: PurchaseInfoDict
     ):
-        self.schedule_date = getdate(  # type: ignore
-            purchase_info.get("delivery_date", add_to_date(None, weeks=2))
-        )
+        if str_date := purchase_info.get("delivery_date"):
+            self.schedule_date = getdate(str_date)  # type: ignore
         self.posting_date = getdate(purchase_info.get("purchase_date", today()))  # type: ignore
         self.delivery_cost = int(purchase_info["delivery_cost"])
         self.order_confirmation_no = purchase_id

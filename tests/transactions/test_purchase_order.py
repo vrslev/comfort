@@ -31,7 +31,7 @@ from comfort.transactions.doctype.sales_order_item.sales_order_item import (
     SalesOrderItem,
 )
 from frappe import ValidationError
-from frappe.utils.data import add_to_date, getdate, now_datetime, today
+from frappe.utils.data import getdate, now_datetime, today
 from tests.conftest import mock_delivery_services, mock_purchase_info
 
 
@@ -476,7 +476,7 @@ def test_add_purchase_info_and_submit_info_not_loaded(purchase_order: PurchaseOr
         purchase_id,
         purchase_info={"delivery_cost": delivery_cost},  # type: ignore
     )
-    assert purchase_order.schedule_date == add_to_date(None, weeks=2).date()  # type: ignore
+    assert purchase_order.schedule_date == None
     assert purchase_order.posting_date == getdate(today())
     assert purchase_order.delivery_cost == delivery_cost
     assert purchase_order.order_confirmation_no == purchase_id
