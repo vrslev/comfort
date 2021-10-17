@@ -93,6 +93,7 @@ class FrappeApi:
     def __init__(self, url: str, api_key: str, api_secret: str):
         self.url = url
         self._session = requests.Session()
+        self._session.headers["Accept"] = "application/json"
         self._authenticate(api_key, api_secret)
 
     def _authenticate(self, api_key: str, api_secret: str):
