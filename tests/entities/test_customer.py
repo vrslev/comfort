@@ -26,9 +26,9 @@ acceptable_vk_urls = (
     "https://vk.com/im?sel=1",
     "https://vk.com/im?media=&sel=1",
     "https://vk.com/im?media=&sel=18392044",
-    "https://vk.com/gim?sel=1",
-    "https://vk.com/gim?media=&sel=1",
-    "https://vk.com/gim?media=&sel=18392044",
+    "https://vk.com/gim1111111?sel=1",
+    "https://vk.com/gim1111111?media=&sel=1",
+    "https://vk.com/gim1111111?media=&sel=18392044",
     None,
 )
 expected_vk_ids = ("1", "1", "18392044", "1", "1", "18392044", None)
@@ -36,9 +36,9 @@ expected_vk_urls = (
     "im?sel=1",
     "im?sel=1",
     "im?sel=18392044",
-    "gim?sel=1",
-    "gim?sel=1",
-    "gim?sel=18392044",
+    "gim1111111?sel=1",
+    "gim1111111?sel=1",
+    "gim1111111?sel=18392044",
     None,
 )
 

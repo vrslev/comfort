@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 from typing import Iterable, Literal, NamedTuple, overload
-from urllib.parse import parse_qs, urlparse
+from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
 
 import frappe
 from comfort import (
@@ -37,13 +37,19 @@ def parse_vk_url(vk_url: str | None):
         return
 
     parsed_url = urlparse(vk_url)
-    if "vk.com" in parsed_url.netloc and "im" in parsed_url.path:
-        query = parse_qs(parsed_url.query)
-        if "sel" in query:
-            vk_id = query["sel"][0]
-            is_group_dialog = "gim" in parsed_url.path
-            new_url = f"https://vk.com/{'g' if is_group_dialog else ''}im?sel={vk_id}"
-            return ParseVkUrlResponse(vk_id, new_url)
+    query = parse_qs(parsed_url.query)
+    if "vk.com" in parsed_url.netloc and "im" in parsed_url.path and query.get("sel"):
+        vk_id = query["sel"][0]
+        components = (
+            parsed_url.scheme,
+            parsed_url.netloc,
+            parsed_url.path,
+            "",
+            urlencode({"sel": vk_id}, doseq=True),
+            "",
+        )
+        new_url = urlunparse(components)
+        return ParseVkUrlResponse(vk_id, new_url)
 
     raise ValidationError(_("Invalid VK URL"))
 
