@@ -3,6 +3,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.12.1 (2021-10-17)
+### Fix
+* **Customer:** VK URL parsing ([`711410e`](https://github.com/vrslev/comfort/commit/711410e7edbb878c2e60075af760974643341c30))
+
 ## v0.12.0 (2021-10-16)
 ### Feature
 * **Compensation:** Add status ([`6443739`](https://github.com/vrslev/comfort/commit/6443739a81377a0fa69fb69e9900125b5e74fa02))
