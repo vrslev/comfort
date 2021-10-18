@@ -59,7 +59,8 @@
   {
    "fieldname": "posting_date",
    "fieldtype": "Date",
-   "label": "Posting Date"
+   "label": "Posting Date",
+   "no_copy": 1
   },
   {
    "fieldname": "order_confirmation_no",
@@ -67,6 +68,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Order Confirmation No",
+   "no_copy": 1,
    "search_index": 1
   },
   {
@@ -81,7 +83,8 @@
   {
    "fieldname": "schedule_date",
    "fieldtype": "Date",
-   "label": "Schedule Date"
+   "label": "Schedule Date",
+   "no_copy": 1
   },
   {
    "fieldname": "column_break_5",
@@ -105,6 +108,7 @@
    "fieldname": "delivery_cost",
    "fieldtype": "Currency",
    "label": "Delivery Cost",
+   "no_copy": 1,
    "read_only": 1
   },
   {
@@ -203,7 +207,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2021-10-15 04:30:49.316256",
+ "modified": "2021-10-18 20:35:27.329434",
  "modified_by": "Administrator",
  "module": "Transactions",
  "name": "Purchase Order",
