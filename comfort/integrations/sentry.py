@@ -5,6 +5,7 @@ from importlib.metadata import distribution
 from logging import Logger
 from typing import Callable, TypedDict
 
+import pymysql.err
 import redis.exceptions
 import sentry_sdk
 import sentry_sdk.integrations.wsgi
@@ -45,6 +46,7 @@ def _init_sentry():  # pragma: no cover
         traces_sample_rate=1.0,
         ignore_errors=[
             redis.exceptions.ConnectionError,
+            pymysql.err.OperationalError,
             frappe.exceptions.ValidationError,
         ],
     )
