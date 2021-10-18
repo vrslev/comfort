@@ -126,6 +126,7 @@ class SalesOrder(TypedDocument):
             self._modify_purchase_order_for_from_available_stock()
             self._make_stock_entries_for_from_available_stock()
             self.set_statuses()
+            self.from_purchase_order = None
 
     def before_cancel(self):  # pragma: no cover
         self.set_statuses()
