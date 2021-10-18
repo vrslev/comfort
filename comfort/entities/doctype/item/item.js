@@ -9,5 +9,12 @@ frappe.ui.form.on("Item", {
         });
       });
     });
+
+    frm.custom_make_buttons = {
+      "Sales Order": "Sales Order",
+      "Sales Return": "Sales Return",
+      "Purchase Order": "Purchase Order",
+      "Purchase Return": "Purchase Return",
+    };
   },
 });
