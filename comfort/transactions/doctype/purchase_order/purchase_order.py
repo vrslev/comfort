@@ -296,6 +296,8 @@ class PurchaseOrder(TypedDocument):
     def _submit_sales_orders_and_update_statuses(self):
         for o in self.sales_orders:
             doc = get_doc(SalesOrder, o.sales_order_name)
+            if doc.docstatus == 2:
+                continue
             doc.set_statuses()
             doc.flags.ignore_validate_update_after_submit = True
             doc.submit()
