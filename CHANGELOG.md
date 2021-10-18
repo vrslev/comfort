@@ -3,6 +3,16 @@
 
 <!--next-version-placeholder-->
 
+## v0.14.0 (2021-10-18)
+### Feature
+* **Item:** Add item dashboard ([`35190c6`](https://github.com/vrslev/comfort/commit/35190c6ab220b94d305491ed349ec146f623d122))
+
+### Fix
+* **Purchase Order:** Make reference fields no-copy ([`f7e5a0e`](https://github.com/vrslev/comfort/commit/f7e5a0ee5155d575d9a1df88444891699102173b))
+* **Purchase Order:** Cancellation ([`d9be160`](https://github.com/vrslev/comfort/commit/d9be160c9eda47c315a3ce63194b7e0442133656))
+* **Purchase Order:** Cancel when there's Sales Orders from available stock ([`fe33b49`](https://github.com/vrslev/comfort/commit/fe33b49e3253fe8dda7aa6d45023f8e09ae86e0b))
+* **Sentry:** Don't send mysql conn errors ([`b26c9f3`](https://github.com/vrslev/comfort/commit/b26c9f3789a3863547f5bd51671ae976040d54eb))
+
 ## v0.13.0 (2021-10-17)
 ### Feature
 * **Compensation:** Add `notes` field ([`09af98d`](https://github.com/vrslev/comfort/commit/09af98dcb1a4c19b3fdc6f97bc41d1fed13581f7))
