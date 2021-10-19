@@ -3,6 +3,13 @@
 
 <!--next-version-placeholder-->
 
+## v0.15.0 (2021-10-19)
+### Feature
+* **Sales Order:** Add contract print template (closes #34) ([`ea1ea77`](https://github.com/vrslev/comfort/commit/ea1ea777c5fc92ba62fa8aaf3a70aa7a351a29d9))
+
+### Fix
+* Hide unused modules ([`1333a37`](https://github.com/vrslev/comfort/commit/1333a3703d5ee52f465a34928b3a0c80689f0274))
+
 ## v0.14.0 (2021-10-18)
 ### Feature
 * **Item:** Add item dashboard ([`35190c6`](https://github.com/vrslev/comfort/commit/35190c6ab220b94d305491ed349ec146f623d122))
