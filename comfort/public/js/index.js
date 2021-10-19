@@ -36,7 +36,10 @@ $(document).ready(() => {
   $('[href="/app/user-profile"]').remove();
 
   // Hide unused modules for production
-  if (frappe.get_route()[0] == "Workspaces" && !frappe.boot.developer_mode) {
+  if (
+    frappe.boot.developer_mode &&
+    ["", "Workspaces"].includes(frappe.get_route()[0])
+  ) {
     $(document).ready(() => {
       $('[href="/app/build"]').remove();
       $('[href="/app/website"').remove();
@@ -45,6 +48,7 @@ $(document).ready(() => {
       $('[href="/app/integrations"').remove();
       $('[href="/app/users"').remove();
       $('[href="/app/tools"').remove();
+      $(`.standard-sidebar-label:contains(${__("Administration")})`).remove();
       for (let el of $('[class="standard-sidebar-label"]')) {
         if (el.textContent.includes("Administration")) {
           $(el).hide();
