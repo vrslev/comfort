@@ -2,3 +2,4 @@
 **/doctype/**/*.json
 **/workspace/**/*.json
 **/fixtures/*.json
+**/print_format/**/*.json
