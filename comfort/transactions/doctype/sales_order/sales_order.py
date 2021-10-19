@@ -36,6 +36,7 @@ from comfort.integrations.ikea import fetch_items, get_delivery_services
 from comfort.stock import create_receipt, create_stock_entry, get_stock_balance
 from comfort.stock.doctype.receipt.receipt import Receipt
 from comfort.transactions import delete_empty_items, merge_same_items
+from frappe.utils.print_format import get_pdf
 
 from ..purchase_order_item_to_sell.purchase_order_item_to_sell import (
     PurchaseOrderItemToSell,
@@ -794,3 +795,14 @@ def calculate_commission_and_margin(doc: str):
         sales_order._calculate_commission()
         sales_order._calculate_margin()
     return {"commission": sales_order.commission, "margin": sales_order.margin}
+
+
+@frappe.whitelist()
+def get_contract_template():  # pragma: no cover
+    doc = new_doc(SalesOrder)
+    doc.customer = "________________"
+    doc.items = []
+    html = frappe.get_print(doc=doc)
+    frappe.local.response.filename = "contract.pdf"
+    frappe.local.response.filecontent = get_pdf(html)
+    frappe.local.response.type = "pdf"

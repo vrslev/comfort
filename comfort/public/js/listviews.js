@@ -57,6 +57,7 @@ frappe.listview_settings["Sales Order"] = {
     add_not_in_purchase_order_filter(list);
     add_purchase_order_filter(list);
     add_from_available_stock_button(list);
+    add_print_contract_template(list);
     list.page.sidebar.remove();
   },
 };
@@ -238,4 +239,11 @@ function add_purchase_order_filter(list) {
   );
 
   delete list.page.fields_dict["purchase_order"]; // To skip main call for all items
+}
+
+function add_print_contract_template(list) {
+  list.page.add_menu_item(__("Print Contract Template"), () => {
+    location.href =
+      "/api/method/comfort.transactions.doctype.sales_order.sales_order.get_contract_template";
+  });
 }

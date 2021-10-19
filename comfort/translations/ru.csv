@@ -172,6 +172,7 @@ Posting Date,Дата публикации
 Prepaid Inventory,Предоплаченный инвентарь
 Prepaid Inventory Account,Счёт предоплаченного инвентаря
 Price,Цена
+Print Contract Template,Распечатать шаблон договора
 Profit/Loss,Прибыль/убыток
 Profit and Loss Statement,Отчет о прибылях и убытках
 Purchase Compensations,Компенсации закупок
@@ -202,6 +203,7 @@ Sales,Продажи
 Sales Account,Счёт продаж
 Sales Compensations,Компенсация заказов
 Sales Compensations Account,Счёт компенсаций заказов
+Sales Contract,Договор к заказу
 Sales Order,Заказ
 Sales Order Child Item,Дочерние товары заказа
 Sales Order Item,Товары заказа

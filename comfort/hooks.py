@@ -16,7 +16,15 @@ fixtures = [
     {"doctype": "Block Module", "filters": {"parent": "Comfort Module Profile"}},
     {
         "doctype": "Property Setter",
-        "filters": {"name": "Purchase Order-main-default_print_format"},
+        "filters": {
+            "name": (
+                "in",
+                (
+                    "Purchase Order-main-default_print_format",
+                    "Sales Order-main-default_print_format",
+                ),
+            )
+        },
     },
 ]
 
