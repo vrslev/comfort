@@ -37,7 +37,7 @@ $(document).ready(() => {
 
   // Hide unused modules for production
   if (
-    frappe.boot.developer_mode &&
+    !frappe.boot.developer_mode &&
     ["", "Workspaces"].includes(frappe.get_route()[0])
   ) {
     $(document).ready(() => {
