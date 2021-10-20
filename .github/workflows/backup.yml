@@ -5,6 +5,8 @@ on:
   schedule:
     - cron: 0 11,19 * * * # every day at 11 and 19 hours
 
+concurrency: server
+
 jobs:
   backup:
     runs-on: ubuntu-latest
