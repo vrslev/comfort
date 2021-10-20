@@ -1179,6 +1179,21 @@ def test_get_sales_orders_not_in_purchase_order_main(purchase_order: PurchaseOrd
     assert new_sales_order.name in res
 
 
+def test_get_sales_orders_not_in_purchase_order_cancelled_po(
+    purchase_order: PurchaseOrder,
+):
+    purchase_order.docstatus = 2
+    purchase_order.set_docstatus()
+    purchase_order.db_insert()
+    purchase_order.update_children()
+    new_sales_order = get_doc(SalesOrder, {"name": "mytestname"})
+    new_sales_order.db_insert()
+
+    res = get_sales_orders_not_in_purchase_order()
+    assert purchase_order.sales_orders[0].sales_order_name in res
+    assert new_sales_order.name in res
+
+
 @pytest.mark.parametrize(
     "from_available_stock", ("Available Purchased", "Available Actual")
 )

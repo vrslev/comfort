@@ -741,7 +741,11 @@ def has_linked_delivery_trip(sales_order_name: str):
 
 @frappe.whitelist()
 def get_sales_orders_not_in_purchase_order():
-    po_sales_orders = get_all(PurchaseOrderSalesOrder, "sales_order_name")
+    po_sales_orders = get_all(
+        PurchaseOrderSalesOrder,
+        fields="sales_order_name",
+        filters={"docstatus": ("!=", 2)},
+    )
     filters = {
         "name": ("not in", (s.sales_order_name for s in po_sales_orders)),
         # Frappe makes Select fields with no value "" instead of None
