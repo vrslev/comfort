@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from copy import copy
+from copy import deepcopy
 from typing import Any, Callable
 
 import ikea_api_wrapped
@@ -9,7 +9,7 @@ import pytest
 
 import comfort.transactions.doctype.purchase_order.purchase_order
 import frappe
-from comfort import count_qty, get_all, get_doc, get_value, group_by_attr
+from comfort import count_qty, get_all, get_doc, get_value, group_by_attr, new_doc
 from comfort.entities.doctype.child_item.child_item import ChildItem
 from comfort.integrations.ikea import FetchItemsResult
 from comfort.transactions import AnyChildItem
@@ -433,25 +433,38 @@ def test_purchase_order_fetch_items_specs(
     sales_order.items = []
     sales_order.append("items", {"item_code": sales_order_item, "qty": 1})
     sales_order.save()
+
+    new_sales_order = new_doc(SalesOrder)
+    new_sales_order.__newname = "testname"  # type: ignore
+    new_sales_order.customer = sales_order.customer
+    new_sales_order.append("items", {"item_code": sales_order_item, "qty": 1})
+    new_sales_order.submit()
+
     purchase_order.items_to_sell = []
     purchase_order.append("items_to_sell", {"item_code": item_to_sell, "qty": 1})
+    purchase_order.append("sales_orders", {"sales_order_name": new_sales_order.name})
     purchase_order.insert()
 
     purchase_order.reload()
-    purchase_order_before = copy(purchase_order)
     sales_order.reload()
-    sales_order_before = copy(sales_order)
-
+    new_sales_order.reload()
+    purchase_order_before = deepcopy(purchase_order)
+    sales_order_before = deepcopy(sales_order)
+    new_sales_order_before = deepcopy(new_sales_order)
     purchase_order.fetch_items_specs()
-
     assert called_fetch_items
+
     purchase_order.reload()
     sales_order.reload()
+    new_sales_order.reload()
     assert purchase_order.as_dict() != purchase_order_before.as_dict()
+
     if sales_order_should_change:
         assert sales_order.as_dict() != sales_order_before.as_dict()
+        assert new_sales_order.as_dict() != new_sales_order_before.as_dict()
     else:
         assert sales_order.as_dict() == sales_order_before.as_dict()
+        assert new_sales_order.as_dict() == new_sales_order_before.as_dict()
 
     assert "Information about items updated" in str(frappe.message_log)  # type: ignore
 

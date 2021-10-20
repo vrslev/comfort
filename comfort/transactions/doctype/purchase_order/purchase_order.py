@@ -318,6 +318,8 @@ class PurchaseOrder(TypedDocument):
         for po_sales_order in self.sales_orders:
             sales_order = get_doc(SalesOrder, po_sales_order.sales_order_name)
             if any(i.item_code in fetched_item_codes for i in sales_order.items):
+                sales_order.flags.ignore_validate_update_after_submit = True  # There may be Sales Order that are submitted from cancelled Purchase Order
+                sales_order.update_items_from_db()
                 sales_order.save()
 
         # Update Items to Sell if changed and also update Sales Orders
