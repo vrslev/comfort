@@ -47,3 +47,5 @@ scheduler_events = {
         "comfort.entities.doctype.customer.customer.update_all_customers_from_vk"
     ],
 }
+
+get_translated_dict = {("boot", None): "comfort.translations.get_translated_dict"}
