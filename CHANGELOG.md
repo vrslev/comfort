@@ -3,6 +3,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.16.1 (2021-10-20)
+### Fix
+* **Translations:** Don't load translations in other languages ([`f2c95c8`](https://github.com/vrslev/comfort/commit/f2c95c81878118fce9c76a2d4d28d3971363553d))
+
 ## v0.16.0 (2021-10-20)
 ### Feature
 * **Sales Order:** Add pending amount to pickup order msg ([`3b17b50`](https://github.com/vrslev/comfort/commit/3b17b50811d750caf0bdf1900798dac8dfbdb856))
