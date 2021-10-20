@@ -249,7 +249,7 @@ comfort.PurchaseOrderController = frappe.ui.form.Controller.extend({
     frappe.validated = false;
 
     this.frm
-      .call({ method: "fetch_items_specs", doc: this.frm.doc })
+      .call({ method: "fetch_items_specs", doc: this.frm.doc, freeze: 1 })
       .then(() => {
         frappe.call({
           method: "comfort.integrations.ikea.get_purchase_history",
