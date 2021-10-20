@@ -813,6 +813,7 @@ def test_get_pickup_order_message_context(sales_order: SalesOrder):
     assert context["day"] == tomorrow.day
     assert context["month"] == MONTHS[tomorrow.month]
     assert context["has_delivery"] == True
+    assert context["pending_amount"] == sales_order.pending_amount
 
 
 def test_get_pickup_order_message_context_not_has_delivery(sales_order: SalesOrder):
@@ -820,6 +821,15 @@ def test_get_pickup_order_message_context_not_has_delivery(sales_order: SalesOrd
     sales_order.validate()
     context = sales_order._get_pickup_order_message_context()
     assert context["has_delivery"] == False
+
+
+def test_get_pickup_order_message_context_not_has_pending_amount(
+    sales_order: SalesOrder,
+):
+    sales_order.validate()
+    sales_order.pending_amount = 0
+    context = sales_order._get_pickup_order_message_context()
+    assert context["pending_amount"] == 0
 
 
 def test_generate_pickup_order_message(sales_order: SalesOrder):

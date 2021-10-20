@@ -589,6 +589,7 @@ class SalesOrder(TypedDocument):
             "day": tomorrow.day,
             "month": MONTHS[tomorrow.month],
             "has_delivery": any("Delivery" in s.type for s in self.services),
+            "pending_amount": self.pending_amount,
         }
 
     @frappe.whitelist()
