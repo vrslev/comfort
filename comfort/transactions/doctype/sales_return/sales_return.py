@@ -146,8 +146,8 @@ class SalesReturn(Return):
     def _add_items_to_sell_to_linked_purchase_order(self):
         purchase_order_name: str | None = get_value(
             "Purchase Order Sales Order",
-            {"sales_order_name": self._voucher.name},
-            "parent",
+            filters={"sales_order_name": self._voucher.name, "docstatus": ("!=", 2)},
+            fieldname="parent",
         )
         if purchase_order_name is None:
             # If Sales Order is from Available Actual stock

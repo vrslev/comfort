@@ -235,7 +235,7 @@ def test_add_missing_info_to_items_in_items_to_sell_amount(
     assert item.amount == 200
 
 
-def test_add_items_to_sell_to_linked_purchase_order_linked_to_po(
+def test_add_items_to_sell_to_linked_purchase_order_linked_to_active_po(
     sales_return: SalesReturn, purchase_order: PurchaseOrder
 ):
     purchase_order.db_insert()
@@ -247,6 +247,21 @@ def test_add_items_to_sell_to_linked_purchase_order_linked_to_po(
     in_order_after = count_qty(purchase_order.items_to_sell)
 
     assert counters_are_same((in_return + in_order_before), in_order_after)
+
+
+def test_add_items_to_sell_to_linked_purchase_order_linked_to_cancelled_po(
+    sales_return: SalesReturn, purchase_order: PurchaseOrder
+):
+    purchase_order.docstatus = 1
+    purchase_order.insert()
+    purchase_order.flags.ignore_links = True
+    purchase_order.cancel()
+    in_order_before = count_qty(purchase_order.items_to_sell)
+    sales_return._add_items_to_sell_to_linked_purchase_order()
+    purchase_order.reload()
+    in_order_after = count_qty(purchase_order.items_to_sell)
+
+    assert counters_are_same(in_order_before, in_order_after)
 
 
 def test_add_items_to_sell_to_linked_purchase_order_not_linked_to_po(
