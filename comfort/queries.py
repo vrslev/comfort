@@ -114,7 +114,7 @@ def purchase_order_sales_order_query(
         for s in get_all(
             PurchaseOrderSalesOrder,
             "sales_order_name",
-            {"parent": ("!=", filters["docname"])},
+            {"parent": ("!=", filters["docname"]), "docstatus": ("!=", 2)},
         )
     ] + filters["not in"]
 
