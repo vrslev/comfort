@@ -3,6 +3,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.15.3 (2021-10-20)
+### Fix
+* **Purchase Order:** Fetch items for submitted Sales Orders before submit ([`ed27e96`](https://github.com/vrslev/comfort/commit/ed27e96a6a737016e35bd7665b5ca0454112de0a))
+* **Purchase Order:** Freeze when fetching items on submit ([`1a84cbf`](https://github.com/vrslev/comfort/commit/1a84cbff2c3bc92920e667878859446a7d523905))
+* **Sales Order:** Don't try to cancel cancelled Payments or Receipts ([`13161a1`](https://github.com/vrslev/comfort/commit/13161a15945e3f679389eedba559742375a7561d))
+
 ## v0.15.2 (2021-10-20)
 ### Fix
 * **Sales Order:** Cancel orders linked to cancelled PO ([`9093458`](https://github.com/vrslev/comfort/commit/909345855ab0ad1a0fe671919d9df5f60e549c5b))
