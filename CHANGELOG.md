@@ -3,6 +3,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.15.1 (2021-10-20)
+### Fix
+* **Sales Order:** Cancel after cancelling Purchase Order ([`523e890`](https://github.com/vrslev/comfort/commit/523e89087715ba25643db3d9a78f77a201cf4949))
+* **Sales Order:** Diff commission when splitting order ([`4074a2c`](https://github.com/vrslev/comfort/commit/4074a2cc95d747c20f085f54aa9d524578b9d7d7))
+* Hide unused modules ([`9dd80f5`](https://github.com/vrslev/comfort/commit/9dd80f521e8fc73ec94d0c478d389b200abe1a39))
+
 ## v0.15.0 (2021-10-19)
 ### Feature
 * **Sales Order:** Add contract print template (closes #34) ([`ea1ea77`](https://github.com/vrslev/comfort/commit/ea1ea777c5fc92ba62fa8aaf3a70aa7a351a29d9))
