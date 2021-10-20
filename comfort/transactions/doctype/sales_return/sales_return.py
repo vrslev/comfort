@@ -197,11 +197,19 @@ class SalesReturn(Return):
             To Deliver:  "Reserved Actual"    -> "Available Actual"    (change Purchase Receipt behavior)
             Delivered:   "Reserved Actual"    -> "Available Actual"    (change Sales Receipt behavior)
         """
+        if self._voucher.delivery_status not in (
+            "Purchased",
+            "To Deliver",
+            "Delivered",
+        ):
+            return
+
         stock_types = {
             "Purchased": ("Reserved Purchased", "Available Purchased"),
             "To Deliver": ("Reserved Actual", "Available Actual"),
             "Delivered": ("Reserved Actual", "Available Actual"),
         }[self._voucher.delivery_status]
+
         create_stock_entry(
             self.doctype, self.name, stock_types[0], self.items, reverse_qty=True
         )

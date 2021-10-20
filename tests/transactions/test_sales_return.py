@@ -336,11 +336,16 @@ def test_sales_return_make_stock_entries_create(
     assert entry_with_second_type
 
 
-def test_sales_return_make_stock_entries_not_create(sales_return: SalesReturn):
-    sales_return._voucher.delivery_status = "Some Random Delivery Status"  # type: ignore
+@pytest.mark.parametrize(
+    "delivery_status", ("", "To Purchase", None, "Some Random Delivery Status")
+)
+def test_sales_return_make_stock_entries_not_create(
+    sales_return: SalesReturn, delivery_status: str
+):
+    sales_return._voucher.delivery_status = delivery_status  # type: ignore
     sales_return.db_insert()
-    with pytest.raises(KeyError):
-        sales_return._make_stock_entries()
+    sales_return._make_stock_entries()
+    assert len(get_all(StockEntry)) == 0
 
 
 @pytest.mark.parametrize(
