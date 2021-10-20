@@ -3,6 +3,13 @@
 
 <!--next-version-placeholder-->
 
+## v0.16.0 (2021-10-20)
+### Feature
+* **Sales Order:** Add pending amount to pickup order msg ([`3b17b50`](https://github.com/vrslev/comfort/commit/3b17b50811d750caf0bdf1900798dac8dfbdb856))
+
+### Fix
+* Some translations appearance ([`108306a`](https://github.com/vrslev/comfort/commit/108306a1a791c3007c86c03277df422d3c30b9a3))
+
 ## v0.15.3 (2021-10-20)
 ### Fix
 * **Purchase Order:** Fetch items for submitted Sales Orders before submit ([`ed27e96`](https://github.com/vrslev/comfort/commit/ed27e96a6a737016e35bd7665b5ca0454112de0a))
