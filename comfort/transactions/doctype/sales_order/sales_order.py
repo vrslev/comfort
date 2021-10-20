@@ -711,7 +711,6 @@ class SalesOrder(TypedDocument):
         for item in self.items:
             item.qty -= new_counter[item.item_code]
             del new_counter[item.item_code]
-        self.edit_commission = True
 
         doc = new_doc(SalesOrder)
         doc.extend(
@@ -723,8 +722,9 @@ class SalesOrder(TypedDocument):
             ],
         )
         doc.customer = self.customer
+        doc.commission = self.commission
+        self.edit_commission = doc.edit_commission = True
         doc.validate()
-        doc.edit_commission = True
 
         self.save()
         doc.save()

@@ -1130,7 +1130,7 @@ def test_split_order(sales_order: SalesOrder):
     sales_order.extend(
         "items",
         [
-            {"item_code": child.item_code, "qty": child.qty}
+            {"item_code": child.item_code, "qty": 30}
             for child in sales_order.child_items
         ],
     )
@@ -1153,7 +1153,7 @@ def test_split_order(sales_order: SalesOrder):
     assert count_qty(new_doc.items) == count_qty(
         (SimpleNamespace(**items_to_split[0]),)
     )
-    assert new_doc.commission
+    assert new_doc.commission == sales_order.commission
     assert new_doc.edit_commission == True
 
 
