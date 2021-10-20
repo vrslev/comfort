@@ -3,6 +3,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.15.2 (2021-10-20)
+### Fix
+* **Sales Order:** Cancel orders linked to cancelled PO ([`9093458`](https://github.com/vrslev/comfort/commit/909345855ab0ad1a0fe671919d9df5f60e549c5b))
+* **Purchase Order:** Include Sales Orders linked to cancelled Purchase Orders in query ([`ed1b58a`](https://github.com/vrslev/comfort/commit/ed1b58a030d6facd9fe4e14957fe5eb0c0fa706f))
+* **Sales Order:** Not In PO filter was showing orders in cancelled PO ([`b9506af`](https://github.com/vrslev/comfort/commit/b9506afa340d56ae6b3b4de81b205c3567a3bd31))
+
 ## v0.15.1 (2021-10-20)
 ### Fix
 * **Sales Order:** Cancel after cancelling Purchase Order ([`523e890`](https://github.com/vrslev/comfort/commit/523e89087715ba25643db3d9a78f77a201cf4949))
