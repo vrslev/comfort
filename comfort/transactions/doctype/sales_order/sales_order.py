@@ -145,11 +145,10 @@ class SalesOrder(TypedDocument):
 
         payload = {"voucher_type": self.doctype, "voucher_no": self.name}
 
-        for payment in get_all(Payment, payload):
-            get_doc(Payment, payment.name).cancel()
-
-        for receipt in get_all(Receipt, payload):
-            get_doc(Receipt, receipt.name).cancel()
+        for doctype in Payment, Receipt:
+            for doc in get_all(doctype, filters=payload, fields=("name", "docstatus")):
+                if doc.docstatus != 2:
+                    get_doc(doctype, doc.name).cancel()
 
     def before_update_after_submit(self):  # pragma: no cover
         self._validate_services_not_changed()
