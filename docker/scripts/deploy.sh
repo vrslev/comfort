@@ -2,6 +2,13 @@ set -e
 set -x
 
 docker system prune -a -f
+
+LOCAL_VERSION=$(awk -F = "/COMFORT_VERSION/{ print $2 }" .env)
+if [ LOCAL_VERSION = COMFORT_VERSION ]; then
+  echo "No release should be made"
+  exit 0
+fi;
+
 docker-compose pull
 docker-compose up -d --force-recreate --no-build --remove-orphans
 
