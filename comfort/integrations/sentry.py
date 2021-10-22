@@ -43,7 +43,6 @@ def _init_sentry():  # pragma: no cover
         dsn=info["dsn"],
         release=info["release"],
         integrations=[RedisIntegration(), RqIntegration()],
-        traces_sample_rate=1.0,
         ignore_errors=[
             redis.exceptions.ConnectionError,
             pymysql.err.OperationalError,

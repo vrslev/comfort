@@ -9,7 +9,6 @@ export function init_sentry() {
         dsn: r.message.sentry_dsn,
         release: r.message.release,
         integrations: [new Integrations.BrowserTracing()],
-        tracesSampleRate: 1.0,
       });
       if (frappe.session.user_email) {
         setUser({ email: frappe.session.user_email });
