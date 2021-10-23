@@ -62,6 +62,25 @@ comfort.SalesOrderController = frappe.ui.form.Controller.extend({
   },
 
   async setup_buttons() {
+    // Add Open in VK button
+    let label = __("Open in VK");
+    let btn = this.frm.custom_buttons[label];
+    let response = await frappe.db.get_value(
+      "Customer",
+      this.frm.doc.customer,
+      "vk_url"
+    );
+    let msg = await response.message;
+
+    if (msg.vk_url) {
+      if (!btn) {
+        btn = this.frm.add_custom_button(label, () => {});
+      }
+      $(btn).attr("onclick", `window.open("${msg.vk_url}");`);
+    } else if (btn) {
+      btn.hide();
+    }
+
     if (
       !this.frm.is_new() &&
       this.frm.doc.docstatus != 2 &&
@@ -258,7 +277,7 @@ comfort.SalesOrderController = frappe.ui.form.Controller.extend({
 
     if (
       !this.frm.is_new() &&
-      this.frm.doc.docstatus == 0 &&
+      this.frm.doc.delivery_status == "To Purchase" &&
       !this.frm.doc.from_available_stock
     ) {
       this.frm.add_custom_button(__("Check availability"), () => {
@@ -291,7 +310,7 @@ comfort.SalesOrderController = frappe.ui.form.Controller.extend({
       }
     }
 
-    let label = __("Fetch items specs");
+    label = __("Fetch items specs");
     if (
       !this.frm.is_new() &&
       this.frm.doc.docstatus == 0 &&
@@ -499,21 +518,6 @@ comfort.SalesOrderController = frappe.ui.form.Controller.extend({
         btn.addClass("hidden");
       }
     }
-    // Add Open in VK button
-    frappe.db
-      .get_value("Customer", this.frm.doc.customer, "vk_url")
-      .then((r) => {
-        let label = __("Open in VK");
-        if (r.message && r.message.vk_url) {
-          var btn = this.frm.add_custom_button(label, () => {});
-          $(btn).attr("onclick", `window.open("${r.message.vk_url}");`);
-        } else {
-          btn = this.frm.custom_buttons[label];
-          if (btn) {
-            btn.hide();
-          }
-        }
-      });
   },
 
   setup_quick_add_items() {
