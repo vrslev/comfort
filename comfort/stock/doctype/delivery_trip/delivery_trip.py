@@ -33,6 +33,7 @@ from ..delivery_stop.delivery_stop import DeliveryStop
 
 class DeliveryTrip(TypedDocument):
     stops: list[DeliveryStop]
+    weight: float
     status: Literal["Draft", "In Progress", "Completed", "Cancelled"]
 
     def before_insert(self):  # pragma: no cover
@@ -49,6 +50,7 @@ class DeliveryTrip(TypedDocument):
     def validate(self):  # pragma: no cover
         self._validate_delivery_statuses_in_orders()
         self.update_sales_orders_from_db()
+        self._get_weight()
 
     def _validate_delivery_statuses_in_orders(self):
         orders = get_all(
@@ -112,6 +114,14 @@ class DeliveryTrip(TypedDocument):
             stop.city = customer.city
             stop.phone = customer.phone
 
+    def _get_weight(self):
+        v: list[Any] = get_all(
+            SalesOrder,
+            fields="SUM(total_weight) as weight",
+            filters={"name": ("in", (s.sales_order for s in self.stops))},
+        )
+        self.weight = v[0].weight
+
     def set_status(self):
         docstatus_to_status_map: dict[
             int, Literal["Draft", "In Progress", "Cancelled"]
@@ -137,11 +147,13 @@ class DeliveryTrip(TypedDocument):
             "form_url": get_url_to_form("Delivery Trip", self.name),
             "doctype": _(self.doctype),
             "docname": self.name,
+            "weight": self.weight,
             "stops": [],
         }
 
         stops: list[dict[str, Any]] = []
         for stop in self.stops:
+            doc = get_doc(SalesOrder, stop.sales_order)
             stops.append(
                 {
                     "customer": stop.customer,
@@ -152,7 +164,8 @@ class DeliveryTrip(TypedDocument):
                     "address": stop.address,
                     "pending_amount": stop.pending_amount,
                     "details": stop.details,
-                    "items_": _get_items_for_order(stop.sales_order),
+                    "items_": _get_items_for_order(doc),
+                    "weight": doc.total_weight,
                 }
             )
         context["stops"] = stops
@@ -205,15 +218,14 @@ def _make_route_url(city: str | None, address: str | None):
     return url + urlencode({"text": text})
 
 
-def _get_items_for_order(sales_order_name: str):
-    doc = get_doc(SalesOrder, sales_order_name)
+def _get_items_for_order(sales_order: SalesOrder):
     return [
         {
             "item_code": format_item_code(item.item_code),
             "qty": item.qty,
             "item_name": item.item_name,
         }
-        for item in doc.get_items_with_splitted_combinations()
+        for item in sales_order.get_items_with_splitted_combinations()
     ]
 
 

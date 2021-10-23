@@ -1,9 +1,11 @@
-<b><a href="{{form_url}}">{{doctype}} {{docname}}</a></b>
+<b><a href="{{ form_url }}">{{ doctype }} {{ docname }}</a></b>
+<br>
+{{ weight }} кг
 <br>
 ------
 {%- for stop in stops -%}
     <br><br>
-    <b>{{loop.index}}. {{stop.customer}}</b>
+    <b>{{ loop.index }}. {{ stop.customer }}</b>
     {% if stop.delivery_type %}
         ({{ _(stop.delivery_type).lower() }}
         {%- if stop.installation -%}
@@ -12,20 +14,22 @@
         )
     {% endif %}
     <br>
-    {{stop.phone}}
+    {{ stop.phone }}
     <br>
-    <a href="{{stop.route_url}}">{{stop.address}}</a>
+    <a href="{{ stop.route_url }}">{{ stop.address }}</a>
     {% if stop.pending_amount > 0 %}
         <br>
-        {{stop.pending_amount}} ₽
+        {{ stop.pending_amount }} ₽
     {% endif %}
     {% if stop.details %}
         <br>
         {{ stop.details }}
     {% endif %}
     <br>
+    {{ stop.weight }} кг
+    <br>
     {%- for item in stop.items_ -%}
         <br>
-        &nbsp;&nbsp;&nbsp;— {{item.item_code}} ⨉ {{item.qty}} шт ({{item.item_name}})
+        &nbsp;&nbsp;&nbsp;— {{ item.item_code }} ⨉ {{ item.qty }} шт ({{ item.item_name }})
     {%- endfor -%}
 {%- endfor -%}

@@ -71,6 +71,29 @@ def test_delivery_trip_update_sales_orders_from_db(
     assert bool(stop.installation) == services_resp["installation"]
 
 
+def test_get_weight_non_zero(delivery_trip: DeliveryTrip, sales_order: SalesOrder):
+    sales_order.total_weight = 1500
+    sales_order.db_update()
+
+    doc = new_doc(SalesOrder)
+    doc.__newname = "test"  # type: ignore
+    doc.set_new_name()
+    doc.total_weight = 1000
+    doc.db_insert()
+
+    delivery_trip.append("stops", {"sales_order": doc.name})
+
+    delivery_trip._get_weight()
+    assert delivery_trip.weight == 2500
+
+
+def test_get_weight_is_zero(delivery_trip: DeliveryTrip, sales_order: SalesOrder):
+    sales_order.total_weight = 0
+    sales_order.db_update()
+    delivery_trip._get_weight()
+    assert delivery_trip.weight == 0.0
+
+
 @pytest.mark.parametrize(
     ("docstatus", "expected_status"),
     ((0, "Draft"), (1, "In Progress"), (2, "Cancelled")),
@@ -121,14 +144,20 @@ def test_validate_orders_have_delivery_services_raises_on_no_delivery(
 
 def test_get_template_context(delivery_trip: DeliveryTrip):
     delivery_trip.set_new_name()
+    delivery_trip.update_sales_orders_from_db()
+    delivery_trip._get_weight()
 
     context = delivery_trip._get_template_context()
+
     assert context["form_url"] == get_url_to_form("Delivery Trip", delivery_trip.name)
+    assert context["weight"] == delivery_trip.weight
     assert context["doctype"] == "Delivery Trip"
     assert context["docname"] == delivery_trip.name
 
     context_stop = context["stops"][0]
     doc_stop = delivery_trip.stops[0]
+    doc = get_doc(SalesOrder, doc_stop.sales_order)
+
     assert context_stop["customer"] == doc_stop.customer
     assert context_stop["delivery_type"] == doc_stop.delivery_type
     assert context_stop["installation"] == doc_stop.installation
@@ -137,11 +166,14 @@ def test_get_template_context(delivery_trip: DeliveryTrip):
     assert context_stop["address"] == doc_stop.address
     assert context_stop["pending_amount"] == doc_stop.pending_amount
     assert context_stop["details"] == doc_stop.details
-    assert context_stop["items_"] == _get_items_for_order(doc_stop.sales_order)
+    assert context_stop["items_"] == _get_items_for_order(doc)
+    assert context_stop["weight"] == doc.total_weight
 
 
 def test_render_telegram_message(delivery_trip: DeliveryTrip):
     delivery_trip.set_new_name()
+    delivery_trip._get_weight()
+
     msg = delivery_trip.render_telegram_message()
     assert msg is not None
     assert "telegram_template.j2" not in msg
