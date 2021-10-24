@@ -55,11 +55,32 @@
         {{ add_table_row(loop.index, item, None)}}
       {% endfor %}
 
-      {% for po_sales_order in doc.sales_orders %}
+      {% for po_sales_order in doc.sales_orders | sort(attribute="customer") %}
         {% set sales_order = frappe.get_doc("Sales Order", po_sales_order.sales_order_name) %}
-        {{ add_table_row(None, None, sales_order.customer) }}
+
+        {% set not_closed_orders = frappe.get_all(
+          "Sales Order",
+          filters={
+            "delivery_status": "To Deliver",
+            "customer": sales_order.customer,
+            "name": ("!=", sales_order.name),
+          }
+        ) | list %}
+
+        {% if not_closed_orders %}
+          {% set customer = sales_order.customer +
+            "<p style='font-size: small; font-weight: normal; margin-top: -0.5%'>Незавершённые заказы: " +
+            not_closed_orders | map(attribute="name") | join(", ") +
+            "</p>"
+          %}
+        {% else %}
+          {% set customer = sales_order.customer %}
+        {% endif %}
+
+        {{ add_table_row(None, None, customer) }}
+
         {% for item in sales_order.get_items_with_splitted_combinations() %}
-          {{ add_table_row(loop.index, item, sales_order.customer)}}
+          {{ add_table_row(loop.index, item, None)}}
         {% endfor %}
       {% endfor %}
     </tbody>
