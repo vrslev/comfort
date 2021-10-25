@@ -500,3 +500,7 @@ Search for {0},Искать {0}
 You haven't created a {0} yet,Ещё нет документов {0}
 Create your first {0},Создайте первый документ {0}
 Add a Filter,Добавить фильтр
+Configure Columns,Настроить столбцы
+Column Width,Ширина столбца
+Add / Remove Columns,Добавить/убрать столбцы
+The total column width cannot be more than 10.,Общее количество ширин столбцов не может быть больше 10
