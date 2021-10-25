@@ -238,8 +238,8 @@ class SalesReturn(Return):
         if return_all_items:
             self._voucher.reload()
         else:
-            self._voucher.db_update()
-            self._voucher.update_children()
+            self._voucher.flags.ignore_validate_update_after_submit = True
+            self._voucher.save()
 
         self._make_delivery_gl_entries()
         self._make_stock_entries()
