@@ -1,5 +1,6 @@
-docker/*Dockerfile
-docker/.env
 .github
 .vscode
+docker/*Dockerfile
+docker/.env
+node_modules
 tests
