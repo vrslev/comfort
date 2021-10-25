@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 import json
-from copy import deepcopy
+from copy import copy, deepcopy
+from datetime import datetime
 from typing import Any, Callable
 
 import ikea_api_wrapped
@@ -82,6 +83,31 @@ def test_update_items_to_sell_from_db(purchase_order: PurchaseOrder):
         assert i.rate == rate
         assert i.weight == weight
         assert i.amount == rate * i.qty
+
+
+def test_clear_no_copy_fields_for_amended_true(purchase_order: PurchaseOrder):
+    purchase_order.amended_from = "Октябрь-1"
+    purchase_order._clear_no_copy_fields_for_amended()
+    assert purchase_order.posting_date is None
+    assert purchase_order.order_confirmation_no is None
+    assert purchase_order.schedule_date is None
+    assert purchase_order.delivery_cost == 0
+
+
+def test_clear_no_copy_fields_for_amended_false(purchase_order: PurchaseOrder):
+    mydate = datetime.now()
+    order_confirmation_no = "111111111"
+    delivery_cost = 1000
+    purchase_order.amended_from = None
+    purchase_order.posting_date = copy(mydate)
+    purchase_order.order_confirmation_no = copy(order_confirmation_no)
+    purchase_order.schedule_date = copy(mydate)
+    purchase_order.delivery_cost = copy(delivery_cost)
+    purchase_order._clear_no_copy_fields_for_amended()
+    assert purchase_order.posting_date == mydate
+    assert purchase_order.order_confirmation_no == order_confirmation_no
+    assert purchase_order.schedule_date == mydate
+    assert purchase_order.delivery_cost == delivery_cost
 
 
 def test_calculate_items_to_sell_cost(purchase_order: PurchaseOrder):

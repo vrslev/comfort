@@ -51,8 +51,8 @@ class PurchaseOrder(TypedDocument):
 
     delivery_options: list[PurchaseOrderDeliveryOption] = []
     cannot_add_items: str | None
-    posting_date: datetime
-    order_confirmation_no: str
+    posting_date: datetime | None
+    order_confirmation_no: str | None
     schedule_date: datetime | None
     total_amount: int
     sales_orders_cost: int
@@ -62,6 +62,7 @@ class PurchaseOrder(TypedDocument):
     sales_orders: list[PurchaseOrderSalesOrder] = []
     items_to_sell: list[PurchaseOrderItemToSell] = []
     status: Literal["Draft", "To Receive", "Completed", "Cancelled"]
+    amended_from: str | None
 
     #########
     # Hooks #
@@ -113,6 +114,7 @@ class PurchaseOrder(TypedDocument):
 
     def before_insert(self):
         self.status = "Draft"
+        self._clear_no_copy_fields_for_amended()
 
     def before_save(self):
         self.delivery_options = []
@@ -162,6 +164,15 @@ class PurchaseOrder(TypedDocument):
             )
             item.item_name, item.rate, item.weight = item_values
             item.amount = item.qty * item.rate
+
+    def _clear_no_copy_fields_for_amended(self):
+        if not self.amended_from:
+            return
+
+        self.posting_date = None
+        self.order_confirmation_no = None
+        self.schedule_date = None
+        self.delivery_cost = 0
 
     def _calculate_items_to_sell_cost(self):
         self.items_to_sell_cost = sum(item.amount for item in self.items_to_sell)
