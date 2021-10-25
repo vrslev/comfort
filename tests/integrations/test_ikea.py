@@ -4,9 +4,11 @@ from typing import Any
 import ikea_api_wrapped
 import pytest
 from ikea_api import IkeaApi
+from ikea_api.errors import OrderCaptureError
 from ikea_api_wrapped.types import NoDeliveryOptionsAvailableError, ParsedItem
 
 import comfort.integrations.ikea
+import frappe
 from comfort import count_qty, counters_are_same, get_all, get_doc, get_value
 from comfort.comfort_core.doctype.ikea_settings.ikea_settings import (
     IkeaSettings,
@@ -55,12 +57,12 @@ def test_get_delivery_services_no_zip_code(ikea_settings: IkeaSettings):
 
 
 @pytest.mark.usefixtures("ikea_settings")
-def test_get_delivery_services_no_error(monkeypatch: pytest.MonkeyPatch):
+def test_get_delivery_services_ok(monkeypatch: pytest.MonkeyPatch):
     patch_get_delivery_services(monkeypatch)
     assert get_delivery_services({"14251253": 1}) == mock_delivery_services
 
 
-def test_get_delivery_services_error(
+def test_get_delivery_services_no_delivery_options(
     monkeypatch: pytest.MonkeyPatch, ikea_settings: IkeaSettings
 ):
     def new_mock_delivery_services(api: IkeaApi, items: Any, zip_code: Any):
@@ -68,10 +70,46 @@ def test_get_delivery_services_error(
         assert zip_code == ikea_settings.zip_code
         raise NoDeliveryOptionsAvailableError
 
+    frappe.message_log = []
+
+    monkeypatch.setattr(
+        ikea_api_wrapped, "get_delivery_services", new_mock_delivery_services
+    )
+
+    assert get_delivery_services({"14251253": 1}) is None
+    assert "No available delivery options" in str(frappe.message_log)  # type: ignore
+
+
+def test_get_delivery_services_internal_ikea_error(
+    monkeypatch: pytest.MonkeyPatch, ikea_settings: IkeaSettings
+):
+    def new_mock_delivery_services(api: IkeaApi, items: Any, zip_code: Any):
+        assert api._token == get_guest_api()._token
+        assert zip_code == ikea_settings.zip_code
+        raise OrderCaptureError({"message": "Error while connecting to ISOM"})
+
     monkeypatch.setattr(
         ikea_api_wrapped, "get_delivery_services", new_mock_delivery_services
     )
     assert get_delivery_services({"14251253": 1}) is None
+    assert "Internal IKEA error, try again" in str(frappe.message_log)  # type: ignore
+
+
+def test_get_delivery_services_other_error(
+    monkeypatch: pytest.MonkeyPatch, ikea_settings: IkeaSettings
+):
+    exp_arg = {"message": "some different error"}
+
+    def new_mock_delivery_services(api: IkeaApi, items: Any, zip_code: Any):
+        assert api._token == get_guest_api()._token
+        assert zip_code == ikea_settings.zip_code
+        raise OrderCaptureError(exp_arg)
+
+    monkeypatch.setattr(
+        ikea_api_wrapped, "get_delivery_services", new_mock_delivery_services
+    )
+    with pytest.raises(OrderCaptureError, match=str(exp_arg)):
+        assert get_delivery_services({"14251253": 1}) is None
 
 
 @pytest.mark.parametrize("authorize", (True, False))

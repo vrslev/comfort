@@ -5,7 +5,7 @@ from typing import Any, TypedDict
 
 import ikea_api_wrapped
 import sentry_sdk
-from ikea_api.errors import ItemFetchError
+from ikea_api.errors import ItemFetchError, OrderCaptureError
 from ikea_api_wrapped.types import NoDeliveryOptionsAvailableError, ParsedItem
 
 import frappe
@@ -43,6 +43,15 @@ def get_delivery_services(items: dict[str, int]):
         return ikea_api_wrapped.get_delivery_services(api, items, zip_code)
     except NoDeliveryOptionsAvailableError:
         frappe.msgprint(_("No available delivery options"), alert=True, indicator="red")
+    except OrderCaptureError as exc:
+        if isinstance(
+            exc.args[0], dict
+        ) and "Error while connecting to ISOM" in exc.args[0].get("message", ""):
+            frappe.msgprint(
+                _("Internal IKEA error, try again"), alert=True, indicator="red"
+            )
+        else:
+            raise
 
 
 def add_items_to_cart(items: dict[str, int], authorize: bool):
