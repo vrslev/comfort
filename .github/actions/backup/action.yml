@@ -33,7 +33,7 @@ runs:
   using: "composite"
   steps:
     - name: Copy files
-      uses: appleboy/scp-action@v0.1.1
+      uses: appleboy/scp-action@v0.1.2
       with:
         host: ${{ inputs.host }}
         username: ${{ inputs.username }}
