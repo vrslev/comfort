@@ -44,9 +44,15 @@ def _init_sentry():  # pragma: no cover
         release=info["release"],
         integrations=[RedisIntegration(), RqIntegration()],
         ignore_errors=[
+            # Queue and db connection errors happen on system updates
             redis.exceptions.ConnectionError,
             pymysql.err.OperationalError,
+            # All validation errors supposed to be for user's notice; they are not system errors
             frappe.exceptions.ValidationError,
+            # If somebody entered wrong credentials, it is not system error
+            frappe.exceptions.AuthenticationError,
+            # When running in Redis Queue sometimes connection resets
+            ConnectionResetError,
         ],
     )
     sentry_sdk.set_user({"email": _get_user_email()})
