@@ -3,6 +3,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.18.1 (2021-10-25)
+### Fix
+* Revert frappe update ([`1017186`](https://github.com/vrslev/comfort/commit/1017186b02fe64e2707ef14b30631f7d8b204a49))
+
 ## v0.18.0 (2021-10-25)
 ### Feature
 * **Purchase Order:** Improve print format ([`33e1206`](https://github.com/vrslev/comfort/commit/33e12067e1a97c7471b4b8f1a8d7728a514a2017))
