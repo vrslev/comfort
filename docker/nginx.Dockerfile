@@ -1,5 +1,5 @@
 ARG FRAPPE_VERSION
-FROM node:14-buster-slim as builder
+FROM node:14-bullseye-slim as builder
 
 RUN apt-get update \
   && apt-get install --no-install-recommends -y \
@@ -13,7 +13,7 @@ RUN mkdir -p sites/assets/frappe sites/assets/comfort apps \
   && echo "frappe\ncomfort" >> sites/apps.txt
 
 ARG FRAPPE_VERSION
-RUN git clone --depth 1 -b ${FRAPPE_VERSION} https://github.com/frappe/frappe apps/frappe
+RUN git clone --depth 1 -b $FRAPPE_VERSION https://github.com/frappe/frappe apps/frappe
 
 COPY . apps/comfort
 
@@ -39,7 +39,7 @@ RUN cd apps \
   && chmod +x /rsync
 
 
-FROM frappe/frappe-nginx:${FRAPPE_VERSION}
+FROM frappe/frappe-nginx:$FRAPPE_VERSION
 
 COPY --from=builder /home/frappe/frappe-bench/sites/ /var/www/html/
 COPY --from=builder /rsync /rsync
