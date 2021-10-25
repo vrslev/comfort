@@ -40,8 +40,7 @@ treeviews = ["Account"]
 
 global_search_doctypes = _get_global_search_doctypes()
 
-# Keep 13.2.1 until deprecation warnings disappear and migrations work
-reqd_frappe_version = "v13.2.1"
+reqd_frappe_version = "v13.13.0"
 
 scheduler_events = {
     "weekly": [
