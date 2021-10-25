@@ -13,7 +13,7 @@ setup(
     package_data={"": ["*.md", "*.json", "*.txt", "*.css", "*.csv", "*.html", "*.js"]},
     zip_safe=False,
     install_requires=[
-        "ikea-api-wrapped==0.4.1",
+        "ikea-api-wrapped==0.4.2",
         "python-telegram-bot==13.7",
         "pydantic==1.8.2",
         "sentry-sdk==1.4.3",
