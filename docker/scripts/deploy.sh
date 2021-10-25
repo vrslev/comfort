@@ -3,7 +3,7 @@ set -x
 
 docker system prune -a -f
 
-LOCAL_VERSION=$(awk -F'=' '/COMFORT_VERSION/{ print $2 }' .env)
+LOCAL_VERSION=$(docker-compose images | grep -P -o -m 1 -e "comfort-worker.*" | grep -P -o -e "v[^ ]+")
 if [ $LOCAL_VERSION = $COMFORT_VERSION ]; then
   echo "No release should be made"
   exit 0
