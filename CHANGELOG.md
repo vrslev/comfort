@@ -9,7 +9,7 @@
 
 ### Fix
 * **Sales Order:** Allow to check availability if delivery status is "To  Purchase" and docstatus is 1; fix "Open In VK" btn appearance ([`f500565`](https://github.com/vrslev/comfort/commit/f500565ad5a34924bba81b83aeb312693e1ee741))
-* **Sentry:** Remove perfomance monitoring ([`ea0beff`](https://github.com/vrslev/comfort/commit/ea0beffa9a463a0db9cd04c4cdd4103e962a80df))
+* **Sentry:** Remove performance monitoring ([`ea0beff`](https://github.com/vrslev/comfort/commit/ea0beffa9a463a0db9cd04c4cdd4103e962a80df))
 
 ## v0.16.1 (2021-10-20)
 ### Fix
