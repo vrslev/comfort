@@ -3,6 +3,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.18.2 (2021-10-25)
+### Fix
+* Frappe version ([`7b2d9c7`](https://github.com/vrslev/comfort/commit/7b2d9c7b9f784cff8e03ee4d2fe9564b5166a7b6))
+
 ## v0.18.1 (2021-10-25)
 ### Fix
 * Revert frappe update ([`1017186`](https://github.com/vrslev/comfort/commit/1017186b02fe64e2707ef14b30631f7d8b204a49))
