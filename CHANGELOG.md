@@ -3,6 +3,16 @@
 
 <!--next-version-placeholder-->
 
+## v0.18.0 (2021-10-25)
+### Feature
+* **Purchase Order:** Improve print format ([`33e1206`](https://github.com/vrslev/comfort/commit/33e12067e1a97c7471b4b8f1a8d7728a514a2017))
+
+### Fix
+* **IKEA:** Handle internal Order Capture error (closes #62) ([`b11b81f`](https://github.com/vrslev/comfort/commit/b11b81f44d338bd70f97bc725b50a392209e8531))
+* **Sentry:** Don't capture connection reset in rq and auth fail ([`bc47e7a`](https://github.com/vrslev/comfort/commit/bc47e7a6bbd0f923bbff52dfb83da51be7a29e1f))
+* **Purchase Order:** Clear no-copy fields on amend ([`ff83c73`](https://github.com/vrslev/comfort/commit/ff83c73ef4328d6f85477edf88c768b169f06fb8))
+* **Sales Return:** Save Sales Order with validations ([`62146dc`](https://github.com/vrslev/comfort/commit/62146dc76b4be9948781a753dd8bb32697a8e73d))
+
 ## v0.17.0 (2021-10-23)
 ### Feature
 * **Delivery Trip:** Calculate total weight ([`835e037`](https://github.com/vrslev/comfort/commit/835e037e91c0e8235c303f384962247bc072d673))
