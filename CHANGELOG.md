@@ -3,6 +3,11 @@
 
 <!--next-version-placeholder-->
 
+## v0.18.3 (2021-10-25)
+### Fix
+* **UI:** Translations for upcoming changes (https://github.com/frappe/frappe/pull/14573) ([`d21dd58`](https://github.com/vrslev/comfort/commit/d21dd581cd8fe2cb57111f5f2ff2477882ecd056))
+* **IKEA:** Add missing translation ([`9b8bfcb`](https://github.com/vrslev/comfort/commit/9b8bfcb3dfed3011ff13f364f50dd568e401dc38))
+
 ## v0.18.2 (2021-10-25)
 ### Fix
 * Frappe version ([`7b2d9c7`](https://github.com/vrslev/comfort/commit/7b2d9c7b9f784cff8e03ee4d2fe9564b5166a7b6))
