@@ -86,7 +86,7 @@ async function show_add_row_dialog() {
 
           frappe.show_alert({
             message: __("Items added"),
-            indicator: "Green",
+            indicator: "green",
           });
           cur_frm.dirty();
           dialog.hide();
