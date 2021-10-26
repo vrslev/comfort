@@ -66,6 +66,7 @@ Customer,Клиент
 Current cart in your IKEA account will be replaced with new one. Proceed?,Текущая корзина в вашем аккаунте будет заменена новой. Продолжить?
 Customer Group,Группа клиентов
 Customer Group Name,Название группы клиентов
+Current Options,Текущие способы
 Debit,Дебет
 Default Accounts,Счета по умолчанию
 Delivered,Доставлено
@@ -81,6 +82,7 @@ Delivery Trip completed,Маршрут завершён
 Delivery Type,Тип доставки
 Delivery to Apartment,Доставка до квартиры
 Delivery to Entrance,Доставка до подъезда
+Delivery Options updated,Способы доставки обновлены
 Discount,Скидка
 Edit Commission,Изменить комиссию
 Endpoint,Адрес
@@ -137,6 +139,7 @@ Items added,Товары добавленны
 Items to Sell,Товары на продажу
 Items to Sell Cost,Стоимость товаров на продажу
 Loading items into cart...,Загрузка товаров в корзину...
+Last Options,Последние способы
 Margin,Прибыль
 Message sent,Сообщение отправлено
 My Profile,Мой профиль
@@ -156,6 +159,7 @@ Old Parent,Предыдущий родитель
 Order Confirmation No,Номер подтверждения заказа
 Order is split,Заказ разделён
 Overpaid,Переплачено
+Options Changed,Способы изменились
 Paid,Оплачено
 Paid Amount,Оплаченная сумма
 Paid With Cash,Оплачено наличными
@@ -263,6 +267,8 @@ Voucher,Документ
 Voucher No,Номер документа
 Voucher Type,Тип документа
 Weight,Вес
+Waiting List,Список ожидания
+Waiting List Sales Order,Заказ списка ожидания
 Invalid VK URL,Неверная ссылка VK
 Zip Code,Почтовый индекс
 image,изображение
