@@ -3,6 +3,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.19.0 (2021-10-26)
+### Feature
+* Add Waiting List ([`e24b965`](https://github.com/vrslev/comfort/commit/e24b9654227c2a45d3dff72bc53ffbf787c9575f))
+
 ## v0.18.3 (2021-10-25)
 ### Fix
 * **UI:** Translations for upcoming changes (https://github.com/frappe/frappe/pull/14573) ([`d21dd58`](https://github.com/vrslev/comfort/commit/d21dd581cd8fe2cb57111f5f2ff2477882ecd056))
