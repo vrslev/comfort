@@ -748,6 +748,7 @@ def get_sales_orders_not_in_purchase_order():
     )
     filters = {
         "name": ("not in", (s.sales_order_name for s in po_sales_orders)),
+        "docstatus": ("!=", 2),
         # Frappe makes Select fields with no value "" instead of None
         "from_available_stock": "",
     }

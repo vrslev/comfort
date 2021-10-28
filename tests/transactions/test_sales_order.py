@@ -1233,6 +1233,14 @@ def test_get_sales_orders_not_in_purchase_order_from_available_stock(
     assert new_sales_order.name not in res
 
 
+def test_get_sales_orders_not_in_purchase_order_cancelled(sales_order: SalesOrder):
+    sales_order.docstatus = 2
+    sales_order.db_insert()
+
+    res = get_sales_orders_not_in_purchase_order()
+    assert sales_order.name not in res
+
+
 def test_get_sales_orders_in_purchase_order(purchase_order: PurchaseOrder):
     purchase_order.db_insert()
     purchase_order.update_children()
