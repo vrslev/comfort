@@ -58,6 +58,7 @@ class PurchaseOrder(TypedDocument):
     sales_orders_cost: int
     delivery_cost: int
     total_weight: float
+    total_margin: int
     items_to_sell_cost: int
     sales_orders: list[PurchaseOrderSalesOrder] = []
     items_to_sell: list[PurchaseOrderItemToSell] = []
@@ -189,7 +190,6 @@ class PurchaseOrder(TypedDocument):
         )
         self.sales_orders_cost = res[0][0] or 0
 
-    @frappe.whitelist()
     def _calculate_total_weight(self):
         res: list[list[float]] = frappe.get_all(
             "Sales Order Item",
@@ -215,11 +215,24 @@ class PurchaseOrder(TypedDocument):
             self.sales_orders_cost + self.items_to_sell_cost + self.delivery_cost
         )
 
+    def _calculate_total_margin(self):
+        self.total_margin = (
+            get_all(
+                SalesOrder,
+                filters={
+                    "name": ("in", (o.sales_order_name for o in self.sales_orders))
+                },
+                fields="SUM(margin) as margin",
+            )[0].margin
+            or 0
+        )
+
     def calculate(self):
         self._calculate_items_to_sell_cost()
         self._calculate_sales_orders_cost()
         self._calculate_total_weight()
         self._calculate_total_amount()
+        self._calculate_total_margin()
 
     def get_items_to_sell(
         self, split_combinations: bool
@@ -399,7 +412,8 @@ class PurchaseOrder(TypedDocument):
 
 
 @frappe.whitelist()
-def calculate_total_weight(doc: str):
+def calculate_total_weight_and_total_weight(doc: str):
     purchase_order = PurchaseOrder(json.loads(doc))
     purchase_order._calculate_total_weight()
-    return purchase_order.total_weight
+    purchase_order._calculate_total_margin()
+    return purchase_order.total_weight, purchase_order.total_margin

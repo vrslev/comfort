@@ -439,7 +439,7 @@ function calculate_total_amount() {
 
 frappe.ui.form.on("Purchase Order Sales Order", {
   sales_order_name() {
-    calculate_total_weight().then(() => {
+    calculate_total_weight_and_total_weight().then(() => {
       calculate_sales_orders_cost();
     });
   },
@@ -449,7 +449,7 @@ frappe.ui.form.on("Purchase Order Sales Order", {
   },
 
   sales_orders_remove() {
-    calculate_total_weight().then(() => {
+    calculate_total_weight_and_total_weight().then(() => {
       calculate_sales_orders_cost();
     });
   },
@@ -465,17 +465,18 @@ function calculate_sales_orders_cost() {
   cur_frm.set_value("sales_orders_cost", sales_orders_cost);
 }
 
-function calculate_total_weight() {
+function calculate_total_weight_and_total_weight() {
   // Using custom method because when user removes items or order in bulk
   // everything goes wrong
   return frappe.call({
     method:
-      "comfort.transactions.doctype.purchase_order.purchase_order.calculate_total_weight",
+      "comfort.transactions.doctype.purchase_order.purchase_order.calculate_total_weight_and_total_weight",
     args: {
       doc: cur_frm.doc,
     },
     callback: (r) => {
-      cur_frm.set_value("total_weight", r.message);
+      cur_frm.set_value("total_weight", r.message[0]);
+      cur_frm.set_value("total_margin", r.message[1]);
     },
   });
 }
@@ -486,7 +487,7 @@ frappe.ui.form.on("Purchase Order Item To Sell", {
   },
 
   qty(frm, cdt, cdn) {
-    calculate_total_weight().then(() => {
+    calculate_total_weight_and_total_weight().then(() => {
       calculate_item_amount(cdt, cdn);
     });
   },
@@ -500,11 +501,11 @@ frappe.ui.form.on("Purchase Order Item To Sell", {
   },
 
   weight() {
-    calculate_total_weight();
+    calculate_total_weight_and_total_weight();
   },
 
   items_to_sell_remove() {
-    calculate_total_weight().then(() => {
+    calculate_total_weight_and_total_weight().then(() => {
       calculate_items_to_sell_cost();
     });
   },

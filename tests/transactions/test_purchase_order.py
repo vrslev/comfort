@@ -16,7 +16,7 @@ from comfort.integrations.ikea import FetchItemsResult
 from comfort.transactions import AnyChildItem
 from comfort.transactions.doctype.purchase_order.purchase_order import (
     PurchaseOrder,
-    calculate_total_weight,
+    calculate_total_weight_and_total_weight,
 )
 from comfort.transactions.doctype.purchase_order_delivery_option.purchase_order_delivery_option import (
     PurchaseOrderDeliveryOption,
@@ -226,6 +226,28 @@ def test_calculate_total_amount(purchase_order: PurchaseOrder):
     purchase_order._calculate_total_amount()
     assert purchase_order.total_amount == (
         delivery_cost + items_to_sell_cost + sales_orders_cost
+    )
+
+
+def test_calculate_total_margin_no_sales_order(purchase_order: PurchaseOrder):
+    purchase_order._calculate_total_margin()
+    assert purchase_order.total_margin == 0
+
+
+def test_calculate_total_margin_with_sales_order(purchase_order: PurchaseOrder):
+    purchase_order._calculate_total_margin()
+    assert (
+        purchase_order.total_margin
+        == get_all(
+            SalesOrder,
+            filters={
+                "name": (
+                    "in",
+                    (o.sales_order_name for o in purchase_order.sales_orders),
+                )
+            },
+            fields="SUM(margin) as margin",
+        )[0].margin
     )
 
 
@@ -574,8 +596,14 @@ def test_purchas_order_add_receipt(
     assert called_submit_sales_orders_and_update_statuses
 
 
-def test_purchase_order_calculate_total_weight_frontend(purchase_order: PurchaseOrder):
+def test_purchase_order_calculate_total_weight_and_total_weight_frontend(
+    purchase_order: PurchaseOrder,
+):
     purchase_order.insert()
-    total_weight = calculate_total_weight(purchase_order.as_json())
+    total_weight, total_margin = calculate_total_weight_and_total_weight(
+        purchase_order.as_json()
+    )
     purchase_order._calculate_total_weight()
+    purchase_order._calculate_total_margin()
     assert total_weight == purchase_order.total_weight
+    assert total_margin == purchase_order.total_margin
