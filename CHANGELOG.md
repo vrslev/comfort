@@ -3,6 +3,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.20.0 (2021-10-28)
+### Feature
+* **Purchase Order:** Add `total_margin` field ([`6888eb2`](https://github.com/vrslev/comfort/commit/6888eb275ee01fef84446d2c1069ca14f9eaa4d3))
+
 ## v0.19.1 (2021-10-28)
 ### Fix
 * **Sales Order:** Delivery status for order from available actual stock ([`86f5694`](https://github.com/vrslev/comfort/commit/86f569424b4be4e4f3b93a8265cc5d8ffacb2eaf))
