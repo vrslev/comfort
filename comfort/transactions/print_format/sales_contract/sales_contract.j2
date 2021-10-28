@@ -125,8 +125,31 @@
       <h4>Цена товара и порядок расчётов</h4>
       <ol>
         <li>
-          Цена товара составляет {{ doc.total_amount }} рублей. Цена товара не
-          включает стоимость его доставки в пределах города.
+          Цена товара составляет {{ doc.total_amount }} рублей. Цена товара
+
+          {% set joined_services = doc.services | map(attribute="type") | join %}
+
+          {% if "Delivery" in joined_services or "Installation" in joined_services %}
+            включает в себя
+          {% else %}
+            не включает в себя доставку.
+          {% endif %}
+
+          {% if "Delivery" in joined_services and "Installation" in joined_services %}
+            доставку до
+            {% if "to Apartment" in joined_services %}
+              квартиры
+            {% elif "to Entrance" in joined_services %}
+              подъезда
+            {% endif %}
+              и установку.
+          {% elif "Delivery to Apartment" in joined_services %}
+              доставку до квартиры.
+          {% elif "Delivery to Entrance" in joined_services %}
+              доставку до подъезда.
+          {% elif "Installation" in joined_services %}
+              установку.
+          {% endif %}
         </li>
         <li>Расчеты по договору производятся путем: 100% предоплаты.</li>
         <li>Покупатель оплачивает товар при заключении договора.</li>
