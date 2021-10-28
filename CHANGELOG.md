@@ -3,6 +3,11 @@
 
 <!--next-version-placeholder-->
 
+## v0.19.1 (2021-10-28)
+### Fix
+* **Sales Order:** Delivery status for order from available actual stock ([`86f5694`](https://github.com/vrslev/comfort/commit/86f569424b4be4e4f3b93a8265cc5d8ffacb2eaf))
+* **Sales Order:** Notice about delivery and installation in contracts ([`a882710`](https://github.com/vrslev/comfort/commit/a882710221b3c8d776da60250db31cfe1135a93d))
+
 ## v0.19.0 (2021-10-26)
 ### Feature
 * Add Waiting List ([`e24b965`](https://github.com/vrslev/comfort/commit/e24b9654227c2a45d3dff72bc53ffbf787c9575f))
