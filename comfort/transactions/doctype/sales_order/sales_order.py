@@ -419,16 +419,16 @@ class SalesOrder(TypedDocument):
     def _set_delivery_status(self):
         if self.docstatus == 2:
             status = ""
-        elif self.from_available_stock == "Available Actual":
-            if self.docstatus == 0:
-                status = "To Purchase"
-            else:
-                status = "To Deliver"
         elif doc_exists(
             "Receipt",
             {"voucher_type": self.doctype, "voucher_no": self.name, "docstatus": 1},
         ):
             status = "Delivered"
+        elif self.from_available_stock == "Available Actual":
+            if self.docstatus == 0:
+                status = "To Purchase"
+            else:
+                status = "To Deliver"
         else:
             if purchase_order_name := get_value(
                 "Purchase Order Sales Order",

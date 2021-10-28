@@ -619,13 +619,24 @@ def test_set_delivery_status_with_cancelled_status(sales_order: SalesOrder):
 @pytest.mark.parametrize(
     ("docstatus", "exp_delivery_status"), ((0, "To Purchase"), (1, "To Deliver"))
 )
-def test_set_delivery_status_from_available_actual_stock(
+def test_set_delivery_status_from_available_actual_stock_not_delivered(
     sales_order: SalesOrder, docstatus: int, exp_delivery_status: str
 ):
     sales_order.docstatus = docstatus
     sales_order.from_available_stock = "Available Actual"
     sales_order._set_delivery_status()
     assert sales_order.delivery_status == exp_delivery_status
+
+
+def test_set_delivery_status_from_available_actual_stock_delivered(
+    receipt_sales: Receipt,
+):
+    sales_order = get_doc(SalesOrder, receipt_sales.voucher_no)
+    sales_order.from_available_stock = "Available Actual"
+    receipt_sales.insert()
+    receipt_sales.submit()
+    sales_order._set_delivery_status()
+    assert sales_order.delivery_status == "Delivered"
 
 
 @pytest.mark.parametrize(
