@@ -3,6 +3,14 @@
 
 <!--next-version-placeholder-->
 
+## v0.21.0 (2021-10-28)
+### Feature
+* **Waiting List:** Show message when Sales Order in Purchase Order ([`6b103b1`](https://github.com/vrslev/comfort/commit/6b103b13586a9a8e37a846e72ba0673424c4f012))
+
+### Fix
+* Add Waiting List to global search ([`c6425d1`](https://github.com/vrslev/comfort/commit/c6425d1281a2790c61179062baa2d5d29d202ffa))
+* **Sales Order:** Don't show cancelled orders in Not In PO filter ([`e0b7f24`](https://github.com/vrslev/comfort/commit/e0b7f24571c1185581a55166cc831f1fff680feb))
+
 ## v0.20.0 (2021-10-28)
 ### Feature
 * **Purchase Order:** Add `total_margin` field ([`6888eb2`](https://github.com/vrslev/comfort/commit/6888eb275ee01fef84446d2c1069ca14f9eaa4d3))
