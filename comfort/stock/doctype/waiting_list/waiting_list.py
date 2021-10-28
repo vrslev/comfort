@@ -8,10 +8,21 @@ from types import SimpleNamespace
 from ikea_api_wrapped.types import GetDeliveryServicesResponse, UnavailableItemDict
 
 import frappe
-from comfort import TypedDocument, count_qty, counters_are_same, get_doc, group_by_attr
+from comfort import (
+    TypedDocument,
+    _,
+    count_qty,
+    counters_are_same,
+    get_all,
+    get_doc,
+    group_by_attr,
+)
 from comfort.integrations.ikea import get_delivery_services
 from comfort.stock.doctype.waiting_list_sales_order.waiting_list_sales_order import (
     WaitingListSalesOrder,
+)
+from comfort.transactions.doctype.purchase_order_sales_order.purchase_order_sales_order import (
+    PurchaseOrderSalesOrder,
 )
 from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
 from comfort.transactions.doctype.sales_order_child_item.sales_order_child_item import (
@@ -105,3 +116,20 @@ class WaitingList(TypedDocument):
             return
         self._process_options(items, resp)
         self.save()
+
+    def _show_already_in_po_message(self):
+        sales_orders_in_purchase_order = get_all(
+            PurchaseOrderSalesOrder,
+            filters={
+                "sales_order_name": ("in", (o.sales_order for o in self.sales_orders))
+            },
+            fields=("sales_order_name"),
+        )
+        if sales_orders_in_purchase_order:
+            names = [o.sales_order_name for o in sales_orders_in_purchase_order]
+            frappe.msgprint(
+                _("Sales Orders already in Purchase Order: {}").format(", ".join(names))
+            )
+
+    def before_save(self):
+        self._show_already_in_po_message()

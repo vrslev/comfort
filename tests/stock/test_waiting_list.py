@@ -5,8 +5,10 @@ from types import SimpleNamespace
 
 import pytest
 
+import frappe
 from comfort import count_qty, counters_are_same, get_doc, new_doc
 from comfort.stock.doctype.waiting_list.waiting_list import WaitingList
+from comfort.transactions.doctype.purchase_order.purchase_order import PurchaseOrder
 from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
 from comfort.transactions.doctype.sales_order_child_item.sales_order_child_item import (
     SalesOrderChildItem,
@@ -93,3 +95,21 @@ def test_get_status_for_order(
         )
         == exp_status
     )
+
+
+def test_show_already_in_po_message_in_po(
+    waiting_list: WaitingList, purchase_order: PurchaseOrder
+):
+    purchase_order.insert()
+    frappe.message_log = []
+    waiting_list._show_already_in_po_message()
+    assert (
+        f"Sales Orders already in Purchase Order: {waiting_list.sales_orders[0].sales_order}"
+        in str(frappe.message_log)  # type: ignore
+    )
+
+
+def test_show_already_in_po_message_not_in_po(waiting_list: WaitingList):
+    frappe.message_log = []
+    waiting_list._show_already_in_po_message()
+    assert frappe.message_log == []
