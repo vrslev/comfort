@@ -18,7 +18,7 @@ from frappe.model.meta import Meta
 from frappe.utils import fmt_money, unique
 
 
-def _format_money(money: str | int | float) -> str:  # type: ignore
+def format_money(money: str | int | float) -> str:  # type: ignore
     return fmt_money(money, precision=0) + " ₽"
 
 
@@ -28,19 +28,19 @@ def _format_weight(weight: int | float):
 
 def _format_item_query(result: list[Any]):  # pragma: no cover
     if result[2]:
-        result[2] = _format_money(result[2])
+        result[2] = format_money(result[2])
 
 
 def _format_purchase_order_query(result: list[Any]):  # pragma: no cover
     if result[2]:
-        result[2] = _format_money(result[2])
+        result[2] = format_money(result[2])
     if result[3]:
         result[3] = _format_weight(result[3])
 
 
 def _format_sales_order_query(result: list[Any]):  # pragma: no cover
     if result[3]:
-        result[3] = _format_money(result[3])
+        result[3] = format_money(result[3])
 
 
 _QUERY_FORMATTERS = {

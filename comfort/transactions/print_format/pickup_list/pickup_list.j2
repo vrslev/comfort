@@ -16,7 +16,7 @@
     {% endif %}
 
     {% if doc.total_amount %}
-    {{ _("Total Amount") }}: {{ doc.total_amount }} ₽
+    {{ _("Total Amount") }}: {{ format_money(doc.total_amount) }}
     {% endif %}
   </p>
 </div>
@@ -53,7 +53,7 @@
           <td style="width: 10%">{{ item.qty | int }}</td>
 
           <td style="width: 10%">
-            {{ item.rate | int or frappe.db.get_value("Item", item.item_code, "rate") | int }} ₽
+            {{ format_money(item.rate or frappe.db.get_value("Item", item.item_code, "rate")) }}
           </td>
 
           <td style="width: 7%">

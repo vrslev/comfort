@@ -1,10 +1,10 @@
-from comfort.queries import _format_money, _format_weight
+from comfort.queries import _format_weight, format_money
 
 
 def test_format_money():
-    assert _format_money("1") == "1 ₽"
-    assert _format_money(1) == "1 ₽"
-    assert _format_money(1.0) == "1 ₽"
+    assert format_money("1") == "1 ₽"
+    assert format_money(1) == "1 ₽"
+    assert format_money(1.0) == "1 ₽"
 
 
 def test_format_weight():

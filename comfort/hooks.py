@@ -53,5 +53,6 @@ get_translated_dict = {("boot", None): "comfort.translations.get_translated_dict
 jenv = {
     "methods": [
         "format_item_code:comfort.integrations.ikea.format_item_code",
+        "format_money:comfort.queries.format_money",
     ],
 }

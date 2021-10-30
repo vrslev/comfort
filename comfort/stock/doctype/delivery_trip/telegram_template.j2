@@ -19,7 +19,7 @@
     <a href="{{ stop.route_url }}">{{ stop.address }}</a>
     {% if stop.pending_amount > 0 %}
         <br>
-        {{ stop.pending_amount }} ₽
+        {{ format_money(stop.pending_amount) }}
     {% endif %}
     {% if stop.details %}
         <br>

@@ -1,12 +1,12 @@
 {{ customer_first_name }}, добрый день! Проверьте ваш заказ:
 {%- for item in items %}
-{{ loop.index }}. {{ format_item_code(item.item_code) or item.item_code }} {{ item.item_name }} ({{ item.rate }} ₽ ⨉ {{ item.qty }} шт)
+{{ loop.index }}. {{ format_item_code(item.item_code) or item.item_code }} {{ item.item_name }} ({{ format_money(item.rate) }} ⨉ {{ item.qty }} шт)
 {%- endfor %}
 {% for service in services %}
-{{ _(service.type) }} ({{ service.rate }} ₽)
+{{ _(service.type) }} ({{ format_money(service.rate) }})
 {%- endfor %}
 
-Сумма заказа — {{ total_amount }} ₽.
+Сумма заказа — {{ format_money(total_amount) }}.
 Оплатить можно н
 {%- if total_amount > 6999 -%}
 аличными, можем подъехать к вам.
