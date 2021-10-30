@@ -1,6 +1,25 @@
 <div class="page-break">
   <div class="print-heading">
     <h2>{{ doc.name }}</h2>
+    <p style="text-transform: initial;">
+      {% if doc.order_confirmation_no %}
+        {{ _("Order Confirmation No") }}: {{ doc.order_confirmation_no }}
+        <br>
+      {% endif %}
+
+      {% if doc.posting_date %}
+        {{ _("Posting Date") }}: {{ frappe.utils.format_date(doc.posting_date) }}
+        <br>
+      {% endif %}
+
+      {% if doc.schedule_date %}
+      {{ _("Schedule Date") }}: {{ frappe.utils.format_date(doc.schedule_date) }}
+      {% endif %}
+
+      {% if doc.total_amount %}
+        {{ _("Total Amount") }}: {{ doc.total_amount }} ₽
+      {% endif %}
+    </p>
   </div>
 
   <table class="table table-bordered">
