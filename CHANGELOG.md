@@ -3,6 +3,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.22.1 (2021-10-30)
+### Fix
+* **Docker:** Fix build due to renaming branch of frappe/frappe_docker ([`356342b`](https://github.com/vrslev/comfort/commit/356342bbc008f51c092fd20f9221d7c9a1cfdfbd))
+
 ## v0.22.0 (2021-10-30)
 ### Feature
 * Format money in templates ([`4d26bb5`](https://github.com/vrslev/comfort/commit/4d26bb57d80c41298c7a4fa9c559f2445a5cf618))
