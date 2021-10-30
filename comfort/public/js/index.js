@@ -120,19 +120,23 @@ comfort.quick_add_items = (text, field, item_callback, callback) => {
   });
 };
 
-// From ERPNext
 frappe.form.link_formatters["Item"] = (value, doc) => {
-  if (
-    doc &&
-    value &&
-    doc.item_name &&
-    doc.item_name !== value &&
-    doc.item_code === value
-  ) {
+  if (value && /^\d+$/.test(value) && value.length == 8) {
+    // Valid item code
+    value = `${value.substring(0, 3)}.${value.substring(
+      3,
+      6
+    )}.${value.substring(6, 8)}`;
+  }
+
+  if (value && doc && doc.item_name && doc.item_name != value) {
+    // item code and item name
     return value + ": " + doc.item_name;
   } else if (!value && doc.doctype && doc.item_name) {
+    // only item name
     return doc.item_name;
   } else {
+    // only item code
     return value;
   }
 };
