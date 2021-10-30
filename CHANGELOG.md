@@ -3,6 +3,18 @@
 
 <!--next-version-placeholder-->
 
+## v0.22.0 (2021-10-30)
+### Feature
+* Format money in templates ([`4d26bb5`](https://github.com/vrslev/comfort/commit/4d26bb57d80c41298c7a4fa9c559f2445a5cf618))
+* **Purchase Order:** Show Sales Order name and Purchase Order name that has waiting for delivery orders in print format ([`24a62c4`](https://github.com/vrslev/comfort/commit/24a62c47eaff725480643cc900bbb449472552eb))
+* Format item codes in print formats ([`53ed7ab`](https://github.com/vrslev/comfort/commit/53ed7ab807978a150eb90010cd2391c670c16f2b))
+* Format item codes in frontend as IKEA does ([`40c2cc9`](https://github.com/vrslev/comfort/commit/40c2cc92562399c20d39429d5811dab1067748b5))
+* **Purchase Order:** Add data about order in print format ([`2cc1725`](https://github.com/vrslev/comfort/commit/2cc1725e1f755e4811b12ee0692f703fcb64c16c))
+
+### Fix
+* **Purchase Order:** Don't allow to break page in middle of client ([`ce3cc31`](https://github.com/vrslev/comfort/commit/ce3cc317bef6e8959028d7d1194d3ea3cd496bf2))
+* **Purchase Order:** Field order ([`37075ea`](https://github.com/vrslev/comfort/commit/37075ea82286238913f1b37dba07eccdddfd6e9a))
+
 ## v0.21.0 (2021-10-28)
 ### Feature
 * **Waiting List:** Show message when Sales Order in Purchase Order ([`6b103b1`](https://github.com/vrslev/comfort/commit/6b103b13586a9a8e37a846e72ba0673424c4f012))
