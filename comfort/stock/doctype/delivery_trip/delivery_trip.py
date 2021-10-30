@@ -5,7 +5,6 @@ from typing import Any, Literal, TypedDict
 from urllib.parse import urlencode
 
 import telegram
-from ikea_api_wrapped import format_item_code
 
 import frappe
 from comfort import (
@@ -164,7 +163,7 @@ class DeliveryTrip(TypedDocument):
                     "address": stop.address,
                     "pending_amount": stop.pending_amount,
                     "details": stop.details,
-                    "items_": _get_items_for_order(doc),
+                    "items_": doc.get_items_with_splitted_combinations(),
                     "weight": doc.total_weight,
                 }
             )
@@ -216,17 +215,6 @@ def _make_route_url(city: str | None, address: str | None):
 
     url = "https://yandex.ru/maps/10849/severodvinsk/?"
     return url + urlencode({"text": text})
-
-
-def _get_items_for_order(sales_order: SalesOrder):
-    return [
-        {
-            "item_code": format_item_code(item.item_code),
-            "qty": item.qty,
-            "item_name": item.item_name,
-        }
-        for item in sales_order.get_items_with_splitted_combinations()
-    ]
 
 
 def _get_delivery_and_installation_from_services(services: list[SalesOrderService]):

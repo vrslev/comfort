@@ -82,7 +82,7 @@
             {% for item in doc.items %}
 
             <li>
-              {{ item.item_code }} {{ item.item_name }} ⨉ {{ item.qty }} шт
+              {{ format_item_code(item.item_code) or item.item_code }}: {{ item.item_name }} ⨉ {{ item.qty }} шт
             </li>
             {% endfor %}
           </ul>

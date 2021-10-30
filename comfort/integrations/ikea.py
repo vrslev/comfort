@@ -6,6 +6,7 @@ from typing import Any, TypedDict
 import ikea_api_wrapped
 import sentry_sdk
 from ikea_api.errors import ItemFetchError, OrderCaptureError
+from ikea_api_wrapped import format_item_code  # type: ignore  # For jenv hook
 from ikea_api_wrapped.types import NoDeliveryOptionsAvailableError, ParsedItem
 
 import frappe

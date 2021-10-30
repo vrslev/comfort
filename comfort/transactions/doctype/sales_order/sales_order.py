@@ -7,7 +7,6 @@ from datetime import datetime, timedelta
 from types import SimpleNamespace
 from typing import Any, Literal, TypedDict
 
-from ikea_api_wrapped import format_item_code
 from ikea_api_wrapped.types import DeliveryOptionDict
 
 import frappe
@@ -534,18 +533,9 @@ class SalesOrder(TypedDocument):
         return matches[0] if matches else self.customer
 
     def _get_check_order_message_context(self):
-        items = [
-            {
-                "item_code": format_item_code(i.item_code),
-                "item_name": i.item_name,
-                "rate": i.rate,
-                "qty": i.qty,
-            }
-            for i in self.items
-        ]
         return {
             "customer_first_name": self._get_customer_first_name(),
-            "items": items,
+            "items": self.items,
             "services": self.services,
             "total_amount": self.total_amount,
         }

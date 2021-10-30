@@ -45,7 +45,7 @@
               </td>
 
               <td style="width: 8%">
-                <b>{{ item.item_code }}</b>
+                <b>{{ format_item_code(item.item_code) or item.item_code }}</b>
               </td>
               <td>
                 {{ item.item_name or frappe.db.get_value("Item", item.item_code, "item_name") }}

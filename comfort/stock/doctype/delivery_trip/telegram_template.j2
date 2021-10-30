@@ -30,6 +30,6 @@
     <br>
     {%- for item in stop.items_ -%}
         <br>
-        &nbsp;&nbsp;&nbsp;— {{ item.item_code }} ⨉ {{ item.qty }} шт ({{ item.item_name }})
+        &nbsp;&nbsp;&nbsp;— {{ format_item_code(item.item_code) or item.item_code }} ⨉ {{ item.qty }} шт ({{ item.item_name }})
     {%- endfor -%}
 {%- endfor -%}

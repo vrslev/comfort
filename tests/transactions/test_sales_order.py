@@ -6,7 +6,6 @@ from types import SimpleNamespace
 from typing import Any, Callable, Literal
 
 import pytest
-from ikea_api_wrapped import format_item_code
 from ikea_api_wrapped.types import DeliveryOptionDict, UnavailableItemDict
 
 import comfort.transactions.doctype.sales_order.sales_order
@@ -771,15 +770,10 @@ def test_get_check_order_message_context(sales_order: SalesOrder):
     sales_order.validate()
     context = sales_order._get_check_order_message_context()
     assert context["customer_first_name"] == sales_order._get_customer_first_name()
-    assert context["items"] == [
-        {
-            "item_code": format_item_code(i.item_code),
-            "item_name": i.item_name,
-            "rate": i.rate,
-            "qty": i.qty,
-        }
-        for i in sales_order.items
-    ]
+    assert counters_are_same(
+        count_qty(context["items"]),  # type: ignore
+        count_qty(sales_order.items),
+    )
     assert context["services"] == sales_order.services
     assert context["total_amount"] == sales_order.total_amount
 
