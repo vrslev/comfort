@@ -29,77 +29,86 @@
         <th>{{ _("Item Code") }}</th>
         <th>{{ _("Item Name") }}</th>
         <th>{{ _("Qty") }}</th>
-        <th>{{ _("Price") }}</th>
+        <th>{{ _("Rate") }}</th>
         <th>{{ _("Weight") }}</th>
       </tr>
     </thead>
     <tbody>
 
       {% set idx = [] %}
-      {% macro add_table_row(loop_index, item, customer) %}
+      {% macro add_table_row(loop_index, item) %}
           <tr>
-            {% if item %}
-              <td style="width: 2%">
-                {{ idx|length + 1 }}
-                {% if idx.append('1') %}{% endif %}
-              </td>
+            <td style="width: 2%">
+              {{ idx | length + 1 }}
+              {% if idx.append('1') %}{% endif %}
+            </td>
 
-              <td style="width: 8%">
-                <b>{{ format_item_code(item.item_code) or item.item_code }}</b>
-              </td>
-              <td>
-                {{ item.item_name or frappe.db.get_value("Item", item.item_code, "item_name") }}
-              </td>
+            <td style="width: 13%">
+              <b>{{ format_item_code(item.item_code) or item.item_code }}</b>
+            </td>
 
-              <td style="width: 10%">
-                {{ item.qty | int }}
-              </td>
+            <td>
+              {{ item.item_name or frappe.db.get_value("Item", item.item_code, "item_name") }}
+            </td>
 
-              <td style="width: 10%">
-                {{ item.rate | int or frappe.db.get_value("Item", item.item_code, "rate") | int }} ₽
-              </td>
+            <td style="width: 10%">{{ item.qty | int }}</td>
 
-              <td style="width: 3%">
-                {{ item.weight or frappe.db.get_value("Item", item.item_code, "weight")}}
-              </td>
+            <td style="width: 10%">
+              {{ item.rate | int or frappe.db.get_value("Item", item.item_code, "rate") | int }} ₽
+            </td>
 
-            {% else %}
-              <td colspan="5"><b style="font-size: 16px">{{ customer }}<b/><td/>
-            {% endif %}
+            <td style="width: 7%">
+              {{ item.weight or frappe.db.get_value("Item", item.item_code, "weight") }}
+            </td>
           </tr>
       {% endmacro %}
 
 
       {% for item in doc.get_items_to_sell(split_combinations=True) %}
-        {{ add_table_row(loop.index, item, None)}}
+        {{ add_table_row(loop.index, item)}}
       {% endfor %}
 
       {% for po_sales_order in doc.sales_orders | sort(attribute="customer") %}
         {% set sales_order = frappe.get_doc("Sales Order", po_sales_order.sales_order_name) %}
 
-        {% set not_closed_orders = frappe.get_all(
+        {% set orders_waiting_for_delivery = frappe.get_all(
           "Sales Order",
           filters={
             "delivery_status": "To Deliver",
             "customer": sales_order.customer,
             "name": ("!=", sales_order.name),
           }
-        ) | list %}
+        ) | map(attribute="name") | list | sort %}
 
-        {% if not_closed_orders %}
-          {% set customer = sales_order.customer +
-            "<p style='font-size: small; font-weight: normal; margin-top: -0.5%'>Незавершённые заказы: " +
-            not_closed_orders | map(attribute="name") | join(", ") +
-            "</p>"
-          %}
-        {% else %}
-          {% set customer = sales_order.customer %}
-        {% endif %}
+        <td colspan="5" style="border-left-color: white; border-right-color: white">
+          <b style="font-size: 16px;">{{ sales_order.customer }}</b>
+          <div style="color: gray">
+            {{ sales_order.name }}
+            {%- if orders_waiting_for_delivery -%}
+              . Ожидают доставки:
+              {% for sales_order_name in orders_waiting_for_delivery %}
+                {{ sales_order_name }}
 
-        {{ add_table_row(None, None, customer) }}
+                {% set purchase_order_name = frappe.db.get_value(
+                  "Purchase Order Sales Order",
+                  filters={"sales_order_name": sales_order_name},
+                  fieldname="parent",
+                ) %}
+
+                {% if purchase_order_name %}
+                  ({{ purchase_order_name }})
+                {%- endif -%}
+
+                {% if loop.index != orders_waiting_for_delivery | length %},{% endif %}
+
+              {% endfor %}
+            {% endif %}
+          </div>
+        </td>
+        <td style="border-left-color: white; border-right-color: white;">
 
         {% for item in sales_order.get_items_with_splitted_combinations() %}
-          {{ add_table_row(loop.index, item, None)}}
+          {{ add_table_row(loop.index, item)}}
         {% endfor %}
       {% endfor %}
     </tbody>
