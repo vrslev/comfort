@@ -34,7 +34,7 @@ RUN apt-get update \
   && rm -rf /var/lib/apt/lists/*
 
 # Setup docker-entrypoint
-RUN git clone --depth 1 -b develop https://github.com/frappe/frappe_docker /tmp/frappe_docker \
+RUN git clone --depth 1 --single-branch https://github.com/frappe/frappe_docker /tmp/frappe_docker \
   && cd /tmp/frappe_docker \
   && cp build/common/worker/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh \
   && ln -s /usr/local/bin/docker-entrypoint.sh / \
