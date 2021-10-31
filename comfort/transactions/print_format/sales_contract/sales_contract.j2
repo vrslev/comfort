@@ -125,7 +125,7 @@
       <h4>Цена товара и порядок расчётов</h4>
       <ol>
         <li>
-          Цена товара составляет {{ doc.total_amount }} рублей. Цена товара
+          Цена товара составляет {{ format_money(doc.total_amount) }}. Цена товара
 
           {% set joined_services = doc.services | map(attribute="type") | join %}
 
