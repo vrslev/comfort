@@ -5,11 +5,11 @@ from collections import Counter, defaultdict
 from typing import Any, Iterable, TypeVar
 
 import frappe
+import frappe.utils
+import frappe.utils.data
 from comfort.integrations import sentry
 from frappe import _ as _gettext
 from frappe.model.document import Document
-
-sentry.init()
 
 
 def _(msg: Any, lang: str | None = None, context: str | None = None) -> str:
@@ -195,3 +195,22 @@ def doc_exists(
 
 def copy_doc(doc: _T_doc, ignore_no_copy: bool = True) -> _T_doc:
     return frappe.copy_doc(doc, ignore_no_copy=ignore_no_copy)  # type: ignore
+
+
+def patch_fmt_money():  # pragma: no cover
+    old_func = frappe.utils.data.fmt_money
+
+    def fmt_money(
+        amount: str | int | float,
+        precision: int | None = None,
+        currency: str | None = None,
+        format: str | None = None,
+    ) -> str:
+        return old_func(amount, precision=0) + " ₽"
+
+    frappe.utils.data.fmt_money = fmt_money
+    frappe.utils.fmt_money = fmt_money
+
+
+sentry.init()
+patch_fmt_money()

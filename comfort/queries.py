@@ -1,9 +1,10 @@
 from __future__ import annotations
 
-from typing import Any, Iterable, Literal
+import re
+from typing import Annotated, Any, Iterable, Literal
 
 import frappe
-from comfort import get_all
+from comfort import _, get_all
 from comfort.stock import get_stock_balance
 from comfort.transactions.doctype.purchase_order_item_to_sell.purchase_order_item_to_sell import (
     PurchaseOrderItemToSell,
@@ -18,35 +19,59 @@ from frappe.model.meta import Meta
 from frappe.utils import fmt_money, unique
 
 
-def format_money(money: str | int | float) -> str:  # type: ignore
-    return fmt_money(money, precision=0) + " ₽"
-
-
 def _format_weight(weight: int | float):
     return f"{float(weight)} кг"
 
 
-def _format_item_query(result: list[Any]):  # pragma: no cover
-    if result[2]:
-        result[2] = format_money(result[2])
+def _parse_phone_number(phone: str):
+    regex = re.compile(r"^((8|\+7)[\-– ]?)?(\(?\d{3}\)?[\-– ]?)?[\d\-– ]{7,10}$")
+    if not re.match(regex, phone):
+        return
+    clean = re.sub(r"[^0-9]+", "", phone)
+    if clean[:1] == "7":
+        clean = "8" + clean[1:]
+    return clean
 
 
-def _format_purchase_order_query(result: list[Any]):  # pragma: no cover
-    if result[2]:
-        result[2] = format_money(result[2])
-    if result[3]:
-        result[3] = _format_weight(result[3])
+def _format_phone_number(phone: str):  # pragma: no cover
+    parsed = _parse_phone_number(phone)
+    if parsed is None:
+        return
+    if len(parsed) < 10:
+        return parsed
+    return f"{parsed[0]} ({parsed[1:4]}) {parsed[4:7]}–{parsed[7:9]}–{parsed[9:11]}"
 
 
-def _format_sales_order_query(result: list[Any]):  # pragma: no cover
-    if result[3]:
-        result[3] = format_money(result[3])
+def _format_item_query(  # pragma: no cover
+    result: Annotated[list[Any], ["name", "item_name", "rate"]]
+):
+    result[2] = fmt_money(result[2])
+
+
+def _format_purchase_order_query(  # pragma: no cover
+    result: Annotated[list[Any], ["name", "status", "total_amount", "total_weight"]]
+):
+    result[2] = fmt_money(result[2])
+    result[3] = _format_weight(result[3])
+
+
+def _format_sales_order_query(  # pragma: no cover
+    result: Annotated[list[Any], ["name", "status", "customer", "total_amount"]]
+):
+    result[3] = fmt_money(result[3])
+
+
+def _format_customer_query(  # pragma: no cover
+    result: Annotated[list[Any], ["name", "customer_group", "phone"]]
+):
+    result[2] = _format_phone_number(str(result[2]))
 
 
 _QUERY_FORMATTERS = {
     "Item": _format_item_query,
     "Purchase Order": _format_purchase_order_query,
     "Sales Order": _format_sales_order_query,
+    "Customer": _format_customer_query,
 }
 
 
@@ -86,12 +111,15 @@ def default_query(
     )
 
     results: list[list[Any]] = [list(result) for result in resp]
+    new_results: list[list[str]] = []
 
-    if doctype in _QUERY_FORMATTERS:
-        for result in results:
+    for result in results:
+        result: list[str] = [_(v) for v in result]
+        if doctype in _QUERY_FORMATTERS:
             _QUERY_FORMATTERS[doctype](result)
+        new_results.append(result)
 
-    return results
+    return new_results
 
 
 def get_standard_queries(doctypes: Iterable[str]):
