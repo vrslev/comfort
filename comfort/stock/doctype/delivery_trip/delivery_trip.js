@@ -2,9 +2,6 @@ frappe.ui.form.on("Delivery Trip", {
   setup(frm) {
     frm.show_submit_message = () => {};
 
-    // Add "Add Multiple" button
-    frm.fields_dict.stops.grid.set_multiple_add("sales_order");
-
     // Disable "Search" and "Add new Sales Order" buttons in "sales_order" field
     frm.fields_dict.stops.grid.get_docfield("sales_order").only_select = 1;
 
@@ -26,6 +23,9 @@ frappe.ui.form.on("Delivery Trip", {
   },
 
   refresh(frm) {
+    // Add "Add Multiple" button
+    frm.fields_dict.stops.grid.set_multiple_add("sales_order");
+
     // Duplicate from setup method. Needed here and there.
     frm.fields_dict.stops.grid.get_docfield("sales_order").only_select = 1;
 
