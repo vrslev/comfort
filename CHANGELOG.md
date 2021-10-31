@@ -3,6 +3,14 @@
 
 <!--next-version-placeholder-->
 
+## v0.22.2 (2021-10-31)
+### Fix
+* Translate values in queries, format phone number ([`058bdc1`](https://github.com/vrslev/comfort/commit/058bdc10314509593dd51cb9511f00cf058e0b00))
+* **Translations:** Add missing translation ([`9ac32fb`](https://github.com/vrslev/comfort/commit/9ac32fb85d4727456fb57073a53e8d26ae668914))
+* **Sales Order:** Format total amount in contract ([`9a22758`](https://github.com/vrslev/comfort/commit/9a227586b02dbe1cc18ca93e7e6edb3b81f15d65))
+* **Item:** Remove duplicate item code filter ([`936dd9b`](https://github.com/vrslev/comfort/commit/936dd9b7b3464aa5432ba98e2aea5dcec859b1a4))
+* **Delivery Trip:** "Add Multiple" button ([`6f4d5d4`](https://github.com/vrslev/comfort/commit/6f4d5d43af42ab95871836fd18406af5ac65fa3d))
+
 ## v0.22.1 (2021-10-30)
 ### Fix
 * **Docker:** Fix build due to renaming branch of frappe/frappe_docker ([`356342b`](https://github.com/vrslev/comfort/commit/356342bbc008f51c092fd20f9221d7c9a1cfdfbd))
