@@ -199,7 +199,7 @@ class DeliveryTrip(TypedDocument):
     @frappe.whitelist()
     def set_completed_status(self):
         self.status = "Completed"
-        self.db_update()
+        self.save_without_validating()
         self._add_receipts_to_sales_orders()
 
 

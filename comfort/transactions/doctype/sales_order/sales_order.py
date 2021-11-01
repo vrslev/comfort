@@ -339,8 +339,7 @@ class SalesOrder(TypedDocument):
 
         delete_empty_items(doc, "items_to_sell")
         doc.calculate()
-        doc.db_update()
-        doc.update_children()
+        doc.save_without_validating()
 
     def _make_stock_entries_for_from_available_stock(self):
         if not self.from_available_stock:
@@ -479,7 +478,7 @@ class SalesOrder(TypedDocument):
             )
         create_payment(self.doctype, self.name, paid_amount, cash)
         self.set_statuses()
-        self.db_update()
+        self.save_without_validating()
 
     @frappe.whitelist()
     def add_receipt(self):
@@ -490,7 +489,7 @@ class SalesOrder(TypedDocument):
 
         create_receipt(self.doctype, self.name)
         self.set_statuses()
-        self.db_update()
+        self.save_without_validating()
 
     @frappe.whitelist()
     def split_combinations(self, combos_docnames: list[str], save: bool):

@@ -389,7 +389,6 @@ def test_purchase_return_on_cancel_not_raises_on_valid_status(
 def test_purchase_return_on_cancel_linked_docs_cancelled(
     purchase_return: PurchaseReturn, sales_order: SalesOrder
 ):
-    purchase_return._voucher.status = "To Receive"
     purchase_return.db_insert()
 
     sales_order.db_set("docstatus", 1)
@@ -397,6 +396,8 @@ def test_purchase_return_on_cancel_linked_docs_cancelled(
     sales_order.reload()
     orders_to_items = purchase_return._allocate_items()
     purchase_return._make_sales_returns(orders_to_items)
+    purchase_return._voucher.reload()
+    purchase_return._voucher.status = "To Receive"
     purchase_return.before_submit()
     purchase_return.on_cancel()
 

@@ -289,15 +289,8 @@ class PurchaseOrder(TypedDocument):
         items += self.get_items_in_sales_orders(split_combinations)
         return count_qty(items)
 
-    def _clear_delivery_options(self):
-        for option in self.delivery_options:
-            frappe.delete_doc(option.doctype, option.name)
-        self.delivery_options = []
-
     @frappe.whitelist()
     def get_delivery_services(self):
-        self._clear_delivery_options()
-
         templated_items = self._get_templated_items_for_api(split_combinations=True)
         response = get_delivery_services(templated_items)
         if not response:
@@ -305,6 +298,7 @@ class PurchaseOrder(TypedDocument):
 
         options: list[DeliveryOptionDict] = response["delivery_options"]
         self.cannot_add_items = json.dumps(response["cannot_add"])
+        self.delivery_options = []
         for option in options:
             self.append(
                 "delivery_options",
@@ -316,7 +310,7 @@ class PurchaseOrder(TypedDocument):
                     "unavailable_items": json.dumps(option["unavailable_items"]),
                 },
             )
-        self.db_update_all()
+        self.save_without_validating()
 
     def _submit_sales_orders_and_update_statuses(self):
         for o in self.sales_orders:
@@ -371,7 +365,7 @@ class PurchaseOrder(TypedDocument):
     def add_receipt(self):
         create_receipt(self.doctype, self.name)
         self.status = "Completed"
-        self.db_update()
+        self.save_without_validating()
         self._submit_sales_orders_and_update_statuses()
 
     @frappe.whitelist()

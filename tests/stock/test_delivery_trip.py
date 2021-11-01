@@ -209,6 +209,7 @@ def test_add_receipts_to_sales_orders(
 
 
 def test_set_completed_status(delivery_trip: DeliveryTrip):
+    delivery_trip.db_insert()
     delivery_trip.status = "Draft"
     for stop in delivery_trip.stops:
         frappe.db.set_value(

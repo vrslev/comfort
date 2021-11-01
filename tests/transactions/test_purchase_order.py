@@ -18,9 +18,6 @@ from comfort.transactions.doctype.purchase_order.purchase_order import (
     PurchaseOrder,
     calculate_total_weight_and_total_weight,
 )
-from comfort.transactions.doctype.purchase_order_delivery_option.purchase_order_delivery_option import (
-    PurchaseOrderDeliveryOption,
-)
 from comfort.transactions.doctype.purchase_order_item_to_sell.purchase_order_item_to_sell import (
     PurchaseOrderItemToSell,
 )
@@ -345,15 +342,8 @@ def test_get_templated_items_for_api(
 
 
 @pytest.mark.usefixtures("ikea_settings")
-def test_clear_delivery_options(purchase_order: PurchaseOrder):
-    purchase_order.get_delivery_services()
-    purchase_order._clear_delivery_options()
-    assert len(purchase_order.delivery_options) == 0
-    assert not get_all(PurchaseOrderDeliveryOption, limit_page_length=1)
-
-
-@pytest.mark.usefixtures("ikea_settings")
 def test_get_delivery_services(purchase_order: PurchaseOrder):
+    purchase_order.db_insert()
     purchase_order.get_delivery_services()
     assert purchase_order.cannot_add_items == json.dumps(
         mock_delivery_services["cannot_add"]
@@ -442,6 +432,7 @@ def test_purchase_order_before_insert(purchase_order: PurchaseOrder):
 
 @pytest.mark.usefixtures("ikea_settings")
 def test_purchase_order_before_submit(purchase_order: PurchaseOrder):
+    purchase_order.db_insert()
     purchase_order.status = "Draft"
     purchase_order.get_delivery_services()
     purchase_order.before_submit()
@@ -575,10 +566,11 @@ def test_purchase_order_checkout(
     assert called_add_items_to_cart
 
 
-def test_purchas_order_add_receipt(
+def test_purchase_order_add_receipt(
     monkeypatch: pytest.MonkeyPatch, purchase_order: PurchaseOrder
 ):
     purchase_order.name = "test"
+    purchase_order.db_insert()
     called_create_receipt = False
     called_submit_sales_orders_and_update_statuses = False
 

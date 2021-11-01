@@ -117,6 +117,11 @@ class TypedDocument(Document):
             ignore_permissions=ignore_permissions, ignore_version=ignore_version
         )
 
+    def save_without_validating(self):
+        self.flags.ignore_validate = True
+        self.flags.ignore_validate_update_after_submit = True
+        self.save()
+
 
 _T_doc = TypeVar("_T_doc", bound=Document)
 

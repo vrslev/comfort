@@ -171,8 +171,7 @@ class PurchaseReturn(Return):
         # NOTE: Never use `update_items_to_sell_from_db`
         self._voucher.update_sales_orders_from_db()
         self._voucher.calculate()
-        self._voucher.db_update()
-        self._voucher.update_children()
+        self._voucher.save_without_validating()
 
     def _make_gl_entries(self):
         """Return `returned_paid_amount` to "Cash" or "Bank"."""

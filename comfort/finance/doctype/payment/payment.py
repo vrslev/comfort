@@ -116,7 +116,7 @@ class Payment(TypedDocument):
 
             doc = get_doc(SalesOrder, self.voucher_no)
             doc.set_statuses()
-            doc.db_update()
+            doc.save_without_validating()
 
     def on_cancel(self):
         self.cancel_gl_entries()

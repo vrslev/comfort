@@ -63,7 +63,7 @@ class ItemMethods:
             if doc_exists("Item", d):
                 doc = get_doc(Item, d)
                 doc.calculate_weight()
-                doc.db_update()
+                doc.save_without_validating()
 
 
 class Item(TypedDocument, ItemMethods):
