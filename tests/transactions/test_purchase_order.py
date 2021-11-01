@@ -55,7 +55,7 @@ def test_delete_sales_order_duplicates(purchase_order: PurchaseOrder):
         assert len(orders) == 1
 
 
-def test_update_sales_orders_from_db(purchase_order: PurchaseOrder):
+def test_update_sales_orders_from_db_not_none(purchase_order: PurchaseOrder):
     for order in purchase_order.sales_orders:
         order.customer = order.total_amount = None  # type: ignore
 
@@ -67,6 +67,17 @@ def test_update_sales_orders_from_db(purchase_order: PurchaseOrder):
         customer, total_amount = values
         assert order.customer == customer
         assert order.total_amount == total_amount
+
+
+def test_update_sales_orders_from_db_is_none():
+    purchase_order = new_doc(PurchaseOrder)
+    purchase_order.append(
+        "sales_orders",
+        {"sales_order_name": "some name", "customer": None, "total_amount": None},
+    )
+    purchase_order.update_sales_orders_from_db()
+    assert purchase_order.sales_orders[0].customer is None
+    assert purchase_order.sales_orders[0].total_amount is None
 
 
 def test_update_items_to_sell_from_db(purchase_order: PurchaseOrder):

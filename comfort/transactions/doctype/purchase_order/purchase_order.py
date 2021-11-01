@@ -153,10 +153,11 @@ class PurchaseOrder(TypedDocument):
 
     def update_sales_orders_from_db(self):
         for order in self.sales_orders:
-            order_values: tuple[str, int] = get_value(
+            order_values: tuple[str, int] | None = get_value(
                 "Sales Order", order.sales_order_name, ("customer", "total_amount")
             )
-            order.customer, order.total_amount = order_values
+            if order_values is not None:
+                order.customer, order.total_amount = order_values
 
     def update_items_to_sell_from_db(self):
         for item in self.items_to_sell:
