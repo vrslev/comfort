@@ -3,6 +3,15 @@
 
 <!--next-version-placeholder-->
 
+## v0.23.0 (2021-11-01)
+### Feature
+* **Delivery Trip:** Format phone in telegram template ([`9c6dd6e`](https://github.com/vrslev/comfort/commit/9c6dd6eb41ded213e581dd6798453194fa801cbd))
+* Format phone in frontend ([`d683b24`](https://github.com/vrslev/comfort/commit/d683b24a83512bafd13bd20f0ec5e395fdda3a7c))
+
+### Fix
+* **Sales Order:** Change pickup order message content if there's delivery ([`e6e2e51`](https://github.com/vrslev/comfort/commit/e6e2e515fd58127d5fa300e095c3cec7272bad23))
+* **queries:** Return formatted phone or input value ([`a733af3`](https://github.com/vrslev/comfort/commit/a733af3fcdef04fb3f9d4378eaea623470c896e8))
+
 ## v0.22.4 (2021-11-01)
 ### Fix
 * **Sales Order:** Change services on submit in some cases ([`070f21a`](https://github.com/vrslev/comfort/commit/070f21a5121c2b2cea17abdb81ae22778140c89c))
