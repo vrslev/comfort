@@ -80,13 +80,17 @@ def test_get_delivery_services_no_delivery_options(
     assert "No available delivery options" in str(frappe.message_log)  # type: ignore
 
 
+@pytest.mark.parametrize(
+    "message",
+    ("Error while connecting to ISOM", "Cannot read property 'get' of undefined"),
+)
 def test_get_delivery_services_internal_ikea_error(
-    monkeypatch: pytest.MonkeyPatch, ikea_settings: IkeaSettings
+    monkeypatch: pytest.MonkeyPatch, ikea_settings: IkeaSettings, message: str
 ):
     def new_mock_delivery_services(api: IkeaApi, items: Any, zip_code: Any):
         assert api._token == get_guest_api()._token
         assert zip_code == ikea_settings.zip_code
-        raise OrderCaptureError({"message": "Error while connecting to ISOM"})
+        raise OrderCaptureError({"message": message})
 
     monkeypatch.setattr(
         ikea_api_wrapped, "get_delivery_services", new_mock_delivery_services

@@ -45,14 +45,16 @@ def get_delivery_services(items: dict[str, int]):
     except NoDeliveryOptionsAvailableError:
         frappe.msgprint(_("No available delivery options"), alert=True, indicator="red")
     except OrderCaptureError as exc:
-        if isinstance(
-            exc.args[0], dict
-        ) and "Error while connecting to ISOM" in exc.args[0].get("message", ""):
-            frappe.msgprint(
-                _("Internal IKEA error, try again"), alert=True, indicator="red"
-            )
-        else:
-            raise
+        if isinstance(exc.args[0], dict):
+            msg = exc.args[0].get("message", "")
+            if (
+                "Error while connecting to ISOM" in msg
+                or "Cannot read property 'get' of undefined" in msg
+            ):
+                return frappe.msgprint(
+                    _("Internal IKEA error, try again"), alert=True, indicator="red"
+                )
+        raise
 
 
 def add_items_to_cart(items: dict[str, int], authorize: bool):
