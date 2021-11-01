@@ -141,6 +141,30 @@ frappe.form.link_formatters["Item"] = (value, doc) => {
   }
 };
 
+function format_phone(value) {
+  var regex = RegExp(/^((8|\+7)[-– ]?)?(\(?\d{3}\)?[-– ]?)?[\d\-– ]{7,10}$/);
+  if (!regex.test(value)) return;
+  let clean = value.replace(/[^0-9]+/);
+  if (clean[0] == "7") {
+    clean = "8" + value.substring(1);
+  }
+  if (clean.length != 11) {
+    return clean;
+  }
+  return `${value.substring(0, 1)} (${value.substring(1, 4)}) ${value.substring(
+    4,
+    7
+  )}–${value.substring(7, 9)}–${value.substring(9, 11)}`;
+}
+
+let old_data_field_formatter = frappe.form.formatters["Data"];
+frappe.form.formatters["Data"] = (value, df) => {
+  if (df && df.options == "Phone") {
+    return format_phone(value);
+  }
+  return old_data_field_formatter(value, df);
+};
+
 frappe.ui.form.ControlLink = frappe.ui.form.ControlLink.extend({
   get_filter_description() {
     return;
