@@ -3,6 +3,18 @@
 
 <!--next-version-placeholder-->
 
+## v0.24.0 (2021-11-01)
+### Feature
+* **Sales Order:** Add Payment and Delivery indicators to form view ([`3a71a55`](https://github.com/vrslev/comfort/commit/3a71a5514472e382ce69b185f03f69dbcbc77aca))
+
+### Fix
+* **Translations:** Add missing translation ([`de3d5cd`](https://github.com/vrslev/comfort/commit/de3d5cd7320d5f36145820e2511fbb6965cbb461))
+* Global Search availability ([`26907fa`](https://github.com/vrslev/comfort/commit/26907fac28f39465418032589cb71dde680b4d45))
+* **Important:** Save document instead of db-updating on one-value changes (for example, status). ([`26ddc8c`](https://github.com/vrslev/comfort/commit/26ddc8c2f47f3d5cbf0137dc4f3de7701c8dce06))
+* **Sales Order:** Incorrect item name in child items table ([`088d521`](https://github.com/vrslev/comfort/commit/088d5210a7adf9822c9fa41042d8f36f9ab7aa73))
+* **queries:** Don't show None value ([`6912700`](https://github.com/vrslev/comfort/commit/6912700959a0109b5fa07e6d3741d99a2bb95f42))
+* **Sales Order:** Payment and Delivery status appearance on old Windows notebook ([`7fb9903`](https://github.com/vrslev/comfort/commit/7fb990365c1e2315009deae03a8804ced10dc762))
+
 ## v0.23.0 (2021-11-01)
 ### Feature
 * **Delivery Trip:** Format phone in telegram template ([`9c6dd6e`](https://github.com/vrslev/comfort/commit/9c6dd6eb41ded213e581dd6798453194fa801cbd))
