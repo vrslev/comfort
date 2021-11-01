@@ -25,7 +25,7 @@ setup(
             "pytest==6.2.5",
             "pytest-cov==3.0.0",
             "pytest-randomly==3.10.1",
-            "responses==0.14.0",
+            "responses==0.15.0",
         ]
     },
 )
