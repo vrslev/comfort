@@ -14,9 +14,10 @@
         )
     {% endif %}
     <br>
-    {{ stop.phone }}
-    <br>
-    <a href="{{ stop.route_url }}">{{ stop.address }}</a>
+    {% if stop.phone %}{{ format_phone(stop.phone) }}<br>{% endif %}
+    {% if stop.address and stop.route_url %}
+      <a href="{{ stop.route_url }}">{{ stop.address }}</a>
+    {% endif %}
     {% if stop.pending_amount > 0 %}
         <br>
         {{ format_money(stop.pending_amount) }}

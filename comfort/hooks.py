@@ -54,5 +54,6 @@ jenv = {
     "methods": [
         "format_item_code:comfort.integrations.ikea.format_item_code",
         "format_money:frappe.utils.formatters.fmt_money",
+        "format_phone:comfort.queries.format_phone",
     ],
 }
