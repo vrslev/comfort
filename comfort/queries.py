@@ -114,7 +114,7 @@ def default_query(
     new_results: list[list[str]] = []
 
     for result in results:
-        result: list[str] = [_(v) for v in result]
+        result: list[str] = [_(v) or "" for v in result]
         if doctype in _QUERY_FORMATTERS:
             _QUERY_FORMATTERS[doctype](result)
         new_results.append(result)
