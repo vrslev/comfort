@@ -33,11 +33,11 @@ def _parse_phone_number(phone: str):
     return clean
 
 
-def _format_phone_number(phone: str):  # pragma: no cover
+def format_phone(phone: str):  # pragma: no cover
     parsed = _parse_phone_number(phone)
     if parsed is None:
-        return
-    if len(parsed) < 10:
+        return phone
+    if len(parsed) != 11:
         return parsed
     return f"{parsed[0]} ({parsed[1:4]}) {parsed[4:7]}–{parsed[7:9]}–{parsed[9:11]}"
 
@@ -64,7 +64,7 @@ def _format_sales_order_query(  # pragma: no cover
 def _format_customer_query(  # pragma: no cover
     result: Annotated[list[Any], ["name", "customer_group", "phone"]]
 ):
-    result[2] = _format_phone_number(str(result[2]))
+    result[2] = format_phone(str(result[2]))
 
 
 _QUERY_FORMATTERS = {
