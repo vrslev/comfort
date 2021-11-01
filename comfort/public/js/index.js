@@ -120,7 +120,7 @@ comfort.quick_add_items = (text, field, item_callback, callback) => {
   });
 };
 
-frappe.form.link_formatters["Item"] = (value, doc) => {
+frappe.form.link_formatters["Item"] = (value, doc, df) => {
   if (value && /^\d+$/.test(value) && value.length == 8) {
     // Valid item code
     value = `${value.substring(0, 3)}.${value.substring(
@@ -129,7 +129,9 @@ frappe.form.link_formatters["Item"] = (value, doc) => {
     )}.${value.substring(6, 8)}`;
   }
 
-  if (value && doc && doc.item_name && doc.item_name != value) {
+  if (df.fieldname != "item_code") {
+    return value;
+  } else if (value && doc && doc.item_name && doc.item_name != value) {
     // item code and item name
     return value + ": " + doc.item_name;
   } else if (!value && doc.doctype && doc.item_name) {
