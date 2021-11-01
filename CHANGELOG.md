@@ -3,6 +3,13 @@
 
 <!--next-version-placeholder-->
 
+## v0.22.4 (2021-11-01)
+### Fix
+* **Sales Order:** Change services on submit in some cases ([`070f21a`](https://github.com/vrslev/comfort/commit/070f21a5121c2b2cea17abdb81ae22778140c89c))
+* **IKEA:** Retry to get authorized token ([`f16a4df`](https://github.com/vrslev/comfort/commit/f16a4df1c053ec5b4857f71dea9b65431b6a813a))
+* **IKEA:** Another pretty error msg in order capture ([`e5beed7`](https://github.com/vrslev/comfort/commit/e5beed77613bf7501b0dcfd439f040f474224306))
+* **Purchase Order:** Don't load Sales Order info if it does not exist ([`4fa4582`](https://github.com/vrslev/comfort/commit/4fa4582b7a5a73b3652a9d07102d6b968d697d10))
+
 ## v0.22.3 (2021-11-01)
 ### Fix
 * Dump ikea-api-wrapped ([`b922e49`](https://github.com/vrslev/comfort/commit/b922e49b8ddfdd7b59b394b2fae59aae65f8f3dc))
