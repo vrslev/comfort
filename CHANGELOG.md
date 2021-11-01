@@ -3,6 +3,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.22.3 (2021-11-01)
+### Fix
+* Dump ikea-api-wrapped ([`b922e49`](https://github.com/vrslev/comfort/commit/b922e49b8ddfdd7b59b394b2fae59aae65f8f3dc))
+
 ## v0.22.2 (2021-10-31)
 ### Fix
 * Translate values in queries, format phone number ([`058bdc1`](https://github.com/vrslev/comfort/commit/058bdc10314509593dd51cb9511f00cf058e0b00))
