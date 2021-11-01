@@ -137,6 +137,7 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "total_weight",
    "fieldtype": "Float",
    "label": "Total Weight",
@@ -177,6 +178,7 @@
    "search_index": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "payment_status",
    "fieldtype": "Select",
    "in_list_view": 1,
@@ -266,7 +268,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-10-19 19:27:20.421757",
+ "modified": "2021-11-01 11:44:39.783705",
  "modified_by": "Administrator",
  "module": "Transactions",
  "name": "Sales Order",
