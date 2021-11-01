@@ -114,9 +114,9 @@ function setup_unnecessary_stuff_removal() {
 
   // Remove buttons from profile dropdown in all pages
   $(document).ready(() => {
-    $(
-      '[class="nav-item dropdown dropdown-help dropdown-mobile d-none d-lg-block"]'
-    ).remove();
+    $(".dropdown-help").remove();
+    $(".dropdown-notifications").remove();
+    $('[class="vertical-bar d-none d-sm-block"]').remove();
     $('[onclick="return frappe.ui.toolbar.setup_session_defaults()"]').remove();
     $('[onclick="return frappe.ui.toolbar.view_website()"]').remove();
     $('[onclick="return frappe.ui.toolbar.toggle_full_width()"]').remove();
