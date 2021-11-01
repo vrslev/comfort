@@ -15,6 +15,7 @@ comfort.SalesOrderController = frappe.ui.form.Controller.extend({
   setup() {
     this.frm.show_submit_message = () => {};
     this.patch_toolbar_set_page_actions();
+    this.add_status_indicators();
   },
 
   patch_toolbar_set_page_actions() {
@@ -31,8 +32,20 @@ comfort.SalesOrderController = frappe.ui.form.Controller.extend({
     };
   },
 
+  add_status_indicators() {
+    this.frm.page.$title_area.append(
+      '<span class="indicator-pill payment-indicator whitespace-nowrap" style="margin-left: 2%;"></span>'
+    );
+    this.payment_indicator = $(".payment-indicator");
+    this.frm.page.$title_area.append(
+      '<span class="indicator-pill delivery-indicator whitespace-nowrap" style="margin-left: 2%;"></span>'
+    );
+    this.delivery_indicator = $(".delivery-indicator");
+  },
+
   refresh() {
     this.setup_buttons();
+    this.render_status_indicators();
     this.frm.custom_make_buttons = {
       Payment: "Payment",
       Receipt: "Receipt",
@@ -43,6 +56,20 @@ comfort.SalesOrderController = frappe.ui.form.Controller.extend({
       this.frm.custom_make_buttons["Sales Return"] = "Sales Return";
     }
     this.setup_item_query();
+  },
+
+  render_status_indicators() {
+    this.payment_indicator
+      .removeClass()
+      .addClass("indicator-pill payment-indicator")
+      .html(`<span>${__(this.frm.doc.payment_status)}</span>`)
+      .addClass(frappe.utils.guess_colour(this.frm.doc.payment_status));
+
+    this.delivery_indicator
+      .removeClass()
+      .addClass("indicator-pill delivery-indicator")
+      .html(`<span>${__(this.frm.doc.delivery_status)}</span>`)
+      .addClass(frappe.utils.guess_colour(this.frm.doc.delivery_status));
   },
 
   setup_item_query() {

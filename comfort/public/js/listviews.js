@@ -53,7 +53,6 @@ frappe.listview_settings["Sales Order"] = {
     }
   },
   onload(list) {
-    substitute_status_colours();
     add_not_in_purchase_order_filter(list);
     add_purchase_order_filter(list);
     add_from_available_stock_button(list);
@@ -123,30 +122,6 @@ function add_from_available_stock_button(list) {
     },
     "small-add"
   );
-}
-
-function substitute_status_colours() {
-  var old_guess_colour = frappe.utils.guess_colour;
-  frappe.utils.guess_colour = (text) => {
-    var colors = {
-      "In Progress": "orange",
-      Completed: "green",
-      "To Purchase": "red",
-      Purchased: "orange",
-      "To Deliver": "orange",
-      Delivered: "green",
-      Unpaid: "red",
-      "Partially Paid": "orange",
-      Paid: "green",
-      Overpaid: "orange",
-      "": " ",
-    };
-    if (colors[text]) {
-      return colors[text];
-    } else {
-      return old_guess_colour(text);
-    }
-  };
 }
 
 function clear_name_filter() {

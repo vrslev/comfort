@@ -216,3 +216,30 @@ for (let doctype of ["GL Entry", "Checkout", "Stock Entry"]) {
     },
   });
 }
+
+function substitute_status_colours() {
+  // Pretty colours for Comfort doctypes
+  var old_guess_colour = frappe.utils.guess_colour;
+  frappe.utils.guess_colour = (text) => {
+    var colors = {
+      "In Progress": "orange",
+      Completed: "green",
+      "To Purchase": "red",
+      Purchased: "orange",
+      "To Deliver": "orange",
+      Delivered: "green",
+      Unpaid: "red",
+      "Partially Paid": "orange",
+      Paid: "green",
+      Overpaid: "orange",
+      "": " ",
+    };
+    if (colors[text]) {
+      return colors[text];
+    } else {
+      return old_guess_colour(text);
+    }
+  };
+}
+
+substitute_status_colours();
