@@ -3,6 +3,14 @@
 
 <!--next-version-placeholder-->
 
+## v0.25.0 (2021-11-02)
+### Feature
+* **Accounts:** Big fix for accounts ([`0b62aba`](https://github.com/vrslev/comfort/commit/0b62abaf73311c3db7bcb45e4afec545681714b9))
+
+### Fix
+* Migrate to new account system ([`4a67aaf`](https://github.com/vrslev/comfort/commit/4a67aaf6686dc0cb473b6c87c9d3740aa55dffac))
+* **Receipt:** Don't create empty GL Entries ([`abda3c7`](https://github.com/vrslev/comfort/commit/abda3c710c61bf3ed14222ad9ed95fe56dc45eb8))
+
 ## v0.24.0 (2021-11-01)
 ### Feature
 * **Sales Order:** Add Payment and Delivery indicators to form view ([`3a71a55`](https://github.com/vrslev/comfort/commit/3a71a5514472e382ce69b185f03f69dbcbc77aca))
