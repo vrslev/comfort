@@ -111,7 +111,7 @@ def get_chart_data(
 ):
     return {
         "data": {
-            "labels": [f"{filters['from_date']}—{filters['to_date']}"],
+            "labels": [""],
             "datasets": [
                 {"name": _("Income"), "values": [income]},
                 {"name": _("Expense"), "values": [expense]},
