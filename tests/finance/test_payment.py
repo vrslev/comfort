@@ -53,19 +53,6 @@ def test_resolve_cash_or_bank(
     assert payment_sales._resolve_cash_or_bank() == expected_account
 
 
-def test_get_amounts_for_sales_gl_entries(
-    payment_sales: Payment, sales_order: SalesOrder
-):
-    sales_order.total_amount = 10000
-    sales_order.service_amount = 800
-    sales_order.db_update_all()
-    amounts = payment_sales._get_amounts_for_sales_gl_entries()
-
-    assert amounts["sales_amount"] == 9200
-    assert amounts["delivery_amount"] == 300
-    assert amounts["installation_amount"] == 500
-
-
 def get_gl_entries(doc: Payment | SalesOrder):
     return get_all(
         GLEntry,
@@ -74,67 +61,24 @@ def get_gl_entries(doc: Payment | SalesOrder):
     )
 
 
-@pytest.mark.parametrize(
-    "paid_amount,exp_sales_amount,exp_delivery_amount,exp_installation_amount",
-    (
-        (500, 500, 0, 0),
-        (5000, 5000, 0, 0),
-        (5200, 5000, 200, 0),
-        (5400, 5000, 300, 100),
-        (5800, 5000, 300, 500),
-        (5900, 5100, 300, 500),
-    ),
-)
-def test_make_categories_invoice_gl_entries(
-    payment_sales: Payment,
-    sales_order: SalesOrder,
-    paid_amount: int,
-    exp_sales_amount: int,
-    exp_delivery_amount: int,
-    exp_installation_amount: int,
-):
-    sales_order.total_amount = 5800
-    sales_order.service_amount = 800
-    sales_order.db_update_all()
-
-    payment_sales.amount = paid_amount
+@pytest.mark.parametrize("cash", ("True", "False"))
+def test_payment_create_sales_gl_entries(payment_sales: Payment, cash: bool):
+    payment_sales.paid_with_cash = cash
     payment_sales.db_insert()
-    payment_sales._create_categories_sales_gl_entries(
-        **payment_sales._get_amounts_for_sales_gl_entries()
-    )
 
-    amounts = {"sales": 0, "delivery": 0, "installation": 0}
-
-    for entry in get_gl_entries(payment_sales):
-        for account_name in amounts:
-            if get_account(account_name) == entry.account:
-                amounts[account_name] += entry.credit
-
-    assert amounts["sales"] == exp_sales_amount
-    assert amounts["delivery"] == exp_delivery_amount
-    assert amounts["installation"] == exp_installation_amount
-
-
-def test_create_categories_sales_gl_entries_skips_on_zero_fund_amount(
-    payment_sales: Payment,
-    sales_order: SalesOrder,
-):
-    payment_sales.amount = 500
-    payment_sales.db_insert()
-    payment_sales._create_categories_sales_gl_entries(0, 300, 200)
-    accounts = [entry.account for entry in get_gl_entries(sales_order)]
-    assert get_account("sales") not in accounts
-
-
-def test_create_income_sales_gl_entry(payment_sales: Payment):
-    payment_sales.amount = 5000
-    payment_sales.db_insert()
-    payment_sales._create_income_sales_gl_entry()
-
-    amount = 0
-    for entry in get_gl_entries(payment_sales):
-        amount += entry.debit
-    assert amount == 5000
+    payment_sales.create_sales_gl_entries()
+    prepaid_sales = get_account("prepaid_sales")
+    cash_or_bank = get_account(payment_sales._resolve_cash_or_bank())
+    entries = get_gl_entries(payment_sales)
+    assert len(entries) == 2
+    for entry in entries:
+        assert entry.account in (cash_or_bank, prepaid_sales)
+        if entry.account == cash_or_bank:
+            assert entry.debit == payment_sales.amount
+            assert entry.credit == 0
+        elif entry.account == prepaid_sales:
+            assert entry.debit == 0
+            assert entry.credit == payment_sales.amount
 
 
 @pytest.mark.parametrize(

@@ -8,7 +8,7 @@
   "default_accounts_section",
   "bank_account",
   "prepaid_inventory_account",
-  "cost_of_goods_sold_account",
+  "prepaid_sales_account",
   "sales_account",
   "installation_account",
   "column_break",
@@ -35,12 +35,6 @@
    "fieldname": "prepaid_inventory_account",
    "fieldtype": "Link",
    "label": "Prepaid Inventory Account",
-   "options": "Account"
-  },
-  {
-   "fieldname": "cost_of_goods_sold_account",
-   "fieldtype": "Link",
-   "label": "Cost of Goods Sold Account",
    "options": "Account"
   },
   {
@@ -94,11 +88,17 @@
   {
    "fieldname": "column_break",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "prepaid_sales_account",
+   "fieldtype": "Link",
+   "label": "Prepaid Sales Account",
+   "options": "Account"
   }
  ],
  "issingle": 1,
  "links": [],
- "modified": "2021-08-31 21:10:10.362955",
+ "modified": "2021-11-02 11:08:49.725761",
  "modified_by": "Administrator",
  "module": "Finance",
  "name": "Finance Settings",

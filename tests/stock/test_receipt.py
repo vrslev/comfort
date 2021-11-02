@@ -63,8 +63,11 @@ def test_new_stock_entry(
     assert entry.items[0].qty == -items[0].qty if reverse_qty else items[0].qty
 
 
-def test_create_sales_gl_entries(receipt_sales: Receipt, sales_order: SalesOrder):
-    sales_order.items_cost = 500
+def test_receipt_create_sales_gl_entries(
+    receipt_sales: Receipt, sales_order: SalesOrder
+):
+    sales_order.discount = 100
+    sales_order.validate()
     sales_order.db_update()
 
     receipt_sales.create_sales_gl_entries()
@@ -76,8 +79,23 @@ def test_create_sales_gl_entries(receipt_sales: Receipt, sales_order: SalesOrder
             "credit": sales_order.items_cost,
         },
         {
-            "account": get_account("cost_of_goods_sold"),
-            "debit": sales_order.items_cost,
+            "account": get_account("sales"),
+            "debit": 0,
+            "credit": sales_order.margin - sales_order.discount,
+        },
+        {
+            "account": get_account("delivery"),
+            "debit": 0,
+            "credit": 300,
+        },
+        {
+            "account": get_account("installation"),
+            "debit": 0,
+            "credit": 500,
+        },
+        {
+            "account": get_account("prepaid_sales"),
+            "debit": sales_order.total_amount,
             "credit": 0,
         },
     ]

@@ -14,8 +14,10 @@ ACCOUNTS: dict[str, dict[str, Any]] = {
         "Inventory": {},
         "Prepaid Inventory": {},
     },
+    "Liabilities": {
+        "Prepaid Sales": {},
+    },
     "Expense": {
-        "Cost of Goods Sold": {},
         "Purchase Delivery": {},
         "Sales Compensations": {},
     },
@@ -31,8 +33,8 @@ DEFAULT_ACCOUNT_SETTINGS = {
     "cash_account": "Cash",
     "prepaid_inventory_account": "Prepaid Inventory",
     "inventory_account": "Inventory",
-    "cost_of_goods_sold_account": "Cost of Goods Sold",
     "purchase_delivery_account": "Purchase Delivery",
+    "prepaid_sales_account": "Prepaid Sales",
     "sales_account": "Sales",
     "delivery_account": "Delivery",
     "installation_account": "Installation",

@@ -2,6 +2,7 @@
 About,Подробнее
 Account Name,Название счёта
 Accounts,Счета
+Account,Счёт
 Add Payment,Добавить платёж
 Add Receipt,Добавить накладную
 Add Sales Order from Available Stock,Добавить заказ из доступного запаса
@@ -34,6 +35,7 @@ Can't return all items,Нельзя вернуть все товары
 "Can't load information about this order, enter delivery cost","Не удалось загрузить информацию об этом заказе, введите стоимость доставки"
 Cannot Add Items,"Товары, которые нельзя добавить"
 Cannot fetch those items: {},Не удалось загрузить эти товары: {}
+Cannot calculate services amount for Receipt,Не удалось посчитать суммы для накладной
 Cash,Наличные
 Cash Account,Наличный счёт
 Chart of Accounts,Диаграмма счетов
@@ -59,8 +61,6 @@ Commission,Комиссия
 Commission Range,Диапазон комиссии
 Commission Settings,Настройки комиссии
 Compensation,Компенсация
-Cost of Goods Sold,Проданные товары
-Cost of Goods Sold Account,Счёт проданных товаров
 Credit,Кредит
 Customer,Клиент
 Current cart in your IKEA account will be replaced with new one. Proceed?,Текущая корзина в вашем аккаунте будет заменена новой. Продолжить?
@@ -176,6 +176,7 @@ Pickup List,Список на выдачу
 Posting Date,Дата публикации
 Prepaid Inventory,Предоплаченный инвентарь
 Prepaid Inventory Account,Счёт предоплаченного инвентаря
+Prepaid Sales Account,Счёт предоплаченных продаж
 Price,Цена
 Print Contract Template,Распечатать шаблон договора
 Profit/Loss,Прибыль/убыток
@@ -219,6 +220,7 @@ Sales Order should be not Сancelled to add Payment,"Заказ не может 
 Sales Order should be submitted,Заказ должен быть подтверждён
 Sales Order {} has no delivery service,В заказе {} нет доставки
 Sales Order {} has no installation service,В заказе {} нет сборки
+Sales Orders already in Purchase Order: {},"Заказы, которые уже добавлены в закупку: {}"
 Sales Orders,Заказы
 Sales Orders Cost,Стоимость заказов
 Sales Return,Возврат заказа
@@ -257,7 +259,7 @@ Total Margin,Общая прибыль
 Total Quantity,Общее кол-во
 Total Weight,Общий вес
 Totals,Итоги
-Total Profit This Year,Общая прибыль за этот год
+Total Profit,Общая прибыль
 Transactions,Операции
 Unavailable Items,Недоступные товары
 Unpaid,Не оплачено

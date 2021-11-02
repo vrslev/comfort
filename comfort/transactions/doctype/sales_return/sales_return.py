@@ -173,7 +173,7 @@ class SalesReturn(Return):
         doc.save()
 
     def _make_delivery_gl_entries(self):
-        """Transfer cost of returned items from "Cost of Goods Sold" to "Inventory" account if Sales Order is delivered.
+        """Transfer cost of returned items from "Prepaid Sales" to "Inventory" account if Sales Order is delivered.
         Changes Sales Receipt behavior."""
         if not self._voucher.delivery_status == "Delivered":
             return
@@ -183,7 +183,7 @@ class SalesReturn(Return):
         self._voucher.reload()
         amount = prev_items_cost - new_items_cost
         create_gl_entry(
-            self.doctype, self.name, get_account("cost_of_goods_sold"), 0, amount
+            self.doctype, self.name, get_account("prepaid_sales"), 0, amount
         )
         create_gl_entry(self.doctype, self.name, get_account("inventory"), amount, 0)
 
@@ -216,7 +216,7 @@ class SalesReturn(Return):
         create_stock_entry(self.doctype, self.name, stock_types[1], self.items)
 
     def _make_payment_gl_entries(self):
-        """Return `returned_paid_amount` from "Cash" or "Bank" to "Sales".
+        """Return `returned_paid_amount` from "Cash" or "Bank" to "Prepaid Sales".
         Changes Payment behavior.
         """
         if not self.returned_paid_amount:
@@ -229,7 +229,7 @@ class SalesReturn(Return):
         amt = self.returned_paid_amount
         asset_account = "cash" if paid_with_cash else "bank"
         create_gl_entry(self.doctype, self.name, get_account(asset_account), 0, amt)
-        create_gl_entry(self.doctype, self.name, get_account("sales"), amt, 0)
+        create_gl_entry(self.doctype, self.name, get_account("prepaid_sales"), amt, 0)
 
     def before_submit(self):
         self._modify_voucher()

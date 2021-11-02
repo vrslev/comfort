@@ -18,7 +18,7 @@ Stock Entry: Reserved Actual -> Available Actual
 
 ### Delivered
 
-GL Entry: Cost of Goods Sold -> Inventory
+GL Entry: Prepaid Sales -> Inventory
 
 Stock Entry: Reserved Actual -> Available Actual
 

@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Literal
 
 import frappe
-from comfort import TypedDocument, get_doc, get_value
+from comfort import TypedDocument, ValidationError, _, get_doc, get_value
 from comfort.entities.doctype.child_item.child_item import ChildItem
 from comfort.finance import cancel_gl_entries_for, create_gl_entry, get_account
 from comfort.stock import cancel_stock_entries_for, create_stock_entry
@@ -64,9 +64,22 @@ class Receipt(TypedDocument):
         self.set_status_in_sales_order()
 
     def create_sales_gl_entries(self):
-        items_cost: int = self._voucher.items_cost  # type: ignore
-        self._new_gl_entry("inventory", 0, items_cost)
-        self._new_gl_entry("cost_of_goods_sold", items_cost, 0)
+        sales_amount: int = self._voucher.margin - self._voucher.discount  # type: ignore
+        delivery_amount, installation_amount = 0, 0
+
+        for s in self._voucher.services:  # type: ignore
+            if "Delivery" in s.type:
+                delivery_amount += s.rate
+            elif "Installation" in s.type:
+                installation_amount += s.rate
+            else:
+                raise ValidationError(_("Cannot calculate services amount for Receipt"))
+
+        self._new_gl_entry("inventory", 0, self._voucher.items_cost)  # type: ignore
+        self._new_gl_entry("sales", 0, sales_amount)
+        self._new_gl_entry("delivery", 0, delivery_amount)
+        self._new_gl_entry("installation", 0, installation_amount)
+        self._new_gl_entry("prepaid_sales", self._voucher.total_amount, 0)
 
     def create_sales_stock_entries(self):
         items: list[

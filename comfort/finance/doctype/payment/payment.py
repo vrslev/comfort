@@ -26,61 +26,10 @@ class Payment(TypedDocument):
     def _resolve_cash_or_bank(self):
         return "cash" if self.paid_with_cash else "bank"
 
-    def _get_amounts_for_sales_gl_entries(self) -> dict[str, int]:
-        from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
-
-        doc = get_doc(SalesOrder, self.voucher_no)
-
-        sales_amount: int = doc.total_amount - doc.service_amount
-        delivery_amount, installation_amount = 0, 0
-
-        for s in doc.services:
-            if "Delivery" in s.type:
-                delivery_amount += s.rate
-            elif "Installation" in s.type:
-                installation_amount += s.rate
-
-        return {
-            "sales_amount": sales_amount,
-            "delivery_amount": delivery_amount,
-            "installation_amount": installation_amount,
-        }
-
-    def _create_categories_sales_gl_entries(
-        self,
-        sales_amount: int,
-        delivery_amount: int,
-        installation_amount: int,
-    ):
-        remaining_amount = self.amount
-        for accounts_name, amount in (
-            ("sales", sales_amount),
-            ("delivery", delivery_amount),
-            ("installation", installation_amount),
-        ):
-            if amount == 0:
-                continue
-
-            elif amount > remaining_amount:
-                self._new_gl_entry(accounts_name, 0, remaining_amount)
-                remaining_amount = 0
-                break
-
-            else:
-                self._new_gl_entry(accounts_name, 0, amount)
-                remaining_amount -= amount
-
-        if remaining_amount > 0:
-            self._new_gl_entry("sales", 0, remaining_amount)
-
-    def _create_income_sales_gl_entry(self):
-        account_field = self._resolve_cash_or_bank()
-        self._new_gl_entry(account_field, self.amount, 0)
-
     def create_sales_gl_entries(self):
-        amounts = self._get_amounts_for_sales_gl_entries()
-        self._create_categories_sales_gl_entries(**amounts)
-        self._create_income_sales_gl_entry()
+        cash_or_bank = self._resolve_cash_or_bank()
+        self._new_gl_entry(cash_or_bank, self.amount, 0)
+        self._new_gl_entry("prepaid_sales", 0, self.amount)
 
     def create_purchase_gl_entries(self):
         cash_or_bank = self._resolve_cash_or_bank()

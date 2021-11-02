@@ -54,3 +54,22 @@ https://smallbusiness.chron.com/accounting-policies-invoicing-goods-not-yet-deli
   paid: Sales -> Cash
   Service -> Cash
   delivered: Inventory -> Cost of Goods Sold
+
+# The Right Way
+
+- Purchase Order
+
+  - paid
+    - Cash -> {Prepaid Inventory,Purchase Delivery}
+  - received
+    - Prepaid Inventory -> Inventory
+      (money are gone only for Purchase Delivery; Inventory increased)
+
+- Sales Order
+
+  - paid
+    - Prepaid Sales -> Cash
+  - delivered
+    <!-- Cost of goods sold, margin - service, service -->
+    - {Inventory,Sales,Service} -> Prepaid Sales
+      (money came only from Sales and Service, Inventory decreased)

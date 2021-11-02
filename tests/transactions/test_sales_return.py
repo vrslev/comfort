@@ -287,7 +287,7 @@ def test_sales_return_make_delivery_gl_entries_create(sales_return: SalesReturn)
         },
     )
     assert len(entries) == 2
-    accounts = get_account("cost_of_goods_sold"), get_account("inventory")
+    accounts = get_account("prepaid_sales"), get_account("inventory")
     for entry in entries:
         assert entry.account in accounts
         if entry.account == accounts[0]:
@@ -382,7 +382,7 @@ def test_sales_return_make_payment_gl_entries_create(
     )
     cash_account = get_account("cash")
     bank_account = get_account("bank")
-    sales_account = get_account("sales")
+    sales_account = get_account("prepaid_sales")
     assert len(entries) == 2
     for entry in entries:
         assert entry.account in (cash_account, bank_account, sales_account)
