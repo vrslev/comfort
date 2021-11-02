@@ -64,9 +64,10 @@ class Receipt(TypedDocument):
         self.set_status_in_sales_order()
 
     def create_sales_gl_entries(self):
+        inventory_amount: int = self._voucher.items_cost  # type: ignore
         sales_amount: int = self._voucher.margin - self._voucher.discount  # type: ignore
         delivery_amount, installation_amount = 0, 0
-
+        prepaid_sales_amount: int = self._voucher.total_amount
         for s in self._voucher.services:  # type: ignore
             if "Delivery" in s.type:
                 delivery_amount += s.rate
@@ -75,11 +76,16 @@ class Receipt(TypedDocument):
             else:
                 raise ValidationError(_("Cannot calculate services amount for Receipt"))
 
-        self._new_gl_entry("inventory", 0, self._voucher.items_cost)  # type: ignore
-        self._new_gl_entry("sales", 0, sales_amount)
-        self._new_gl_entry("delivery", 0, delivery_amount)
-        self._new_gl_entry("installation", 0, installation_amount)
-        self._new_gl_entry("prepaid_sales", self._voucher.total_amount, 0)
+        if inventory_amount:  # TODO: Test all this ifs
+            self._new_gl_entry("inventory", 0, inventory_amount)  # type: ignore
+        if sales_amount:
+            self._new_gl_entry("sales", 0, sales_amount)
+        if delivery_amount:
+            self._new_gl_entry("delivery", 0, delivery_amount)
+        if installation_amount:
+            self._new_gl_entry("installation", 0, installation_amount)
+        if prepaid_sales_amount:
+            self._new_gl_entry("prepaid_sales", prepaid_sales_amount, 0)
 
     def create_sales_stock_entries(self):
         items: list[
