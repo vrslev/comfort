@@ -140,6 +140,7 @@ Items to Sell,Товары на продажу
 Items to Sell Cost,Стоимость товаров на продажу
 Loading items into cart...,Загрузка товаров в корзину...
 Last Options,Последние способы
+Liabilities,Обязательства
 Margin,Прибыль
 Message sent,Сообщение отправлено
 My Profile,Мой профиль
@@ -176,11 +177,12 @@ Pickup List,Список на выдачу
 Posting Date,Дата публикации
 Prepaid Inventory,Предоплаченный инвентарь
 Prepaid Inventory Account,Счёт предоплаченного инвентаря
+Prepaid Sales,Предоплаченные продажи
 Prepaid Sales Account,Счёт предоплаченных продаж
 Price,Цена
 Print Contract Template,Распечатать шаблон договора
 Profit/Loss,Прибыль/убыток
-Profit and Loss Statement,Отчет о прибылях и убытках
+Profit and Loss Statement,Отчёт о прибылях и убытках
 Purchase Compensations,Компенсации закупок
 Purchase Compensations Account,Счёт компенсации закупок
 Purchase Delivery,Доставка закупок
@@ -279,6 +281,7 @@ image,изображение
 FRAPPE CORRECTIONS ______________________________________________________________________________________,
 Search or type a command (Ctrl + G),Поиск
 Reports & Masters,Основное
+Report {0},Отчёт {0}
 Submitted,Подтверждено
 Draft,Черновик
 Closed,Закрыто
