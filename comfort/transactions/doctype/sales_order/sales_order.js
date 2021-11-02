@@ -34,11 +34,11 @@ comfort.SalesOrderController = frappe.ui.form.Controller.extend({
 
   add_status_indicators() {
     this.frm.page.$title_area.append(
-      '<span class="indicator-pill payment-indicator whitespace-nowrap" style="margin-left: 2%;"></span>'
+      '<span class="indicator-pill whitespace-nowrap payment-indicator" style="margin-left: 2%;"></span>'
     );
     this.payment_indicator = $(".payment-indicator");
     this.frm.page.$title_area.append(
-      '<span class="indicator-pill delivery-indicator whitespace-nowrap" style="margin-left: 2%;"></span>'
+      '<span class="indicator-pill whitespace-nowrap delivery-indicator" style="margin-left: 2%;"></span>'
     );
     this.delivery_indicator = $(".delivery-indicator");
   },
@@ -61,13 +61,13 @@ comfort.SalesOrderController = frappe.ui.form.Controller.extend({
   render_status_indicators() {
     this.payment_indicator
       .removeClass()
-      .addClass("indicator-pill payment-indicator")
+      .addClass("indicator-pill whitespace-nowrap payment-indicator")
       .html(`<span>${__(this.frm.doc.payment_status)}</span>`)
       .addClass(frappe.utils.guess_colour(this.frm.doc.payment_status));
 
     this.delivery_indicator
       .removeClass()
-      .addClass("indicator-pill delivery-indicator")
+      .addClass("indicator-pill whitespace-nowrap delivery-indicator")
       .html(`<span>${__(this.frm.doc.delivery_status)}</span>`)
       .addClass(frappe.utils.guess_colour(this.frm.doc.delivery_status));
   },
