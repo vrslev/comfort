@@ -1,4 +1,6 @@
 """
+v0.25.0
+
 Currently:
 
 - "Sales" account contains cost of goods that not sold yet and margin
@@ -98,6 +100,12 @@ def receipt_sales():
         doc.create_sales_gl_entries()
 
 
+def remove_costs_of_goods_sold():
+    import frappe
+
+    frappe.delete_doc("Account", "Cost of Goods Sold")
+
+
 def check_if_statuses_changed():
     for sales_order in get_all(SalesOrder, filters={"docstatus": 1}):
         doc = get_doc(SalesOrder, sales_order.name)
@@ -132,4 +140,5 @@ def main():
     sales_return()
     payment_sales()
     receipt_sales()
+    remove_costs_of_goods_sold()
     check_if_statuses_changed()
