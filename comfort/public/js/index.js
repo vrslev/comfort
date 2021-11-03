@@ -174,7 +174,7 @@ function add_item_code_formatter() {
 
 function format_phone(value) {
   var regex = RegExp(/^((8|\+7)[-– ]?)?(\(?\d{3}\)?[-– ]?)?[\d\-– ]{7,10}$/);
-  if (!regex.test(value)) return;
+  if (!regex.test(value)) return "";
   let clean = value.replace(/[^0-9]+/);
   if (clean[0] == "7") {
     clean = "8" + value.substring(1);
