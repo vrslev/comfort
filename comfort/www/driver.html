@@ -1,0 +1,68 @@
+{% if not doc_exists %}
+  {{ _("Wrong Delivery Trip name") }}
+{% else %}
+
+<h1>
+  <a href="{{ form_url }}">
+    {{ doctype }}<br>
+    {{ docname }}
+  </a>
+</h1>
+
+<p>{{ weight }} кг</p>
+<br>
+
+<ol>
+  {%- for stop in stops -%}
+    <li style="margin-left: -5%; margin-bottom: 15%;">
+      <div>
+      <h2 style="display: inline-block;">{{ stop.customer }}</h2>
+
+      {% if stop.phone %}
+        <span style="float: right; vertical-align: top;">{{ format_phone(stop.phone) }}</span>
+      {% endif %}
+      <br>
+    </div>
+
+
+      {% if stop.address and stop.route_url %}
+        <a href="{{ stop.route_url }}">{{ stop.address }}</a>
+        <br>
+      {% endif %}
+
+      {% if stop.delivery_type %}
+        {{ _(stop.delivery_type).lower() }}
+        {%- if stop.installation -%}
+          , {{ _("Installation").lower() }}
+        {%- endif -%}
+        <br>
+      {% endif %}
+
+      {% if stop.pending_amount > 0 %}
+        {{ format_money(stop.pending_amount) }}
+        <br>
+      {% endif %}
+
+      {% if stop.details %}
+        {{ stop.details }}
+        <br>
+      {% endif %}
+
+      {{ stop.weight }} кг
+      <br>
+
+      <ul style="padding-left: 5%; color: gray;">
+        {%- for item in stop.items_ -%}
+        <br>
+        <li style="margin-bottom: -1%">
+          {{ format_item_code(item.item_code) or item.item_code }} ⨉ {{ item.qty }}
+          шт ({{ item.item_name }})
+        </li>
+        {%- endfor -%}
+      </ul>
+
+    </li>
+  {%- endfor -%}
+</ol>
+
+{% endif %}

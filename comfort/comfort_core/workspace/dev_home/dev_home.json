@@ -44,15 +44,6 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Telegram Settings",
-   "link_to": "Telegram Settings",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
    "label": "Entities",
    "link_type": "DocType",
    "onboard": 0,
@@ -254,7 +245,7 @@
    "type": "Link"
   }
  ],
- "modified": "2021-10-07 17:10:27.259777",
+ "modified": "2021-11-03 10:38:40.940971",
  "modified_by": "Administrator",
  "module": "Comfort Core",
  "name": "Dev Home",

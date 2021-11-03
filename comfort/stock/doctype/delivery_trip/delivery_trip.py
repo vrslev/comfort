@@ -1,24 +1,10 @@
 from __future__ import annotations
 
-import re
 from typing import Any, Literal, TypedDict
 from urllib.parse import urlencode
 
-import telegram
-
 import frappe
-from comfort import (
-    TypedDocument,
-    ValidationError,
-    _,
-    get_all,
-    get_doc,
-    group_by_attr,
-    maybe_json,
-)
-from comfort.comfort_core.doctype.telegram_settings.telegram_settings import (
-    send_message,
-)
+from comfort import TypedDocument, ValidationError, _, get_all, get_doc, group_by_attr
 from comfort.entities.doctype.customer.customer import Customer
 from comfort.stock.doctype.receipt.receipt import Receipt
 from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
@@ -156,6 +142,7 @@ class DeliveryTrip(TypedDocument):
             stops.append(
                 {
                     "customer": stop.customer,
+                    "sales_order": stop.sales_order,
                     "delivery_type": stop.delivery_type,
                     "installation": stop.installation,
                     "phone": stop.phone,
@@ -169,14 +156,6 @@ class DeliveryTrip(TypedDocument):
             )
         context["stops"] = stops
         return context
-
-    @frappe.whitelist()
-    def render_telegram_message(self) -> str:
-        return frappe.render_template(  # type: ignore
-            template="stock/doctype/delivery_trip/telegram_template.j2",
-            context=self._get_template_context(),
-            is_path=True,
-        )
 
     def _add_receipts_to_sales_orders(self):
         orders_have_receipt: list[str] = [
@@ -244,20 +223,3 @@ def get_delivery_and_installation_for_order(sales_order_name: str):
         SalesOrderService, fields="type", filters={"parent": sales_order_name}
     )
     return _get_delivery_and_installation_from_services(services)
-
-
-def _prepare_message_for_telegram(message: str):
-    message = message.replace("\n", "")
-    message = message.replace("<br>", "\n")
-    message = re.sub(r" +", " ", message)
-    message = message.replace("&nbsp;&nbsp;&nbsp;", "   ")
-    return message
-
-
-@frappe.whitelist()
-def send_telegram_message(text: str):  # pragma: no cover
-    send_message(
-        text=_prepare_message_for_telegram(maybe_json(text)),
-        parse_mode=telegram.ParseMode.HTML,
-        disable_web_page_preview=True,
-    )

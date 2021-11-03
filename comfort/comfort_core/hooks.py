@@ -120,7 +120,6 @@ def get_global_search_doctypes():
         "Commission Settings",
         "Ikea Settings",
         "Ikea Authorization Server Settings",
-        "Telegram Settings",
         "Finance Settings",
         "Vk Api Settings",
         "Vk Form Settings",

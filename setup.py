@@ -14,7 +14,6 @@ setup(
     zip_safe=False,
     install_requires=[
         "ikea-api-wrapped==0.4.3",
-        "python-telegram-bot==13.7",
         "pydantic==1.8.2",
         "sentry-sdk==1.4.3",
     ],

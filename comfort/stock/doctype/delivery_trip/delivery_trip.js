@@ -34,39 +34,8 @@ frappe.ui.form.on("Delivery Trip", {
       frm.doc.docstatus != 2 &&
       frm.doc.status != "Completed"
     ) {
-      frm.add_custom_button(__("Send Telegram message"), () => {
-        frm.call({
-          doc: frm.doc,
-          method: "render_telegram_message",
-          freeze: 1,
-          callback: (r) => {
-            var dialog = new frappe.ui.Dialog({
-              title: __("Preview"),
-              primary_action_label: __("Send"),
-              primary_action: () => {
-                frappe.call({
-                  method:
-                    "comfort.stock.doctype.delivery_trip.delivery_trip.send_telegram_message",
-                  args: {
-                    text: r.message,
-                  },
-                  freeze: 1,
-                  callback: () => {
-                    frappe.show_alert({
-                      message: __("Message sent"),
-                      indicator: "green",
-                    });
-                    dialog.hide();
-                  },
-                });
-              },
-            });
-            dialog.$body.append(
-              `<p class="frappe-confirm-message">${r.message}</p>`
-            );
-            dialog.show();
-          },
-        });
+      frm.add_custom_button(__("Go to Driver mode"), () => {
+        location.href = `/driver?name=${frm.doc.name}`;
       });
     }
 

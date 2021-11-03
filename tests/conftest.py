@@ -23,9 +23,6 @@ from comfort.comfort_core.doctype.commission_settings.commission_settings import
     CommissionSettings,
 )
 from comfort.comfort_core.doctype.ikea_settings.ikea_settings import IkeaSettings
-from comfort.comfort_core.doctype.telegram_settings.telegram_settings import (
-    TelegramSettings,
-)
 from comfort.comfort_core.doctype.vk_api_settings.vk_api_settings import VkApiSettings
 from comfort.entities.doctype.customer.customer import Customer
 from comfort.entities.doctype.item.item import Item
@@ -683,16 +680,6 @@ class FakeBot(MagicMock):
                 }
             )
         ]
-
-
-@pytest.fixture
-def telegram_settings(monkeypatch: pytest.MonkeyPatch) -> TelegramSettings:
-    monkeypatch.setattr("telegram.Bot", FakeBot)
-    doc = get_doc(TelegramSettings)
-    doc.bot_token = "28910482:82359djtg3fi0denjk"
-    doc.chat_id = "-103921437849"
-    doc.save()
-    return doc
 
 
 @pytest.fixture

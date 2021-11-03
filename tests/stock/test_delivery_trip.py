@@ -12,7 +12,6 @@ from comfort.stock.doctype.delivery_trip.delivery_trip import (
     DeliveryTrip,
     _get_delivery_and_installation_from_services,
     _make_route_url,
-    _prepare_message_for_telegram,
     get_delivery_and_installation_for_order,
 )
 from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
@@ -172,15 +171,6 @@ def test_get_template_context(delivery_trip: DeliveryTrip):
     assert context_stop["weight"] == doc.total_weight
 
 
-def test_render_telegram_message(delivery_trip: DeliveryTrip):
-    delivery_trip.set_new_name()
-    delivery_trip._get_weight()
-
-    msg = delivery_trip.render_telegram_message()
-    assert msg is not None
-    assert "telegram_template.j2" not in msg
-
-
 @pytest.mark.parametrize("insert_receipt_before", (True, False))
 def test_add_receipts_to_sales_orders(
     delivery_trip: DeliveryTrip,
@@ -287,9 +277,3 @@ def test_get_delivery_and_installation_for_order(
     sales_order.db_update_all()
     res = get_delivery_and_installation_for_order(sales_order.name)
     assert res == expected_result
-
-
-def test_prepare_message_for_telegram():
-    assert (
-        _prepare_message_for_telegram("<br><br>\n\n   &nbsp;&nbsp;&nbsp;") == "\n\n    "
-    )
