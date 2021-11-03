@@ -96,6 +96,15 @@
   {
    "hidden": 0,
    "is_query_report": 1,
+   "label": "Stock Balance",
+   "link_to": "Stock Balance",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
    "label": "General Ledger",
    "link_to": "General Ledger",
    "link_type": "Report",
@@ -114,14 +123,14 @@
   {
    "hidden": 0,
    "is_query_report": 1,
-   "label": "Stock Balance",
-   "link_to": "Stock Balance",
+   "label": "Debtors",
+   "link_to": "Debtors",
    "link_type": "Report",
    "onboard": 0,
    "type": "Link"
   }
  ],
- "modified": "2021-10-26 14:00:19.621579",
+ "modified": "2021-11-03 14:29:12.612629",
  "modified_by": "Administrator",
  "module": "Comfort Core",
  "name": "Home",
