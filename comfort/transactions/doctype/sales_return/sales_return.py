@@ -245,7 +245,8 @@ class SalesReturn(Return):
         self._make_stock_entries()
         self._make_payment_gl_entries()
 
-        if return_all_items and not self.flags.sales_order_on_cancel:
+        if return_all_items:
+            self._voucher.flags.on_cancel_from_sales_return = True
             self._voucher.cancel()
 
         self._add_items_to_sell_to_linked_purchase_order()

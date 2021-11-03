@@ -54,14 +54,6 @@ def test_validate_voucher_statuses_docstatus_not_raises(sales_return: SalesRetur
     sales_return._validate_voucher_statuses()
 
 
-def test_validate_voucher_statuses_docstatus_not_executed_on_sales_order_cancel(
-    sales_return: SalesReturn,
-):
-    sales_return._voucher.docstatus = 2
-    sales_return.flags.sales_order_on_cancel = True
-    sales_return._validate_voucher_statuses()
-
-
 @pytest.mark.parametrize("docstatus", (0, 2))
 def test_validate_voucher_statuses_docstatus_raises(
     sales_return: SalesReturn, docstatus: int
@@ -428,8 +420,10 @@ def test_sales_return_before_submit(
 
     sales_return.items = []
     sales_return.append("items", item)
+    sales_return.db_insert()
     sales_return._voucher.update_children()
 
+    assert len(get_all(SalesReturn)) == 1
     if return_all_items:
         counter_before = count_qty(sales_return._voucher.items)
         sales_return.save()

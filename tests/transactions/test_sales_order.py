@@ -353,6 +353,7 @@ def test_create_cancel_sales_return_without_return_before(
     sales_order.load_doc_before_save()
     sales_order._create_cancel_sales_return()
 
+    assert len(get_all(SalesReturn)) == 1
     return_name: str = get_value("Sales Return", {"sales_order": sales_order.name})
     cancel_return = get_doc(SalesReturn, return_name)
     assert cancel_return.sales_order == sales_order.name
@@ -383,6 +384,7 @@ def test_create_cancel_sales_return_with_return_before(
     sales_order.load_doc_before_save()
     sales_order._create_cancel_sales_return()
 
+    assert len(get_all(SalesReturn)) == 2
     return_name: str = get_value("Sales Return", {"sales_order": sales_order.name})
     cancel_return = get_doc(SalesReturn, return_name)
     new_counter = count_qty(sales_order.get_items_with_splitted_combinations())

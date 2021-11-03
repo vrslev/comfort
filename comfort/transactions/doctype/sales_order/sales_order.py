@@ -300,6 +300,9 @@ class SalesOrder(TypedDocument):
         ]
 
     def _create_cancel_sales_return(self):
+        if self.flags.on_cancel_from_sales_return:
+            return
+
         from ..sales_return.sales_return import SalesReturn
 
         sales_return = new_doc(SalesReturn)
