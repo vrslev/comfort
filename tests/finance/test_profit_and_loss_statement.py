@@ -106,7 +106,6 @@ def test_get_chart_data():
     income, expense, profit_loss = 300, 200, 100
     filters = get_filters()
     chart: dict[str, Any] = get_chart_data(filters, income, expense, profit_loss)
-    assert chart["data"]["labels"][0] == f"{filters['from_date']}—{filters['to_date']}"
     for dataset in chart["data"]["datasets"]:
         if dataset["name"] == "Income":
             assert dataset["values"][0] == income
