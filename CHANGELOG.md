@@ -3,6 +3,26 @@
 
 <!--next-version-placeholder-->
 
+## v0.26.0 (2021-11-03)
+### Feature
+* **Sales Order:** Sort Purchase Order in listview filter by creation time ([`df99412`](https://github.com/vrslev/comfort/commit/df994125d57df300875f0b87d53a977ef6b0f6de))
+* Add Debtors report ([`2d26c2e`](https://github.com/vrslev/comfort/commit/2d26c2ec3392b721ee8b800430bfe293eb9bf1fe))
+* **Delivery Trip:** Use portal pages instead of Telegram for driver mode ([`255e56a`](https://github.com/vrslev/comfort/commit/255e56a33c477ddf3e7b31d31fd6ee473d7f93db))
+
+### Fix
+* **Sales Return:** Calculations in Purchase Order after all ([`1f440c7`](https://github.com/vrslev/comfort/commit/1f440c7f45e0e8adba1cc9a56f5d5f577aab6ad5))
+* **Purchase Order:** Make customer field clickable ([`55dbe63`](https://github.com/vrslev/comfort/commit/55dbe63a49f29a60a862a1800539d84acb929a90))
+* **Compensation:** Permissions to submit, cancel, amend ([`72bf19f`](https://github.com/vrslev/comfort/commit/72bf19faf37f2b925d2021fd42b6fb9366582388))
+* **Compensation:** Translate "Received" button ([`f877cde`](https://github.com/vrslev/comfort/commit/f877cde54219264d503c6149a12957f409e611f2))
+* **Sales Return:** Duplicate creation ([`e8adda5`](https://github.com/vrslev/comfort/commit/e8adda5d3c9d36ac0a1d98266c88a38c14fc2f07))
+* Add Global Search translations ([`a56dd52`](https://github.com/vrslev/comfort/commit/a56dd5212a21ea5ed5d82f5310bfc291d5dcbdfe))
+* **Customer:** Don't show undefined if no phone provided ([`b13f72c`](https://github.com/vrslev/comfort/commit/b13f72cce78dd5a85f2ec3d2a4e89d0eee62f182))
+* Improve translations ([`60ad7ea`](https://github.com/vrslev/comfort/commit/60ad7ea59426fd80376a99bc3f40ca5bea44412e))
+* Remove label on chart on Profit and Loss statement ([`54832d9`](https://github.com/vrslev/comfort/commit/54832d960ded2ecb6e0fbec2ad80f780cb3ac676))
+* Stock Balance report item code align ([`2ce7a33`](https://github.com/vrslev/comfort/commit/2ce7a33848bf2eeb93bedd840b1166a81ea5c8e1))
+* **Accounts:** Add missing translations ([`5f7d839`](https://github.com/vrslev/comfort/commit/5f7d83933f8986901400f4459ad38cb28fed099c))
+* **Sales Order:** Status indicator appearance ([`cf6f85b`](https://github.com/vrslev/comfort/commit/cf6f85ba3c5f7b63e84e9f94ed31ccd90d9579c3))
+
 ## v0.25.0 (2021-11-02)
 ### Feature
 * **Accounts:** Big fix for accounts ([`0b62aba`](https://github.com/vrslev/comfort/commit/0b62abaf73311c3db7bcb45e4afec545681714b9))
