@@ -206,6 +206,12 @@ function add_purchase_order_filter(list) {
       fieldname: "purchase_order",
       fieldtype: "Link",
       options: "Purchase Order",
+      get_query() {
+        return {
+          query:
+            "comfort.transactions.doctype.sales_order.sales_order.purchase_order_filter_query",
+        };
+      },
       change() {
         change();
       },

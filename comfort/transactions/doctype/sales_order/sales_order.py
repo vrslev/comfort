@@ -748,6 +748,29 @@ def get_sales_orders_not_in_purchase_order():
 
 
 @frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def purchase_order_filter_query(
+    doctype: str,
+    txt: str,
+    searchfield: str,
+    start: int,
+    page_len: int,
+    filters: dict[Any, Any],
+):  # pragma: no cover
+    from comfort.queries import default_query
+
+    return default_query(
+        doctype=doctype,
+        txt=txt,
+        searchfield=searchfield,
+        start=start,
+        page_len=page_len,
+        filters=filters,
+        order_by="creation DESC",
+    )
+
+
+@frappe.whitelist()
 def get_sales_orders_in_purchase_order(purchase_order_name: str):
     po_sales_orders = get_all(
         PurchaseOrderSalesOrder,

@@ -96,6 +96,7 @@ def default_query(
     start: int,
     page_len: int,
     filters: dict[Any, Any],
+    order_by: str = "modified DESC",
 ):
     fields = _get_fields(doctype, [searchfield, "name"])
 
@@ -104,7 +105,7 @@ def default_query(
         fields=fields,
         filters=filters,
         or_filters=[(field, "like", "%%%s%%" % txt) for field in fields],
-        order_by="modified DESC",
+        order_by=order_by,
         limit_start=start,
         limit_page_length=page_len,
         as_list=True,
