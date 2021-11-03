@@ -3,3 +3,4 @@
 **/workspace/**/*.json
 **/fixtures/*.json
 **/print_format/**/*.json
+*.html
