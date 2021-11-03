@@ -168,9 +168,10 @@ class SalesReturn(Return):
         )
         doc.items_to_sell = merge_same_items(doc.items_to_sell)
         self._add_missing_info_to_items_in_items_to_sell(doc.items_to_sell)
-        doc.flags.ignore_validate_update_after_submit = True
         doc.flags.ignore_links = True
-        doc.save()
+        doc.update_sales_orders_from_db()
+        doc.calculate()
+        doc.save_without_validating()
 
     def _make_delivery_gl_entries(self):
         """Transfer cost of returned items from "Prepaid Sales" to "Inventory" account if Sales Order is delivered.
@@ -249,6 +250,7 @@ class SalesReturn(Return):
             self._voucher.flags.on_cancel_from_sales_return = True
             self._voucher.cancel()
 
+    def on_submit(self):
         self._add_items_to_sell_to_linked_purchase_order()
 
     def before_cancel(self):

@@ -64,8 +64,9 @@ class Payment(TypedDocument):
             from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
 
             doc = get_doc(SalesOrder, self.voucher_no)
-            doc.set_statuses()
-            doc.save_without_validating()
+            if doc.docstatus != 2:
+                doc.set_statuses()
+                doc.save_without_validating()
 
     def on_cancel(self):
         self.cancel_gl_entries()

@@ -195,7 +195,10 @@ class PurchaseOrder(TypedDocument):
         res: list[list[float]] = frappe.get_all(
             "Sales Order Item",
             fields="SUM(total_weight) AS total_weight",
-            filters={"parent": ("in", (o.sales_order_name for o in self.sales_orders))},
+            filters={
+                "parent": ("in", (o.sales_order_name for o in self.sales_orders)),
+                "docstatus": ("!=", 2),
+            },
             as_list=True,
         )
         sales_orders_weight = res[0][0] or 0.0
@@ -221,7 +224,8 @@ class PurchaseOrder(TypedDocument):
             get_all(
                 SalesOrder,
                 filters={
-                    "name": ("in", (o.sales_order_name for o in self.sales_orders))
+                    "name": ("in", (o.sales_order_name for o in self.sales_orders)),
+                    "docstatus": ("!=", 2),
                 },
                 fields="SUM(margin) as margin",
             )[0].margin

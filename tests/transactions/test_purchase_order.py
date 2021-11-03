@@ -191,6 +191,13 @@ def test_calculate_total_weight(
     if updated_sales_orders is not None:
         purchase_order.sales_orders = updated_sales_orders
 
+    if updated_sales_orders:
+        cancelled_item = new_doc(SalesOrderItem)
+        cancelled_item.total_weight = 100000
+        cancelled_item.docstatus = 2
+        cancelled_item.parent = purchase_order.sales_orders[0].sales_order_name
+        cancelled_item.db_update()
+
     purchase_order.update_items_to_sell_from_db()
     purchase_order._calculate_total_weight()
 
@@ -198,10 +205,8 @@ def test_calculate_total_weight(
         "Sales Order Item",
         fields="SUM(total_weight) AS total_weight",
         filters={
-            "parent": (
-                "in",
-                (o.sales_order_name for o in purchase_order.sales_orders),
-            )
+            "parent": ("in", (o.sales_order_name for o in purchase_order.sales_orders)),
+            "docstatus": ("!=", 2),
         },
         as_list=True,
     )
@@ -243,17 +248,18 @@ def test_calculate_total_margin_no_sales_order(purchase_order: PurchaseOrder):
 
 
 def test_calculate_total_margin_with_sales_order(purchase_order: PurchaseOrder):
+    cancelled_order = get_doc(SalesOrder, {"name": "test"})
+    cancelled_order.margin = 200
+    cancelled_order.docstatus = 2
+    cancelled_order.db_insert()
+    purchase_order.append("sales_orders", {"sales_order_name": cancelled_order.name})
+
     purchase_order._calculate_total_margin()
     assert (
         purchase_order.total_margin
         == get_all(
             SalesOrder,
-            filters={
-                "name": (
-                    "in",
-                    (o.sales_order_name for o in purchase_order.sales_orders),
-                )
-            },
+            filters={"name": purchase_order.sales_orders[0].sales_order_name},
             fields="SUM(margin) as margin",
         )[0].margin
     )
