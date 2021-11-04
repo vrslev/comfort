@@ -16,4 +16,5 @@ def get_context(context: dict[str, Any]):
         doc = get_doc(DeliveryTrip, delivery_trip_name)
         context.update(doc._get_template_context())
     context["doc_exists"] = exists
+    context["no_cache"] = True
     return context
