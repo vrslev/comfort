@@ -3,6 +3,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.26.1 (2021-11-04)
+### Fix
+* **Delivery Trip:** Disable cache for driver mode ([`fcf4f78`](https://github.com/vrslev/comfort/commit/fcf4f78d74ae308aca78c1f80cccd7b5637af19c))
+
 ## v0.26.0 (2021-11-03)
 ### Feature
 * **Sales Order:** Sort Purchase Order in listview filter by creation time ([`df99412`](https://github.com/vrslev/comfort/commit/df994125d57df300875f0b87d53a977ef6b0f6de))
