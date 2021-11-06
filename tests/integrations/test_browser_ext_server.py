@@ -131,7 +131,7 @@ mock_decoded_token = {
 
 def test_update_token():
     token = PyJWT().encode(mock_decoded_token, "secret")
-    assert update_token(token) == {}
+    assert update_token(token) == {}  # type: ignore
     doc = get_doc(IkeaSettings)
-    assert doc.authorized_token == token
+    assert doc.authorized_token == token.decode()
     assert int(doc.authorized_token_expiration) == mock_decoded_token["exp"]  # type: ignore

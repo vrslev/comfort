@@ -65,7 +65,7 @@ def process_sales_order(
 def update_token(token: str) -> dict[Any, Any]:
     doc = get_doc(IkeaSettings)
     doc.authorized_token = token
-    decoded_token = PyJWT().decode(token, options={"verify_signature": False})
+    decoded_token = PyJWT().decode(token, verify=False)
     doc.authorized_token_expiration = decoded_token["exp"]
     doc.save()
     return {}
