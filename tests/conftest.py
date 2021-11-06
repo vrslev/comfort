@@ -1,6 +1,7 @@
-from datetime import date
+from calendar import timegm
+from datetime import date, datetime, timedelta, timezone
 from types import SimpleNamespace
-from typing import Any, Callable
+from typing import Any
 from unittest.mock import MagicMock
 
 import ikea_api.auth
@@ -529,8 +530,11 @@ mock_token = "some_mock_token"  # nosec
 def ikea_settings(monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setattr(ikea_api.auth, "get_guest_token", lambda: mock_token)
     doc = get_doc(IkeaSettings)
+    doc.authorized_token = mock_token
+    doc.authorized_token_expiration = timegm(
+        (datetime.now(tz=timezone.utc) + timedelta(hours=1)).utctimetuple()
+    )
     doc.zip_code = "101000"
-    doc.username = doc.password = "lalalallalllala"
     doc.save()
     return doc
 

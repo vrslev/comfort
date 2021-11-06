@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from datetime import datetime
+from calendar import timegm
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
 import pytest
@@ -78,61 +79,39 @@ def test_get_guest_api_return():
     assert get_guest_api().reveal_token() == mock_token
 
 
-@pytest.mark.parametrize("dev_mode", (True, False))
 @pytest.mark.parametrize(*_testdata)
 def test_get_authorized_api_update(
     ikea_settings: IkeaSettings,
     token: str | None,
     expiration: datetime | None,
-    dev_mode: bool,
 ):
-    frappe.conf.developer_mode = dev_mode
-    ikea_settings.authorized_token = token  # type: ignore
-    ikea_settings.authorized_token_expiration = expiration  # type: ignore
+    ikea_settings.authorized_token = token
+    if expiration:
+        ikea_settings.authorized_token_expiration = timegm(
+            (expiration - timedelta(days=1)).astimezone(timezone.utc).utctimetuple()
+        )
+    else:
+        ikea_settings.authorized_token_expiration = None
+
     ikea_settings.save()
-    get_authorized_api()
-    ikea_settings.reload()
-    assert ikea_settings.authorized_token == mock_token
-    assert is_same_date(
-        get_datetime(ikea_settings.authorized_token_expiration),
-        add_to_date(None, hours=24),
-    )
+    with pytest.raises(ValidationError, match="Update authorization info"):
+        get_authorized_api()
 
 
 def test_get_authorized_api_no_update(ikea_settings: IkeaSettings):
-    new_token, new_expiration = "fff", add_to_date(None, hours=5)
-    ikea_settings.authorized_token = new_token
+    new_expiration = timegm(
+        (datetime.now(tz=timezone.utc) + timedelta(hours=1)).utctimetuple()
+    )
+    ikea_settings.authorized_token = mock_token
     ikea_settings.authorized_token_expiration = new_expiration
     ikea_settings.save()
+    frappe.clear_document_cache("Ikea Settings", "Ikea Settings")
     get_authorized_api()
     ikea_settings.reload()
-    assert ikea_settings.authorized_token == new_token
-    assert is_same_date(
-        get_datetime(ikea_settings.authorized_token_expiration), new_expiration
-    )
+    assert ikea_settings.authorized_token == mock_token
+    assert int(ikea_settings.authorized_token_expiration) == new_expiration
 
 
 @pytest.mark.usefixtures("ikea_settings")
 def test_get_authorized_api_return():
     assert get_authorized_api().reveal_token() == mock_token
-
-
-@pytest.mark.parametrize(
-    ("username", "password"),
-    (
-        ("user", None),
-        (None, "password"),
-        (None, None),
-    ),
-)
-def test_get_authorized_api_raises_on_login_data_missing(
-    ikea_settings: IkeaSettings, username: str | None, password: str | None
-):
-    ikea_settings.username = username
-    ikea_settings.password = password
-    ikea_settings.save()
-
-    with pytest.raises(
-        ValidationError, match="Enter login and password in Ikea Settings"
-    ):
-        get_authorized_api()

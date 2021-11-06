@@ -5,9 +5,6 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "username",
-  "password",
-  "column_break",
   "zip_code",
   "secrets_section_break",
   "guest_token",
@@ -16,16 +13,6 @@
   "authorized_token_expiration"
  ],
  "fields": [
-  {
-   "fieldname": "username",
-   "fieldtype": "Data",
-   "label": "Username"
-  },
-  {
-   "fieldname": "password",
-   "fieldtype": "Password",
-   "label": "Password"
-  },
   {
    "fieldname": "zip_code",
    "fieldtype": "Data",
@@ -54,14 +41,10 @@
   },
   {
    "fieldname": "authorized_token_expiration",
-   "fieldtype": "Datetime",
+   "fieldtype": "Int",
    "hidden": 1,
    "label": "Authorized Token Expiration",
    "read_only": 1
-  },
-  {
-   "fieldname": "column_break",
-   "fieldtype": "Column Break"
   },
   {
    "fieldname": "secrets_section_break",
@@ -70,7 +53,7 @@
  ],
  "issingle": 1,
  "links": [],
- "modified": "2021-08-31 21:55:53.196475",
+ "modified": "2021-11-06 20:02:28.263466",
  "modified_by": "Administrator",
  "module": "Comfort Core",
  "name": "Ikea Settings",
