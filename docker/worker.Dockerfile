@@ -36,15 +36,15 @@ RUN apt-get update \
 # Setup docker-entrypoint
 RUN git clone --depth 1 --single-branch https://github.com/frappe/frappe_docker /tmp/frappe_docker \
   && cd /tmp/frappe_docker \
-  && cp build/common/worker/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh \
+  && cp build/frappe-worker/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh \
   && ln -s /usr/local/bin/docker-entrypoint.sh / \
   && mkdir -p /home/frappe/frappe-bench/commands \
-  && cp build/common/commands/* /home/frappe/frappe-bench/commands \
+  && cp build/frappe-worker/commands/* /home/frappe/frappe-bench/commands \
   && mkdir /opt/frappe \
-  && cp build/common/common_site_config.json.template /opt/frappe/common_site_config.json.template \
-  && cp build/common/worker/install_app.sh /usr/local/bin/install_app \
-  && cp build/common/worker/bench /usr/local/bin/bench \
-  && cp build/common/worker/healthcheck.sh /usr/local/bin/healthcheck.sh \
+  && cp build/frappe-worker/common_site_config.json.template /opt/frappe/common_site_config.json.template \
+  && cp build/frappe-worker/install_app.sh /usr/local/bin/install_app \
+  && cp build/frappe-worker/bench /usr/local/bin/bench \
+  && cp build/frappe-worker/healthcheck.sh /usr/local/bin/healthcheck.sh \
   && chown -R frappe:frappe /home/frappe
 
 # Install wkhtmltopdf
