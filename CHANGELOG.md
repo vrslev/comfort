@@ -3,6 +3,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.26.4 (2021-11-06)
+### Fix
+* **Purchase Return:** Submit if items from Sales Order ([`3d5ef9e`](https://github.com/vrslev/comfort/commit/3d5ef9eb27b3fea67717999ac989b233b7c503c1))
+
 ## v0.26.3 (2021-11-06)
 ### Fix
 * **Docker:** Build due to changes in frappe/frappe_docker ([`a99bde6`](https://github.com/vrslev/comfort/commit/a99bde66781c120864cd81972440464b06f234e2))
