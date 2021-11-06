@@ -1,18 +1,21 @@
 import re
 
 import pytest
+from jwt import PyJWT
 
 import comfort.integrations.browser_ext
-from comfort import count_qty
+from comfort import count_qty, get_doc
 from comfort.comfort_core.doctype.commission_settings.commission_settings import (
     CommissionSettings,
 )
+from comfort.comfort_core.doctype.ikea_settings.ikea_settings import IkeaSettings
 from comfort.entities.doctype.customer.customer import Customer
 from comfort.entities.doctype.item.item import Item
 from comfort.integrations.browser_ext import (
     _create_customer,
     _create_sales_order,
     _get_url_to_reference_doc,
+    update_token,
 )
 
 
@@ -106,3 +109,29 @@ def test_get_url_to_reference_doc_no_items():
         r"http://tests:\d+/app/customer/John%20Johnson",
         _get_url_to_reference_doc(customer, sales_order),
     )
+
+
+mock_decoded_token = {
+    "https://accounts.ikea.com/customerType": "individual",
+    "https://accounts.ikea.com/retailUnit": "RU",
+    "https://accounts.ikea.com/memberId": "1111111111",
+    "https://accounts.ikea.com/partyUId": "111111111111111111111111111",
+    "iss": "https://ru.accounts.ikea.com/",
+    "sub": "auth0|1111111111",
+    "aud": [
+        "https://retail.api.ikea.com",
+        "https://ikea-prod-ru.eu.auth0.com/userinfo",
+    ],
+    "iat": 1111111111,
+    "exp": 1000000001,  # explicitly don't validate expiration time
+    "azp": "11111fsklfjweifiicni190h",
+    "scope": "openid profile email",
+}
+
+
+def test_update_token():
+    token = PyJWT().encode(mock_decoded_token, "secret")
+    assert update_token(token) == {}
+    doc = get_doc(IkeaSettings)
+    assert doc.authorized_token == token
+    assert int(doc.authorized_token_expiration) == mock_decoded_token["exp"]  # type: ignore

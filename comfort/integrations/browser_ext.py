@@ -1,7 +1,12 @@
 from __future__ import annotations
 
+from typing import Any
+
+from jwt import PyJWT
+
 import frappe
 from comfort import get_doc, get_value, new_doc
+from comfort.comfort_core.doctype.ikea_settings.ikea_settings import IkeaSettings
 from comfort.entities.doctype.customer.customer import Customer, parse_vk_url
 from comfort.integrations.ikea import fetch_items
 from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
@@ -48,7 +53,19 @@ def _get_url_to_reference_doc(
 
 
 @frappe.whitelist()
-def main(customer_name: str, vk_url: str, item_codes: list[str]):  # pragma: no cover
+def process_sales_order(
+    customer_name: str, vk_url: str, item_codes: list[str]
+):  # pragma: no cover
     customer = _create_customer(customer_name, vk_url)
     sales_order = _create_sales_order(customer_name, item_codes)
     return _get_url_to_reference_doc(customer, sales_order)
+
+
+@frappe.whitelist()
+def update_token(token: str) -> dict[Any, Any]:
+    doc = get_doc(IkeaSettings)
+    doc.authorized_token = token
+    decoded_token = PyJWT().decode(token, options={"verify_signature": False})
+    doc.authorized_token_expiration = decoded_token["exp"]
+    doc.save()
+    return {}
