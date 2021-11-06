@@ -3,6 +3,16 @@
 
 <!--next-version-placeholder-->
 
+## v0.27.0 (2021-11-06)
+### Feature
+* **IKEA:** Add client part of manual token updating ([`0fd3543`](https://github.com/vrslev/comfort/commit/0fd354381e0fb8109969262576d292f8bf43d5ad))
+* **IKEA:** Add server part of manual token updating ([`69a6f7d`](https://github.com/vrslev/comfort/commit/69a6f7d92a3c3cfb8dffdd5d4ec70146fb9e700d))
+
+### Fix
+* **IKEA:** Add translation ([`fdbcc5f`](https://github.com/vrslev/comfort/commit/fdbcc5fb8d8ca586a9b3d8cf97e397ccbc47c551))
+* **Ikea Settings:** Remove username and password fields, add new validation for authorized token ([`c14a8b3`](https://github.com/vrslev/comfort/commit/c14a8b3b220e83faf8da4bb64f12098f61b8ad60))
+* Don't user authorization server ([`80b7f12`](https://github.com/vrslev/comfort/commit/80b7f12fec00dcd803ac1c395450e24caa105893))
+
 ## v0.26.4 (2021-11-06)
 ### Fix
 * **Purchase Return:** Submit if items from Sales Order ([`3d5ef9e`](https://github.com/vrslev/comfort/commit/3d5ef9eb27b3fea67717999ac989b233b7c503c1))
