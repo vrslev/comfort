@@ -3,6 +3,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.26.3 (2021-11-06)
+### Fix
+* **Docker:** Build due to changes in frappe/frappe_docker ([`a99bde6`](https://github.com/vrslev/comfort/commit/a99bde66781c120864cd81972440464b06f234e2))
+
 ## v0.26.2 (2021-11-06)
 ### Fix
 * **Debtors report:** Show paid but not purchased orders amount; fix total amount color ([`6fd6b0d`](https://github.com/vrslev/comfort/commit/6fd6b0d8b357b4957b497fe2f3a4bcf4a770c524))
