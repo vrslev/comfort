@@ -8,7 +8,7 @@ from comfort.transactions.doctype.purchase_order_item_to_sell.purchase_order_ite
 from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
 
 
-def _get_sales_orders_amount() -> int:
+def _get_purchased_sales_orders_amount() -> int:
     sales_orders = get_all(
         SalesOrder,
         fields="(items_cost - paid_amount) as diff",
@@ -18,6 +18,24 @@ def _get_sales_orders_amount() -> int:
         },
     )
     return sum(s.diff for s in sales_orders if s.diff > 0)  # type: ignore
+
+
+def _get_not_purchased_sales_orders_amount():
+    sales_orders = get_all(
+        SalesOrder,
+        fields="SUM(paid_amount) as paid_amount",
+        filters={
+            "payment_status": ("in", ("Partially Paid", "Paid", "Overpaid")),
+            "delivery_status": (
+                "in",
+                (
+                    "",  # cancelled
+                    "To Purchase",
+                ),
+            ),
+        },
+    )
+    return sales_orders[0].paid_amount
 
 
 def _get_items_to_sell_amount():
@@ -30,14 +48,23 @@ def _get_items_to_sell_amount():
     return items[0].amount
 
 
-def get_report_summary():
-    sales_orders_amount = _get_sales_orders_amount()
+def _get_report_summary():
+    sales_orders_amount = _get_purchased_sales_orders_amount()
     items_to_sell_amount = _get_items_to_sell_amount()
-
+    not_purchased_sales_orders_amount = _get_not_purchased_sales_orders_amount()
+    total_amount = (
+        sales_orders_amount - not_purchased_sales_orders_amount + items_to_sell_amount
+    )
     return [
         {
             "value": sales_orders_amount,
-            "label": _("Sales Orders"),
+            "label": _("Purchased Sales Orders"),
+            "datatype": "Currency",
+        },
+        {"type": "separator", "value": "-"},
+        {
+            "value": not_purchased_sales_orders_amount,
+            "label": _("Not Purchased Sales Orders"),
             "datatype": "Currency",
         },
         {"type": "separator", "value": "+"},
@@ -48,8 +75,8 @@ def get_report_summary():
         },
         {"type": "separator", "value": "="},
         {
-            "value": sales_orders_amount + items_to_sell_amount,
-            "indicator": "Green" if 300 > 0 else "Red",
+            "value": total_amount,
+            "indicator": "Green" if total_amount > 0 else "Red",
             "label": _("Total"),
             "datatype": "Currency",
         },
@@ -57,4 +84,4 @@ def get_report_summary():
 
 
 def execute(filters: dict[str, str]):
-    return (), (), None, None, get_report_summary()
+    return (), (), None, None, _get_report_summary()
