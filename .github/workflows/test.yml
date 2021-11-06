@@ -9,14 +9,12 @@ on:
       - "**.py"
       - "**.json"
       - "!docker/scripts/**"
-      - "!authorization_server/**"
       - "!browser_ext/**"
   pull_request:
     paths:
       - "**.py"
       - "**.json"
       - "!docker/scripts/**"
-      - "!authorization_server/**"
       - "!browser_ext/**"
 
 jobs:

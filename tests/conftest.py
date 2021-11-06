@@ -527,16 +527,7 @@ mock_token = "some_mock_token"  # nosec
 
 @pytest.fixture
 def ikea_settings(monkeypatch: pytest.MonkeyPatch):
-    import comfort.integrations.ikea_authorization_server
-
     monkeypatch.setattr(ikea_api.auth, "get_guest_token", lambda: mock_token)
-
-    mock_main: Callable[[Any, Any], str] = lambda _, __: mock_token
-    monkeypatch.setattr(
-        comfort.integrations.ikea_authorization_server, "main", mock_main
-    )
-    monkeypatch.setattr(ikea_api.auth, "get_authorized_token", mock_main)
-
     doc = get_doc(IkeaSettings)
     doc.zip_code = "101000"
     doc.username = doc.password = "lalalallalllala"
