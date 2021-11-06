@@ -3,6 +3,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.27.1 (2021-11-06)
+### Fix
+* **Browser Ext:** Token decoding ([`7b1b771`](https://github.com/vrslev/comfort/commit/7b1b771eae5271a96b9bd21b0b08aa665d61a17b))
+
 ## v0.27.0 (2021-11-06)
 ### Feature
 * **IKEA:** Add client part of manual token updating ([`0fd3543`](https://github.com/vrslev/comfort/commit/0fd354381e0fb8109969262576d292f8bf43d5ad))
