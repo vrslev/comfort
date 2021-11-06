@@ -1,6 +1,6 @@
 from setuptools import setup
 
-__version__ = "0.1.1"
+__version__ = "0.2.0"
 
 setup(
     name="comfort_browser_ext",
@@ -10,7 +10,7 @@ setup(
     zip_safe=False,
     py_modules=["comfort_browser_ext"],
     install_requires=[
-        "ikea-api-wrapped==0.4.2",
+        "ikea-api-wrapped==0.4.3",
         "beautifulsoup4==4.10.0",
         "sentry-sdk==1.4.3",
     ],
@@ -19,7 +19,7 @@ setup(
             "pytest==6.2.5",
             "pytest-cov==3.0.0",
             "pytest-randomly==3.10.1",
-            "responses==0.14.0",
+            "responses==0.15.0",
         ]
     },
 )

@@ -17,11 +17,11 @@ from comfort_browser_ext import (
     Config,
     FrappeApi,
     FrappeException,
+    _get_item_codes,
+    _send_sales_order_to_server,
     get_config,
-    get_item_codes,
     init_sentry,
-    parse_args,
-    send_to_server,
+    update_token,
 )
 
 
@@ -40,43 +40,19 @@ def config():
     )
 
 
-class SendToServerArgs(TypedDict):
-    customer_name: str
-    vk_url: str
-    item_codes: list[str]
-
-
-@pytest.fixture
-def send_to_server_args():
-    return SendToServerArgs(
-        customer_name="John Johnson",
-        vk_url="https://vk.com/im?sel=1",
-        item_codes=["00370713"],
-    )
-
-
-def test_get_item_codes(html: str):
-    assert not set(get_item_codes(html)) ^ {
-        "00370713",
-        "09326198",
-        "20372829",
-        "30370702",
-        "80370337",
-        "99326231",
-    }
-
-
-def test_get_config(tmp_path: pathlib.Path, config: Config):
-    dir_path_str = tmp_path.as_posix()
-    file_path = tmp_path.joinpath("config.ini")
-
-    empty_config = f"""[{PACKAGE_NAME}]
+empty_config = f"""[{PACKAGE_NAME}]
 url =
 api_key =
 api_secret =
 sentry_dsn =
 
 """
+
+
+def test_get_config(tmp_path: pathlib.Path, config: Config):
+    dir_path_str = tmp_path.as_posix()
+    file_path = tmp_path.joinpath("config.ini")
+
     # Make sure can write empty config multiple time without duplicating sections
     for _ in range(3):
         with pytest.raises(RuntimeError, match="Config is incomplete"):
@@ -103,6 +79,27 @@ sentry_dsn =
         parser.write(f)
 
     assert get_config(dir_path_str) == config
+
+
+def test_init_sentry(monkeypatch: pytest.MonkeyPatch, config: Config):
+    def mock_init(dsn: str, release: str, **kwargs: Any):
+        assert dsn == config.sentry_dsn
+        assert len(re.findall(PACKAGE_NAME + r"@\d+\.\d+\.\d+", release)) == 1
+
+    monkeypatch.setattr(sentry_sdk, "init", mock_init)
+    init_sentry(config)
+    assert sentry_sdk.utils.MAX_STRING_LENGTH == 8192
+
+
+def test_get_item_codes(html: str):
+    assert not set(_get_item_codes(html)) ^ {
+        "00370713",
+        "09326198",
+        "20372829",
+        "30370702",
+        "80370337",
+        "99326231",
+    }
 
 
 def test_frappe_exception_success():
@@ -204,10 +201,25 @@ def test_frappe_api_post(monkeypatch: pytest.MonkeyPatch, frappe_api: FrappeApi)
     assert frappe_api.post(**exp_payload)
 
 
-def test_send_to_server(
+class SendSalesOrderToServerArgs(TypedDict):
+    customer_name: str
+    vk_url: str
+    item_codes: list[str]
+
+
+@pytest.fixture
+def send_sales_order_to_server_args():
+    return SendSalesOrderToServerArgs(
+        customer_name="John Johnson",
+        vk_url="https://vk.com/im?sel=1",
+        item_codes=["00370713"],
+    )
+
+
+def test_send_sales_order_to_server(
     monkeypatch: pytest.MonkeyPatch,
     config: Config,
-    send_to_server_args: SendToServerArgs,
+    send_sales_order_to_server_args: SendSalesOrderToServerArgs,
 ):
     mock_get_config: Callable[[str], Config] = lambda directory: config
     monkeypatch.setattr(comfort_browser_ext, "get_config", mock_get_config)
@@ -215,37 +227,35 @@ def test_send_to_server(
     exp_msg = f"{config.url}/sales-order/SO-2021-00001"
 
     def mock_post(self: FrappeApi, **data: Any):
-        new_data = dict(send_to_server_args)
-        new_data["cmd"] = "comfort.integrations.browser_ext.main"
+        new_data = dict(send_sales_order_to_server_args)
+        new_data["cmd"] = "comfort.integrations.browser_ext.process_sales_order"
         assert data == new_data
         return exp_msg
 
     monkeypatch.setattr(FrappeApi, "post", mock_post)
     assert (
-        send_to_server(
+        _send_sales_order_to_server(
             config,
-            send_to_server_args["customer_name"],
-            send_to_server_args["vk_url"],
-            send_to_server_args["item_codes"],
+            send_sales_order_to_server_args["customer_name"],
+            send_sales_order_to_server_args["vk_url"],
+            send_sales_order_to_server_args["item_codes"],
         )
         == exp_msg
     )
 
 
-def test_init_sentry(monkeypatch: pytest.MonkeyPatch, config: Config):
-    def mock_init(dsn: str, release: str, **kwargs: Any):
-        assert dsn == config.sentry_dsn
-        assert len(re.findall(PACKAGE_NAME + r"@\d+\.\d+\.\d+", release)) == 1
+def test_update_token(
+    monkeypatch: pytest.MonkeyPatch,
+    config: Config,
+):
+    mock_get_config: Callable[[str], Config] = lambda directory: config
+    monkeypatch.setattr(comfort_browser_ext, "get_config", mock_get_config)
+    exp_token = "mytoken"  # nosec
 
-    monkeypatch.setattr(sentry_sdk, "init", mock_init)
-    init_sentry(config)
-    assert sentry_sdk.utils.MAX_STRING_LENGTH == 8192
+    def mock_post(self: FrappeApi, **data: Any):  # type: ignore
+        assert data["cmd"] == "comfort.integrations.browser_ext.update_token"
+        assert data["token"] == exp_token
+        return {}
 
-
-def test_parse_args(html: str, send_to_server_args: SendToServerArgs):
-    parsed_args = parse_args(
-        [send_to_server_args["customer_name"], send_to_server_args["vk_url"], html]
-    )
-    assert parsed_args.customer_name == send_to_server_args["customer_name"]
-    assert parsed_args.vk_url == send_to_server_args["vk_url"]
-    assert parsed_args.html == html
+    monkeypatch.setattr(FrappeApi, "post", mock_post)
+    assert update_token(config, exp_token) == 0

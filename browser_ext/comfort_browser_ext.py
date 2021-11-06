@@ -4,7 +4,7 @@ import json
 import os.path
 import re
 import sys
-from argparse import ArgumentParser, Namespace
+from argparse import ArgumentParser
 from base64 import b64encode
 from configparser import ConfigParser
 from dataclasses import dataclass
@@ -20,28 +20,6 @@ import sentry_sdk.utils
 from bs4 import BeautifulSoup
 
 PACKAGE_NAME = "comfort_browser_ext"
-
-
-def unshorten_item_urls(soup: BeautifulSoup):
-    for btn_tag in soup.find_all(re.compile("a|img|button")):
-        btn_tag: BeautifulSoup
-        url: str | None = btn_tag.get("data-link-url")  # type: ignore
-        if url is not None:
-            btn_tag.replace_with(url)
-
-    for a_tag in soup.find_all("a"):
-        a_tag: BeautifulSoup
-        url: str | None = a_tag.get("title")  # type: ignore
-        if url:
-            a_tag.replace_with(url)
-
-    return soup
-
-
-def get_item_codes(html: str):
-    soup = BeautifulSoup(unescape(unescape(html)), "html.parser")
-    text = unshorten_item_urls(soup).get_text()
-    return ikea_api_wrapped.parse_item_codes(text)
 
 
 @dataclass
@@ -77,6 +55,42 @@ def get_config(directory: str):
     ):
         raise RuntimeError("Config is incomplete")
     return Config(**config[PACKAGE_NAME])
+
+
+def init_sentry(config: Config):
+    if not config.sentry_dsn:
+        return
+
+    release = distribution(PACKAGE_NAME).metadata["Version"]
+    sentry_sdk.utils.MAX_STRING_LENGTH = 8192  # Capture full tracebacks from server
+    sentry_sdk.init(
+        dsn=config.sentry_dsn,
+        release=f"{PACKAGE_NAME}@{release}",
+        traces_sample_rate=1.0,
+        with_locals=True,
+    )
+
+
+def _unshorten_item_urls(soup: BeautifulSoup):
+    for btn_tag in soup.find_all(re.compile("a|img|button")):
+        btn_tag: BeautifulSoup
+        url: str | None = btn_tag.get("data-link-url")  # type: ignore
+        if url is not None:
+            btn_tag.replace_with(url)
+
+    for a_tag in soup.find_all("a"):
+        a_tag: BeautifulSoup
+        url: str | None = a_tag.get("title")  # type: ignore
+        if url:
+            a_tag.replace_with(url)
+
+    return soup
+
+
+def _get_item_codes(html: str):
+    soup = BeautifulSoup(unescape(unescape(html)), "html.parser")
+    text = _unshorten_item_urls(soup).get_text()
+    return ikea_api_wrapped.parse_item_codes(text)
 
 
 class FrappeException(Exception):
@@ -126,7 +140,7 @@ class FrappeApi:
         return self._handle_response(response)
 
 
-def send_to_server(
+def _send_sales_order_to_server(
     config: Config, customer_name: str, vk_url: str, item_codes: list[str]
 ) -> str:
     return FrappeApi(
@@ -134,48 +148,57 @@ def send_to_server(
         api_key=config.api_key,
         api_secret=config.api_secret,
     ).post(
-        cmd="comfort.integrations.browser_ext.main",
+        cmd="comfort.integrations.browser_ext.process_sales_order",
         customer_name=customer_name,
         vk_url=vk_url,
         item_codes=item_codes,
     )
 
 
-class Arguments(Namespace):
-    customer_name: str
-    vk_url: str
-    html: str
+def process_sales_order(
+    config: Config, html: str, customer_name: str, vk_url: str
+):  # pragma: no cover
+    item_codes = _get_item_codes(html)
+    url = _send_sales_order_to_server(config, customer_name, vk_url, item_codes)
+    return check_call(["open", url])
 
 
-def init_sentry(config: Config):
-    if not config.sentry_dsn:
-        return
-
-    release = distribution(PACKAGE_NAME).metadata["Version"]
-    sentry_sdk.utils.MAX_STRING_LENGTH = 8192  # Capture full tracebacks from server
-    sentry_sdk.init(
-        dsn=config.sentry_dsn,
-        release=f"{PACKAGE_NAME}@{release}",
-        traces_sample_rate=1.0,
-        with_locals=True,
+def update_token(config: Config, token: str):
+    FrappeApi(
+        url=config.url, api_key=config.api_key, api_secret=config.api_secret
+    ).post(
+        cmd="comfort.integrations.browser_ext.update_token",
+        token=token,
     )
+    return 0
 
 
 def parse_args(args: list[str]):
     parser = ArgumentParser()
-    parser.add_argument("customer_name", type=str)
-    parser.add_argument("vk_url", type=str)
-    parser.add_argument("html", type=str)
-    return parser.parse_args(args, Arguments)
+    subparsers = parser.add_subparsers(dest="command")
+
+    process_sales_order_parser = subparsers.add_parser("process_sales_order")
+    process_sales_order_parser.add_argument("customer_name", type=str)
+    process_sales_order_parser.add_argument("vk_url", type=str)
+    process_sales_order_parser.add_argument("html", type=str)
+
+    get_token_parser = subparsers.add_parser("update_token")
+    get_token_parser.add_argument("token", type=str)
+
+    return parser.parse_args(args)
 
 
-def main():
+def main() -> int:
     config = get_config(os.path.dirname(__file__))
     init_sentry(config)
     args = parse_args(sys.argv[1:])
-    item_codes = get_item_codes(args.html)
-    url = send_to_server(config, args.customer_name, args.vk_url, item_codes)
-    return check_call(["open", url])
+
+    if args.command == "process_sales_order":
+        return process_sales_order(config, args.html, args.customer_name, args.vk_url)
+    elif args.command == "update_token":
+        return update_token(config, args.token)
+
+    return 0
 
 
 if __name__ == "__main__":

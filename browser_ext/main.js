@@ -71,8 +71,8 @@ function quote(text) {
   return `"${text}"`;
 }
 
-function execute_python_script(customer_name, vk_url, html) {
-  var cur_app = Application.currentApplication(); // eslint-disable-line no-undef
+function execute_python_script(args) {
+  let cur_app = Application.currentApplication(); // eslint-disable-line no-undef
   cur_app.includeStandardAdditions = true;
   cur_app.doShellScript(
     [
@@ -82,17 +82,61 @@ function execute_python_script(customer_name, vk_url, html) {
       "venv/bin/python",
       "-m",
       "comfort_browser_ext",
-      quote(customer_name),
-      quote(vk_url),
-      quote(escape_html(html)),
+      ...args,
     ].join(" ")
   );
 }
 
-// eslint-disable-next-line no-unused-vars
-function run() {
+function process_sales_order() {
   let customer_name = get_customer_name();
   let vk_url = get_vk_url();
   let html = get_html();
-  execute_python_script(customer_name, vk_url, html);
+  execute_python_script([
+    "process_sales_order",
+    quote(customer_name),
+    quote(vk_url),
+    quote(html),
+  ]);
+}
+
+function validate_ikea_url() {
+  var url = exec(() => location.href);
+  if (!(url && url.match("ikea.com"))) {
+    exit("Вы находитесь не на сайте IKEA");
+  }
+}
+
+function get_token() {
+  function _get_cookie(name) {
+    // https://stackoverflow.com/questions/51312980/how-to-get-and-set-cookies-in-javascript
+    var nameEQ = name + "=";
+    var ca = document.cookie.split(";");
+    for (var i = 0; i < ca.length; i++) {
+      var c = ca[i];
+      while (c.charAt(0) == " ") c = c.substring(1, c.length);
+      if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+    }
+    return null;
+  }
+
+  return _get_cookie("idp_reguser");
+}
+
+function update_token() {
+  validate_ikea_url();
+  let token = exec(get_token);
+  execute_python_script(["update_token", token]);
+  Safari.displayAlert("Информация для входа обновлена");
+}
+
+// eslint-disable-next-line no-unused-vars
+function run() {
+  let url = exec(() => location.href);
+  if (url && url.match("vk.com")) {
+    process_sales_order();
+  } else if (url && url.match("ikea.com")) {
+    update_token();
+  } else {
+    exit("Вы находитесь не на сайте VK или IKEA");
+  }
 }
