@@ -158,6 +158,7 @@ class PurchaseReturn(Return):
         self,
         orders_to_items: defaultdict[str | None, list[dict[str, str | int | None]]],
     ):
+        self._voucher.reload()  # After Sales Returns
         self._split_combinations_in_voucher()
 
         qty_counter = count_qty(SimpleNamespace(**i) for i in orders_to_items[None])  # type: ignore

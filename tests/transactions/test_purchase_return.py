@@ -398,6 +398,7 @@ def test_purchase_return_on_cancel_linked_docs_cancelled(
     purchase_return._make_sales_returns(orders_to_items)
     purchase_return._voucher.reload()
     purchase_return._voucher.status = "To Receive"
+    purchase_return._voucher.db_update()
     purchase_return.before_submit()
     purchase_return.on_cancel()
 
