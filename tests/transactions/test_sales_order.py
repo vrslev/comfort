@@ -127,6 +127,9 @@ def test_validate_from_available_stock_available_purchased_raises(
     sales_order: SalesOrder, purchase_order: PurchaseOrder
 ):
     purchase_order.status = "To Receive"
+    purchase_order.items_to_sell = []
+    # Append combination
+    purchase_order.append("items_to_sell", {"item_code": "29128569", "qty": 1})
     purchase_order.db_insert()
     purchase_order.update_children()
     sales_order.from_available_stock = "Available Purchased"
@@ -140,9 +143,10 @@ def test_validate_from_available_stock_available_purchased_raises(
             "qty": purchase_order.items_to_sell[0].qty + 1,
         },
     )
+    sales_order.set_child_items()
     with pytest.raises(
         ValidationError,
-        match=f"Insufficient stock for Item {purchase_order.items_to_sell[0].item_code}",
+        match=f"Insufficient stock for Item ",
     ):
         sales_order._validate_from_available_stock()
 
@@ -151,6 +155,9 @@ def test_validate_from_available_stock_available_purchased_not_raises(
     sales_order: SalesOrder, purchase_order: PurchaseOrder
 ):
     purchase_order.status = "To Receive"
+    purchase_order.items_to_sell = []
+    # Append combination
+    purchase_order.append("items_to_sell", {"item_code": "29128569", "qty": 1})
     purchase_order.db_insert()
     purchase_order.update_children()
     sales_order.from_available_stock = "Available Purchased"
@@ -164,6 +171,7 @@ def test_validate_from_available_stock_available_purchased_not_raises(
             "qty": purchase_order.items_to_sell[0].qty,
         },
     )
+    sales_order.set_child_items()
     sales_order._validate_from_available_stock()
 
 

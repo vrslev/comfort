@@ -201,11 +201,10 @@ class SalesOrder(TypedDocument):
         if self.from_available_stock == "Available Actual":
             stock_counter = get_stock_balance(self.from_available_stock)
         else:
-            items_to_sell = get_all(
-                PurchaseOrderItemToSell,
-                fields=("item_code", "qty"),
-                filters={"parent": ("in", self.from_purchase_order)},
-            )
+            from ..purchase_order.purchase_order import PurchaseOrder
+
+            doc = get_doc(PurchaseOrder, self.from_purchase_order)
+            items_to_sell = doc.get_items_to_sell(split_combinations=True)
             stock_counter = count_qty(items_to_sell)
 
         for item_code, qty in order_counter.items():
@@ -213,7 +212,7 @@ class SalesOrder(TypedDocument):
                 raise ValidationError(
                     _(
                         "Insufficient stock for Item {}. Required: {}, available: {}"
-                    ).format(item_code, stock_counter[item_code], qty)
+                    ).format(item_code, qty, stock_counter[item_code])
                 )
 
     def _calculate_item_totals(self):
