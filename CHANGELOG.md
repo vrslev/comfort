@@ -3,6 +3,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.27.4 (2021-11-07)
+### Fix
+* **Sales Order:** Initial from available purchased validation ([`79f92ad`](https://github.com/vrslev/comfort/commit/79f92ad370984f5e971a7accdfdc11a72b8d48fc))
+
 ## v0.27.3 (2021-11-07)
 ### Fix
 * **Sales Order:** From available purchased stock ([`31a5dea`](https://github.com/vrslev/comfort/commit/31a5dea136adff75009b4f641b28ddf5efcf51fd))
