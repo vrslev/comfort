@@ -3,6 +3,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.27.3 (2021-11-07)
+### Fix
+* **Sales Order:** From available purchased stock ([`31a5dea`](https://github.com/vrslev/comfort/commit/31a5dea136adff75009b4f641b28ddf5efcf51fd))
+
 ## v0.27.2 (2021-11-07)
 ### Fix
 * **Purchase Return:** Submit if linked Sales Return cancels Sales Order ([`f9ad7dd`](https://github.com/vrslev/comfort/commit/f9ad7dd91031eeed1212570501362c04ae83f72b))
