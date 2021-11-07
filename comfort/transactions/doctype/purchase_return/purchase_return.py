@@ -103,6 +103,7 @@ class PurchaseReturn(Return):
         self,
         orders_to_items: defaultdict[str | None, list[dict[str, str | int | None]]],
     ):
+        self._voucher.flags.ignore_links = True
         to_remove: list[PurchaseOrderSalesOrder] = []
         for order_name, items in orders_to_items.items():
             if order_name is None:
