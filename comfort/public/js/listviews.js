@@ -57,7 +57,6 @@ frappe.listview_settings["Sales Order"] = {
     add_purchase_order_filter(list);
     add_from_available_stock_button(list);
     add_print_contract_template(list);
-    list.page.sidebar.remove();
   },
 };
 
