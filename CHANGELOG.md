@@ -3,6 +3,11 @@
 
 <!--next-version-placeholder-->
 
+## v0.27.2 (2021-11-07)
+### Fix
+* **Purchase Return:** Submit if linked Sales Return cancels Sales Order ([`f9ad7dd`](https://github.com/vrslev/comfort/commit/f9ad7dd91031eeed1212570501362c04ae83f72b))
+* **UI:** Remove sidebar area in listview ([`9aa1199`](https://github.com/vrslev/comfort/commit/9aa11994b79cdf69b5e56832c564dd4077b04c09))
+
 ## v0.27.1 (2021-11-06)
 ### Fix
 * **Browser Ext:** Token decoding ([`7b1b771`](https://github.com/vrslev/comfort/commit/7b1b771eae5271a96b9bd21b0b08aa665d61a17b))
