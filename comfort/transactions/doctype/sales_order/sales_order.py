@@ -196,6 +196,7 @@ class SalesOrder(TypedDocument):
             self.from_available_stock, self.from_purchase_order
         )
 
+        self.set_child_items()
         order_counter = count_qty(self.get_items_with_splitted_combinations())
 
         if self.from_available_stock == "Available Actual":
