@@ -85,7 +85,7 @@ def test_create_vk_group_dialog_url():
     (
         ("Самовывоз (бесплатно)", None),
         ("До подъезда (100 ₽)", {"type": "Delivery to Entrance", "rate": 100}),
-        ("До квартиры (от 300 ₽)", {"type": "Delivery to Apartment", "rate": 300}),
+        ("До квартиры (от 400 ₽)", {"type": "Delivery to Apartment", "rate": 400}),
     ),
 )
 def test_get_delivery_service(

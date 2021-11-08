@@ -32,10 +32,10 @@ def test_sales_return_voucher_property(sales_return: SalesReturn):
 @pytest.mark.parametrize(
     ("paid_amount", "exp_returned_paid_amount"),
     (
-        (27370, 2150),  # Fully paid
+        (27370, 2050),  # Fully paid
         (0, 0),  # Not paid
         (100, 0),  # Partially paid but not enough to return
-        (26000, 780),
+        (26000, 680),
     ),  # Partially paid need to return some
 )
 def test_sales_return_calculate_returned_paid_amount(

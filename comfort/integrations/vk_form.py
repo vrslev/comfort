@@ -89,7 +89,7 @@ def _get_delivery_service(raw_delivery_type: str):
     if "подъезд" in raw_delivery_type:
         return {"type": "Delivery to Entrance", "rate": 100}
     elif "квартир" in raw_delivery_type:
-        return {"type": "Delivery to Apartment", "rate": 300}
+        return {"type": "Delivery to Apartment", "rate": 400}
 
 
 def _create_sales_order(customer_name: str, raw_order: str, raw_delivery_type: str):

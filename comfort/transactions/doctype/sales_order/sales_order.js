@@ -739,7 +739,7 @@ function recalculate_global_item_totals() {
 frappe.ui.form.on("Sales Order Service", {
   type(frm, cdt, cdn) {
     let default_rates = {
-      "Delivery to Apartment": 300,
+      "Delivery to Apartment": 400,
       "Delivery to Entrance": 100,
       Installation: 0,
     };
