@@ -203,7 +203,10 @@ def _get_delivery_and_installation_from_services(services: list[SalesOrderServic
     for service in services:
         if service.type == "Delivery to Apartment":
             delivery_type = "To Apartment"
-        if service.type == "Delivery to Entrance":
+        if (
+            service.type == "Delivery to Entrance"
+            and delivery_type is None  # Ensure "To Apartment" has advantage
+        ):
             delivery_type = "To Entrance"
         elif service.type == "Installation":
             installation = True
