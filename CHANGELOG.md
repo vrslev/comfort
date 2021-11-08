@@ -3,6 +3,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.27.5 (2021-11-08)
+### Fix
+* **Customer:** Don't force city and gender on update from VK ([#75](https://github.com/vrslev/comfort/issues/75)) ([`01fab79`](https://github.com/vrslev/comfort/commit/01fab79cc26484b8b48ce7743347ed3fa8fd6728))
+* **Sales Order:** Change "To Apartment" rate from 300 to 400 (closes #74) ([`986c4e1`](https://github.com/vrslev/comfort/commit/986c4e132eae8c722277f5ce92ccb38d05b74bb7))
+* **Delivery Trip:** Make sure "To Apartment" has advantage if there's to entrance and to apartment (closes #72) ([`9b75a5d`](https://github.com/vrslev/comfort/commit/9b75a5db524263e7651df712bbeb601f9366c23f))
+
 ## v0.27.4 (2021-11-07)
 ### Fix
 * **Sales Order:** Initial from available purchased validation ([`79f92ad`](https://github.com/vrslev/comfort/commit/79f92ad370984f5e971a7accdfdc11a72b8d48fc))
