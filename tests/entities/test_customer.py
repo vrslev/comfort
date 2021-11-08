@@ -224,12 +224,20 @@ def test_get_vk_users_for_customers_no_user_ids():
 @pytest.mark.parametrize(
     "sex,exp_gender", ((None, None), (0, None), (1, "Female"), (2, "Male"))
 )
-def test_update_customer_from_vk_user_gender(
+def test_update_customer_from_vk_user_gender_not_set(
     customer: Customer, sex: int | None, exp_gender: str | None
 ):
+    customer.gender = None
     user = SimpleNamespace(sex=sex, photo_max_orig=None, city=None)
     _update_customer_from_vk_user(customer, user)  # type: ignore
     assert customer.gender == exp_gender
+
+
+def test_update_customer_from_vk_user_gender_set(customer: Customer):
+    customer.gender = "Male"
+    user = SimpleNamespace(sex=1, photo_max_orig=None, city=None)
+    _update_customer_from_vk_user(customer, user)  # type: ignore
+    assert customer.gender == "Male"
 
 
 def test_update_customer_from_vk_user_image(customer: Customer):
@@ -239,7 +247,8 @@ def test_update_customer_from_vk_user_image(customer: Customer):
     assert customer.image == image
 
 
-def test_update_customer_from_vk_user_city(customer: Customer):
+def test_update_customer_from_vk_user_city_not_set(customer: Customer):
+    customer.city = None
     city = "Moscow"
     user = SimpleNamespace(
         sex=None, photo_max_orig=None, city=SimpleNamespace(id=1, title=city)
@@ -248,9 +257,20 @@ def test_update_customer_from_vk_user_city(customer: Customer):
     assert customer.city == city
 
 
+def test_update_customer_from_vk_user_city_set(customer: Customer):
+    customer.city = "Moscow"
+    user = SimpleNamespace(
+        sex=None, photo_max_orig=None, city=SimpleNamespace(id=1, title="Not Moscow")
+    )
+    _update_customer_from_vk_user(customer, user)  # type: ignore
+    assert customer.city == "Moscow"
+
+
 @responses.activate
 @pytest.mark.usefixtures("vk_api_settings")
 def test_update_all_customers_from_vk_with_vk_id(customer: Customer):
+    customer.gender = None
+    customer.city = None
     customer.db_insert()
     doc = new_doc(Customer)
     doc.name = "Test Name"

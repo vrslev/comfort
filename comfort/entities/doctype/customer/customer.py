@@ -113,10 +113,11 @@ def _get_vk_users_for_customers(customers: Iterable[Customer]):
 
 
 def _update_customer_from_vk_user(customer: Customer, user: User):
-    customer.gender = {None: None, 0: None, 1: "Female", 2: "Male"}[user.sex]  # type: ignore
+    if not customer.gender:
+        customer.gender = {None: None, 0: None, 1: "Female", 2: "Male"}[user.sex]  # type: ignore
     if user.photo_max_orig:
         customer.image = user.photo_max_orig
-    if user.city and user.city.title:
+    if not customer.city and user.city and user.city.title:
         customer.city = user.city.title
 
 
