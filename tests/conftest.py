@@ -332,7 +332,7 @@ def sales_order(
             "discount": 0,
             "paid_amount": 0,
             "services": [
-                {"type": "Delivery to Entrance", "rate": 300},
+                {"type": "Delivery to Entrance", "rate": 400},
                 {"type": "Installation", "rate": 500},
             ],
             "items": [

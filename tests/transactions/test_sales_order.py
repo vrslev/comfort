@@ -258,7 +258,7 @@ def test_calculate_margin_with_commission(sales_order: SalesOrder):
 def test_calculate_total_amount(sales_order: SalesOrder):
     sales_order.items_cost = 14984
     sales_order.margin = 1496
-    sales_order.service_amount = 300
+    sales_order.service_amount = 400
     sales_order.discount = 100
     sales_order._calculate_total_amount()
     exp_total_amount = (
@@ -276,7 +276,7 @@ def test_validate_services_not_changed_raises_on_changed_value(
 ):
     sales_order.insert()
     sales_order.db_set("delivery_status", delivery_status)
-    sales_order.services[0].rate += 300
+    sales_order.services[0].rate += 400
     with pytest.raises(
         ValidationError,
         match="Allowed to change services in Sales Order only if delivery status is To Purchase, Purchased or To Deliver",

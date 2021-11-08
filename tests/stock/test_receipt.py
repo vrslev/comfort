@@ -86,7 +86,7 @@ def test_receipt_create_sales_gl_entries(
         {
             "account": get_account("delivery"),
             "debit": 0,
-            "credit": 300,
+            "credit": 400,
         },
         {
             "account": get_account("installation"),
