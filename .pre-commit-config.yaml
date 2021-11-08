@@ -30,7 +30,7 @@ repos:
       - id: eslint
         args: [--fix]
         additional_dependencies:
-          - eslint@8.1.0
+          - eslint@8.2.0
           - eslint-plugin-prettier
 
   - repo: https://github.com/pre-commit/mirrors-prettier
