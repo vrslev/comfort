@@ -32,7 +32,7 @@ bash scripts/check-health.sh
 print_group Ping site
 
 echo Ping version
-ping_res=$(curl --insecure -sS "https://$SITE_NAME/api/method/version")
+ping_res=$(curl --insecure -sS "https://$DOMAIN/api/method/version")
 echo "$ping_res"
 if [[ -z $(echo "$ping_res" | grep "message" || echo "") ]]; then
   echo "Ping failed"
@@ -40,7 +40,7 @@ if [[ -z $(echo "$ping_res" | grep "message" || echo "") ]]; then
 fi
 
 echo Check index
-index_res=$(curl --insecure -sS "https://$SITE_NAME")
+index_res=$(curl --insecure -sS "https://$DOMAIN")
 if [[ -n $(echo "$index_res" | grep "Internal Server Error" || echo "") ]]; then
   echo "Index check failed"
   echo "$index_res"
