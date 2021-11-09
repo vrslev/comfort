@@ -3,6 +3,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.28.0 (2021-11-09)
+### Feature
+* **Docker:** Use Frappe Docker base image for worker ([`2a832bf`](https://github.com/vrslev/comfort/commit/2a832bfb85500df2962a925c398752485dfc3c89))
+
 ## v0.27.5 (2021-11-08)
 ### Fix
 * **Customer:** Don't force city and gender on update from VK ([#75](https://github.com/vrslev/comfort/issues/75)) ([`01fab79`](https://github.com/vrslev/comfort/commit/01fab79cc26484b8b48ce7743347ed3fa8fd6728))
