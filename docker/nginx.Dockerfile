@@ -17,22 +17,15 @@ RUN git clone --depth 1 -b $FRAPPE_VERSION https://github.com/frappe/frappe apps
 
 COPY . apps/comfort
 
-RUN cd apps \
+RUN cd apps/frappe \
   && echo "Install frappe Node dependencies..." \
-  && yarn --pure-lockfile --cwd frappe || true \
+  && yarn --pure-lockfile || true \
   && echo "Install comfort Node dependencies..." \
-  && yarn --pure-lockfile --cwd comfort || true \
+  && yarn --pure-lockfile --cwd ../comfort \
   && echo "Build comfort browser assets..." \
-  && cd frappe \
   && yarn production --app comfort \
-  && echo "Install frappe Node production dependencies..." \
-  && yarn --pure-lockfile --prod \
-  && echo "Install comfort Node production dependencies..." \
-  && cd ../comfort \
-  && yarn --pure-lockfile --prod \
   && echo "Copy assets" \
   && cd /home/frappe/frappe-bench \
-  && mkdir -p sites/assets/comfort \
   && cp -R apps/comfort/comfort/public/* sites/assets/comfort \
   && echo "rsync -a --delete /var/www/html/assets/frappe /assets" >/rsync \
   && echo "rsync -a --delete /var/www/html/assets/comfort /assets" >>/rsync \
