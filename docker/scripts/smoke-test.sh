@@ -11,7 +11,7 @@ else
   DOMAIN=test.localhost
 fi
 
-PROJECT_NAME=testcomfort
+export PROJECT_NAME=testcomfort
 
 # Initial group
 echo ::group::Generate .env
@@ -28,7 +28,6 @@ docker-compose -p $PROJECT_NAME up -d
 
 print_group Check health
 bash scripts/check-health.sh
-
 
 print_group Ping site
 
@@ -47,7 +46,6 @@ if [[ -n $(echo "$index_res" | grep "Internal Server Error" || echo "") ]]; then
   echo "$index_res"
   exit 1
 fi
-
 
 if [ -z $CI ]; then
   print_group Prune containers
