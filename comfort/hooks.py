@@ -40,7 +40,7 @@ treeviews = ["Account"]
 
 global_search_doctypes = _get_global_search_doctypes()
 
-reqd_frappe_version = "v13.13.0"
+reqd_frappe_version = "v13.14.0"
 
 scheduler_events = {
     "weekly": [
