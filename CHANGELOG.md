@@ -3,6 +3,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.28.1 (2021-11-10)
+### Fix
+* **Docker:** Backup command; upgrade frappe to v13.14.0 ([`e87e92e`](https://github.com/vrslev/comfort/commit/e87e92ee6089f7f32f83dd26ee218097e1efe329))
+
 ## v0.28.0 (2021-11-09)
 ### Feature
 * **Docker:** Use Frappe Docker base image for worker ([`2a832bf`](https://github.com/vrslev/comfort/commit/2a832bfb85500df2962a925c398752485dfc3c89))
