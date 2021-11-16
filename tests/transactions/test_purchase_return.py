@@ -217,7 +217,7 @@ def test_add_missing_field_to_voucher_items_to_sell_changes(
     item_name: str | None,
     amount: int | None,
 ):
-    items: list[AnyChildItem] = list(
+    items: list[AnyChildItem] = list(  # type: ignore
         merge_same_items(purchase_return._voucher.get_items_to_sell(True))
     )
     item = items[0]
@@ -239,7 +239,7 @@ def test_add_missing_field_to_voucher_items_to_sell_not_changes(
     purchase_return: PurchaseReturn,
 ):
     rate, weight, item_name, amount = 100, 200, "The Name", 345
-    items: list[AnyChildItem] = list(
+    items: list[AnyChildItem] = list(  # type: ignore
         merge_same_items(purchase_return._voucher.get_items_to_sell(True))
     )
     item = items[0]
@@ -255,7 +255,7 @@ def test_add_missing_field_to_voucher_items_to_sell_not_changes(
 
 
 def test_purchase_return_split_combinations_in_voucher(purchase_return: PurchaseReturn):
-    items: list[AnyChildItem] = list(
+    items: list[AnyChildItem] = list(  # type: ignore
         merge_same_items(purchase_return._voucher.get_items_to_sell(True))
     )
     purchase_return._add_missing_field_to_voucher_items_to_sell(items)
