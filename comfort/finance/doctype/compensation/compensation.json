@@ -23,6 +23,7 @@
    "fieldname": "voucher_type",
    "fieldtype": "Select",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Voucher Type",
    "options": "Purchase Order\nSales Order",
    "reqd": 1,
@@ -33,6 +34,7 @@
    "fieldtype": "Dynamic Link",
    "in_global_search": 1,
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Voucher No",
    "options": "voucher_type",
    "reqd": 1,
@@ -41,6 +43,7 @@
   {
    "fieldname": "amount",
    "fieldtype": "Currency",
+   "in_list_view": 1,
    "label": "Amount",
    "reqd": 1
   },
@@ -89,7 +92,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-11-03 15:09:32.606344",
+ "modified": "2021-11-16 15:34:18.105215",
  "modified_by": "Administrator",
  "module": "Finance",
  "name": "Compensation",
