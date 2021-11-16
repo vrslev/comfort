@@ -3,6 +3,11 @@
 
 <!--next-version-placeholder-->
 
+## v0.28.2 (2021-11-16)
+### Fix
+* **Sales Order:** Submit from available purchased stock if Purchase Order has cancelled Sales Orders ([`1dd2d80`](https://github.com/vrslev/comfort/commit/1dd2d807b958abf7c49bd54bb74bc5c2a6ea350e))
+* **Purchase Return:** Returned items via Sales Return appeared in Items to Sell ([`8d4819c`](https://github.com/vrslev/comfort/commit/8d4819ceb17b8b3b06153e41b9e69b7ab939f81c))
+
 ## v0.28.1 (2021-11-10)
 ### Fix
 * **Docker:** Backup command; upgrade frappe to v13.14.0 ([`e87e92e`](https://github.com/vrslev/comfort/commit/e87e92ee6089f7f32f83dd26ee218097e1efe329))
