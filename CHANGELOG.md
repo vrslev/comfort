@@ -3,6 +3,11 @@
 
 <!--next-version-placeholder-->
 
+## v0.29.0 (2021-11-16)
+### Feature
+* **Delivery Trip:** Auto dark mode in Driver mode (closes #73) ([`730d4bc`](https://github.com/vrslev/comfort/commit/730d4bcaf40a324c929db123c03d2a26d5cce26b))
+* **Compensation:** Add voucher to filters and amount to list view ([`8db9954`](https://github.com/vrslev/comfort/commit/8db9954b93e6f67e7aa56cb470d6c9bde5d777bc))
+
 ## v0.28.2 (2021-11-16)
 ### Fix
 * **Sales Order:** Submit from available purchased stock if Purchase Order has cancelled Sales Orders ([`1dd2d80`](https://github.com/vrslev/comfort/commit/1dd2d807b958abf7c49bd54bb74bc5c2a6ea350e))
