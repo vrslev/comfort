@@ -120,6 +120,7 @@ class TypedDocument(Document):
     def save_without_validating(self):
         self.flags.ignore_validate = True
         self.flags.ignore_validate_update_after_submit = True
+        self.flags.ignore_links = True
         self.save()
 
 
