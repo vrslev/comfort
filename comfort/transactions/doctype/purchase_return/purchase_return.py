@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from collections import defaultdict
-from types import SimpleNamespace
 from typing import Literal
 
 from comfort import (
@@ -155,14 +154,15 @@ class PurchaseReturn(Return):
         self._voucher.items_to_sell = []
         self._voucher.extend("items_to_sell", items)
 
-    def _modify_voucher(
-        self,
-        orders_to_items: defaultdict[str | None, list[dict[str, str | int | None]]],
-    ):
+    def _modify_voucher(self):
         self._voucher.reload()  # After Sales Returns
         self._split_combinations_in_voucher()
 
-        qty_counter = count_qty(SimpleNamespace(**i) for i in orders_to_items[None])  # type: ignore
+        # Before we removed only items to sell.
+        # But after creating Sales Returns items from them are added to items to sell,
+        # so we need delete them too.
+        qty_counter = count_qty(self.items)
+
         for item in self._voucher.items_to_sell:
             if item.item_code in qty_counter:
                 item.qty -= qty_counter[item.item_code]
@@ -205,7 +205,7 @@ class PurchaseReturn(Return):
     def before_submit(self):
         orders_to_items = self._allocate_items()
         self._make_sales_returns(orders_to_items)
-        self._modify_voucher(orders_to_items)
+        self._modify_voucher()
         self._make_gl_entries()
         self._make_stock_entries()
 

@@ -277,8 +277,7 @@ def test_purchase_return_split_combinations_in_voucher(purchase_return: Purchase
 
 def test_purchase_return_modify_voucher(purchase_return: PurchaseReturn):
     prev_qty_counter = count_qty(purchase_return._voucher.get_items_to_sell(True))
-    orders_to_items = purchase_return._allocate_items()
-    purchase_return._modify_voucher(orders_to_items)
+    purchase_return._modify_voucher()
     new_qty_counter = count_qty(purchase_return._voucher.get_items_to_sell(True))
 
     diff = prev_qty_counter.copy()
@@ -287,7 +286,7 @@ def test_purchase_return_modify_voucher(purchase_return: PurchaseReturn):
         if diff[item_code] == 0:
             del diff[item_code]
 
-    assert diff == count_qty(SimpleNamespace(**i) for i in orders_to_items[None])
+    assert diff == count_qty(purchase_return.items)
 
 
 @pytest.mark.parametrize("status", ("Draft", "Cancelled", "Random Status"))
@@ -366,6 +365,25 @@ def test_purchase_return_make_stock_entries_create(
     doc = get_doc(StockEntry, entry_name)
     assert count_qty(doc.items) == counter
     assert doc.stock_type == exp_stock_type
+
+
+def test_purchase_return_before_submit_items_to_sell_added_from_sales_return_are_deleted(
+    purchase_return: PurchaseReturn,
+):
+    purchase_return._voucher.items_to_sell = []
+    purchase_return._voucher.submit()
+    purchase_return.items = []
+    purchase_return.append(
+        "items",
+        {
+            "item_code": "10014030",
+            "qty": 2,
+            "rate": 1000,
+        },
+    )
+    purchase_return.save()
+    purchase_return.before_submit()
+    assert purchase_return._voucher.items_to_sell == []
 
 
 def test_purchase_return_on_cancel_raises_on_invalid_status(
