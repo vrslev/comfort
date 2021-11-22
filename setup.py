@@ -19,7 +19,7 @@ setup(
     ],
     extras_require={
         "dev": [
-            "black==21.10b0",
+            "black==21.11b1",
             "pre_commit==2.15.0",
             "pytest==6.2.5",
             "pytest-cov==3.0.0",
