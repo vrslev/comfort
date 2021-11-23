@@ -181,7 +181,7 @@ def test_calculate_sales_orders_cost_if_no_sales_orders(purchase_order: Purchase
         ([], []),
     ),
 )
-def test_calculate_total_weight(
+def test_calculate_total_weight_main(
     purchase_order: PurchaseOrder,
     updated_items_to_sell: list[Any] | None,
     updated_sales_orders: list[Any] | None,
@@ -214,6 +214,16 @@ def test_calculate_total_weight(
         i.weight * i.qty for i in purchase_order.items_to_sell
     )
     assert purchase_order.total_weight == exp_total_weight
+
+
+@pytest.mark.parametrize(("qty", "weight"), ((None, 10), (10, None), (None, None)))
+def test_calculate_total_weight_empty_item(
+    purchase_order: PurchaseOrder, qty: int | None, weight: int | None
+):
+    item = purchase_order.items_to_sell[0]
+    item.qty = qty  # type: ignore
+    item.weight = weight  # type: ignore
+    purchase_order._calculate_total_weight()
 
 
 def test_calculate_total_amount_costs_set_if_none(

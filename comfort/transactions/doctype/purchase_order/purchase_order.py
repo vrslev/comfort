@@ -203,7 +203,9 @@ class PurchaseOrder(TypedDocument):
         )
         sales_orders_weight = res[0][0] or 0.0
         items_to_sell_weight = sum(
-            item.weight * item.qty for item in self.items_to_sell
+            item.weight * item.qty
+            for item in self.items_to_sell
+            if item.weight and item.qty
         )
         self.total_weight = sales_orders_weight + items_to_sell_weight
 
