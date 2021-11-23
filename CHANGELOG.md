@@ -3,6 +3,13 @@
 
 <!--next-version-placeholder-->
 
+## v0.29.1 (2021-11-23)
+### Fix
+* **Debtors:** Default values for amounts to avoid raising TypeError ([`923f2cc`](https://github.com/vrslev/comfort/commit/923f2cc5263387a4357ef9e11d13388164489ee0))
+* **Delivery Trip:** Create Receipts for Sales Orders on completion even if they have ones that are cancelled ([`484fca9`](https://github.com/vrslev/comfort/commit/484fca9834041c1010feb3cf251655ab6d141c8a))
+* **Sales Order:** Don't return `False` on cancelled delivery trip in `has_linked_delivery_trip` ([`b3af839`](https://github.com/vrslev/comfort/commit/b3af839b403dd3a94fe984d530bded3acb15d496))
+* **Purchase Order:** Calculating total weight when weight or qty is not set yet ([`5e9dd37`](https://github.com/vrslev/comfort/commit/5e9dd375d0ae3a69dbee49f1a2c26ff46d840c04))
+
 ## v0.29.0 (2021-11-16)
 ### Feature
 * **Delivery Trip:** Auto dark mode in Driver mode (closes #73) ([`730d4bc`](https://github.com/vrslev/comfort/commit/730d4bcaf40a324c929db123c03d2a26d5cce26b))
