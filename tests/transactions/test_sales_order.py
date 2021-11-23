@@ -1182,15 +1182,29 @@ def test_split_order(sales_order: SalesOrder):
     assert new_doc.edit_commission == True
 
 
-def test_has_linked_delivery_trip_true(sales_order: SalesOrder):
+@pytest.mark.parametrize(
+    ("has_cancelled_stop", "has_active_stop", "expected"),
+    (
+        (False, False, False),
+        (True, False, False),
+        (True, True, True),
+        (False, True, True),
+    ),
+)
+def test_has_linked_delivery_trip(
+    sales_order: SalesOrder,
+    has_cancelled_stop: bool,
+    has_active_stop: bool,
+    expected: bool,
+):
     sales_order.db_insert()
-    get_doc(DeliveryStop, {"sales_order": sales_order.name}).db_insert()
-    assert has_linked_delivery_trip(sales_order.name)
-
-
-def test_has_linked_delivery_trip_false(sales_order: SalesOrder):
-    sales_order.db_insert()
-    assert not has_linked_delivery_trip(sales_order.name)
+    if has_cancelled_stop:
+        get_doc(
+            DeliveryStop, {"sales_order": sales_order.name, "docstatus": 2}
+        ).db_insert()
+    if has_active_stop:
+        get_doc(DeliveryStop, {"sales_order": sales_order.name}).db_insert()
+    assert has_linked_delivery_trip(sales_order.name) is expected
 
 
 def test_get_sales_orders_not_in_purchase_order_main(purchase_order: PurchaseOrder):

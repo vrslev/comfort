@@ -726,7 +726,11 @@ class SalesOrder(TypedDocument):
 @frappe.whitelist()
 def has_linked_delivery_trip(sales_order_name: str):
     name: Any = doc_exists(
-        {"doctype": "Delivery Stop", "sales_order": sales_order_name}
+        {
+            "doctype": "Delivery Stop",
+            "sales_order": sales_order_name,
+            "docstatus": ("!=", 2),
+        }
     )
     return bool(name)
 
