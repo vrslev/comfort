@@ -35,7 +35,7 @@ def _get_not_purchased_sales_orders_amount():
             ),
         },
     )
-    return sales_orders[0].paid_amount
+    return sales_orders[0].paid_amount or 0
 
 
 def _get_items_to_sell_amount():
@@ -45,7 +45,7 @@ def _get_items_to_sell_amount():
         fields=("SUM(amount) as amount"),
         filters={"parent": ("in", (o.name for o in purchase_orders))},
     )
-    return items[0].amount
+    return items[0].amount or 0
 
 
 def _get_report_summary():
