@@ -8,6 +8,7 @@ on:
     paths:
       - docker/**
       - .dockerignore
+      - comfort/hooks.py # contains `reqd_frappe_version`
 
 jobs:
   build:
