@@ -166,6 +166,7 @@ class DeliveryTrip(TypedDocument):
                 filters={
                     "voucher_type": "Sales Order",
                     "voucher_no": ("in", (s.sales_order for s in self.stops)),
+                    "docstatus": 1,
                 },
             )
         ]

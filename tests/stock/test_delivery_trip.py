@@ -14,6 +14,7 @@ from comfort.stock.doctype.delivery_trip.delivery_trip import (
     _make_route_url,
     get_delivery_and_installation_for_order,
 )
+from comfort.stock.doctype.receipt.receipt import Receipt
 from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
 from frappe.utils import get_url_to_form
 
@@ -171,15 +172,27 @@ def test_get_template_context(delivery_trip: DeliveryTrip):
     assert context_stop["weight"] == doc.total_weight
 
 
+@pytest.mark.parametrize("has_cancelled_receipt", (True, False))
 @pytest.mark.parametrize("insert_receipt_before", (True, False))
 def test_add_receipts_to_sales_orders(
     delivery_trip: DeliveryTrip,
     sales_order: SalesOrder,
     item_no_children: Item,
+    has_cancelled_receipt: bool,
     insert_receipt_before: bool,
 ):
     sales_order.delivery_status = "To Deliver"
     sales_order.db_update()
+    if has_cancelled_receipt:
+        get_doc(
+            Receipt,
+            {
+                "voucher_type": sales_order.doctype,
+                "voucher_no": sales_order.name,
+                "docstatus": 2,
+            },
+        ).db_insert()
+
     doc = new_doc(SalesOrder)
     doc.name = "SO-2021-0002"
     doc.customer = sales_order.customer
@@ -194,8 +207,10 @@ def test_add_receipts_to_sales_orders(
 
     delivery_trip.append("stops", {"sales_order": doc.name})
     delivery_trip._add_receipts_to_sales_orders()
-    assert doc_exists({"doctype": "Receipt", "voucher_no": sales_order.name})
-    assert doc_exists({"doctype": "Receipt", "voucher_no": doc.name})
+    assert doc_exists(
+        {"doctype": "Receipt", "voucher_no": sales_order.name, "docstatus": 1}
+    )
+    assert doc_exists({"doctype": "Receipt", "voucher_no": doc.name, "docstatus": 1})
 
 
 def test_set_completed_status(delivery_trip: DeliveryTrip):
