@@ -3,6 +3,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.29.2 (2021-11-23)
+### Fix
+* **Docker:** Fix nginx image issues due to latest changes in frappe/frappe_docker ([`91c02bb`](https://github.com/vrslev/comfort/commit/91c02bb9be1283dcd542185fd157ce952f0bc8cd))
+
 ## v0.29.1 (2021-11-23)
 ### Fix
 * **Debtors:** Default values for amounts to avoid raising TypeError ([`923f2cc`](https://github.com/vrslev/comfort/commit/923f2cc5263387a4357ef9e11d13388164489ee0))
