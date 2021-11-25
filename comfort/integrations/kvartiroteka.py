@@ -3,8 +3,7 @@ from __future__ import annotations
 import re
 from typing import Any
 
-from ikea_api.api import API, Method
-from ikea_api.errors import IkeaApiError
+from ikea_api._api import API
 
 import frappe
 
@@ -15,7 +14,7 @@ class Kvartiroteka(API):
     _images: list[str] = []
 
     def __init__(self):
-        super().__init__(None, "https://kvartiroteka.ikea.ru/data/_/items")  # type: ignore
+        super().__init__("https://kvartiroteka.ikea.ru/data/_/items")
         self._session.headers.update(
             {
                 "Accept": "application/json, text/plain, */*",
@@ -26,28 +25,27 @@ class Kvartiroteka(API):
     def _parse_design_id(self, url: str):
         matches = re.findall(r"#/[^/]+/[^/]+/([^/]+)", url)
         if not matches:
-            raise IkeaApiError(f"Invalid Kvartiroteka url: {url}")
+            raise RuntimeError(f"Invalid Kvartiroteka url: {url}")
         self._design_id = matches[0]
 
     def _get_rooms(self):
-        resp = self._call_api(
-            f"{self._endpoint}/design_room",
-            data={"filter[design_id.url][eq]": self._design_id},
-            method=Method.GET,
+        resp = self._get(
+            endpoint=f"{self.endpoint}/design_room",
+            params={"filter[design_id.url][eq]": self._design_id},
         )
         self._rooms = resp["data"]
 
     def _get_images(self):
         for room in self._rooms:
-            resp = self._call_api(
-                f"{self._endpoint}/block",
-                data={
+            # TODO: Remove this type annotation after fix in ikea_api
+            resp: Any = self._get(
+                endpoint=f"{self.endpoint}/block",
+                params={
                     "fields": "views.view_id.image.*",
                     "limit": "-1",
                     "filter[room_id][eq]": room["room_id"],
                     "filter[design_id][eq]": room["design_id"],
                 },
-                method=Method.GET,
             )
             for block in resp["data"]:
                 for view in block["views"]:

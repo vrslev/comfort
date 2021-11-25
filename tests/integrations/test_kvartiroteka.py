@@ -4,7 +4,6 @@ from typing import Any
 
 import pytest
 import responses
-from ikea_api.errors import IkeaApiError
 
 from comfort.integrations.kvartiroteka import Kvartiroteka
 
@@ -85,8 +84,7 @@ def rooms() -> list[dict[str, Any]]:
 
 def test_kvartiroteka_init():
     api = Kvartiroteka()
-    assert api._endpoint == "https://kvartiroteka.ikea.ru/data/_/items"
-    assert api._token == None
+    assert api.endpoint == "https://kvartiroteka.ikea.ru/data/_/items"
     assert api._session.headers["Accept"] == "application/json, text/plain, */*"
     assert api._session.headers["Content-Type"] == "application/json;charset=utf-8"
 
@@ -107,7 +105,7 @@ def test_parse_design_id_passes(kvartiroteka_url: str):
 )
 def test_parse_design_id_raises(url: str):
     api = Kvartiroteka()
-    with pytest.raises(IkeaApiError, match=f"Invalid Kvartiroteka url: {url}"):
+    with pytest.raises(RuntimeError, match=f"Invalid Kvartiroteka url: {url}"):
         api._parse_design_id(url)
 
 
@@ -117,7 +115,7 @@ def test_get_rooms(kvartiroteka_url: str, rooms: list[dict[str, Any]]):
     api._parse_design_id(kvartiroteka_url)
     responses.add(
         method=responses.GET,
-        url=f"{api._endpoint}/design_room?filter%5Bdesign_id.url%5D%5Beq%5D={api._design_id}",
+        url=f"{api.endpoint}/design_room?filter%5Bdesign_id.url%5D%5Beq%5D={api._design_id}",
         json={"data": rooms},
         match_querystring=True,
     )
@@ -132,7 +130,7 @@ def test_get_images(kvartiroteka_url: str, rooms: list[dict[str, Any]]):
     api._rooms = rooms[:1]
     responses.add(
         method=responses.GET,
-        url=f"{api._endpoint}/block?fields=views.view_id.image.%2A&limit=-1&filter%5Broom_id%5D%5Beq%5D=621&filter%5Bdesign_id%5D%5Beq%5D=204",
+        url=f"{api.endpoint}/block?fields=views.view_id.image.%2A&limit=-1&filter%5Broom_id%5D%5Beq%5D=621&filter%5Bdesign_id%5D%5Beq%5D=204",
         json={
             "data": [
                 {"views": []},
