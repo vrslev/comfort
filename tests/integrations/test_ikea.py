@@ -162,6 +162,10 @@ def test_get_purchase_history(monkeypatch: pytest.MonkeyPatch):
 def test_get_purchase_info(monkeypatch: pytest.MonkeyPatch, use_lite_id: bool):
     exp_purchase_id = 111111110
 
+    class MockGetPurchaseInfoResult:
+        def dict(self):
+            pass
+
     def mock_get_purchase_info(api: IKEA, *, id: str, email: str):
         assert api.token == get_authorized_api().token
         assert id == str(exp_purchase_id)
@@ -169,6 +173,7 @@ def test_get_purchase_info(monkeypatch: pytest.MonkeyPatch, use_lite_id: bool):
             assert email == get_value("Ikea Settings", None, "username")
         else:
             assert email is None
+        return MockGetPurchaseInfoResult()
 
     monkeypatch.setattr(ikea_api.wrappers, "get_purchase_info", mock_get_purchase_info)
     get_purchase_info(exp_purchase_id, use_lite_id)

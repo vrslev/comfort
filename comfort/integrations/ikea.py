@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import date
 from typing import TypedDict
 
 import ikea_api
@@ -80,14 +81,21 @@ def get_purchase_history():
     return ikea_api.wrappers.get_purchase_history(get_authorized_api())
 
 
+class PurchaseInfoDict(TypedDict):
+    delivery_cost: float
+    total_cost: float
+    purchase_date: date | None
+    delivery_date: date | None
+
+
 @frappe.whitelist()
-def get_purchase_info(purchase_id: int, use_lite_id: bool):
+def get_purchase_info(purchase_id: int, use_lite_id: bool) -> PurchaseInfoDict:
     email: str | None = None
     if use_lite_id:
         email = get_cached_value("Ikea Settings", "Ikea Settings", "username")
-    return ikea_api.wrappers.get_purchase_info(
+    return ikea_api.wrappers.get_purchase_info(  # type: ignore
         get_authorized_api(), id=str(purchase_id), email=email
-    )
+    ).dict()
 
 
 def _make_item_category(name: str | None, url: str | None):
