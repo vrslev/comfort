@@ -357,7 +357,6 @@ class PurchaseOrder(TypedDocument):
         self, purchase_id: str, purchase_info: PurchaseInfoDict
     ):
         # Schedule date and posting date could be not loaded
-        # TODO: Check if this works and if it works when everything loaded
         self.schedule_date = purchase_info.get("delivery_date", datetime.now())  # type: ignore
         self.posting_date = purchase_info.get("purchase_date", datetime.now())  # type: ignore
         self.delivery_cost = int(purchase_info["delivery_cost"])

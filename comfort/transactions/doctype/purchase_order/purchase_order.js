@@ -222,7 +222,7 @@ comfort.PurchaseOrderController = frappe.ui.form.Controller.extend({
           callback: (r) => {
             var args = {
               purchase_id: purchase_id,
-              purchase_info: r.message,
+              purchase_info: r.message || {},
             };
             if (r.message && Object.keys(r.message).length > 0) {
               _send(args);
