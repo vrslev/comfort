@@ -53,7 +53,6 @@ def get_delivery_services(items: dict[str, int]):
     except NoDeliveryOptionsAvailableError:
         frappe.msgprint(_("No available delivery options"), alert=True, indicator="red")
     except OrderCaptureError as exc:
-        # TODO: Remove this annotation after ikea_api fix
         response: CustomResponse = exc.response
 
         if (
@@ -236,8 +235,7 @@ def fetch_items(item_codes: str | list[str], force_update: bool):
     if not items_to_fetch:
         return FetchItemsResult(unsuccessful=[], successful=[])
 
-    # TODO: Remove this type annotation after fix in ikea_api
-    parsed_items: list[types.ParsedItem] = ikea_api.wrappers.get_items(items_to_fetch)
+    parsed_items = ikea_api.wrappers.get_items(items_to_fetch)
 
     _create_item_categories(parsed_items)
     _fetch_child_items(parsed_items, force_update)

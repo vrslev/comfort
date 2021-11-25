@@ -29,8 +29,7 @@ class Kvartiroteka(API):
         self._design_id = matches[0]
 
     def _get_rooms(self):
-        # TODO: Remove this type hint after ikea api update
-        resp: Any = self._get(
+        resp = self._get(
             endpoint=f"{self.endpoint}/design_room",
             params={"filter[design_id.url][eq]": self._design_id},
         )
@@ -38,8 +37,7 @@ class Kvartiroteka(API):
 
     def _get_images(self):
         for room in self._rooms:
-            # TODO: Remove this type annotation after fix in ikea_api
-            resp: Any = self._get(
+            resp = self._get(
                 endpoint=f"{self.endpoint}/block",
                 params={
                     "fields": "views.view_id.image.*",
