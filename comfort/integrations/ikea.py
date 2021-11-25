@@ -242,11 +242,10 @@ def get_items(item_codes: str):  # pragma: no cover
     try:
         response = fetch_items(item_codes, force_update=True)
     except ItemFetchError as e:
-        # TODO: Check if this works
         if not (
             e.args
+            and e.args[0]
             and isinstance(e.args[0], list)
-            and len(e.args[0]) > 0  # type: ignore
             and isinstance(e.args[0][0], str)
         ):
             raise
