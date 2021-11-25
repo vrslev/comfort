@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Mapping
 
 from jwt import PyJWT
 
@@ -65,7 +65,7 @@ def process_sales_order(
 def update_token(token: str) -> dict[Any, Any]:
     doc = get_doc(IkeaSettings)
     doc.authorized_token = token
-    decoded_token = PyJWT().decode(token, verify=False)
+    decoded_token: Mapping[str, Any] = PyJWT().decode(token, verify=False)
     doc.authorized_token_expiration = decoded_token["exp"]
     doc.save()
     return {}

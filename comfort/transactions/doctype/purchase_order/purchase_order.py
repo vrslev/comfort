@@ -6,8 +6,6 @@ from datetime import datetime
 from types import SimpleNamespace
 from typing import Any, Literal
 
-from ikea_api_wrapped.types import DeliveryOptionDict, PurchaseInfoDict
-
 import frappe
 from comfort import (
     TypedDocument,
@@ -24,13 +22,13 @@ from comfort import (
 from comfort.entities.doctype.child_item.child_item import ChildItem
 from comfort.finance import create_payment
 from comfort.integrations.ikea import (
+    PurchaseInfoDict,
     add_items_to_cart,
     fetch_items,
     get_delivery_services,
 )
 from comfort.stock import create_checkout, create_receipt
 from comfort.transactions import AnyChildItem, delete_empty_items, merge_same_items
-from frappe.utils.data import getdate, now_datetime, today
 
 from ..purchase_order_delivery_option.purchase_order_delivery_option import (
     PurchaseOrderDeliveryOption,
@@ -84,7 +82,7 @@ class PurchaseOrder(TypedDocument):
             11: "Ноябрь",
             12: "Декабрь",
         }
-        this_month = months_number_to_name[now_datetime().month]
+        this_month = months_number_to_name[datetime.now().month]
 
         carts_in_this_month: tuple[tuple[str]] | None = frappe.db.sql(  # type: ignore
             """
@@ -302,18 +300,20 @@ class PurchaseOrder(TypedDocument):
         if not response:
             return
 
-        options: list[DeliveryOptionDict] = response["delivery_options"]
-        self.cannot_add_items = json.dumps(response["cannot_add"])
+        options = response.delivery_options
+        self.cannot_add_items = json.dumps(response.cannot_add)
         self.delivery_options = []
         for option in options:
             self.append(
                 "delivery_options",
                 {
-                    "type": option["delivery_type"],
-                    "service_provider": option["service_provider"],
-                    "date": option["delivery_date"],
-                    "price": option["price"],
-                    "unavailable_items": json.dumps(option["unavailable_items"]),
+                    "type": option.type,
+                    "service_provider": option.service_provider,
+                    "date": option.date,
+                    "price": option.price,
+                    "unavailable_items": json.dumps(
+                        [o.dict() for o in option.unavailable_items]
+                    ),
                 },
             )
         self.save_without_validating()
@@ -356,9 +356,9 @@ class PurchaseOrder(TypedDocument):
     def add_purchase_info_and_submit(
         self, purchase_id: str, purchase_info: PurchaseInfoDict
     ):
-        if str_date := purchase_info.get("delivery_date"):
-            self.schedule_date = getdate(str_date)  # type: ignore
-        self.posting_date = getdate(purchase_info.get("purchase_date", today()))  # type: ignore
+        # Schedule date and posting date could be not loaded
+        self.schedule_date = purchase_info.get("delivery_date", datetime.now())  # type: ignore
+        self.posting_date = purchase_info.get("purchase_date", datetime.now())  # type: ignore
         self.delivery_cost = int(purchase_info["delivery_cost"])
         self.order_confirmation_no = purchase_id
         self.submit()

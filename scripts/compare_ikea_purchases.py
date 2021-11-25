@@ -1,24 +1,23 @@
 import re
 from typing import Any
 
-from ikea_api import IkeaApi
-from ikea_api.endpoints.purchases import OrderInfoQuery
+from ikea_api import IKEA
 
 email = ""
 token = ""  # nosec
 
 
-def compare_orders(first_no: int, second_no: int):
+def compare_orders(first_no: str, second_no: str):
     before = get_items_in_order(first_no)
     after = get_items_in_order(second_no)
     comparison = get_items_in_comparison(before, after)
     print_differences(comparison)
 
 
-def get_items_in_order(order_number: int):
-    api = IkeaApi(token)
-    o = api.Purchases.order_info(
-        queries=[OrderInfoQuery.ProductListOrder],
+def get_items_in_order(order_number: str):
+    api = IKEA(token)
+    o = api.purchases.order_info(
+        queries=["ProductListOrder"],
         email=email,
         order_number=order_number,
         take_products=1000,

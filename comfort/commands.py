@@ -97,7 +97,7 @@ def _make_commission_settings():
 
 def _make_items():
     # Last item contains all previous items
-    items = [
+    items: list[dict[str, Any]] = [
         {
             "item_code": "10014030",
             "item_name": "ПАКС Каркас гардероба, 50x58x236 см, белый",

@@ -13,7 +13,7 @@ from importlib.metadata import distribution
 from subprocess import check_call  # nosec
 from typing import Any
 
-import ikea_api_wrapped
+import ikea_api
 import requests
 import sentry_sdk
 import sentry_sdk.utils
@@ -90,7 +90,7 @@ def _unshorten_item_urls(soup: BeautifulSoup):
 def _get_item_codes(html: str):
     soup = BeautifulSoup(unescape(unescape(html)), "html.parser")
     text = _unshorten_item_urls(soup).get_text()
-    return ikea_api_wrapped.parse_item_codes(text)
+    return ikea_api.parse_item_codes(text)
 
 
 class FrappeException(Exception):

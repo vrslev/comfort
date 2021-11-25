@@ -55,9 +55,7 @@ def test_get_unavailable_items_counter(waiting_list: WaitingList):
         SimpleNamespace(item_code="10366598", qty=2),
         SimpleNamespace(item_code="11111111", qty=3),
     ]
-    unavailable_items = mock_delivery_services["delivery_options"][0][
-        "unavailable_items"
-    ]
+    unavailable_items = mock_delivery_services.delivery_options[0].unavailable_items
     cannot_add_items = ["11111111"]
     counter = waiting_list._get_unavailable_items_counter(
         items,  # type: ignore

@@ -99,7 +99,7 @@ class Customer(TypedDocument):
         _update_customer_from_vk_user(self, users[self.vk_id])
 
 
-def _get_vk_users_for_customers(customers: Iterable[Customer]):
+def _get_vk_users_for_customers(customers: Iterable[Customer]) -> dict[str, User]:
     vk_id_to_customer_name_map = {
         c.name: c.vk_id for c in customers if c.vk_id is not None
     }

@@ -4,16 +4,17 @@ from types import SimpleNamespace
 from typing import Any
 from unittest.mock import MagicMock
 
-import ikea_api.auth
-import ikea_api_wrapped
+import ikea_api._endpoints.auth
+import ikea_api.wrappers
 import pytest
-from ikea_api_wrapped.types import (
-    DeliveryOptionDict,
+from ikea_api.wrappers.types import (
+    ChildItem,
+    DeliveryService,
     GetDeliveryServicesResponse,
     ParsedItem,
-    PurchaseHistoryItemDict,
-    PurchaseInfoDict,
-    UnavailableItemDict,
+    PurchaseHistoryItem,
+    PurchaseInfo,
+    UnavailableItem,
 )
 from pymysql import OperationalError
 
@@ -345,85 +346,85 @@ def sales_order(
 
 mock_delivery_services = GetDeliveryServicesResponse(
     delivery_options=[
-        DeliveryOptionDict(
-            delivery_date=date(2021, 8, 26),
-            delivery_type="Доставка",
+        DeliveryService(
+            date=date(2021, 8, 26),
+            type="Доставка",
             price=3299,
             service_provider=None,
             unavailable_items=[
-                UnavailableItemDict(item_code="50366596", available_qty=0),
-                UnavailableItemDict(item_code="10366598", available_qty=0),
-                UnavailableItemDict(item_code="29128569", available_qty=0),
+                UnavailableItem(item_code="50366596", available_qty=0),
+                UnavailableItem(item_code="10366598", available_qty=0),
+                UnavailableItem(item_code="29128569", available_qty=0),
             ],
         ),
-        DeliveryOptionDict(
-            delivery_date=date(2021, 8, 26),
-            delivery_type="Доставка без подъёма",
+        DeliveryService(
+            date=date(2021, 8, 26),
+            type="Доставка без подъёма",
             price=2799,
             service_provider=None,
             unavailable_items=[
-                UnavailableItemDict(item_code="50366596", available_qty=0),
-                UnavailableItemDict(item_code="10366598", available_qty=0),
-                UnavailableItemDict(item_code="29128569", available_qty=0),
+                UnavailableItem(item_code="50366596", available_qty=0),
+                UnavailableItem(item_code="10366598", available_qty=0),
+                UnavailableItem(item_code="29128569", available_qty=0),
             ],
         ),
-        DeliveryOptionDict(
-            delivery_date=date(2021, 8, 27),
-            delivery_type="Пункт самовывоза",
+        DeliveryService(
+            date=date(2021, 8, 27),
+            type="Пункт самовывоза",
             price=1998,
             service_provider="Деловые линии",
             unavailable_items=[
-                UnavailableItemDict(item_code="50366596", available_qty=0),
-                UnavailableItemDict(item_code="40277973", available_qty=0),
-                UnavailableItemDict(item_code="10366598", available_qty=0),
-                UnavailableItemDict(item_code="29128569", available_qty=0),
+                UnavailableItem(item_code="50366596", available_qty=0),
+                UnavailableItem(item_code="40277973", available_qty=0),
+                UnavailableItem(item_code="10366598", available_qty=0),
+                UnavailableItem(item_code="29128569", available_qty=0),
             ],
         ),
-        DeliveryOptionDict(
-            delivery_date=date(2021, 8, 25),
-            delivery_type="Магазин",
+        DeliveryService(
+            date=date(2021, 8, 25),
+            type="Магазин",
             price=999999,
             service_provider=None,
             unavailable_items=[
-                UnavailableItemDict(item_code="50366596", available_qty=0),
-                UnavailableItemDict(item_code="40277973", available_qty=0),
-                UnavailableItemDict(item_code="10366598", available_qty=0),
-                UnavailableItemDict(item_code="29128569", available_qty=0),
+                UnavailableItem(item_code="50366596", available_qty=0),
+                UnavailableItem(item_code="40277973", available_qty=0),
+                UnavailableItem(item_code="10366598", available_qty=0),
+                UnavailableItem(item_code="29128569", available_qty=0),
             ],
         ),
-        DeliveryOptionDict(
-            delivery_date=date(2021, 8, 24),
-            delivery_type="Магазин",
+        DeliveryService(
+            date=date(2021, 8, 24),
+            type="Магазин",
             price=1998,
             service_provider=None,
             unavailable_items=[
-                UnavailableItemDict(item_code="50366596", available_qty=0),
-                UnavailableItemDict(item_code="40277973", available_qty=0),
-                UnavailableItemDict(item_code="10366598", available_qty=0),
-                UnavailableItemDict(item_code="29128569", available_qty=0),
+                UnavailableItem(item_code="50366596", available_qty=0),
+                UnavailableItem(item_code="40277973", available_qty=0),
+                UnavailableItem(item_code="10366598", available_qty=0),
+                UnavailableItem(item_code="29128569", available_qty=0),
             ],
         ),
-        DeliveryOptionDict(
-            delivery_date=date(2021, 8, 24),
-            delivery_type="Магазин",
+        DeliveryService(
+            date=date(2021, 8, 24),
+            type="Магазин",
             price=1998,
             service_provider=None,
             unavailable_items=[
-                UnavailableItemDict(item_code="50366596", available_qty=0),
-                UnavailableItemDict(item_code="10366598", available_qty=0),
-                UnavailableItemDict(item_code="29128569", available_qty=0),
+                UnavailableItem(item_code="50366596", available_qty=0),
+                UnavailableItem(item_code="10366598", available_qty=0),
+                UnavailableItem(item_code="29128569", available_qty=0),
             ],
         ),
-        DeliveryOptionDict(
-            delivery_date=date(2021, 8, 25),
-            delivery_type="Магазин",
+        DeliveryService(
+            date=date(2021, 8, 25),
+            type="Магазин",
             price=1998,
             service_provider=None,
             unavailable_items=[
-                UnavailableItemDict(item_code="50366596", available_qty=0),
-                UnavailableItemDict(item_code="40277973", available_qty=0),
-                UnavailableItemDict(item_code="10366598", available_qty=0),
-                UnavailableItemDict(item_code="29128569", available_qty=0),
+                UnavailableItem(item_code="50366596", available_qty=0),
+                UnavailableItem(item_code="40277973", available_qty=0),
+                UnavailableItem(item_code="10366598", available_qty=0),
+                UnavailableItem(item_code="29128569", available_qty=0),
             ],
         ),
     ],
@@ -431,38 +432,38 @@ mock_delivery_services = GetDeliveryServicesResponse(
 )
 
 mock_purchase_history = [
-    PurchaseHistoryItemDict(
+    PurchaseHistoryItem(
         datetime="2021-04-19T10:12:00Z",
         datetime_formatted="19 апреля 2021, 13:12",
-        price=8326.0,
-        purchase_id=11111111,
+        price=8326,
+        id="11111111",
         status="IN_PROGRESS",
         store="Интернет-магазин",
     ),
-    PurchaseHistoryItemDict(
+    PurchaseHistoryItem(
         datetime="2021-04-14T18:16:25Z",
         datetime_formatted="14 апреля 2021, 21:16",
         price=0,
-        purchase_id=111111110,
+        id="111111110",
         status="COMPLETED",
         store="Интернет-магазин",
     ),
 ]
 
-mock_purchase_info = PurchaseInfoDict(
-    purchase_date="2021-04-19",
-    delivery_date="2021-04-24",
+mock_purchase_info = PurchaseInfo(
+    purchase_date=date(2021, 4, 19),
+    delivery_date=date(2021, 4, 24),
     delivery_cost=399.0,
     total_cost=7927.0,
 )
 
 
 def patch_get_delivery_services(monkeypatch: pytest.MonkeyPatch):
-    def mock_get_delivery_services(api: Any, items: Any, zip_code: Any):
+    def mock_get_delivery_services(api: Any, *, items: Any, zip_code: Any):
         return mock_delivery_services
 
     monkeypatch.setattr(
-        ikea_api_wrapped, "get_delivery_services", mock_get_delivery_services
+        ikea_api.wrappers, "get_delivery_services", mock_get_delivery_services
     )
 
 
@@ -528,7 +529,7 @@ mock_token = "some_mock_token"  # nosec
 
 @pytest.fixture
 def ikea_settings(monkeypatch: pytest.MonkeyPatch):
-    monkeypatch.setattr(ikea_api.auth, "get_guest_token", lambda: mock_token)
+    monkeypatch.setattr(ikea_api._endpoints.auth, "get_guest_token", lambda: mock_token)
     doc = get_doc(IkeaSettings)
     doc.authorized_token = mock_token
     doc.authorized_token_expiration = timegm(
@@ -541,61 +542,61 @@ def ikea_settings(monkeypatch: pytest.MonkeyPatch):
 
 @pytest.fixture
 def parsed_item() -> ParsedItem:
-    return {
-        "is_combination": True,
-        "item_code": "29128569",
-        "name": "ПАКС, Гардероб, 175x58x236 см, белый",
-        "image_url": "https://www.ikea.com/ru/ru/images/products/paks-garderob-belyj__0383288_PE557277_S5.JPG",
-        "weight": 0.0,
-        "child_items": [
-            {
-                "item_code": "10014030",
-                "item_name": "ПАКС, Каркас гардероба, 175x58x236 см, белый",
-                "weight": 41.3,
-                "qty": 2,
-            },
-            {
-                "item_code": "10366598",
-                "item_name": "КОМПЛИМЕНТ, Штанга платяная, 175x58x236 см, белый",
-                "weight": 0.43,
-                "qty": 1,
-            },
-            {
-                "item_code": "20277974",
-                "item_name": "КОМПЛИМЕНТ, Полка, 175x58x236 см, белый",
-                "weight": 4.66,
-                "qty": 2,
-            },
-            {
-                "item_code": "40277973",
-                "item_name": "КОМПЛИМЕНТ, Полка, 175x58x236 см, белый",
-                "weight": 2.98,
-                "qty": 6,
-            },
-            {
-                "item_code": "40366634",
-                "item_name": "КОМПЛИМЕНТ, Ящик, 175x58x236 см, белый",
-                "weight": 7.72,
-                "qty": 3,
-            },
-            {
-                "item_code": "50121575",
-                "item_name": "ПАКС, Каркас гардероба, 175x58x236 см, белый",
-                "weight": 46.8,
-                "qty": 1,
-            },
-            {
-                "item_code": "50366596",
-                "item_name": "КОМПЛИМЕНТ, Штанга платяная, 175x58x236 см, белый",
-                "weight": 0.3,
-                "qty": 1,
-            },
+    return ParsedItem(
+        is_combination=True,
+        item_code="29128569",
+        name="ПАКС, Гардероб, 175x58x236 см, белый",
+        image_url="https://www.ikea.com/ru/ru/images/products/paks-garderob-belyj__0383288_PE557277_S5.JPG",
+        weight=0.0,
+        child_items=[
+            ChildItem(
+                item_code="10014030",
+                name="ПАКС, Каркас гардероба, 175x58x236 см, белый",
+                weight=41.3,
+                qty=2,
+            ),
+            ChildItem(
+                item_code="10366598",
+                name="КОМПЛИМЕНТ, Штанга платяная, 175x58x236 см, белый",
+                weight=0.43,
+                qty=1,
+            ),
+            ChildItem(
+                item_code="20277974",
+                name="КОМПЛИМЕНТ, Полка, 175x58x236 см, белый",
+                weight=4.66,
+                qty=2,
+            ),
+            ChildItem(
+                item_code="40277973",
+                name="КОМПЛИМЕНТ, Полка, 175x58x236 см, белый",
+                weight=2.98,
+                qty=6,
+            ),
+            ChildItem(
+                item_code="40366634",
+                name="КОМПЛИМЕНТ, Ящик, 175x58x236 см, белый",
+                weight=7.72,
+                qty=3,
+            ),
+            ChildItem(
+                item_code="50121575",
+                name="ПАКС, Каркас гардероба, 175x58x236 см, белый",
+                weight=46.8,
+                qty=1,
+            ),
+            ChildItem(
+                item_code="50366596",
+                name="КОМПЛИМЕНТ, Штанга платяная, 175x58x236 см, белый",
+                weight=0.3,
+                qty=1,
+            ),
         ],
-        "price": 17950,
-        "url": "https://www.ikea.com/ru/ru/p/-s29128569",
-        "category_name": "Открытые гардеробы",
-        "category_url": "https://www.ikea.com/ru/ru/cat/-43634",
-    }
+        price=17950,
+        url="https://www.ikea.com/ru/ru/p/-s29128569",
+        category_name="Открытые гардеробы",
+        category_url="https://www.ikea.com/ru/ru/cat/-43634",  # type: ignore
+    )
 
 
 @pytest.fixture

@@ -3,16 +3,16 @@ from __future__ import annotations
 import json
 from copy import copy, deepcopy
 from datetime import datetime
-from typing import Any, Callable
+from typing import Any
 
-import ikea_api_wrapped
+import ikea_api.wrappers
 import pytest
 
 import comfort.transactions.doctype.purchase_order.purchase_order
 import frappe
 from comfort import count_qty, get_all, get_doc, get_value, group_by_attr, new_doc
 from comfort.entities.doctype.child_item.child_item import ChildItem
-from comfort.integrations.ikea import FetchItemsResult
+from comfort.integrations.ikea import FetchItemsResult, PurchaseInfoDict
 from comfort.transactions import AnyChildItem
 from comfort.transactions.doctype.purchase_order.purchase_order import (
     PurchaseOrder,
@@ -358,14 +358,14 @@ def test_get_templated_items_for_api(
 
 
 @pytest.mark.usefixtures("ikea_settings")
-def test_get_delivery_services(purchase_order: PurchaseOrder):
+def test_get_delivery_services_with_response(purchase_order: PurchaseOrder):
     purchase_order.db_insert()
     purchase_order.get_delivery_services()
     assert purchase_order.cannot_add_items == json.dumps(
-        mock_delivery_services["cannot_add"]
+        mock_delivery_services.cannot_add
     )
     assert len(purchase_order.delivery_options) == len(
-        mock_delivery_services["delivery_options"]
+        mock_delivery_services.delivery_options
     )
 
 
@@ -373,8 +373,13 @@ def test_get_delivery_services(purchase_order: PurchaseOrder):
 def test_get_delivery_services_no_response(
     purchase_order: PurchaseOrder, monkeypatch: pytest.MonkeyPatch
 ):
-    mock_func: Callable[[Any, Any, Any], None] = lambda api, items, zip_code: None
-    monkeypatch.setattr(ikea_api_wrapped, "get_delivery_services", mock_func)
+    def mock_get_delivery_services(api: Any, *, items: Any, zip_code: Any):
+        pass
+
+    monkeypatch.setattr(
+        ikea_api.wrappers, "get_delivery_services", mock_get_delivery_services
+    )
+
     purchase_order.get_delivery_services()
     assert not purchase_order.cannot_add_items
     assert not purchase_order.delivery_options
@@ -538,12 +543,13 @@ def test_purchase_order_fetch_items_specs(
 def test_add_purchase_info_and_submit_info_loaded(purchase_order: PurchaseOrder):
     purchase_order.db_insert()
     purchase_id = "111111110"
+
     purchase_order.add_purchase_info_and_submit(
-        purchase_id, purchase_info=mock_purchase_info
+        purchase_id, purchase_info=mock_purchase_info.dict()  # type: ignore
     )
-    assert purchase_order.schedule_date == getdate(mock_purchase_info["delivery_date"])
-    assert purchase_order.posting_date == getdate(mock_purchase_info["purchase_date"])
-    assert purchase_order.delivery_cost == mock_purchase_info["delivery_cost"]
+    assert purchase_order.schedule_date == mock_purchase_info.delivery_date
+    assert purchase_order.posting_date == mock_purchase_info.purchase_date
+    assert purchase_order.delivery_cost == mock_purchase_info.delivery_cost
     assert purchase_order.order_confirmation_no == purchase_id
     assert purchase_order.docstatus == 1
 
@@ -553,9 +559,14 @@ def test_add_purchase_info_and_submit_info_not_loaded(purchase_order: PurchaseOr
     purchase_order.db_insert()
     purchase_order.add_purchase_info_and_submit(
         purchase_id,
-        purchase_info={"delivery_cost": delivery_cost},  # type: ignore
+        purchase_info=PurchaseInfoDict(
+            delivery_cost=delivery_cost,
+            total_cost=0,
+            purchase_date=datetime.now().date(),
+            delivery_date=None,
+        ),
     )
-    assert purchase_order.schedule_date == None
+    assert purchase_order.schedule_date is None
     assert purchase_order.posting_date == getdate(today())
     assert purchase_order.delivery_cost == delivery_cost
     assert purchase_order.order_confirmation_no == purchase_id

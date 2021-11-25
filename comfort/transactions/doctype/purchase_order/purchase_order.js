@@ -222,9 +222,9 @@ comfort.PurchaseOrderController = frappe.ui.form.Controller.extend({
           callback: (r) => {
             var args = {
               purchase_id: purchase_id,
-              purchase_info: r.message,
+              purchase_info: r.message || {},
             };
-            if (Object.keys(r.message).length > 0) {
+            if (r.message && Object.keys(r.message).length > 0) {
               _send(args);
             } else {
               frappe.prompt(
@@ -260,7 +260,7 @@ comfort.PurchaseOrderController = frappe.ui.form.Controller.extend({
               r.message.forEach((p) => {
                 if (p.status == "IN_PROGRESS") {
                   purchases.push([
-                    [p.id, p.datetime_formatted, p.cost + " ₽"].join(" | "),
+                    [p.id, p.datetime_formatted, p.price + " ₽"].join(" | "),
                   ]);
                 }
               });
