@@ -9,6 +9,7 @@ import sentry_sdk
 from ikea_api import format_item_code as format_item_code  # For jenv hook
 from ikea_api._api import CustomResponse
 from ikea_api.exceptions import (
+    GraphQLError,
     ItemFetchError,
     NoDeliveryOptionsAvailableError,
     OrderCaptureError,
@@ -94,13 +95,30 @@ class PurchaseInfoDict(TypedDict):
 
 
 @frappe.whitelist()
-def get_purchase_info(purchase_id: int, use_lite_id: bool) -> PurchaseInfoDict:
-    email: str | None = None
-    if use_lite_id:
-        email = get_cached_value("Ikea Settings", "Ikea Settings", "username")
-    return ikea_api.wrappers.get_purchase_info(  # type: ignore
-        get_authorized_api(), id=str(purchase_id), email=email
-    ).dict()
+def get_purchase_info(purchase_id: int, use_lite_id: bool) -> PurchaseInfoDict | None:
+    api = get_authorized_api()
+    id = str(purchase_id)
+    email = (
+        get_cached_value("Ikea Settings", "Ikea Settings", "username")
+        if use_lite_id
+        else None
+    )
+
+    try:
+        return ikea_api.wrappers.get_purchase_info(api, id=id, email=email).dict()  # type: ignore
+    except GraphQLError as exc:
+        if isinstance(exc.errors, dict):
+            exc.errors = [exc.errors]
+        for error in exc.errors:
+            if "message" not in error:
+                continue
+            if error["message"] in (
+                "Purchase not found",
+                "Order not found",
+                "Invalid order id",
+            ):
+                return
+        sentry_sdk.capture_exception(exc)
 
 
 def _make_item_category(name: str | None, url: str | None):

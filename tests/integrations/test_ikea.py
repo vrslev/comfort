@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 from types import SimpleNamespace
 from typing import Any
@@ -5,8 +7,13 @@ from unittest.mock import Mock
 
 import ikea_api.wrappers
 import pytest
+import sentry_sdk
 from ikea_api import IKEA
-from ikea_api.exceptions import NoDeliveryOptionsAvailableError, OrderCaptureError
+from ikea_api.exceptions import (
+    GraphQLError,
+    NoDeliveryOptionsAvailableError,
+    OrderCaptureError,
+)
 from ikea_api.wrappers.types import ParsedItem
 
 import comfort.integrations.ikea
@@ -159,7 +166,7 @@ def test_get_purchase_history(monkeypatch: pytest.MonkeyPatch):
 
 @pytest.mark.parametrize("use_lite_id", (True, False))
 @pytest.mark.usefixtures("ikea_settings")
-def test_get_purchase_info(monkeypatch: pytest.MonkeyPatch, use_lite_id: bool):
+def test_get_purchase_info_main(monkeypatch: pytest.MonkeyPatch, use_lite_id: bool):
     exp_purchase_id = 111111110
 
     class MockGetPurchaseInfoResult:
@@ -170,6 +177,7 @@ def test_get_purchase_info(monkeypatch: pytest.MonkeyPatch, use_lite_id: bool):
         assert api.token == get_authorized_api().token
         assert id == str(exp_purchase_id)
         if use_lite_id:
+            # TODO: Remove this block: IkeaSettings don't store username anymore
             assert email == get_value("Ikea Settings", None, "username")
         else:
             assert email is None
@@ -177,6 +185,60 @@ def test_get_purchase_info(monkeypatch: pytest.MonkeyPatch, use_lite_id: bool):
 
     monkeypatch.setattr(ikea_api.wrappers, "get_purchase_info", mock_get_purchase_info)
     get_purchase_info(exp_purchase_id, use_lite_id)
+
+
+@pytest.mark.parametrize("is_dict", (True, False))
+@pytest.mark.parametrize(
+    ("err", "should_capture"),
+    (
+        ({"not message": "foo"}, True),
+        ({"message": "Purchase not found"}, False),
+        ({"message": "Order not found"}, False),
+        ({"message": "Invalid order id"}, False),
+        ({"message": "some other msg"}, True),
+    ),
+)
+@pytest.mark.usefixtures("ikea_settings")
+def test_get_purchase_info_raises(
+    monkeypatch: pytest.MonkeyPatch,
+    is_dict: bool,
+    err: dict[str, str],
+    should_capture: bool,
+):
+    if is_dict:
+        msg = {"errors": [err]}
+    msg = {"errors": err}
+    resp = [msg, {}]
+
+    class MockResponse:
+        status_code = 200
+        _json = resp
+        text = json.dumps(resp)
+
+    exc = GraphQLError(MockResponse())  # type: ignore
+
+    class MockPurchases:
+        def __init__(self, token: str):
+            pass
+
+        def order_info(self, **kwargs: Any):
+            raise exc
+
+    called = False
+
+    def mock_capture_exception(exception: Exception):
+        assert exception is exc
+        nonlocal called
+        called = True
+
+    monkeypatch.setattr(ikea_api, "Purchases", MockPurchases)
+    monkeypatch.setattr(sentry_sdk, "capture_exception", mock_capture_exception)
+
+    get_purchase_info(1, False)
+    if should_capture:
+        assert called
+    else:
+        assert not called
 
 
 def test_make_item_category_not_exists(parsed_item: ParsedItem):

@@ -224,7 +224,7 @@ comfort.PurchaseOrderController = frappe.ui.form.Controller.extend({
               purchase_id: purchase_id,
               purchase_info: r.message,
             };
-            if (Object.keys(r.message).length > 0) {
+            if (r.message && Object.keys(r.message).length > 0) {
               _send(args);
             } else {
               frappe.prompt(
