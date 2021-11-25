@@ -3,9 +3,8 @@ from __future__ import annotations
 import json
 from collections import Counter
 from copy import copy
-from types import SimpleNamespace
 
-from ikea_api_wrapped.types import GetDeliveryServicesResponse, UnavailableItemDict
+from ikea_api.wrappers.types import GetDeliveryServicesResponse, UnavailableItem
 
 import frappe
 from comfort import (
@@ -46,13 +45,10 @@ class WaitingList(TypedDocument):
     def _get_unavailable_items_counter(
         self,
         items: list[SalesOrderChildItem | SalesOrderItem],
-        unavailable_items: list[UnavailableItemDict],
+        unavailable_items: list[UnavailableItem],
         cannot_add_items: list[str],
     ):
-        counter = count_qty(
-            (SimpleNamespace(**i) for i in unavailable_items),
-            value_attr="available_qty",
-        )
+        counter = count_qty(unavailable_items, value_attr="available_qty")
 
         for item_code in cannot_add_items:
             counter[item_code] = 0
@@ -94,14 +90,14 @@ class WaitingList(TypedDocument):
             cur_items = grouped_items[order.sales_order]
             current_options: dict[str, tuple[dict[str, int], str]] = {}
 
-            for option in delivery_services["delivery_options"]:
+            for option in delivery_services.delivery_options:
                 counter = self._get_unavailable_items_counter(
                     cur_items,
-                    option["unavailable_items"],
-                    delivery_services["cannot_add"],
+                    option.unavailable_items,
+                    delivery_services.cannot_add,
                 )
                 status = self._get_status_for_order(cur_items, counter)
-                current_options[option["delivery_type"]] = dict(counter), status
+                current_options[option.type] = dict(counter), status
 
             if order.current_options:
                 order.last_options = copy(order.current_options)
