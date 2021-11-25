@@ -78,7 +78,9 @@ def add_items_to_cart(items: dict[str, int], authorize: bool):
 
 @frappe.whitelist()
 def get_purchase_history():
-    return ikea_api.wrappers.get_purchase_history(get_authorized_api())
+    return [
+        p.dict() for p in ikea_api.wrappers.get_purchase_history(get_authorized_api())
+    ]
 
 
 class PurchaseInfoDict(TypedDict):

@@ -260,7 +260,7 @@ comfort.PurchaseOrderController = frappe.ui.form.Controller.extend({
               r.message.forEach((p) => {
                 if (p.status == "IN_PROGRESS") {
                   purchases.push([
-                    [p.id, p.datetime_formatted, p.cost + " ₽"].join(" | "),
+                    [p.id, p.datetime_formatted, p.price + " ₽"].join(" | "),
                   ]);
                 }
               });
