@@ -55,16 +55,19 @@ def get_delivery_services(items: dict[str, int]):
         # TODO: Remove this annotation after ikea_api fix
         response: CustomResponse = exc.response
 
-        # TODO: Check if this works
-        if isinstance(response._json, dict):
-            msg: str = response._json.get("message", "")
-            if (
-                "Error while connecting to ISOM" in msg
-                or "Cannot read property 'get' of undefined" in msg
-            ):
-                return frappe.msgprint(
-                    _("Internal IKEA error, try again"), alert=True, indicator="red"
-                )
+        if (
+            isinstance(response._json, dict)
+            and "message" in response._json
+            and isinstance(response._json["message"], str)
+            and (
+                "Error while connecting to ISOM" in response._json["message"]
+                or "Cannot read property 'get' of undefined"
+                in response._json["message"]
+            )
+        ):
+            return frappe.msgprint(
+                _("Internal IKEA error, try again"), alert=True, indicator="red"
+            )
         raise
 
 
@@ -239,6 +242,7 @@ def get_items(item_codes: str):  # pragma: no cover
     try:
         response = fetch_items(item_codes, force_update=True)
     except ItemFetchError as e:
+        # TODO: Check if this works
         if not (
             e.args
             and isinstance(e.args[0], list)
