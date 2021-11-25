@@ -3,8 +3,8 @@ from __future__ import annotations
 from calendar import timegm
 from datetime import datetime, timezone
 
-import ikea_api
-import ikea_api.auth
+import ikea_api._endpoints.auth
+from ikea_api import IKEA
 from jwt import PyJWT
 from jwt.exceptions import ExpiredSignatureError
 
@@ -34,11 +34,11 @@ def get_guest_api():
         or doc.guest_token_expiration is None
         or convert_to_datetime(doc.guest_token_expiration) <= now_datetime()
     ):
-        doc.guest_token = ikea_api.auth.get_guest_token()
+        doc.guest_token = ikea_api._endpoints.auth.get_guest_token()
         doc.guest_token_expiration = add_to_date(None, days=30)
         doc.save()
 
-    return ikea_api.IkeaApi(doc.guest_token)
+    return IKEA(doc.guest_token)
 
 
 def _authorized_token_expired(exp: int):
@@ -58,4 +58,4 @@ def get_authorized_api():
     ):
         raise ValidationError(_("Update authorization info"))
 
-    return ikea_api.IkeaApi(doc.authorized_token)
+    return IKEA(doc.authorized_token)

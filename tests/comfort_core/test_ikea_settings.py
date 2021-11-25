@@ -76,7 +76,7 @@ def test_get_guest_api_no_update(ikea_settings: IkeaSettings):
 
 @pytest.mark.usefixtures("ikea_settings")
 def test_get_guest_api_return():
-    assert get_guest_api().reveal_token() == mock_token
+    assert get_guest_api().token == mock_token
 
 
 @pytest.mark.parametrize(*_testdata)
@@ -114,4 +114,4 @@ def test_get_authorized_api_no_update(ikea_settings: IkeaSettings):
 
 @pytest.mark.usefixtures("ikea_settings")
 def test_get_authorized_api_return():
-    assert get_authorized_api().reveal_token() == mock_token
+    assert get_authorized_api().token == mock_token
