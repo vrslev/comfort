@@ -3,6 +3,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.30.0 (2021-11-25)
+### Feature
+* Bump ikea-api ([#96](https://github.com/vrslev/comfort/issues/96)) ([`7c83a5a`](https://github.com/vrslev/comfort/commit/7c83a5acbd75faf5617e3dc503ffbc0539dd3d5b))
+
 ## v0.29.2 (2021-11-23)
 ### Fix
 * **Docker:** Fix nginx image issues due to latest changes in frappe/frappe_docker ([`91c02bb`](https://github.com/vrslev/comfort/commit/91c02bb9be1283dcd542185fd157ce952f0bc8cd))
