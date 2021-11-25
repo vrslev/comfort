@@ -77,7 +77,7 @@ _QUERY_FORMATTERS = {
 
 def _get_fields(doctype: str, fields: list[str]) -> list[str]:  # pragma: no cover
     meta: Meta = frappe.get_meta(doctype)
-    search_fields: list[str] = meta.get_search_fields()
+    search_fields: list[str] = meta.get_search_fields()  # type: ignore
     fields.extend(search_fields)  # type: ignore
 
     title_field: str | None = meta.get("title_field")  # type: ignore

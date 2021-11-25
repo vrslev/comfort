@@ -377,7 +377,10 @@ class SalesOrder(TypedDocument):
             )
         ]
         returns: list[Any] = [
-            r.name for r in frappe.get_all("Sales Return", {"sales_order": self.name})
+            r.name
+            for r in frappe.get_all(  # type: ignore
+                "Sales Return", {"sales_order": self.name}
+            )
         ]
 
         balances: list[tuple[int]] = frappe.get_all(
@@ -825,7 +828,7 @@ def get_contract_template():  # pragma: no cover
     doc = new_doc(SalesOrder)
     doc.customer = "________________"
     doc.items = []
-    html = frappe.get_print(doc=doc)
+    html = frappe.get_print(doc=doc)  # type: ignore
     frappe.local.response.filename = "contract.pdf"
     frappe.local.response.filecontent = get_pdf(html)
     frappe.local.response.type = "pdf"

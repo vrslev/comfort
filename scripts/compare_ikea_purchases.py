@@ -2,6 +2,7 @@ import re
 from typing import Any
 
 from ikea_api import IKEA
+from ikea_api._api import GraphQLResponse
 
 email = ""
 token = ""  # nosec
@@ -16,7 +17,8 @@ def compare_orders(first_no: str, second_no: str):
 
 def get_items_in_order(order_number: str):
     api = IKEA(token)
-    o = api.purchases.order_info(
+    # TODO: Remove this type hint after
+    o: list[GraphQLResponse] = api.purchases.order_info(
         queries=["ProductListOrder"],
         email=email,
         order_number=order_number,

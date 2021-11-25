@@ -13,7 +13,7 @@ from frappe.model.document import Document
 
 
 def _(msg: Any, lang: str | None = None, context: str | None = None) -> str:
-    return _gettext(msg, lang, context)
+    return _gettext(msg, lang, context)  # type: ignore
 
 
 def count_qty(
@@ -152,7 +152,7 @@ def get_doc(cls: type[_T_doc], *args: Any, **kwargs: Any) -> _T_doc:
 
 
 def get_all(cls: type[_T_doc], *args: Any, **kwargs: Any) -> list[_T_doc]:
-    return frappe.get_all(_resolve_doctype_from_class(cls), *args, **kwargs)
+    return frappe.get_all(_resolve_doctype_from_class(cls), *args, **kwargs)  # type: ignore
 
 
 def get_value(
@@ -162,7 +162,7 @@ def get_value(
     as_dict: bool = False,
     order_by: str | None = None,
 ) -> Any:
-    return frappe.db.get_value(
+    return frappe.db.get_value(  # type: ignore
         doctype=doctype,
         filters=filters,
         fieldname=fieldname,
@@ -204,7 +204,7 @@ def copy_doc(doc: _T_doc, ignore_no_copy: bool = True) -> _T_doc:
 
 
 def patch_fmt_money():  # pragma: no cover
-    old_func = frappe.utils.data.fmt_money
+    old_func = frappe.utils.data.fmt_money  # type: ignore
 
     def fmt_money(
         amount: str | int | float,
@@ -212,7 +212,7 @@ def patch_fmt_money():  # pragma: no cover
         currency: str | None = None,
         format: str | None = None,
     ) -> str:
-        return old_func(amount, precision=0) + " ₽"
+        return old_func(amount, precision=0) + " ₽"  # type: ignore
 
     frappe.utils.data.fmt_money = fmt_money
     frappe.utils.fmt_money = fmt_money

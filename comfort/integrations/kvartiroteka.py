@@ -29,7 +29,8 @@ class Kvartiroteka(API):
         self._design_id = matches[0]
 
     def _get_rooms(self):
-        resp = self._get(
+        # TODO: Remove this type hint after ikea api update
+        resp: Any = self._get(
             endpoint=f"{self.endpoint}/design_room",
             params={"filter[design_id.url][eq]": self._design_id},
         )

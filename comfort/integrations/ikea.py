@@ -57,7 +57,7 @@ def get_delivery_services(items: dict[str, int]):
 
         # TODO: Check if this works
         if isinstance(response._json, dict):
-            msg = response._json.get("message", "")
+            msg: str = response._json.get("message", "")
             if (
                 "Error while connecting to ISOM" in msg
                 or "Cannot read property 'get' of undefined" in msg
