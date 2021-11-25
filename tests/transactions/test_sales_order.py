@@ -6,7 +6,7 @@ from types import SimpleNamespace
 from typing import Any, Callable, Literal
 
 import pytest
-from ikea_api_wrapped.types import DeliveryOptionDict, UnavailableItemDict
+from ikea_api.wrappers.types import DeliveryService, UnavailableItem
 
 import comfort.transactions.doctype.sales_order.sales_order
 import frappe
@@ -878,9 +878,9 @@ def test_get_services_for_check_availability_no_unavailble_items(
 ):
     def new_get_delivery_services(items: Any):
         resp = deepcopy(mock_delivery_services)
-        resp["cannot_add"] = []
-        for option in resp["delivery_options"]:
-            option["unavailable_items"] = []
+        resp.cannot_add = []
+        for option in resp.delivery_options:
+            option.unavailable_items = []
         return resp
 
     monkeypatch.setattr(
@@ -910,10 +910,10 @@ def test_get_services_for_check_availability_with_unavailable_items(
 ):
     resp = deepcopy(mock_delivery_services)
     if not cannot_add_appear:
-        resp["cannot_add"] = []
+        resp.cannot_add = []
     if not unavailable_items_appear:
-        for option in resp["delivery_options"]:
-            option["unavailable_items"] = []
+        for option in resp.delivery_options:
+            option.unavailable_items = []
 
     def new_get_delivery_services(items: Any):
         return resp
@@ -937,15 +937,15 @@ def test_check_availability_options_items(
 
     def new_get_delivery_services(items: Any):
         resp = deepcopy(mock_delivery_services)
-        resp["cannot_add"] = []
-        resp["delivery_options"] = resp["delivery_options"][:1]
-        resp["delivery_options"][0]["unavailable_items"] = [
-            UnavailableItemDict(item_code=item.item_code, available_qty=0)
+        resp.cannot_add = []
+        resp.delivery_options = resp.delivery_options[:1]
+        resp.delivery_options[0].unavailable_items = [
+            UnavailableItem(item_code=item.item_code, available_qty=0)
         ]
-        resp["delivery_options"].append(
-            DeliveryOptionDict(
-                delivery_date=None,
-                delivery_type="test",
+        resp.delivery_options.append(
+            DeliveryService(
+                date=None,
+                type="test",
                 price=0,
                 service_provider=None,
                 unavailable_items=[],
@@ -988,15 +988,13 @@ def test_check_availability_options_delivery_type(
 ):
     def new_get_delivery_services(items: Any):
         resp = deepcopy(mock_delivery_services)
-        resp["cannot_add"] = []
-        resp["delivery_options"] = resp["delivery_options"][:1]
-        option = resp["delivery_options"][0]
-        option["service_provider"] = service_provider
-        option["delivery_type"] = delivery_type
-        option["unavailable_items"] = [
-            UnavailableItemDict(
-                item_code=sales_order.items[0].item_code, available_qty=0
-            )
+        resp.cannot_add = []
+        resp.delivery_options = resp.delivery_options[:1]
+        option = resp.delivery_options[0]
+        option.service_provider = service_provider
+        option.type = delivery_type
+        option.unavailable_items = [
+            UnavailableItem(item_code=sales_order.items[0].item_code, available_qty=0)
         ]
         return resp
 
@@ -1019,9 +1017,9 @@ def test_check_availability_options_cannot_add(
 
     def new_get_delivery_services(items: Any):
         resp = deepcopy(mock_delivery_services)
-        resp["cannot_add"] = [item.item_code]
-        resp["delivery_options"] = resp["delivery_options"][:1]
-        resp["delivery_options"][0]["unavailable_items"] = []
+        resp.cannot_add = [item.item_code]
+        resp.delivery_options = resp.delivery_options[:1]
+        resp.delivery_options[0].unavailable_items = []
         return resp
 
     monkeypatch.setattr(

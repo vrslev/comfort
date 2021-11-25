@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 from types import SimpleNamespace
 from typing import Any, Literal, TypedDict
 
-from ikea_api_wrapped.types import DeliveryOptionDict
+from ikea_api.wrappers.types import DeliveryService
 
 import frappe
 from comfort import (
@@ -598,11 +598,10 @@ class SalesOrder(TypedDocument):
         if delivery_services is None:
             return  # Caught NoDeliveryOptionsAvailableError
 
-        if delivery_services["cannot_add"]:
+        if delivery_services.cannot_add:
             return delivery_services
         if any(
-            option["unavailable_items"]
-            for option in delivery_services["delivery_options"]
+            option.unavailable_items for option in delivery_services.delivery_options
         ):
             return delivery_services
 
@@ -624,35 +623,35 @@ class SalesOrder(TypedDocument):
         if delivery_services is None:
             return
 
-        def _get_delivery_type(option: DeliveryOptionDict):
-            if option["service_provider"] and option["delivery_type"]:
-                return f"{option['delivery_type']} ({option['service_provider']})"
-            return option["delivery_type"]
+        def _get_delivery_type(option: DeliveryService):
+            if option.service_provider and option.type:
+                return f"{option.type} ({option.service_provider})"
+            return option.type
 
-        def _get_items(option: DeliveryOptionDict):
+        def _get_items(option: DeliveryService):
             return [
                 _CheckAvailabilityDeliveryOptionItem(
-                    item_code=item["item_code"],
-                    item_name=grouped_items[item["item_code"]][0].item_name,
-                    available_qty=item["available_qty"],
-                    required_qty=qty_counter[item["item_code"]],
+                    item_code=item.item_code,
+                    item_name=grouped_items[item.item_code][0].item_name,
+                    available_qty=item.available_qty,
+                    required_qty=qty_counter[item.item_code],
                 )
-                for item in option["unavailable_items"]
+                for item in option.unavailable_items
             ]
 
         options = [
             _CheckAvailabilityDeliveryOption(
                 delivery_type=_get_delivery_type(option), items=_get_items(option)
             )
-            for option in delivery_services["delivery_options"]
-            if option["unavailable_items"]
+            for option in delivery_services.delivery_options
+            if option.unavailable_items
         ]
 
         cannot_add = [
             _CheckAvailabilityCannotAddItem(
                 item_code=item_code, item_name=grouped_items[item_code][0].item_name
             )
-            for item_code in delivery_services["cannot_add"]
+            for item_code in delivery_services.cannot_add
         ]
 
         return _CheckAvailabilityResponse(options=options, cannot_add=cannot_add)
