@@ -14,6 +14,13 @@ updates:
       day: monday
       time: "07:00"
 
+  - package-ecosystem: pip
+    directory: browser_ext
+    schedule:
+      interval: weekly
+      day: monday
+      time: "07:00"
+
   - package-ecosystem: docker
     directory: docker
     schedule:
