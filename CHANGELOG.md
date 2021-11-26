@@ -3,6 +3,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.30.1 (2021-11-26)
+### Fix
+* Bump ikea-api ([`e430c4a`](https://github.com/vrslev/comfort/commit/e430c4a5164c0f4328f7b286bdfb64a74198f7d3))
+
 ## v0.30.0 (2021-11-25)
 ### Feature
 * Bump ikea-api ([#96](https://github.com/vrslev/comfort/issues/96)) ([`7c83a5a`](https://github.com/vrslev/comfort/commit/7c83a5acbd75faf5617e3dc503ffbc0539dd3d5b))
