@@ -9,7 +9,10 @@ frappe.query_reports["Stock Balance"] = {
       reqd: 1,
     },
   ],
-  after_datatable_render() {
-    $(".dt-cell--col-1").css("text-align", "left");
+  formatter(value, row, column, data, original_func) {
+    if (column.id == "item_code") {
+      column.align = "left";
+    }
+    return original_func(value, row, column, data);
   },
 };
