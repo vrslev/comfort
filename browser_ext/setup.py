@@ -12,14 +12,14 @@ setup(
     install_requires=[
         "ikea-api==1.0.2",
         "beautifulsoup4==4.10.0",
-        "sentry-sdk==1.4.3",
+        "sentry-sdk==1.5.0",
     ],
     extras_require={
         "dev": [
             "pytest==6.2.5",
             "pytest-cov==3.0.0",
-            "pytest-randomly==3.10.1",
-            "responses==0.15.0",
+            "pytest-randomly==3.10.2",
+            "responses==0.16.0",
         ]
     },
 )
