@@ -23,6 +23,7 @@ from comfort.integrations.vk_form import (
     _create_vk_group_dialog_url,
     _get_customer_name,
     _get_delivery_service,
+    _send_confirmation_message,
     main,
     process_form,
 )
@@ -166,10 +167,26 @@ def vk_form_settings():
     doc.save()
 
 
+def test_send_confirmation_message(monkeypatch: pytest.MonkeyPatch):
+    exp_message = "Иван, спасибо за ваш заказ! Когда обработаем его, напишем вам!"
+    exp_user_id = 1
+    called = False
+
+    class CustomVkApi:
+        def send_message(self, user_id: int, message: str):
+            nonlocal called
+            called = True
+            assert message == exp_message
+            assert user_id == exp_user_id
+
+    monkeypatch.setattr(comfort.integrations.vk_form, "VkApi", CustomVkApi)
+    _send_confirmation_message(1, "Иван")
+    assert called
+
+
 @pytest.mark.usefixtures("vk_form_settings")
-@pytest.mark.usefixtures(
-    "customer"
-)  # patch Customer object to disable vk info fetching
+# patch Customer object to disable vk info fetching
+@pytest.mark.usefixtures("customer")
 def test_process_form(
     monkeypatch: pytest.MonkeyPatch,
     item_no_children: Item,
@@ -178,8 +195,22 @@ def test_process_form(
     item_no_children.db_insert()
     commission_settings.insert()
     patch_fetch_items(monkeypatch)
+    called_send_confirmation_message = False
+
+    def mock_send_confirmation_message(user_id: int, first_name: str):
+        assert user_id == 111111111
+        assert first_name == "Ivan"
+        nonlocal called_send_confirmation_message
+        called_send_confirmation_message = True
+
+    monkeypatch.setattr(
+        comfort.integrations.vk_form,
+        "_send_confirmation_message",
+        mock_send_confirmation_message,
+    )
 
     process_form(mock_form)
+    assert called_send_confirmation_message
     doc = get_doc(SalesOrder, "SO-2021-0001")
     assert doc.customer
     assert doc.items

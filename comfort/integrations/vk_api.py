@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from random import randint
 from typing import Any, Literal, Optional
 
 import requests
@@ -9,26 +10,26 @@ from comfort import ValidationError, _, get_value
 
 
 class VkApi:
-    service_token: str
+    group_token: str
     api_version: str = "5.131"
     lang: str = "ru"
 
     def __init__(self):
-        self._get_service_token_from_settings()
+        self._get_group_token_from_settings()
         self._session = requests.Session()
 
-    def _get_service_token_from_settings(self):
-        token: str | None = get_value("Vk Api Settings", fieldname="app_service_token")
+    def _get_group_token_from_settings(self):
+        token: str | None = get_value("Vk Api Settings", fieldname="group_token")
         if not token:
             raise ValidationError(_("Enter VK App service token in Vk Api Settings"))
-        self.service_token = token
+        self.group_token = token
 
     def _get_params(self, params: dict[str, Any]):
         for key in params:
             if isinstance(params[key], list):
                 params[key] = ",".join(str(p) for p in params[key])
         params |= {
-            "access_token": self.service_token,
+            "access_token": self.group_token,
             "v": self.api_version,
             "lang": self.lang,
         }
@@ -51,6 +52,12 @@ class VkApi:
             fields=["photo_max_orig", "sex", "city"],
         )
         return [User(**u) for u in response]
+
+    def send_message(self, user_id: int, message: str):
+        random_id = randint(1, 10000)  # nosec
+        self._call_api(
+            "messages.send", user_id=user_id, message=message, random_id=random_id
+        )
 
 
 class VkApiError(Exception):

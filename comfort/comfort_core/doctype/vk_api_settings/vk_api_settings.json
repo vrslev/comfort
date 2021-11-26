@@ -5,18 +5,18 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "app_service_token"
+  "group_token"
  ],
  "fields": [
   {
-   "fieldname": "app_service_token",
+   "fieldname": "group_token",
    "fieldtype": "Data",
-   "label": "App Service Token"
+   "label": "Group Token"
   }
  ],
  "issingle": 1,
  "links": [],
- "modified": "2021-10-12 09:30:52.254045",
+ "modified": "2021-11-26 16:17:02.310106",
  "modified_by": "Administrator",
  "module": "Comfort Core",
  "name": "Vk Api Settings",

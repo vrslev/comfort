@@ -9,6 +9,7 @@ from werkzeug import Response
 import frappe
 from comfort import get_value, new_doc
 from comfort.integrations.ikea import fetch_items
+from comfort.integrations.vk_api import VkApi
 from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
 
 
@@ -112,6 +113,11 @@ def _create_sales_order(customer_name: str, raw_order: str, raw_delivery_type: s
     doc.save()
 
 
+def _send_confirmation_message(user_id: int, first_name: str):
+    message = f"{first_name}, спасибо за ваш заказ! Когда обработаем его, напишем вам!"
+    VkApi().send_message(user_id=user_id, message=message)
+
+
 def process_form(form: dict[Any, Any]):
     response = VkForm(**form)
     answers = _get_mapped_answers(response.object.answers)
@@ -124,6 +130,9 @@ def process_form(form: dict[Any, Any]):
     )
     _create_sales_order(customer.name, answers.raw_order, answers.raw_delivery_type)
     frappe.db.commit()
+    _send_confirmation_message(
+        user_id=response.object.user_id, first_name=answers.first_name
+    )
 
 
 @frappe.whitelist(allow_guest=True)
@@ -131,6 +140,6 @@ def main():
     frappe.session.user = frappe.session.sid = "Administrator"
     try:
         process_form(frappe.form_dict)  # type: ignore
-    except Exception as e:
-        sentry_sdk.capture_exception(e)
+    except Exception as exc:
+        sentry_sdk.capture_exception(exc)
     return Response("ok")

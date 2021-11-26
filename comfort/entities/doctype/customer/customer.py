@@ -81,8 +81,8 @@ class Customer(TypedDocument):
             self.vk_id, self.vk_url = parse_vk_url(self.vk_url)
         self.update_info_from_vk()
 
-    def _vk_service_token_in_settings(self):
-        token: str | None = get_value("Vk Api Settings", fieldname="app_service_token")
+    def _vk_group_token_in_settings(self):
+        token: str | None = get_value("Vk Api Settings", fieldname="group_token")
         if token:
             return True
         else:
@@ -92,7 +92,7 @@ class Customer(TypedDocument):
     def update_info_from_vk(self):
         if self.vk_id is None:
             return
-        if not self._vk_service_token_in_settings():
+        if not self._vk_group_token_in_settings():
             return
 
         users = _get_vk_users_for_customers((self,))

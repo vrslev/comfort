@@ -122,22 +122,22 @@ def test_customer_validate(customer: Customer):
 
 
 @pytest.mark.usefixtures("vk_api_settings")
-def test_vk_service_token_in_settings_true():
+def test_vk_group_token_in_settings_true():
     frappe.message_log = []
-    res = Customer._vk_service_token_in_settings(object())  # type: ignore
+    res = Customer._vk_group_token_in_settings(object())  # type: ignore
     assert res
     assert frappe.message_log == []
 
 
-def test_vk_service_token_in_settings_false():
+def test_vk_group_token_in_settings_false():
     frappe.message_log = []
-    res = Customer._vk_service_token_in_settings(object())  # type: ignore
+    res = Customer._vk_group_token_in_settings(object())  # type: ignore
     assert not res
     assert "Enter VK App service token in Vk Api Settings" in str(frappe.message_log)  # type: ignore
 
 
 @pytest.mark.parametrize(
-    ("vk_id", "with_service_token", "exp_called"),
+    ("vk_id", "with_group_token", "exp_called"),
     (("248934423", True, True), ("248934423", False, False), (None, True, False)),
 )
 def test_update_info_from_vk(
@@ -145,13 +145,13 @@ def test_update_info_from_vk(
     customer: Customer,
     vk_api_settings: VkApiSettings,
     vk_id: str,
-    with_service_token: bool,
+    with_group_token: bool,
     exp_called: bool,
 ):
     customer = Customer(customer.as_dict())  # Customer class is patched in conftest
 
-    if not with_service_token:
-        vk_api_settings.app_service_token = None
+    if not with_group_token:
+        vk_api_settings.group_token = None
         vk_api_settings.save()
 
     first_called = False

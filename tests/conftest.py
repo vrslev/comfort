@@ -761,6 +761,6 @@ def purchase_return(purchase_order: PurchaseOrder, sales_order: SalesOrder):
 @pytest.fixture
 def vk_api_settings():
     doc = get_doc(VkApiSettings)
-    doc.app_service_token = "some_test_app_service_token"
+    doc.group_token = "some_test_group_token_token"
     doc.save()
     return doc
