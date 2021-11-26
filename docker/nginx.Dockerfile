@@ -1,4 +1,4 @@
-FROM node:14-bullseye-slim as builder
+FROM node:17-bullseye-slim as builder
 
 RUN apt-get update \
   && apt-get install --no-install-recommends -y \
