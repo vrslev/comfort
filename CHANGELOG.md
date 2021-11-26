@@ -3,6 +3,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.31.0 (2021-11-26)
+### Feature
+* **vk:** Send confirmation message after form is received ([`7c565aa`](https://github.com/vrslev/comfort/commit/7c565aaa2d4fa6781ace8b1b11b18215a6d3f87c))
+
 ## v0.30.1 (2021-11-26)
 ### Fix
 * Bump ikea-api ([`e430c4a`](https://github.com/vrslev/comfort/commit/e430c4a5164c0f4328f7b286bdfb64a74198f7d3))
