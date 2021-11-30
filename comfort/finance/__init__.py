@@ -21,7 +21,12 @@ def get_account(field_name: str) -> str:
 
 def create_gl_entry(
     doctype: Literal[
-        "Payment", "Receipt", "Sales Return", "Purchase Return", "Compensation"
+        "Payment",
+        "Receipt",
+        "Sales Return",
+        "Purchase Return",
+        "Compensation",
+        "Money Transfer",
     ],
     name: str,
     account: str,

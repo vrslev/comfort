@@ -104,6 +104,7 @@ def get_global_search_doctypes():
         "Checkout",
         "Receipt",
         "Waiting List",
+        "Money Transfer",
         #
         # Various entities
         #

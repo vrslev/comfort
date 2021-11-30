@@ -40,7 +40,7 @@
    "fieldtype": "Select",
    "in_filter": 1,
    "label": "Voucher Type",
-   "options": "\nPayment\nReceipt\nSales Return\nPurchase Return\nCompensation"
+   "options": "\nPayment\nReceipt\nSales Return\nPurchase Return\nCompensation\nMoney Transfer"
   },
   {
    "fieldname": "voucher_no",
@@ -84,7 +84,7 @@
  "in_create": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-10-09 14:47:21.095766",
+ "modified": "2021-11-26 22:14:30.006166",
  "modified_by": "Administrator",
  "module": "Finance",
  "name": "GL Entry",
