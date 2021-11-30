@@ -62,9 +62,9 @@ def _format_sales_order_query(  # pragma: no cover
 
 
 def _format_customer_query(  # pragma: no cover
-    result: Annotated[list[Any], ["name", "customer_group", "phone"]]
+    result: Annotated[list[Any], ["name", "phone"]]
 ):
-    result[2] = format_phone(str(result[2]))
+    result[1] = format_phone(str(result[1]))
 
 
 _QUERY_FORMATTERS = {

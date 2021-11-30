@@ -111,7 +111,6 @@ def get_global_search_doctypes():
         "Customer",
         "Item",
         "Account",
-        "Customer Group",
         "Item Category",
         # "GL Entry",
         # "Stock Entry",

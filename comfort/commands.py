@@ -12,7 +12,6 @@ from comfort.comfort_core.doctype.commission_settings.commission_settings import
 )
 from comfort.comfort_core.hooks import after_install
 from comfort.entities.doctype.customer.customer import Customer
-from comfort.entities.doctype.customer_group.customer_group import CustomerGroup
 from comfort.entities.doctype.item.item import Item
 from comfort.hooks import app_name
 from comfort.transactions.doctype.purchase_order.purchase_order import PurchaseOrder
@@ -49,15 +48,6 @@ def _cleanup():
     frappe.db.commit()
 
 
-def _make_customer_group():
-    doc = {
-        "customer_group_name": "Friends",
-        "doctype": "Customer Group",
-    }
-    if not doc_exists(doc):
-        CustomerGroup(doc).insert()
-
-
 def _make_customer():
     doc = {
         "name": "Pavel Durov",
@@ -67,7 +57,6 @@ def _make_customer():
         "city": "Moscow",
         "address": "Arbat, 1",
         "doctype": "Customer",
-        "customer_group": "Friends",
     }
     if not doc_exists(doc["doctype"], doc["name"]):
         Customer(doc).db_insert()
@@ -247,7 +236,6 @@ def _make_purchase_order(sales_order_name: str | None):
 
 
 def _make_docs():
-    _make_customer_group()
     _make_customer()
     _make_items()
     _make_commission_settings()

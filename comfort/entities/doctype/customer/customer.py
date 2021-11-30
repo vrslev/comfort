@@ -57,7 +57,6 @@ def parse_vk_url(vk_url: str | None):
 class Customer(TypedDocument):
     image: str
     gender: Literal["Male", "Female"] | None
-    customer_group: str
     vk_id: str | None
     vk_url: str | None
     phone: str | None
