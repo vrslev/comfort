@@ -3,6 +3,16 @@
 
 <!--next-version-placeholder-->
 
+## v0.32.0 (2021-11-30)
+### Feature
+* Add money transfer (closes #76) ([`d9d8271`](https://github.com/vrslev/comfort/commit/d9d827189b0bb4f21fa2bb297d14e02e53757c98))
+
+### Fix
+* Remove Customer Group doctype ([`ec7e20b`](https://github.com/vrslev/comfort/commit/ec7e20b08ceacaab7f107a594430f6e342b47f72))
+* Add missing translations ([`12102c1`](https://github.com/vrslev/comfort/commit/12102c1afa3d8f8f8829c54cdad2590b80ec64f5))
+* **GL Entry:** Don't allow target account to be group ([`9d84f49`](https://github.com/vrslev/comfort/commit/9d84f49dbc7a0b93fe31417b22547ac309def09a))
+* **Stock Balance:** Alignment (closes #93) ([`1ad3350`](https://github.com/vrslev/comfort/commit/1ad3350da38ea0fe5f08aa4d6cdfe2b88f13d20a))
+
 ## v0.31.0 (2021-11-26)
 ### Feature
 * **vk:** Send confirmation message after form is received ([`7c565aa`](https://github.com/vrslev/comfort/commit/7c565aaa2d4fa6781ace8b1b11b18215a6d3f87c))
