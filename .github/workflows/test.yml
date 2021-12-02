@@ -10,12 +10,14 @@ on:
       - "**.json"
       - "!docker/scripts/**"
       - "!browser_ext/**"
+      - "!cli/**"
   pull_request:
     paths:
       - "**.py"
       - "**.json"
       - "!docker/scripts/**"
       - "!browser_ext/**"
+      - "!cli/**"
 
 jobs:
   test:
