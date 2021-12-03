@@ -3,6 +3,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.32.1 (2021-12-03)
+### Fix
+* **Purchase Order:** Don't show cancelled Sales Orders in print format ([`246f4de`](https://github.com/vrslev/comfort/commit/246f4de880e3b2e6531c105d65d9fce948e6f63b))
+
 ## v0.32.0 (2021-11-30)
 ### Feature
 * Add money transfer (closes #76) ([`d9d8271`](https://github.com/vrslev/comfort/commit/d9d827189b0bb4f21fa2bb297d14e02e53757c98))
