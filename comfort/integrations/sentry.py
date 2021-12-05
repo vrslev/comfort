@@ -53,6 +53,9 @@ def _init_sentry():  # pragma: no cover
             frappe.exceptions.AuthenticationError,
             # When running in Redis Queue sometimes connection resets
             ConnectionResetError,
+            # When running in Schedule container sometimes connection to db is being refused.
+            # Most likely right after deployment.
+            ConnectionRefusedError,
         ],
     )
     sentry_sdk.set_user({"email": _get_user_email()})
