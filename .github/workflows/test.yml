@@ -82,6 +82,7 @@ jobs:
         run: |
           cd ~/frappe-bench
           bench get-app $GITHUB_WORKSPACE --skip-assets
+          echo -ne "frappe\ncomfort" >sites/apps.txt
 
           bench new-site tests \
             --mariadb-root-password 123 \
