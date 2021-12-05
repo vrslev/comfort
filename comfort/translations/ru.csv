@@ -24,7 +24,7 @@ Bank Account,Банковский счёт
 Basic Info,Основная информация
 Balance,Баланс
 Bot Token,Токен бота
-Can only deliver Sales Orders that have delivery status To Deliver: {},Можно доставить только те заказы, у которых статус доставки — Доставить: {}
+Can only deliver Sales Orders that have delivery status To Deliver: {},"Можно доставить только те заказы, у которых статус доставки — Доставить: {}"
 Can only add compensation for submitted document,Можно добавить компенсацию только для подтверждённого документа
 Can't add child item that contains child items,Нельзя добавить дочерний товар в дочерний товар
 Can't split Sales Order and include all the items,Нельзя разделить заказ и включить все товары в новый
