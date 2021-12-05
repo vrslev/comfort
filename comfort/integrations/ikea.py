@@ -10,6 +10,7 @@ from ikea_api import format_item_code as format_item_code  # For jenv hook
 from ikea_api._api import CustomResponse
 from ikea_api.exceptions import (
     GraphQLError,
+    IKEAAPIError,
     ItemFetchError,
     NoDeliveryOptionsAvailableError,
     OrderCaptureError,
@@ -104,7 +105,14 @@ def get_purchase_info(purchase_id: int, use_lite_id: bool) -> PurchaseInfoDict |
     )
 
     try:
-        return ikea_api.wrappers.get_purchase_info(api, id=id, email=email).dict()  # type: ignore
+        for _ in range(3):
+            try:
+                return ikea_api.wrappers.get_purchase_info(  # type: ignore
+                    api=api, id=id, email=email
+                ).dict()
+            except IKEAAPIError as exc:
+                if exc.response.status_code != 504:
+                    raise
     except GraphQLError as exc:
         if isinstance(exc.errors, dict):
             exc.errors = [exc.errors]

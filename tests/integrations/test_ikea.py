@@ -11,6 +11,7 @@ import sentry_sdk
 from ikea_api import IKEA
 from ikea_api.exceptions import (
     GraphQLError,
+    IKEAAPIError,
     NoDeliveryOptionsAvailableError,
     OrderCaptureError,
 )
@@ -185,6 +186,65 @@ def test_get_purchase_info_main(monkeypatch: pytest.MonkeyPatch, use_lite_id: bo
 
     monkeypatch.setattr(ikea_api.wrappers, "get_purchase_info", mock_get_purchase_info)
     get_purchase_info(exp_purchase_id, use_lite_id)
+
+
+@pytest.mark.usefixtures("ikea_settings")
+def test_get_purchase_info_ikeaapierror_504(monkeypatch: pytest.MonkeyPatch):
+    exp_purchase_id = 111111110
+
+    class MockGetPurchaseInfoResult:
+        def dict(self):
+            return "foo"
+
+    count = 0
+
+    def mock_get_purchase_info(api: IKEA, *, id: str, email: str):
+        assert api.token == get_authorized_api().token
+        assert id == str(exp_purchase_id)
+        assert email is None
+        nonlocal count
+        if count in (0, 1):
+            count += 1
+            raise IKEAAPIError(
+                SimpleNamespace(  # type: ignore
+                    status_code=504,
+                    text=(
+                        "<html><body><h1>504 Gateway Time-out</h1>\n"
+                        + "The server didn't respond in time.\n</body></html>\n"
+                    ),
+                )
+            )
+        else:
+            return MockGetPurchaseInfoResult()
+
+    monkeypatch.setattr(ikea_api.wrappers, "get_purchase_info", mock_get_purchase_info)
+    assert get_purchase_info(exp_purchase_id, False) == "foo"
+
+
+@pytest.mark.usefixtures("ikea_settings")
+def test_get_purchase_info_ikeaapierror_not_504(monkeypatch: pytest.MonkeyPatch):
+    exp_purchase_id = 111111110
+
+    class MockGetPurchaseInfoResult:
+        def dict(self):
+            return "foo"
+
+    count = 0
+
+    def mock_get_purchase_info(api: IKEA, *, id: str, email: str):
+        assert api.token == get_authorized_api().token
+        assert id == str(exp_purchase_id)
+        assert email is None
+        nonlocal count
+        if count in (0, 1):
+            count += 1
+            raise IKEAAPIError(SimpleNamespace(status_code=404, text=""))  # type: ignore
+        else:
+            return MockGetPurchaseInfoResult()
+
+    monkeypatch.setattr(ikea_api.wrappers, "get_purchase_info", mock_get_purchase_info)
+    with pytest.raises(IKEAAPIError, match="404"):
+        get_purchase_info(exp_purchase_id, False)
 
 
 @pytest.mark.parametrize("is_dict", (True, False))
