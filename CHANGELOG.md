@@ -3,6 +3,17 @@
 
 <!--next-version-placeholder-->
 
+## v0.32.2 (2021-12-05)
+### Fix
+* **Sentry:** Ignore `ConnectionRefusedError` ([`e68907d`](https://github.com/vrslev/comfort/commit/e68907d1a25f0ea40721f855ee09ab2f3d0405c9))
+* **IKEA:** Retry getting purchase info on 504 ([`dd9c454`](https://github.com/vrslev/comfort/commit/dd9c4542a46ceded1ec99b3a165cf7450fc97999))
+* Bump ikea-api version ([`f047be9`](https://github.com/vrslev/comfort/commit/f047be92301b64228e6604a205f57af471321471))
+* **Delviery Trip:** Translation of error message ([`22fc840`](https://github.com/vrslev/comfort/commit/22fc8407ccd0cf2899382edf63982772473c3205))
+
+### Ci
+* **test:** Fix installation ([`0a5de42`](https://github.com/vrslev/comfort/commit/0a5de42ac25d777a48f98d94ff3b512f8eb33c52))
+* **semantic-release:** Add more changelog sections ([`c3f2bae`](https://github.com/vrslev/comfort/commit/c3f2bae2f0a457f9f105efb1b5ec910fc83262ed))
+
 ## v0.32.1 (2021-12-03)
 ### Fix
 * **Purchase Order:** Don't show cancelled Sales Orders in print format ([`246f4de`](https://github.com/vrslev/comfort/commit/246f4de880e3b2e6531c105d65d9fce948e6f63b))
