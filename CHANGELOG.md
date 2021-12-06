@@ -3,6 +3,23 @@
 
 <!--next-version-placeholder-->
 
+## v0.32.3 (2021-12-06)
+### Fix
+* Upgrade Frappe to v13.16.0 ([#100](https://github.com/vrslev/comfort/issues/100)) ([`59c7e3e`](https://github.com/vrslev/comfort/commit/59c7e3e3560bb037943fac1aa3c953dc5b1eadca))
+
+### Build
+* **deps-dev:** Bump black from 21.11b1 to 21.12b0 ([`f56ed69`](https://github.com/vrslev/comfort/commit/f56ed6909c26fd371c8f5fc3bd999e58f1456039))
+* **deps-dev:** Bump eslint from 8.3.0 to 8.4.0 ([`637b806`](https://github.com/vrslev/comfort/commit/637b806d767df7ae730fa117b2a4226b5fca13fd))
+* **deps-dev:** Bump pytest-randomly in /browser_ext ([`985e063`](https://github.com/vrslev/comfort/commit/985e063a4bd86d1a6311123880d3876debca2a7f))
+* **deps-dev:** Bump pytest-randomly from 3.10.2 to 3.10.3 ([`4f7db8d`](https://github.com/vrslev/comfort/commit/4f7db8d69e98ca755f68881937fb9ac5fab6a07f))
+* **deps-dev:** Bump prettier from 2.5.0 to 2.5.1 ([`cf60e40`](https://github.com/vrslev/comfort/commit/cf60e40023e258adfcc73eae8bb3b68737dcde08))
+* **deps-dev:** Bump pre-commit from 2.15.0 to 2.16.0 ([`6fb0142`](https://github.com/vrslev/comfort/commit/6fb0142cab577e7e89df6e5c63ddd78555b0a376))
+* **deps:** Bump docker/metadata-action from 3.6.0 to 3.6.1 ([`e5ebb3d`](https://github.com/vrslev/comfort/commit/e5ebb3d9fbd5ea53b73d77f3d7494fc0399ae910))
+
+### Chore
+* Fix typing ([`ce36c7e`](https://github.com/vrslev/comfort/commit/ce36c7eb4163cd1037c380db8bf85e0f1642df59))
+* **deps:** Update pre-commit hooks ([#101](https://github.com/vrslev/comfort/issues/101)) ([`b83b08e`](https://github.com/vrslev/comfort/commit/b83b08eda4e64201f86563aff419af823a146b5a))
+
 ## v0.32.2 (2021-12-05)
 ### Fix
 * **Sentry:** Ignore `ConnectionRefusedError` ([`e68907d`](https://github.com/vrslev/comfort/commit/e68907d1a25f0ea40721f855ee09ab2f3d0405c9))
