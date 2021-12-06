@@ -16,6 +16,9 @@ from comfort.transactions.doctype.sales_order_child_item.sales_order_child_item 
 from comfort.transactions.doctype.sales_order_item.sales_order_item import (
     SalesOrderItem,
 )
+from comfort.transactions.doctype.sales_order_service.sales_order_service import (
+    SalesOrderService,
+)
 
 from ..stock_entry.stock_entry import StockTypes
 
@@ -68,7 +71,8 @@ class Receipt(TypedDocument):
         sales_amount: int = self._voucher.margin - self._voucher.discount  # type: ignore
         delivery_amount, installation_amount = 0, 0
         prepaid_sales_amount: int = self._voucher.total_amount
-        for s in self._voucher.services:  # type: ignore
+        services: list[SalesOrderService] = self._voucher.services  # type: ignore
+        for s in services:
             if "Delivery" in s.type:
                 delivery_amount += s.rate
             elif "Installation" in s.type:
