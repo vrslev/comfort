@@ -16,6 +16,7 @@ setup(
         "ikea-api==1.0.3",
         "pydantic==1.8.2",
         "sentry-sdk==1.5.0",
+        "base_telegram_bot @ git+https://github.com/vrslev/base-telegram-bot.git",
     ],
     extras_require={
         "dev": [

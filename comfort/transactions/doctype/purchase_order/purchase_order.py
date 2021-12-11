@@ -62,6 +62,8 @@ class PurchaseOrder(TypedDocument):
     items_to_sell: list[PurchaseOrderItemToSell] = []
     status: Literal["Draft", "To Receive", "Completed", "Cancelled"]
     amended_from: str | None
+    supplier_name: str
+    supplier_tracking_no: str
 
     #########
     # Hooks #
