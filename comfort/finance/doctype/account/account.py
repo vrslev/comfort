@@ -38,7 +38,7 @@ def get_children(doctype: str, parent: str = "", is_root: bool = False):
 
 @frappe.whitelist()
 def add_node():
-    args = make_tree_args(**frappe.form_dict)
+    args: Any = make_tree_args(**frappe.form_dict)  # type: ignore
     if args.is_root:
         args.parent_account = None
     get_doc(Account, args).insert()
