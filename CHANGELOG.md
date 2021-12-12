@@ -3,6 +3,19 @@
 
 <!--next-version-placeholder-->
 
+## v0.32.4 (2021-12-12)
+### Fix
+* **Receipt:** Change Purchase Order status on cancel ([`da12713`](https://github.com/vrslev/comfort/commit/da127133ed0a3eb75b0cd48629ce773156e25e00))
+* **Purchase Order:** Allow to submit purchase even if it is not in IKEA's purchase history ([`833d452`](https://github.com/vrslev/comfort/commit/833d4521161694afe1959a3bf4fe5e10914a01ac))
+* **Purchase Return:** Cancelled Sales Order were included in `_get_all_items` result ([`b8ca10f`](https://github.com/vrslev/comfort/commit/b8ca10f2aa0e05e9d4d894f46af46696df368208))
+* **Purchase Order:** Cancelled Sales Order were included in `get_items_in_sales_orders` result ([`a1dd395`](https://github.com/vrslev/comfort/commit/a1dd395842da7648f1127333e4d2abf94612f40a))
+* **IKEA:** Don't show error message on `get_purchase_info` in one more case ([`fa33deb`](https://github.com/vrslev/comfort/commit/fa33debe5a1656a92f12528f48f2f1c2ba17a87d))
+* **IKEA:** Show pretty error message on `get_delivery_services` in another case ([`e9c9291`](https://github.com/vrslev/comfort/commit/e9c9291787c2be0dd91978e5bf73fe52cc858850))
+* **IKEA:** Show pretty error message on `get_delivery_services` in one more case ([`a0c7702`](https://github.com/vrslev/comfort/commit/a0c7702c2f61dc9c174f50ef87172178eb83b82d))
+
+### Chore
+* Fix typing issues ([`247b104`](https://github.com/vrslev/comfort/commit/247b104cfe04e630270058f8512db21b6f424b4f))
+
 ## v0.32.3 (2021-12-06)
 ### Fix
 * Upgrade Frappe to v13.16.0 ([#100](https://github.com/vrslev/comfort/issues/100)) ([`59c7e3e`](https://github.com/vrslev/comfort/commit/59c7e3e3560bb037943fac1aa3c953dc5b1eadca))
