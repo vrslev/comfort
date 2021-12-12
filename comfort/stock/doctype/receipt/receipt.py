@@ -64,7 +64,7 @@ class Receipt(TypedDocument):
     def on_cancel(self):
         cancel_gl_entries_for(self.doctype, self.name)
         cancel_stock_entries_for(self.doctype, self.name)
-        self.set_status_in_sales_order()
+        self.set_status_in_voucher()
 
     def create_sales_gl_entries(self):
         inventory_amount: int = self._voucher.items_cost  # type: ignore
@@ -132,10 +132,18 @@ class Receipt(TypedDocument):
         self._create_purchase_stock_entries_for_sales_orders()
         self._create_purchase_stock_entries_for_items_to_sell()
 
-    def set_status_in_sales_order(self):
+    def set_status_in_voucher(self):
         if self.voucher_type == "Sales Order":
             from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
 
             doc = get_doc(SalesOrder, self.voucher_no)
             doc.set_statuses()
+            doc.save_without_validating()
+        else:
+            from comfort.transactions.doctype.purchase_order.purchase_order import (
+                PurchaseOrder,
+            )
+
+            doc = get_doc(PurchaseOrder, self.voucher_no)
+            doc.status = "To Receive"
             doc.save_without_validating()

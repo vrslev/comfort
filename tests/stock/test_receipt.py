@@ -247,7 +247,7 @@ def test_create_purchase_stock_entries_for_items_to_sell_not_executed_if_no_item
 
 
 @pytest.mark.parametrize("docstatus", (0, 1))
-def test_set_status_in_sales_order(sales_order: SalesOrder, docstatus: int):
+def test_set_status_in_voucher_sales_order(sales_order: SalesOrder, docstatus: int):
     sales_order.docstatus = docstatus
     sales_order.delivery_status = "To Deliver"
     sales_order.update_items_from_db()
@@ -262,7 +262,15 @@ def test_set_status_in_sales_order(sales_order: SalesOrder, docstatus: int):
     receipt = get_doc(Receipt, receipt_name)
     receipt.docstatus = 2
     receipt.db_update()
-    receipt.set_status_in_sales_order()
+    receipt.set_status_in_voucher()
 
     sales_order.reload()
     assert sales_order.delivery_status != "Delivered"
+
+
+def test_set_status_in_voucher_purchase_order(receipt_purchase: Receipt):
+    receipt_purchase._voucher.status = "Completed"
+    receipt_purchase._voucher.db_update()
+    receipt_purchase.set_status_in_voucher()
+    receipt_purchase._voucher.reload()
+    assert receipt_purchase._voucher.status == "To Receive"
