@@ -117,6 +117,44 @@ def test_get_delivery_services_internal_ikea_error(
     assert "Internal IKEA error, try again" in str(frappe.message_log)  # type: ignore
 
 
+def test_get_delivery_services_ikeaapierror_502(
+    monkeypatch: pytest.MonkeyPatch, ikea_settings: IkeaSettings
+):
+    class MockResponse:
+        status_code = 502
+        text = "ff"
+
+    def new_mock_delivery_services(api: IKEA, items: Any, zip_code: Any):
+        raise IKEAAPIError(MockResponse())  # type: ignore
+
+    monkeypatch.setattr(
+        ikea_api.wrappers, "get_delivery_services", new_mock_delivery_services
+    )
+
+    assert get_delivery_services({"14251253": 1}) is None
+    assert "Internal IKEA error, try again" in str(frappe.message_log)  # type: ignore
+
+
+def test_get_delivery_services_ikeaapierror_not_502(
+    monkeypatch: pytest.MonkeyPatch, ikea_settings: IkeaSettings
+):
+    class MockResponse:
+        status_code = 504
+        text = "ff"
+
+    def new_mock_delivery_services(api: IKEA, items: Any, zip_code: Any):
+        raise IKEAAPIError(MockResponse())  # type: ignore
+
+    monkeypatch.setattr(
+        ikea_api.wrappers, "get_delivery_services", new_mock_delivery_services
+    )
+
+    with pytest.raises(IKEAAPIError) as exc:
+        get_delivery_services({"14251253": 1})
+    assert exc.value.response.status_code == 504
+    assert exc.value.response.text == "ff"
+
+
 def test_get_delivery_services_other_error(
     monkeypatch: pytest.MonkeyPatch, ikea_settings: IkeaSettings
 ):

@@ -70,6 +70,12 @@ def get_delivery_services(items: dict[str, int]):
                 _("Internal IKEA error, try again"), alert=True, indicator="red"
             )
         raise
+    except IKEAAPIError as exc:
+        if exc.response.status_code == 502:
+            return frappe.msgprint(
+                _("Internal IKEA error, try again"), alert=True, indicator="red"
+            )
+        raise
 
 
 def add_items_to_cart(items: dict[str, int], authorize: bool):
