@@ -31,7 +31,6 @@ Can't split Sales Order and include all the items,Нельзя разделит�
 Can fetch items specs only if status is Draft,"Загрузить новую информацию о товарах можно, только если статус заказа — Черновик"
 Can't fetch items specs if order is from Available Stock,"Нельзя загрузить новую информацию о товарах, если он из доступного запаса"
 Can't add GL Entry for group account,Нельзя добавить бухгалтерскую запись для аккаунта-группы
-"Can't receive purchase history, enter order number","Не удалось загрузить историю закупок, введите номер закупки"
 Can't return all items,Нельзя вернуть все товары
 "Can't load information about this order, enter delivery cost","Не удалось загрузить информацию об этом заказе, введите стоимость доставки"
 Cannot Add Items,"Товары, которые нельзя добавить"
@@ -89,6 +88,8 @@ Enter endpoint and secret key in Ikea Authorization Server Settings,Введит
 Enter login and password in Ikea Settings,Введите логин и пароль в Настройках ИКЕА
 Enter VK App service token in Vk Api Settings,Введите сервисный токен приложения VK в настройках VK API
 Enter Zip Code in Ikea Settings,Введите почтовый индекс в Настройках ИКЕА
+Enter Purchase Number,Введите номер покупки
+Enter Purchase Number manually,Ввести номер покупки вручную
 Entities,Сущности
 Every stop should have address,Каждая остановка должна иметь адрес
 Every stop should have city,Каждая остановка должна иметь город
@@ -196,6 +197,7 @@ Purchase Order completed,Закупка завершена
 Purchase Order should be submitted,Закупка должна быть подтверждена
 Purchase Return,Возврат закупки
 Purchase Return Item,Товар возврата закупки
+Purchase Number,Номер покупки
 Purchased,Закуплено
 Purchased Sales Orders,Закупленные заказы
 Qty,Кол-во

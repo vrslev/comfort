@@ -246,6 +246,28 @@ comfort.PurchaseOrderController = frappe.ui.form.Controller.extend({
       });
     }
 
+    function show_enter_purchase_number_dialog() {
+      var dialog = new frappe.ui.Dialog({
+        title: __("Enter Purchase Number"),
+        fields: [
+          {
+            // prettier-ignore
+            label: __("Purchase Number"),
+            fieldname: "purchase_id",
+            fieldtype: "Int",
+            reqd: 1,
+          },
+        ],
+
+        primary_action({ purchase_id }) {
+          add_purchase_info_and_submit(purchase_id, true);
+          dialog.hide();
+        },
+      });
+      dialog.no_cancel();
+      dialog.show();
+    }
+
     frappe.validated = false;
 
     this.frm
@@ -281,22 +303,17 @@ comfort.PurchaseOrderController = frappe.ui.form.Controller.extend({
                   add_purchase_info_and_submit(purchase_id, false);
                   dialog.hide();
                 },
+
+                secondary_action_label: __("Enter Purchase Number manually"),
+                secondary_action() {
+                  show_enter_purchase_number_dialog();
+                  dialog.hide();
+                },
               });
               dialog.no_cancel();
               dialog.show();
             } else {
-              frappe.prompt(
-                {
-                  // prettier-ignore
-                  label: __("Can't receive purchase history, enter order number"),
-                  fieldname: "purchase_id",
-                  fieldtype: "Int",
-                  reqd: 1,
-                },
-                ({ purchase_id }) => {
-                  add_purchase_info_and_submit(purchase_id, true);
-                }
-              );
+              show_enter_purchase_number_dialog();
             }
           },
         });
