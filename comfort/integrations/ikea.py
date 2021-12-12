@@ -129,6 +129,7 @@ def get_purchase_info(purchase_id: int, use_lite_id: bool) -> PurchaseInfoDict |
                 "Purchase not found",
                 "Order not found",
                 "Invalid order id",
+                "Exception while fetching data (/order/id) : null",
             ):
                 return
         sentry_sdk.capture_exception(exc)

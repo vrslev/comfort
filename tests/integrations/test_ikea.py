@@ -297,6 +297,15 @@ def test_get_purchase_info_ikeaapierror_not_504(monkeypatch: pytest.MonkeyPatch)
         ({"message": "Purchase not found"}, False),
         ({"message": "Order not found"}, False),
         ({"message": "Invalid order id"}, False),
+        (
+            {
+                "message": "Exception while fetching data (/order/id) : null",
+                "locations": [{"line": 4, "column": 13}],
+                "path": ["order", "id"],
+                "extensions": {"classification": "DataFetchingException"},
+            },
+            False,
+        ),
         ({"message": "some other msg"}, True),
     ),
 )
