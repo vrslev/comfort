@@ -91,7 +91,11 @@ def test_get_delivery_services_no_delivery_options(
 
 @pytest.mark.parametrize(
     "message",
-    ("Error while connecting to ISOM", "Cannot read property 'get' of undefined"),
+    (
+        "Error while connecting to ISOM",
+        "Error while connecting to SPE",
+        "Cannot read property 'get' of undefined",
+    ),
 )
 def test_get_delivery_services_internal_ikea_error(
     monkeypatch: pytest.MonkeyPatch, ikea_settings: IkeaSettings, message: str

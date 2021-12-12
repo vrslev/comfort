@@ -61,7 +61,7 @@ def get_delivery_services(items: dict[str, int]):
             and "message" in response._json
             and isinstance(response._json["message"], str)
             and (
-                "Error while connecting to ISOM" in response._json["message"]
+                "Error while connecting to" in response._json["message"]
                 or "Cannot read property 'get' of undefined"
                 in response._json["message"]
             )
