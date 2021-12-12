@@ -12,6 +12,7 @@ import comfort.transactions.doctype.purchase_order.purchase_order
 import frappe
 from comfort import count_qty, get_all, get_doc, get_value, group_by_attr, new_doc
 from comfort.entities.doctype.child_item.child_item import ChildItem
+from comfort.entities.doctype.item.item import Item
 from comfort.integrations.ikea import FetchItemsResult, PurchaseInfoDict
 from comfort.transactions import AnyChildItem
 from comfort.transactions.doctype.purchase_order.purchase_order import (
@@ -307,6 +308,22 @@ def test_get_items_in_sales_orders_with_empty_sales_orders(
     purchase_order: PurchaseOrder,
 ):
     purchase_order.sales_orders = []
+    items = purchase_order.get_items_in_sales_orders(split_combinations=False)
+    assert items == []
+
+
+def test_get_items_in_sales_orders_with_cancelled_items(
+    purchase_order: PurchaseOrder, item: Item
+):
+    doc = new_doc(SalesOrder)
+    doc.__newname = "test1"  # type: ignore
+    doc.customer = purchase_order.sales_orders[0].customer
+    doc.append("items", {"item_code": item.item_code, "qty": 1})
+    doc.submit()
+    doc.cancel()
+
+    purchase_order.sales_orders = []
+    purchase_order.append("sales_orders", {"sales_order_name": doc.name})
     items = purchase_order.get_items_in_sales_orders(split_combinations=False)
     assert items == []
 

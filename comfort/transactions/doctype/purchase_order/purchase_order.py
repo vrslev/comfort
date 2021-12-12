@@ -271,14 +271,14 @@ class PurchaseOrder(TypedDocument):
         so_items = get_all(
             SalesOrderItem,
             fields=("item_code", "qty"),
-            filters={"parent": ("in", sales_order_names)},
+            filters={"parent": ("in", sales_order_names), "docstatus": ("!=", 2)},
         )
 
         if split_combinations:
             child_items = get_all(
                 SalesOrderChildItem,
                 fields=("parent_item_code", "item_code", "qty"),
-                filters={"parent": ("in", sales_order_names)},
+                filters={"parent": ("in", sales_order_names), "docstatus": ("!=", 2)},
             )
             items += child_items
 
