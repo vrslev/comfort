@@ -63,6 +63,8 @@ class PurchaseReturn(Return):
         # to have `parent` and `doctype` fields in these items
         for sales_order in self._voucher.sales_orders:
             doc = get_doc(SalesOrder, sales_order.sales_order_name)
+            if doc.docstatus == 2:
+                continue
             items += doc.get_items_with_splitted_combinations()
         return items
 

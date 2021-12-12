@@ -7,7 +7,8 @@ from typing import Generator, Literal
 import pytest
 
 import frappe
-from comfort import count_qty, get_all, get_doc, get_value, group_by_attr
+from comfort import count_qty, get_all, get_doc, get_value, group_by_attr, new_doc
+from comfort.entities.doctype.item.item import Item
 from comfort.finance import get_account
 from comfort.finance.doctype.gl_entry.gl_entry import GLEntry
 from comfort.stock.doctype.stock_entry.stock_entry import StockEntry
@@ -81,7 +82,16 @@ def test_purchase_return_validate_voucher_statuses_status_raises(
         purchase_return._validate_voucher_statuses()
 
 
-def test_purchase_return_get_all_items(purchase_return: PurchaseReturn):
+def test_purchase_return_get_all_items(purchase_return: PurchaseReturn, item: Item):
+    # Insert cancelled Sales Order
+    doc = new_doc(SalesOrder)
+    doc.__newname = "test1"  # type: ignore
+    doc.customer = purchase_return._voucher.sales_orders[0].customer
+    doc.append("items", {"item_code": item.item_code, "qty": 1})
+    doc.submit()
+    doc.cancel()
+
+    purchase_return._voucher.append("sales_orders", {"sales_order_name": doc.name})
     items = purchase_return._get_all_items()
     exp_items: list[AnyChildItem] = list(
         purchase_return._voucher.get_items_to_sell(True)
