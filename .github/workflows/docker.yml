@@ -26,14 +26,14 @@ jobs:
 
       - name: Nginx meta
         id: nginx-meta
-        uses: docker/metadata-action@v3.6.1
+        uses: docker/metadata-action@v3.6.2
         with:
           images: cr.yandex/crpdmuh1072ntg30t18g/comfort-nginx
           bake-target: nginx
 
       - name: Worker meta
         id: worker-meta
-        uses: docker/metadata-action@v3.6.1
+        uses: docker/metadata-action@v3.6.2
         with:
           images: cr.yandex/crpdmuh1072ntg30t18g/comfort-worker
           bake-target: worker
