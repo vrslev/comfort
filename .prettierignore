@@ -4,3 +4,5 @@
 **/fixtures/*.json
 **/print_format/**/*.json
 *.html
+!chrome_ext/**
+chrome_ext/bootstrap.min.css
