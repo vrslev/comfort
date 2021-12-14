@@ -525,3 +525,17 @@ Add / Remove Columns,Добавить/убрать столбцы
 The total column width cannot be more than 10.,Общее количество ширин столбцов не может быть больше 10
 No Results found,Нет результатов
 Search for anything,Ищите что угодно
+{0} submitted this document {1},{0} подтвердили этот документ {1}
+{0} submitted this document,{0} подтвердили этот документ
+{0} cancelled this document {1},{0} отменили этот документ {1}
+{0} cancelled this document,{0} отменили этот документ
+{0} from {1} to {2},"{0} (было: {1}, стало: {2})"
+{0} changed value of {1} {2},"{0} изменили значения: {1}, {2}"
+{0} changed value of {1},{0} изменили значения: {1}
+{0} from {1} to {2} in row #{3},"{0} (было: {1}, стало: {2} — строка #{3})"
+{0} changed values for {1} {2},"{0} изменили значения: {1}, {2}"
+{0} changed values for {1},"{0} изменили значения: {1}"
+added rows for {0},добавили строки {0}
+removed rows for {0},удалили строки {0}
+{0} created this {1},{0} создал {1}
+{0} edited this {1},{0} отредактировал {1}
