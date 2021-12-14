@@ -1,0 +1,19 @@
+name: Build Safari Extension
+
+on:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: macos-latest
+
+    defaults:
+      run:
+        working-directory: chrome_ext
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - run: xcrun safari-web-extension-converter . --mac-only --no-open --no-prompt
+      - run: ls
+      - run: git add . && git status
