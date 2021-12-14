@@ -10,7 +10,6 @@ on:
       - "**.json"
       - "!docker/scripts/**"
       - "!browser_ext/**"
-      - "!chrome_ext/**"
       - "!cli/**"
   pull_request:
     paths:
@@ -18,7 +17,6 @@ on:
       - "**.json"
       - "!docker/scripts/**"
       - "!browser_ext/**"
-      - "!chrome_ext/**"
       - "!cli/**"
 
 jobs:
