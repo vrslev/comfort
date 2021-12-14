@@ -14,6 +14,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - run: xcrun safari-web-extension-converter . --mac-only --no-open --no-prompt
+      - run: xcrun safari-web-extension-converter . --no-open
       - run: ls
       - run: git add . && git status
