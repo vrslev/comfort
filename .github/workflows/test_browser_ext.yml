@@ -11,6 +11,7 @@ on:
   pull_request:
     paths:
       - browser_ext/**
+      - "!browser_ext/chrome/**"
 
 jobs:
   test:
