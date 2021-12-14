@@ -1,0 +1,18 @@
+body {
+  padding: 12px;
+}
+
+h1 {
+  font-size: 13px;
+}
+
+.updater {
+  margin-top: 3px;
+  background-color: rgba(151, 151, 151, 0.133);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.updater:active {
+  color: rgba(105, 105, 105, 0.133);
+}
