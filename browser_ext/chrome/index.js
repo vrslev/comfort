@@ -22,8 +22,8 @@ async function send_token(tab, token) {
     // https://developer.chrome.com/docs/extensions/reference/scripting/#type-ExecutionWorld
     world: "MAIN",
     args: [token],
-    func: (token) => {
-      frappe.call("comfort.integrations.browser_ext.update_token", {
+    func: async (token) => {
+      await frappe.call("comfort.integrations.browser_ext.update_token", {
         token: token,
       });
     },
@@ -46,8 +46,8 @@ async function main() {
     return;
   }
 
-  send_token(tab, token);
+  await send_token(tab, token);
+  alert("Authorization info updated!");
 }
 
-let el = document.getElementsByClassName("updater");
-el[0].addEventListener("click", main);
+document.getElementsByClassName("updater")[0].addEventListener("click", main);
