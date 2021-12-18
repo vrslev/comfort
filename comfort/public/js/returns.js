@@ -96,9 +96,10 @@ async function show_add_row_dialog() {
   });
 
   dialog.$body.prepend(
-    `<p class="frappe-confirm-message">${__(
-      "You can also change quantity as you want."
-    )}</p>`
+    // prettier-ignore
+    `<p class="frappe-confirm-message">${
+      __("You can also change quantity as you want.")
+    }</p>`
   );
   let grid = dialog.fields_dict.items.grid;
   grid.grid_buttons.hide();
