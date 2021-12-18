@@ -120,6 +120,8 @@ def get_purchase_info(purchase_id: int, use_lite_id: bool) -> PurchaseInfoDict |
                 if exc.response.status_code != 504:
                     raise
     except GraphQLError as exc:
+        if isinstance(exc.errors, list) and exc.errors:
+            exc.errors = exc.errors[0]
         if isinstance(exc.errors, dict):
             exc.errors = [exc.errors]
         for error in exc.errors:
