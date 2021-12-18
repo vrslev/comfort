@@ -3,6 +3,24 @@
 
 <!--next-version-placeholder-->
 
+## v0.32.5 (2021-12-18)
+### Fix
+* **IKEA:** Error handling in `purchase_info` ([`b2be175`](https://github.com/vrslev/comfort/commit/b2be175b7b3e830ab6e1d992c7cf7094214ae8b7))
+* **Returns:** Translation ([`d0d439b`](https://github.com/vrslev/comfort/commit/d0d439b1783d3c2c2170cc0725748cd8bc0973ab))
+* **Translations:** Add timeline translations ([`72ede3f`](https://github.com/vrslev/comfort/commit/72ede3f15bb0683126cc7fcaac99d5996068d7e5))
+
+### Build
+* **deps:** Bump @sentry/browser from 6.15.0 to 6.16.1 ([#114](https://github.com/vrslev/comfort/issues/114)) ([`2a58028`](https://github.com/vrslev/comfort/commit/2a58028b0409e53ed3f6ac8e78d89db00614528c))
+* **deps:** Bump @sentry/tracing from 6.15.0 to 6.16.1 ([#113](https://github.com/vrslev/comfort/issues/113)) ([`60c173d`](https://github.com/vrslev/comfort/commit/60c173db33953736eae4494bbb88289936f1dbf0))
+* **deps-dev:** Bump eslint from 8.4.0 to 8.4.1 ([#115](https://github.com/vrslev/comfort/issues/115)) ([`5c961cf`](https://github.com/vrslev/comfort/commit/5c961cfcf52e6fde35c648bbea6228388c27ddd8))
+* **deps:** Bump docker/metadata-action from 3.6.1 to 3.6.2 ([#112](https://github.com/vrslev/comfort/issues/112)) ([`e4ae9ea`](https://github.com/vrslev/comfort/commit/e4ae9ea7494eee9fe9123366add1463fdaebf42d))
+
+### Chore
+* Refactor compare_ikea_purchases script ([`14d0464`](https://github.com/vrslev/comfort/commit/14d0464b893d2a4d6e66b0d31b4c3b331b2c80dc))
+* Add push translations script ([`09bdb48`](https://github.com/vrslev/comfort/commit/09bdb48ce86e6a99032cdcafbaf419b58b2626e0))
+* Add prepare chrome ext script ([`8786288`](https://github.com/vrslev/comfort/commit/87862885fd7eccf32035a99edb9d165bcf9505c4))
+* **deps:** Update pre-commit hooks ([#111](https://github.com/vrslev/comfort/issues/111)) ([`603271a`](https://github.com/vrslev/comfort/commit/603271ad9bb31e0b0fbeb30e8621d20683424d40))
+
 ## v0.32.4 (2021-12-12)
 ### Fix
 * **Receipt:** Change Purchase Order status on cancel ([`da12713`](https://github.com/vrslev/comfort/commit/da127133ed0a3eb75b0cd48629ce773156e25e00))
