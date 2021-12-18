@@ -8,3 +8,5 @@ venv
 docker/.env
 
 node_modules
+
+cli/build
