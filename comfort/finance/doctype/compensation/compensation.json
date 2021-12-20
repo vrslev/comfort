@@ -44,6 +44,7 @@
    "fieldname": "amount",
    "fieldtype": "Currency",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Amount",
    "reqd": 1
   },
@@ -71,6 +72,7 @@
    "fieldname": "status",
    "fieldtype": "Select",
    "hidden": 1,
+   "in_standard_filter": 1,
    "label": "Status",
    "options": "\nDraft\nReceived\nCancelled",
    "read_only": 1
@@ -92,7 +94,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-11-16 15:34:18.105215",
+ "modified": "2021-12-20 17:05:23.269643",
  "modified_by": "Administrator",
  "module": "Finance",
  "name": "Compensation",
