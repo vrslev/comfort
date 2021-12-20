@@ -15,7 +15,7 @@ setup(
     install_requires=[
         "ikea-api==1.0.3",
         "pydantic==1.8.2",
-        "sentry-sdk==1.5.0",
+        "sentry-sdk==1.5.1",
     ],
     extras_require={
         "dev": [
