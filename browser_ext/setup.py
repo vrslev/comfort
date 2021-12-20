@@ -12,7 +12,7 @@ setup(
     install_requires=[
         "ikea-api==1.0.3",
         "beautifulsoup4==4.10.0",
-        "sentry-sdk==1.5.0",
+        "sentry-sdk==1.5.1",
     ],
     extras_require={
         "dev": [
