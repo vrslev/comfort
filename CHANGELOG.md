@@ -3,6 +3,19 @@
 
 <!--next-version-placeholder-->
 
+## v0.33.0 (2021-12-20)
+### Feature
+* **Compensation:** Add amount and status filters ([`89a829a`](https://github.com/vrslev/comfort/commit/89a829a76149f0cca229f2a0eb35a50e6ed7199d))
+
+### Build
+* **deps:** Bump peter-evans/create-pull-request from 3.11.0 to 3.12.0 ([#118](https://github.com/vrslev/comfort/issues/118)) ([`f82dd16`](https://github.com/vrslev/comfort/commit/f82dd162812d88d7126eb88197c03df84fa4af68))
+* **deps:** Bump sentry-sdk from 1.5.0 to 1.5.1 ([#119](https://github.com/vrslev/comfort/issues/119)) ([`51804e5`](https://github.com/vrslev/comfort/commit/51804e5bc776f9eeaa2641caf2caf7519f440acf))
+* **deps:** Bump sentry-sdk from 1.5.0 to 1.5.1 in /browser_ext ([#121](https://github.com/vrslev/comfort/issues/121)) ([`a556942`](https://github.com/vrslev/comfort/commit/a556942a9dc9a8ebb04a5fe5d64ed70b75579add))
+* **deps-dev:** Bump eslint from 8.4.1 to 8.5.0 ([#120](https://github.com/vrslev/comfort/issues/120)) ([`b61ed55`](https://github.com/vrslev/comfort/commit/b61ed55c46ad13428be7ebb74e3d0c07f392bf2f))
+
+### Chore
+* **deps:** Update pre-commit hooks ([#117](https://github.com/vrslev/comfort/issues/117)) ([`199a100`](https://github.com/vrslev/comfort/commit/199a100e57564c9b1cf33a1ab4edb4a1c4be4a6b))
+
 ## v0.32.5 (2021-12-18)
 ### Fix
 * **IKEA:** Error handling in `purchase_info` ([`b2be175`](https://github.com/vrslev/comfort/commit/b2be175b7b3e830ab6e1d992c7cf7094214ae8b7))
