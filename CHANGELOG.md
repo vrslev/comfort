@@ -3,6 +3,13 @@
 
 <!--next-version-placeholder-->
 
+## v0.34.0 (2021-12-21)
+### Feature
+* Update Frappe to v13.17.0 ([`da903e0`](https://github.com/vrslev/comfort/commit/da903e03d0bf22be812a13f660fa1dc30a924cc7))
+
+### Chore
+* Remove unused method in TypedDocument ([`08a0207`](https://github.com/vrslev/comfort/commit/08a0207e74c1d6de4c020552a163c62f0d300ea9))
+
 ## v0.33.0 (2021-12-20)
 ### Feature
 * **Compensation:** Add amount and status filters ([`89a829a`](https://github.com/vrslev/comfort/commit/89a829a76149f0cca229f2a0eb35a50e6ed7199d))
