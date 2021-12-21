@@ -84,13 +84,6 @@ class TypedDocument(Document):
     ) -> Any:
         return super().get(key=key, filters=filters, limit=limit, default=default)  # type: ignore
 
-    def get_password(
-        self, fieldname: str = "password", raise_exception: bool = True
-    ) -> str | None:
-        return super().get_password(  # type: ignore
-            fieldname=fieldname, raise_exception=raise_exception
-        )
-
     def insert(
         self,
         ignore_permissions: bool | None = None,
