@@ -16,6 +16,7 @@ setup(
         "ikea-api==1.0.3",
         "pydantic==1.8.2",
         "sentry-sdk==1.5.1",
+        "uvicorn[standard]==0.16.0",
     ],
     extras_require={
         "dev": [
