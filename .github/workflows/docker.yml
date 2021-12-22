@@ -24,28 +24,57 @@ jobs:
           username: oauth
           password: ${{ secrets.YANDEX_TOKEN }}
 
+      - name: Nginx meta
+        id: nginx-meta
+        uses: docker/metadata-action@v3.6.2
+        with:
+          images: cr.yandex/crpdmuh1072ntg30t18g/comfort-nginx
+          bake-target: nginx
+
+      - name: Worker meta
+        id: worker-meta
+        uses: docker/metadata-action@v3.6.2
+        with:
+          images: cr.yandex/crpdmuh1072ntg30t18g/comfort-worker
+          bake-target: worker
+
+      - name: Merge metas
+        id: meta
+        run: |
+          dicts="$(cat $NGINX_BAKE_FILE | jq .target) $(cat $WORKER_BAKE_FILE | jq .target)"
+          targets="$(echo $dicts | jq -s add)"
+          res="$(echo '{"target": {}}' | jq ".target += ${targets}")"
+          echo "$res"
+          bake_file_path=/tmp/worker-nginx-meta.json
+          touch /tmp/worker-nginx-meta.json
+          echo "$res" > /tmp/worker-nginx-meta.json
+          echo "::set-output name=bake-file::/tmp/worker-nginx-meta.json"
+        env:
+          NGINX_BAKE_FILE: ${{ steps.nginx-meta.outputs.bake-file }}
+          WORKER_BAKE_FILE: ${{ steps.worker-meta.outputs.bake-file }}
+
       - name: Set up build args
         run: |
-          set -x
-
           echo FRAPPE_VERSION=$(awk -F '"' '/reqd_frappe_version/{print $2}' comfort/hooks.py) >>$GITHUB_ENV
-          echo TAG=${GITHUB_REF##*/} >>$GITHUB_ENV
-          echo $FRAPPE_VERSION
-          echo $TAG
+          echo COMFORT_VERSION=${{ fromJSON(steps.nginx-meta.outputs.json).labels['org.opencontainers.image.version'] }} >>$GITHUB_ENV
 
-      # - name: Build images
-      #   uses: docker/bake-action@v1.6.0
-      #   with:
-      #     load: true
+      - name: Build images
+        uses: docker/bake-action@v1.6.0
+        with:
+          files: |
+            ./docker-bake.hcl
+            ${{ steps.meta.outputs.bake-file }}
+          load: true
 
-      # - name: Smoke Test
-      #   working-directory: docker
-      #   run: bash scripts/smoke-test.sh
-      #   env:
-      #     COMFORT_VERSION: ${{ fromJSON(steps.nginx-meta.outputs.json).labels['org.opencontainers.image.version'] }}
+      - name: Smoke Test
+        working-directory: docker
+        run: bash scripts/smoke-test.sh
 
-      # - name: Push images
-      #   if: github.event_name != 'pull_request'
-      #   uses: docker/bake-action@v1.6.0
-      #   with:
-      #     push: true
+      - name: Push images
+        if: github.event_name != 'pull_request'
+        uses: docker/bake-action@v1.6.0
+        with:
+          files: |
+            ./docker-bake.hcl
+            ${{ steps.meta.outputs.bake-file }}
+          push: true
