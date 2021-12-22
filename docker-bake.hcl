@@ -1,5 +1,7 @@
 variable "FRAPPE_VERSION" {}
 
+# Shortcut for tagging images locally.
+# In GitHub Actions using https://github.com/docker/metadata-action.
 variable "TAG" {}
 
 target "frappe-version" {

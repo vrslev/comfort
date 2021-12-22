@@ -5,10 +5,10 @@ on:
     types:
       - published
   pull_request:
-    # paths:
-    #   - docker/**
-    #   - .dockerignore
-    #   - comfort/hooks.py # contains `reqd_frappe_version`
+    paths:
+      - docker/**
+      - .dockerignore
+      - comfort/hooks.py # contains `reqd_frappe_version`
 
 jobs:
   build:
