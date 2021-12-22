@@ -1,0 +1,33 @@
+import os
+import os.path
+from typing import Any
+
+from uvicorn.middleware.wsgi import WSGIMiddleware
+from werkzeug.middleware.shared_data import SharedDataMiddleware
+
+import frappe
+import frappe.app
+
+
+def _get_asgi_app():
+    _app: Any = frappe.app.application
+
+    with frappe.init_site():
+        # Some code so uvicorn could be used in development:
+        # - Set current site to first site (like `bench serve does`)
+        # - Add /assets and /files endpoint
+        if frappe.conf.developer_mode:
+            sites_path: str = frappe.local.sites_path
+
+            _app = SharedDataMiddleware(
+                app=_app,
+                exports={
+                    "/assets": os.path.join(sites_path, "assets"),
+                    "/files": os.path.abspath(sites_path),
+                },
+            )
+
+    return WSGIMiddleware(_app)
+
+
+app = _get_asgi_app()
