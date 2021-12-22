@@ -5,6 +5,7 @@ from collections import Counter, defaultdict
 from typing import Any, Iterable, TypeVar
 
 import frappe
+import frappe.auth
 import frappe.utils
 import frappe.utils.data
 from comfort.integrations import sentry
@@ -211,5 +212,13 @@ def patch_fmt_money():  # pragma: no cover
     frappe.utils.fmt_money = fmt_money
 
 
+def patch_validate_ip_address():
+    def mock_validate_ip_address(user: Any):
+        return
+
+    frappe.auth.validate_ip_address = mock_validate_ip_address
+
+
 sentry.init()
 patch_fmt_money()
+patch_validate_ip_address()
