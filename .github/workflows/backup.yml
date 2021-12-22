@@ -3,7 +3,7 @@ name: Backup
 on:
   workflow_dispatch:
   schedule:
-    - cron: 0 11,19 * * * # every day at 11 and 19 hours
+    - cron: 0 8,16 * * * # every day at 11 and 19 hours (UTC+03:00)
 
 concurrency: server
 
