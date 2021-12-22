@@ -3,6 +3,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.35.0 (2021-12-22)
+### Feature
+* Use uvicorn for deployment ([#122](https://github.com/vrslev/comfort/issues/122)) ([`bded4ce`](https://github.com/vrslev/comfort/commit/bded4ce493d9e3b26f16f96e817f7e050da140c8))
+
 ## v0.34.0 (2021-12-21)
 ### Feature
 * Update Frappe to v13.17.0 ([`da903e0`](https://github.com/vrslev/comfort/commit/da903e03d0bf22be812a13f660fa1dc30a924cc7))
