@@ -7,6 +7,7 @@ from werkzeug.middleware.shared_data import SharedDataMiddleware
 
 import frappe
 import frappe.app
+from frappe.utils.bench_helper import get_sites
 
 
 def _get_asgi_app():
@@ -17,6 +18,8 @@ def _get_asgi_app():
         # - Set current site to first site (like `bench serve does`)
         # - Add /assets and /files endpoint
         if frappe.conf.developer_mode:
+            frappe.app._site = get_sites(None)[0]
+
             sites_path: str = frappe.local.sites_path
 
             _app = SharedDataMiddleware(
