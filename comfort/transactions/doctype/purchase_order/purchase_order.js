@@ -2,6 +2,7 @@ comfort.PurchaseOrderController = frappe.ui.form.Controller.extend({
   setup() {
     this.frm.show_submit_message = () => {};
     this.setup_sales_order_query();
+    this.setup_make_methods();
   },
 
   setup_sales_order_query() {
@@ -27,6 +28,18 @@ comfort.PurchaseOrderController = frappe.ui.form.Controller.extend({
     this.frm.fields_dict.sales_orders.grid.get_docfield(
       "sales_order_name"
     ).only_select = 1;
+  },
+
+  setup_make_methods() {
+    this.frm.make_methods = {
+      Compensation: () => {
+        const docname = this.frm.doc.name;
+        frappe.new_doc("Compensation", null, () => {
+          cur_frm.set_value("voucher_type", "Purchase Order");
+          cur_frm.set_value("voucher_no", docname);
+        });
+      },
+    };
   },
 
   onload_post_render() {

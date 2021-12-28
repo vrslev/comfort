@@ -16,6 +16,7 @@ comfort.SalesOrderController = frappe.ui.form.Controller.extend({
     this.frm.show_submit_message = () => {};
     this.patch_toolbar_set_page_actions();
     this.add_status_indicators();
+    this.setup_make_methods();
   },
 
   patch_toolbar_set_page_actions() {
@@ -41,6 +42,18 @@ comfort.SalesOrderController = frappe.ui.form.Controller.extend({
       '<span class="indicator-pill whitespace-nowrap delivery-indicator" style="margin-left: 2%;"></span>'
     );
     this.delivery_indicator = $(".delivery-indicator");
+  },
+
+  setup_make_methods() {
+    this.frm.make_methods = {
+      Compensation: () => {
+        const docname = this.frm.doc.name;
+        frappe.new_doc("Compensation", null, () => {
+          cur_frm.set_value("voucher_type", "Sales Order");
+          cur_frm.set_value("voucher_no", docname);
+        });
+      },
+    };
   },
 
   refresh() {
