@@ -347,6 +347,7 @@ def sales_order(
 mock_delivery_services = GetDeliveryServicesResponse(
     delivery_options=[
         DeliveryService(
+            is_available=True,
             date=date(2021, 8, 26),
             type="Доставка",
             price=3299,
@@ -358,6 +359,7 @@ mock_delivery_services = GetDeliveryServicesResponse(
             ],
         ),
         DeliveryService(
+            is_available=False,
             date=date(2021, 8, 26),
             type="Доставка без подъёма",
             price=2799,
@@ -369,6 +371,7 @@ mock_delivery_services = GetDeliveryServicesResponse(
             ],
         ),
         DeliveryService(
+            is_available=True,
             date=date(2021, 8, 27),
             type="Пункт самовывоза",
             price=1998,
@@ -381,6 +384,7 @@ mock_delivery_services = GetDeliveryServicesResponse(
             ],
         ),
         DeliveryService(
+            is_available=True,
             date=date(2021, 8, 25),
             type="Магазин",
             price=999999,
@@ -393,6 +397,7 @@ mock_delivery_services = GetDeliveryServicesResponse(
             ],
         ),
         DeliveryService(
+            is_available=False,
             date=date(2021, 8, 24),
             type="Магазин",
             price=1998,
@@ -405,6 +410,7 @@ mock_delivery_services = GetDeliveryServicesResponse(
             ],
         ),
         DeliveryService(
+            is_available=False,
             date=date(2021, 8, 24),
             type="Магазин",
             price=1998,
@@ -416,6 +422,7 @@ mock_delivery_services = GetDeliveryServicesResponse(
             ],
         ),
         DeliveryService(
+            is_available=False,
             date=date(2021, 8, 25),
             type="Магазин",
             price=1998,

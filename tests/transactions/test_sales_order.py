@@ -881,6 +881,7 @@ def test_get_services_for_check_availability_no_unavailble_items(
         resp.cannot_add = []
         for option in resp.delivery_options:
             option.unavailable_items = []
+            option.is_available = True
         return resp
 
     monkeypatch.setattr(
@@ -944,6 +945,7 @@ def test_check_availability_options_items(
         ]
         resp.delivery_options.append(
             DeliveryService(
+                is_available=True,
                 date=None,
                 type="test",
                 price=0,
