@@ -3,6 +3,17 @@
 
 <!--next-version-placeholder-->
 
+## v0.35.2 (2021-12-28)
+### Fix
+* **IKEA:** Bump ikea-api from 1.0.3 to 1.1.0 ([`47fd144`](https://github.com/vrslev/comfort/commit/47fd144b98b8897acefd63e31abcbf5d3495a984))
+* **IKEA:** Update OrderCapture integration before ikea-api release ([`95c6a64`](https://github.com/vrslev/comfort/commit/95c6a64da568e5db6ef235ef08cac3fb20ea188f))
+
+### Test
+* Fix failing tests ([`e85aff8`](https://github.com/vrslev/comfort/commit/e85aff82bbcfb66ef8e7ee92c4297c2eb35a8fc3))
+
+### Chore
+* **IKEA:** Remove unused code ([`62c205b`](https://github.com/vrslev/comfort/commit/62c205b09b33bef9073abb23a564c1d4c9b01c24))
+
 ## v0.35.1 (2021-12-28)
 ### Fix
 * Bump Frappe from 13.17.0 to 13.17.1 ([`7175f1d`](https://github.com/vrslev/comfort/commit/7175f1d766d22d9edeb51e69aad56ceb86ab10f2))
