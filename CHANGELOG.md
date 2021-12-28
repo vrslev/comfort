@@ -3,6 +3,22 @@
 
 <!--next-version-placeholder-->
 
+## v0.35.1 (2021-12-28)
+### Fix
+* Bump Frappe from 13.17.0 to 13.17.1 ([`7175f1d`](https://github.com/vrslev/comfort/commit/7175f1d766d22d9edeb51e69aad56ceb86ab10f2))
+* **Compensation:** Autofill form when creating from Purchase Order or Sales Order ([`54c75b7`](https://github.com/vrslev/comfort/commit/54c75b77eec6b76e08536df04dbc810b22db4d84))
+* Patch `frappe.auth.validate_ip_address` to improve performance (https://github.com/frappe/frappe/issues/15408) ([`6004e06`](https://github.com/vrslev/comfort/commit/6004e0620ab9751557e77f0ee91273b55eab999a))
+* Get first site in development with uvicorn ([`cf4bccd`](https://github.com/vrslev/comfort/commit/cf4bccd67f6b36752d617b59625cbded5d2b0182))
+
+### Build
+* **deps:** Bump docker/login-action from 1.10.0 to 1.12.0 ([#124](https://github.com/vrslev/comfort/issues/124)) ([`328548d`](https://github.com/vrslev/comfort/commit/328548d16dd07c5c85c8b1a9725b81e61998d85a))
+
+### Ci
+* Fix cron, use UTC+03:00 ([`9d76670`](https://github.com/vrslev/comfort/commit/9d76670c2bd3daf742ff90aa9e5e63647087ca82))
+
+### Chore
+* Allow to tag docker images locally ([#123](https://github.com/vrslev/comfort/issues/123)) ([`1da79d1`](https://github.com/vrslev/comfort/commit/1da79d199ea9e57dea5817a1578866138a608ce5))
+
 ## v0.35.0 (2021-12-22)
 ### Feature
 * Use uvicorn for deployment ([#122](https://github.com/vrslev/comfort/issues/122)) ([`bded4ce`](https://github.com/vrslev/comfort/commit/bded4ce493d9e3b26f16f96e817f7e050da140c8))
