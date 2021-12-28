@@ -4,6 +4,7 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "is_available",
   "type",
   "service_provider",
   "date",
@@ -45,11 +46,19 @@
    "hidden": 1,
    "label": "Unavailable Items",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_available",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Is Available",
+   "read_only": 1
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2021-08-31 05:33:00.020898",
+ "modified": "2021-12-28 12:37:29.585670",
  "modified_by": "Administrator",
  "module": "Transactions",
  "name": "Purchase Order Delivery Option",

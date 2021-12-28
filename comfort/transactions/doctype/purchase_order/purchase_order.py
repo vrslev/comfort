@@ -300,13 +300,13 @@ class PurchaseOrder(TypedDocument):
         if not response:
             return
 
-        options = response.delivery_options
         self.cannot_add_items = json.dumps(response.cannot_add)
         self.delivery_options = []
-        for option in options:
+        for option in response.delivery_options:
             self.append(
                 "delivery_options",
                 {
+                    "is_available": option.is_available,
                     "type": option.type,
                     "service_provider": option.service_provider,
                     "date": option.date,

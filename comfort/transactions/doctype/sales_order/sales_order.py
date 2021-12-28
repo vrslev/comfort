@@ -607,6 +607,10 @@ class SalesOrder(TypedDocument):
             option.unavailable_items for option in delivery_services.delivery_options
         ):
             return delivery_services
+        if any(
+            not option.is_available for option in delivery_services.delivery_options
+        ):
+            return delivery_services
 
         frappe.msgprint(
             _("All items available"),

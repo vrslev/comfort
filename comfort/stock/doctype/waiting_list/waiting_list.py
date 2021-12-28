@@ -91,6 +91,9 @@ class WaitingList(TypedDocument):
             current_options: dict[str, tuple[dict[str, int], str]] = {}
 
             for option in delivery_services.delivery_options:
+                if not option.is_available:
+                    continue
+
                 counter = self._get_unavailable_items_counter(
                     cur_items,
                     option.unavailable_items,

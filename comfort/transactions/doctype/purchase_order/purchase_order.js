@@ -567,6 +567,14 @@ function clear_sales_orders_from_localstorage() {
   }
 }
 
+// Set formatter here because `frm.set_indicator_formatter()` method works only on links
+frappe.meta.docfield_map["Purchase Order Delivery Option"].type.formatter =
+  function (value, df, options, doc) {
+    let color = doc.is_available ? "green" : "red";
+    if (!value) return "";
+    return `<div class="indicator ${color}">${value}</div>`;
+  };
+
 $.extend(
   cur_frm.cscript,
   new comfort.PurchaseOrderController({ frm: cur_frm })
