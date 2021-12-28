@@ -7,7 +7,6 @@ import ikea_api
 import ikea_api.wrappers
 import sentry_sdk
 from ikea_api import format_item_code as format_item_code  # For jenv hook
-from ikea_api._api import CustomResponse
 from ikea_api.exceptions import (
     GraphQLError,
     IKEAAPIError,
@@ -47,23 +46,24 @@ def get_delivery_services(items: dict[str, int]):
     )
     if not zip_code:
         raise ValidationError(_("Enter Zip Code in Ikea Settings"))
+
     try:
         return ikea_api.wrappers.get_delivery_services(
             api, items=items, zip_code=zip_code
         )
+
     except NoDeliveryOptionsAvailableError:
         frappe.msgprint(_("No available delivery options"), alert=True, indicator="red")
-    except OrderCaptureError as exc:
-        response: CustomResponse = exc.response
 
+    except OrderCaptureError as exc:
         if (
-            isinstance(response._json, dict)
-            and "message" in response._json
-            and isinstance(response._json["message"], str)
+            isinstance(exc.response._json, dict)
+            and "message" in exc.response._json
+            and isinstance(exc.response._json["message"], str)
             and (
-                "Error while connecting to" in response._json["message"]
+                "Error while connecting to" in exc.response._json["message"]
                 or "Cannot read property 'get' of undefined"
-                in response._json["message"]
+                in exc.response._json["message"]
             )
         ):
             return frappe.msgprint(
