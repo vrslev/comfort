@@ -6,7 +6,7 @@ export function init_sentry() {
     method: "comfort.integrations.sentry.get_info",
     callback: (r) => {
       init({
-        dsn: r.message.sentry_dsn,
+        dsn: r.message.dsn,
         release: r.message.release,
         integrations: [new Integrations.BrowserTracing()],
       });
