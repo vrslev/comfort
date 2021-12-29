@@ -3,6 +3,14 @@
 
 <!--next-version-placeholder-->
 
+## v0.35.3 (2021-12-29)
+### Fix
+* **Delivery Trip:** Don't call `set_completed_status` if no doc provided ([`4c18b08`](https://github.com/vrslev/comfort/commit/4c18b088bd5d6a327d4be05039dd9c8fa0ac8b33))
+* **Sentry:** Remove Redis integration, don't ignore ConnectionRefusedError ([`1cef4c3`](https://github.com/vrslev/comfort/commit/1cef4c3d4a16b35bee0ecf698cc5caa337fec527))
+* **Sentry:** Override `schedule` and `worker` bench commands to enable Sentry ([`4aaf165`](https://github.com/vrslev/comfort/commit/4aaf16527e5c18ded48f2cf4107c0172b0675cbd))
+* **IKEA:** Bump ikea-api from 1.1.0 to 1.1.1 ([`089ae34`](https://github.com/vrslev/comfort/commit/089ae3444356a1f771d6c3536d21b0844c15c1f1))
+* **Sentry:** JS integration ([`537c23a`](https://github.com/vrslev/comfort/commit/537c23a91001e7b0ba83d3422d3521dba9e81532))
+
 ## v0.35.2 (2021-12-28)
 ### Fix
 * **IKEA:** Bump ikea-api from 1.0.3 to 1.1.0 ([`47fd144`](https://github.com/vrslev/comfort/commit/47fd144b98b8897acefd63e31abcbf5d3495a984))
