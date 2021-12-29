@@ -41,6 +41,10 @@ frappe.ui.form.on("Delivery Trip", {
 
     if (frm.doc.status == "In Progress") {
       frm.page.set_primary_action(__("Complete"), () => {
+        if (!frm.doc) {
+          throw Error("No doc provided :(");
+        }
+
         frm.call({
           doc: frm.doc,
           method: "set_completed_status",
