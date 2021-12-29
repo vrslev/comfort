@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 import csv
+import os
 from typing import Any, Generator
 
 import click
+import sentry_sdk
 
 import frappe
+import frappe.utils.scheduler
 from comfort import doc_exists, get_all, get_doc, new_doc
 from comfort.comfort_core.doctype.commission_settings.commission_settings import (
     CommissionSettings,
@@ -21,6 +24,7 @@ from frappe.core.doctype.doctype.doctype import DocType
 from frappe.core.doctype.module_def.module_def import ModuleDef
 from frappe.translate import get_full_dict, get_messages_for_app
 from frappe.utils.fixtures import sync_fixtures
+from frappe.utils.scheduler import enqueue_events, is_scheduler_inactive
 
 
 def connect(context: Any):
@@ -286,4 +290,50 @@ def write_translations(context: Any, untranslated_file: str | None, lang: str):
         print("All translated!")
 
 
-commands = [demo, reset, write_translations]
+def _patch_scheduler_enqueue_events_for_site():
+    if not os.getenv("SENTRY_DSN"):
+        return
+
+    def patched_enqueue_events_for_site(site: str):
+        try:
+            frappe.connect(site=site)
+            if is_scheduler_inactive():
+                return
+
+            enqueue_events(site=site)
+
+            frappe.logger("scheduler").debug(f"Queued events for site {site}")
+
+        except frappe.db.OperationalError as exc:
+            if frappe.db.is_access_denied(exc):
+                frappe.logger("scheduler").debug(f"Access denied for site {site}")
+            sentry_sdk.capture_exception(exc)
+
+        except Exception as exc:
+            sentry_sdk.capture_exception(exc)
+
+        finally:
+            frappe.destroy()
+
+    frappe.utils.scheduler.enqueue_events_for_site = patched_enqueue_events_for_site
+
+
+@click.command("schedule")
+def start_scheduler():
+    print("custom scheduler started")
+    from frappe.utils.scheduler import start_scheduler
+
+    _patch_scheduler_enqueue_events_for_site()
+    start_scheduler()
+
+
+@click.command("worker")
+@click.option("--queue", type=str)
+@click.option("--quiet", is_flag=True, default=False)
+def start_worker(queue: str, quiet: bool = False):
+    from frappe.utils.background_jobs import start_worker
+
+    start_worker(queue=queue, quiet=quiet)
+
+
+commands = [demo, reset, write_translations, start_scheduler, start_worker]
