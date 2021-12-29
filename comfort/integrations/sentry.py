@@ -8,9 +8,7 @@ from typing import Callable, TypedDict
 import pymysql.err
 import redis.exceptions
 import sentry_sdk
-import sentry_sdk.integrations.wsgi
 from sentry_sdk.integrations.logging import ignore_logger
-from sentry_sdk.integrations.redis import RedisIntegration
 from sentry_sdk.integrations.rq import RqIntegration
 from sentry_sdk.integrations.wsgi import SentryWsgiMiddleware
 from werkzeug.wrappers.response import Response
@@ -42,7 +40,7 @@ def _init_sentry():  # pragma: no cover
     sentry_sdk.init(
         dsn=info["dsn"],
         release=info["release"],
-        integrations=[RedisIntegration(), RqIntegration()],
+        integrations=[RqIntegration()],
         ignore_errors=[
             # Queue and db connection errors happen on system updates
             redis.exceptions.ConnectionError,
@@ -53,9 +51,6 @@ def _init_sentry():  # pragma: no cover
             frappe.exceptions.AuthenticationError,
             # When running in Redis Queue sometimes connection resets
             ConnectionResetError,
-            # When running in Schedule container sometimes connection to db is being refused.
-            # Most likely right after deployment.
-            ConnectionRefusedError,
         ],
     )
     sentry_sdk.set_user({"email": _get_user_email()})
