@@ -15,7 +15,7 @@ from ikea_api.exceptions import (
     NoDeliveryOptionsAvailableError,
     OrderCaptureError,
 )
-from ikea_api.wrappers.types import ParsedItem
+from ikea_api.wrappers.types import GetDeliveryServicesResponse, ParsedItem
 
 import comfort.integrations.ikea
 import frappe
@@ -71,13 +71,31 @@ def test_get_delivery_services_ok(monkeypatch: pytest.MonkeyPatch):
     assert get_delivery_services({"14251253": 1}) == mock_delivery_services
 
 
-def test_get_delivery_services_no_delivery_options(
+def test_get_delivery_services_no_delivery_options_raises(
     monkeypatch: pytest.MonkeyPatch, ikea_settings: IkeaSettings
 ):
     def new_mock_delivery_services(api: IKEA, items: Any, zip_code: Any):
         assert api.token == get_guest_api().token
         assert zip_code == ikea_settings.zip_code
         raise NoDeliveryOptionsAvailableError(Mock())
+
+    frappe.message_log = []
+
+    monkeypatch.setattr(
+        ikea_api.wrappers, "get_delivery_services", new_mock_delivery_services
+    )
+
+    assert get_delivery_services({"14251253": 1}) is None
+    assert "No available delivery options" in str(frappe.message_log)  # type: ignore
+
+
+def test_get_delivery_services_no_delivery_options_empty(
+    monkeypatch: pytest.MonkeyPatch, ikea_settings: IkeaSettings
+):
+    def new_mock_delivery_services(api: IKEA, items: Any, zip_code: Any):
+        assert api.token == get_guest_api().token
+        assert zip_code == ikea_settings.zip_code
+        return GetDeliveryServicesResponse(delivery_options=[], cannot_add=[])
 
     frappe.message_log = []
 

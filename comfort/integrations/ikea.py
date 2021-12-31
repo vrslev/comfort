@@ -48,7 +48,7 @@ def get_delivery_services(items: dict[str, int]):
         raise ValidationError(_("Enter Zip Code in Ikea Settings"))
 
     try:
-        return ikea_api.wrappers.get_delivery_services(
+        res = ikea_api.wrappers.get_delivery_services(
             api, items=items, zip_code=zip_code
         )
 
@@ -70,12 +70,22 @@ def get_delivery_services(items: dict[str, int]):
                 _("Internal IKEA error, try again"), alert=True, indicator="red"
             )
         raise
+
     except IKEAAPIError as exc:
         if exc.response.status_code == 502:
             return frappe.msgprint(
                 _("Internal IKEA error, try again"), alert=True, indicator="red"
             )
         raise
+
+    else:
+        if not res.delivery_options:
+            frappe.msgprint(
+                _("No available delivery options"), alert=True, indicator="red"
+            )
+            return
+
+        return res
 
 
 def add_items_to_cart(items: dict[str, int], authorize: bool):
