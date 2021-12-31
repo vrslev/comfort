@@ -107,6 +107,7 @@ function validate_ikea_url() {
 }
 
 function get_token() {
+  // TODO: If no token found, raise
   function _get_cookie(name) {
     // https://stackoverflow.com/questions/51312980/how-to-get-and-set-cookies-in-javascript
     var nameEQ = name + "=";
