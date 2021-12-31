@@ -34,8 +34,12 @@ frappe.ui.form.on("Delivery Trip", {
       frm.doc.docstatus != 2 &&
       frm.doc.status != "Completed"
     ) {
-      frm.add_custom_button(__("Go to Driver mode"), () => {
+      // TODO: Remove old driver mode
+      frm.add_custom_button("Перейти в старый режим водителя", () => {
         location.href = `/driver?name=${frm.doc.name}`;
+      });
+      frm.add_custom_button(__("Go to Driver mode"), () => {
+        location.href = `/app/driver?name=${frm.doc.name}`;
       });
     }
 
