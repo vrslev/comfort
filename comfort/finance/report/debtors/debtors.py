@@ -1,10 +1,8 @@
 from __future__ import annotations
 
-from comfort import _, get_all
-from comfort.transactions.doctype.purchase_order.purchase_order import PurchaseOrder
-from comfort.transactions.doctype.purchase_order_item_to_sell.purchase_order_item_to_sell import (
-    PurchaseOrderItemToSell,
-)
+from comfort import _, get_all, group_by_attr
+from comfort.entities.doctype.item.item import Item
+from comfort.stock import get_stock_balance
 from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
 
 
@@ -39,13 +37,23 @@ def _get_not_purchased_sales_orders_amount():
 
 
 def _get_items_to_sell_amount():
-    purchase_orders = get_all(PurchaseOrder, filters={"docstatus": 1})
-    items = get_all(
-        PurchaseOrderItemToSell,
-        fields=("SUM(amount) as amount"),
-        filters={"parent": ("in", (o.name for o in purchase_orders))},
+    counter = get_stock_balance("Available Actual")
+    purchased = get_stock_balance("Available Purchased")
+    for item_code in counter:
+        if item_code in purchased:
+            counter[item_code] += purchased[item_code]
+
+    items_with_rates = get_all(
+        Item,
+        fields=("item_code", "rate"),
+        filters={"item_code": ("in", counter.keys())},
     )
-    return items[0].amount or 0
+    grouped_items = group_by_attr(items_with_rates)
+
+    amount = 0
+    for item_code, qty in counter.items():
+        amount += grouped_items[item_code][0].rate * qty
+    return amount
 
 
 def _get_report_summary():
