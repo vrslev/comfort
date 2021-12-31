@@ -3,6 +3,17 @@
 
 <!--next-version-placeholder-->
 
+## v0.36.0 (2021-12-31)
+### Feature
+* **Delivery Trip:** Add Open in VK button to driver mode ([`5539767`](https://github.com/vrslev/comfort/commit/553976730c0ba05f06db305b4f85befaa9b6e956))
+* **Delivery Trip:** Add new driver mode page ([`c0b2136`](https://github.com/vrslev/comfort/commit/c0b21364d40f3f5741140922ea4120d583bc944a))
+* Switch light/dark theme automatically ([`15448bb`](https://github.com/vrslev/comfort/commit/15448bbc4ff9221f69ec835c14029f0962b4f6ca))
+
+### Fix
+* **Translations:** Translate No Data ([`fc536dc`](https://github.com/vrslev/comfort/commit/fc536dc976dd13080d1abc5b2933eaf6b6cdd524))
+* **Delivery Trip:** Add button to new driver mode ([`1d171a8`](https://github.com/vrslev/comfort/commit/1d171a8dd3231d8cac34c13a3162285430808660))
+* **Customer:** Strip name on insert ([`f904981`](https://github.com/vrslev/comfort/commit/f9049813feed997bed31ae1b5fff2d6a06ad8451))
+
 ## v0.35.5 (2021-12-31)
 ### Fix
 * **IKEA:** Show No Available Options result if not delivery options returned ([`adf3d2e`](https://github.com/vrslev/comfort/commit/adf3d2eb2a20ab2079133c387f9da8bfa6efc51c))
