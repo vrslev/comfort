@@ -3,6 +3,7 @@
 **/workspace/**/*.json
 **/fixtures/*.json
 **/print_format/**/*.json
+**/page/**/*.json
 *.html
 !browser_ext/chrome/**
 browser_ext/chrome/bootstrap.min.css
