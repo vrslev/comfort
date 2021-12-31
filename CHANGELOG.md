@@ -3,6 +3,14 @@
 
 <!--next-version-placeholder-->
 
+## v0.35.5 (2021-12-31)
+### Fix
+* **IKEA:** Show No Available Options result if not delivery options returned ([`adf3d2e`](https://github.com/vrslev/comfort/commit/adf3d2eb2a20ab2079133c387f9da8bfa6efc51c))
+* **Stock:** "Reserved Actual" translation ([`73c4e87`](https://github.com/vrslev/comfort/commit/73c4e87d5694ad8ee2a7d094f4a2d02ccc4cf86b))
+
+### Chore
+* Add todo ([`2072c1f`](https://github.com/vrslev/comfort/commit/2072c1fe7e47aaa5ed2d7efb9110627f77f0b3b3))
+
 ## v0.35.4 (2021-12-31)
 ### Fix
 * **Debtors report:** Items to sell amount calculations ([`c25bec1`](https://github.com/vrslev/comfort/commit/c25bec14a0da2d6c70f78502e5e3e3647fd1c6ff))
