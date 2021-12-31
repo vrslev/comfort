@@ -147,15 +147,20 @@ function setup_unnecessary_stuff_removal() {
   });
 }
 
+comfort.format_item_code = (value) => {
+  if (value && /^\d+$/.test(value) && value.length == 8) {
+    // Valid item code
+    value = `${value.substring(0, 3)}.${value.substring(
+      3,
+      6
+    )}.${value.substring(6, 8)}`;
+  }
+  return value;
+};
+
 function add_item_code_formatter() {
   frappe.form.link_formatters["Item"] = (value, doc, df) => {
-    if (value && /^\d+$/.test(value) && value.length == 8) {
-      // Valid item code
-      value = `${value.substring(0, 3)}.${value.substring(
-        3,
-        6
-      )}.${value.substring(6, 8)}`;
-    }
+    value = comfort.format_item_code(value);
 
     if (df.fieldname != "item_code") {
       return value;
@@ -248,6 +253,21 @@ function patch_guess_colour() {
   };
 }
 
+function detect_and_switch_theme() {
+  if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+    $("html").attr("data-theme", "dark");
+  } else {
+    $("html").attr("data-theme", "light");
+  }
+
+  function toggle_theme(e) {
+    let theme = e.matches ? "dark" : "light";
+    $("html").attr("data-theme", theme);
+  }
+  window.matchMedia("(prefers-color-scheme: light)").addListener(toggle_theme);
+  window.matchMedia("(prefers-color-scheme: dark)").addListener(toggle_theme);
+}
+
 setup_unnecessary_stuff_removal();
 add_item_code_formatter();
 patch_data_field_formatter();
@@ -255,3 +275,4 @@ patch_control_link_class();
 hide_cancel_button_in_low_level_doctypes();
 patch_guess_colour();
 init_sentry();
+detect_and_switch_theme();
