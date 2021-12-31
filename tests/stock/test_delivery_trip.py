@@ -5,7 +5,14 @@ from types import SimpleNamespace
 import pytest
 
 import frappe
-from comfort import count_qty, counters_are_same, doc_exists, get_doc, new_doc
+from comfort import (
+    count_qty,
+    counters_are_same,
+    doc_exists,
+    get_doc,
+    get_value,
+    new_doc,
+)
 from comfort.entities.doctype.customer.customer import Customer
 from comfort.entities.doctype.item.item import Item
 from comfort.stock.doctype.delivery_trip.delivery_trip import (
@@ -165,6 +172,7 @@ def test_get_template_context(delivery_trip: DeliveryTrip):
     assert context_stop["address"] == doc_stop.address
     assert context_stop["pending_amount"] == doc_stop.pending_amount
     assert context_stop["details"] == doc_stop.details
+    assert context_stop["vk_url"] == get_value("Customer", doc_stop.customer, "vk_url")
     assert counters_are_same(
         count_qty(context_stop["items_"]),
         count_qty(doc.get_items_with_splitted_combinations()),

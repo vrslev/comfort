@@ -4,7 +4,15 @@ from typing import Any, Literal, TypedDict
 from urllib.parse import urlencode
 
 import frappe
-from comfort import TypedDocument, ValidationError, _, get_all, get_doc, group_by_attr
+from comfort import (
+    TypedDocument,
+    ValidationError,
+    _,
+    get_all,
+    get_doc,
+    get_value,
+    group_by_attr,
+)
 from comfort.entities.doctype.customer.customer import Customer
 from comfort.stock.doctype.receipt.receipt import Receipt
 from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
@@ -139,6 +147,7 @@ class DeliveryTrip(TypedDocument):
         stops: list[dict[str, Any]] = []
         for stop in self.stops:
             doc = get_doc(SalesOrder, stop.sales_order)
+            vk_url = get_value("Customer", stop.customer, "vk_url")
             stops.append(
                 {
                     "customer": stop.customer,
@@ -152,6 +161,7 @@ class DeliveryTrip(TypedDocument):
                     "details": stop.details,
                     "items_": doc.get_items_with_splitted_combinations(),
                     "weight": doc.total_weight,
+                    "vk_url": vk_url,
                 }
             )
         context["stops"] = stops

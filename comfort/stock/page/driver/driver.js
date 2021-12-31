@@ -42,12 +42,20 @@ class DriverPage {
 
   generate_button(label, link, icon) {
     return `
-      <button class="btn btn-default btn-sm ellipsis" style="margin-left: 10px;">
+      <button class="btn btn-default btn-sm ellipsis" style="margin-left: 10px; margin-bottom: 10px">
         <a href="${link}" style="text-decoration: none;">
           <i class="fa fa-${icon} icon-sm"></i>
           ${label}
         </a>
       </button>`;
+  }
+
+  generate_open_in_vk_button(stop) {
+    if (stop.vk_url && stop.vk_url.match(/vk.com\/gim/)) {
+      // We want to add a button only if url guides us to group dialog
+      return this.generate_button(__("Open in VK"), stop.vk_url, "comments");
+    }
+    return "";
   }
 
   add_el(idx, stop) {
@@ -66,6 +74,7 @@ class DriverPage {
             stop.route_url,
             "car"
           )}
+          ${this.generate_open_in_vk_button(stop)}
         </div>
       </div>`
     ).appendTo(".page-content");
