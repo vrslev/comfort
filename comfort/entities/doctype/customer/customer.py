@@ -74,6 +74,7 @@ class Customer(TypedDocument):
                 self.name = f"{regex.sub('', self.name)} {str(idx)}"
             else:
                 self.name = f"{self.name} 2"
+        self.name = self.name.strip()
 
     def validate(self):
         if self.vk_url:
