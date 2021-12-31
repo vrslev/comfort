@@ -3,6 +3,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.35.4 (2021-12-31)
+### Fix
+* **Debtors report:** Items to sell amount calculations ([`c25bec1`](https://github.com/vrslev/comfort/commit/c25bec14a0da2d6c70f78502e5e3e3647fd1c6ff))
+
 ## v0.35.3 (2021-12-29)
 ### Fix
 * **Delivery Trip:** Don't call `set_completed_status` if no doc provided ([`4c18b08`](https://github.com/vrslev/comfort/commit/4c18b088bd5d6a327d4be05039dd9c8fa0ac8b33))
