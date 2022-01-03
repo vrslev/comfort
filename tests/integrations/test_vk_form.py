@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from copy import copy
+from datetime import datetime
 from typing import Any
 
 import pytest
@@ -114,14 +115,14 @@ def test_vk_form_create_sales_order_with_items(
     patch_fetch_items(monkeypatch)
 
     _create_sales_order(customer.name, item_no_children.item_code, "")
-    doc = get_doc(SalesOrder, "SO-2021-0001")
+    doc = get_doc(SalesOrder, f"SO-{datetime.now().year}-0001")
     assert doc.customer == customer.name
     assert dict(count_qty(doc.items)) == {item_no_children.item_code: 1}
 
 
 def test_vk_form_create_sales_order_no_items():
     _create_sales_order("John Johnson", "", "")
-    assert not doc_exists("Sales Order", "SO-2021-0001")
+    assert not doc_exists("Sales Order", f"SO-{datetime.now().year}-0001")
 
 
 def test_vk_form_create_sales_order_with_services(
@@ -138,7 +139,7 @@ def test_vk_form_create_sales_order_with_services(
     _create_sales_order(
         customer.name, item_no_children.item_code, "До подъезда (100 ₽)"
     )
-    doc = get_doc(SalesOrder, "SO-2021-0001")
+    doc = get_doc(SalesOrder, f"SO-{datetime.now().year}-0001")
     assert doc.services[0].type == "Delivery to Entrance"
     assert doc.services[0].rate == 100
 
@@ -155,7 +156,7 @@ def test_vk_form_create_sales_order_no_services(
     patch_fetch_items(monkeypatch)
 
     _create_sales_order(customer.name, item_no_children.item_code, "")
-    doc = get_doc(SalesOrder, "SO-2021-0001")
+    doc = get_doc(SalesOrder, f"SO-{datetime.now().year}-0001")
     assert not doc.services
 
 
@@ -211,7 +212,7 @@ def test_process_form(
 
     process_form(mock_form)
     assert called_send_confirmation_message
-    doc = get_doc(SalesOrder, "SO-2021-0001")
+    doc = get_doc(SalesOrder, f"SO-{datetime.now().year}-0001")
     assert doc.customer
     assert doc.items
     assert doc.services

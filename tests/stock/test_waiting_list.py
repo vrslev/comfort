@@ -99,10 +99,14 @@ def test_show_already_in_po_message_in_po(
     waiting_list: WaitingList, purchase_order: PurchaseOrder
 ):
     purchase_order.insert()
+    waiting_list.sales_orders.pop(0)
+    waiting_list.append(
+        "sales_orders", {"sales_order": purchase_order.sales_orders[0].sales_order_name}
+    )
     frappe.message_log = []
     waiting_list._show_already_in_po_message()
     assert (
-        f"Sales Orders already in Purchase Order: {waiting_list.sales_orders[0].sales_order}"
+        f"Sales Orders already in Purchase Order: {waiting_list.sales_orders[1].sales_order}"
         in str(frappe.message_log)  # type: ignore
     )
 

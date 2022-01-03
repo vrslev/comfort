@@ -1,4 +1,5 @@
 import re
+from datetime import datetime
 
 import pytest
 from jwt import PyJWT
@@ -95,7 +96,7 @@ def test_get_url_to_reference_doc_with_items(
     customer = _create_customer(customer_name, "https://vk.com/im?sel=1")
     sales_order = _create_sales_order(customer_name, [item_no_children.item_code])
     assert re.match(
-        r"http://tests:\d+/app/sales-order/SO-2021-0001",
+        rf"http://tests:\d+/app/sales-order/SO-{datetime.now().year}-0001",
         _get_url_to_reference_doc(customer, sales_order),
     )
 
