@@ -14,7 +14,7 @@ setup(
     zip_safe=False,
     install_requires=[
         "ikea-api==1.1.1",
-        "pydantic==1.8.2",
+        "pydantic==1.9.0",
         "sentry-sdk==1.5.1",
         "uvicorn[standard]==0.16.0",
     ],
