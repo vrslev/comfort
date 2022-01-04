@@ -3,6 +3,21 @@
 
 <!--next-version-placeholder-->
 
+## v0.36.1 (2022-01-04)
+### Fix
+* **IKEA:** Bump ikea-api version from 1.1.1 to 1.1.2 ([`5971f6b`](https://github.com/vrslev/comfort/commit/5971f6bc5aa88a3b28b178f1e5d5bdbf6ba12fb6))
+
+### Build
+* **deps:** Bump pydantic from 1.8.2 to 1.9.0 ([#126](https://github.com/vrslev/comfort/issues/126)) ([`26d84c4`](https://github.com/vrslev/comfort/commit/26d84c4bd5e4e9a09cacc44d0ab616b6b7a15bac))
+* **deps:** Bump ikea-api from 1.0.3 to 1.1.1 in /browser_ext ([#128](https://github.com/vrslev/comfort/issues/128)) ([`4f4dbbd`](https://github.com/vrslev/comfort/commit/4f4dbbd6c67db617d5c3e475d7173ab16e83b1d7))
+* **deps-dev:** Bump eslint from 8.5.0 to 8.6.0 ([#127](https://github.com/vrslev/comfort/issues/127)) ([`f940b11`](https://github.com/vrslev/comfort/commit/f940b11cf45055ab930affce25483a1cabe9c4e0))
+
+### Test
+* Fix tests that was depending on 2021 year ([`d531e84`](https://github.com/vrslev/comfort/commit/d531e84b3bd51d9260f8aa02c1ea5bc6abf3f8dc))
+
+### Chore
+* **deps:** Update pre-commit hooks ([#125](https://github.com/vrslev/comfort/issues/125)) ([`5216660`](https://github.com/vrslev/comfort/commit/5216660e35979771ed0cbeac1bc6c65696867b84))
+
 ## v0.36.0 (2021-12-31)
 ### Feature
 * **Delivery Trip:** Add Open in VK button to driver mode ([`5539767`](https://github.com/vrslev/comfort/commit/553976730c0ba05f06db305b4f85befaa9b6e956))
