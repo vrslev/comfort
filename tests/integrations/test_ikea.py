@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from copy import deepcopy
 from types import SimpleNamespace
 from typing import Any
 from unittest.mock import Mock
@@ -48,6 +49,8 @@ from tests.conftest import (
     mock_purchase_history,
     patch_get_delivery_services,
 )
+
+# TODO: Remove redundant parts of tests
 
 
 @pytest.mark.usefixtures("ikea_settings")
@@ -105,6 +108,52 @@ def test_get_delivery_services_no_delivery_options_empty(
 
     assert get_delivery_services({"14251253": 1}) is None
     assert "No available delivery options" in str(frappe.message_log)  # type: ignore
+
+
+def test_get_delivery_services_all_delivery_options_unavailable(
+    monkeypatch: pytest.MonkeyPatch, ikea_settings: IkeaSettings
+):
+    def new_mock_delivery_services(api: IKEA, items: Any, zip_code: Any):
+        return SimpleNamespace(
+            delivery_options=[
+                SimpleNamespace(is_available=False),
+                SimpleNamespace(is_available=False),
+            ],
+            cannot_add=[],
+        )
+
+    frappe.message_log = []
+
+    monkeypatch.setattr(
+        ikea_api.wrappers, "get_delivery_services", new_mock_delivery_services
+    )
+
+    assert get_delivery_services({"14251253": 1}) is None
+    assert "No available delivery options" in str(frappe.message_log)  # type: ignore
+
+
+def test_get_delivery_services_some_delivery_options_available(
+    monkeypatch: pytest.MonkeyPatch, ikea_settings: IkeaSettings
+):
+    exp_res = SimpleNamespace(
+        delivery_options=[
+            SimpleNamespace(is_available=False),
+            SimpleNamespace(is_available=True),
+        ],
+        cannot_add=[],
+    )
+
+    def new_mock_delivery_services(api: IKEA, items: Any, zip_code: Any):
+        return deepcopy(exp_res)
+
+    frappe.message_log = []
+
+    monkeypatch.setattr(
+        ikea_api.wrappers, "get_delivery_services", new_mock_delivery_services
+    )
+
+    assert get_delivery_services({"14251253": 1}) == exp_res
+    assert "No available delivery options" not in str(frappe.message_log)  # type: ignore
 
 
 @pytest.mark.parametrize(
