@@ -603,13 +603,7 @@ class SalesOrder(TypedDocument):
 
         if delivery_services.cannot_add:
             return delivery_services
-        if any(
-            option.unavailable_items for option in delivery_services.delivery_options
-        ):
-            return delivery_services
-        if any(
-            not option.is_available for option in delivery_services.delivery_options
-        ):
+        if any(o.unavailable_items for o in delivery_services.delivery_options):
             return delivery_services
 
         frappe.msgprint(
@@ -660,7 +654,6 @@ class SalesOrder(TypedDocument):
             )
             for item_code in delivery_services.cannot_add
         ]
-
         return _CheckAvailabilityResponse(options=options, cannot_add=cannot_add)
 
     @frappe.whitelist()
