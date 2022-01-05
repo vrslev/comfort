@@ -3,6 +3,18 @@
 
 <!--next-version-placeholder-->
 
+## v0.36.2 (2022-01-05)
+### Fix
+* **Profit and Loss Statement report:** Set default datetimes to start and end of month ([`95699df`](https://github.com/vrslev/comfort/commit/95699dfe80adb0ff2e679ff7c6802b0932e113ac))
+* **UI:** Indicator colors in dark mode ([`0f2cb8c`](https://github.com/vrslev/comfort/commit/0f2cb8cd090ac24e115cba079ed897ae5a99cc5c))
+* **IKEA:** Bump ikea-api to 1.1.3 ([`3193589`](https://github.com/vrslev/comfort/commit/319358931d350bc3fb12ae7da317858b6fcb2a8c))
+* **IKEA:** Parse ingka page links ([`7952e03`](https://github.com/vrslev/comfort/commit/7952e03b6859c78748877f6eaa834a7b7eb04735))
+* **Sales Order:** Don't show empty message when checking availability and some delivery options are unavailable ([`5a8a546`](https://github.com/vrslev/comfort/commit/5a8a5468d7c06ce37e2be6ecd76526c62b1b5acf))
+* **IKEA:** Return None if all delivery options unavailable in `get_delivery_services` ([`74ff2f7`](https://github.com/vrslev/comfort/commit/74ff2f7ee6b98a9bbdd4b8f1c6350cfa8714217c))
+
+### Chore
+* Add todo ([`35470d3`](https://github.com/vrslev/comfort/commit/35470d305ddc80dea6800d48402a277ca8217bc1))
+
 ## v0.36.1 (2022-01-04)
 ### Fix
 * **IKEA:** Bump ikea-api version from 1.1.1 to 1.1.2 ([`5971f6b`](https://github.com/vrslev/comfort/commit/5971f6bc5aa88a3b28b178f1e5d5bdbf6ba12fb6))
