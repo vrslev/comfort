@@ -22,7 +22,7 @@ def _get_asgi_app():
 
             sites_path: str = frappe.local.sites_path
 
-            _app = SharedDataMiddleware(
+            _app = SharedDataMiddleware(  # TODO: THIS IS WRONG Shared and Static are different
                 app=_app,
                 exports={
                     "/assets": os.path.join(sites_path, "assets"),
