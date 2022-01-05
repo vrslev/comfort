@@ -34,6 +34,7 @@ boot_session = "comfort.comfort_core.hooks.extend_boot_session"
 override_doctype_class = {"DocType": "comfort.comfort_core.hooks.CustomDocType"}
 
 app_include_js = "/assets/js/comfort.min.js"
+app_include_css = "/assets/css/comfort.min.css"
 web_include_js = "/assets/js/comfort-web.min.js"
 
 treeviews = ["Account"]

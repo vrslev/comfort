@@ -4,5 +4,6 @@
     "public/js/returns.js",
     "public/js/listviews.js"
   ],
-  "js/comfort-web.min.js": ["public/js/web.js"]
+  "js/comfort-web.min.js": ["public/js/web.js"],
+  "css/comfort.min.css": ["public/css/index.scss"]
 }

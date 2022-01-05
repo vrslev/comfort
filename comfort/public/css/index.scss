@@ -1,0 +1,41 @@
+@media (prefers-color-scheme: dark) {
+  @mixin indicator-color($color) {
+    &::before,
+    &::after {
+      background: var(--bg-#{$color});
+    }
+  }
+
+  .indicator.green {
+    @include indicator-color("green");
+  }
+
+  .indicator.cyan {
+    @include indicator-color("cyan");
+  }
+
+  .indicator.blue {
+    @include indicator-color("blue");
+  }
+
+  .indicator.orange {
+    @include indicator-color("orange");
+  }
+
+  .indicator.yellow {
+    @include indicator-color("yellow");
+  }
+
+  .indicator.gray,
+  .indicator.grey {
+    @include indicator-color("gray");
+  }
+
+  .indicator.red {
+    @include indicator-color("red");
+  }
+
+  .indicator.pink {
+    @include indicator-color("pink");
+  }
+}
