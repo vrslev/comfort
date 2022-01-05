@@ -224,7 +224,9 @@ def _create_item(parsed_item: types.ParsedItem):
 
 
 def _get_items_to_fetch(item_codes: str | list[str], force_update: bool):
-    parsed_item_codes = ikea_api.parse_item_codes(item_codes)
+    parsed_item_codes = ikea_api.parse_item_codes(
+        item_codes, unshorten_ingka_pagelinks=True
+    )
 
     if force_update:
         return parsed_item_codes
