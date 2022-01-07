@@ -121,7 +121,7 @@ def test_vk_api_call_api_http_status(vk_api: VkApi):
         vk_api._call_api(vk_api_mock_method, **vk_api_mock_params)
 
 
-mock_users_get_resp = {
+mock_users_get_resp: dict[str, Any] = {
     "response": [
         {
             "first_name": "Иван",
