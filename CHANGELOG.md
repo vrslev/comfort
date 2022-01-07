@@ -3,6 +3,14 @@
 
 <!--next-version-placeholder-->
 
+## v0.36.3 (2022-01-07)
+### Fix
+* Bump Frappe from 13.17.1 to 13.18.0 ([`be5fa2d`](https://github.com/vrslev/comfort/commit/be5fa2d021980ac076f495e935107c7f03aa7e2a))
+* **Translations:** Add missing translation after bumping Frappe ([`0f17b70`](https://github.com/vrslev/comfort/commit/0f17b70146658ddc7064ee72106e5b1e156b0c9d))
+
+### Chore
+* Fix typing issue ([`29e12cc`](https://github.com/vrslev/comfort/commit/29e12ccc73c0213190e3c9edf84ead0db4b42b45))
+
 ## v0.36.2 (2022-01-05)
 ### Fix
 * **Profit and Loss Statement report:** Set default datetimes to start and end of month ([`95699df`](https://github.com/vrslev/comfort/commit/95699dfe80adb0ff2e679ff7c6802b0932e113ac))
