@@ -3,6 +3,13 @@
 
 <!--next-version-placeholder-->
 
+## v0.36.4 (2022-01-08)
+### Fix
+* **IKEA:** Show delivery options if any of options has unavailable items ([`881c911`](https://github.com/vrslev/comfort/commit/881c91141ef82a618d362b646a477e8124a40de3))
+
+### Test
+* Fix ikea tests ([`9785aca`](https://github.com/vrslev/comfort/commit/9785acae461d40978a58297c745a243c1f4015f9))
+
 ## v0.36.3 (2022-01-07)
 ### Fix
 * Bump Frappe from 13.17.1 to 13.18.0 ([`be5fa2d`](https://github.com/vrslev/comfort/commit/be5fa2d021980ac076f495e935107c7f03aa7e2a))
