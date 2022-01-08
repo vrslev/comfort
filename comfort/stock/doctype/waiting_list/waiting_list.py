@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from collections import Counter
+from collections import Counter, defaultdict
 from copy import copy
 
 from ikea_api.wrappers.types import GetDeliveryServicesResponse, UnavailableItem
@@ -64,6 +64,7 @@ class WaitingList(TypedDocument):
         self,
         items: list[SalesOrderChildItem | SalesOrderItem],
         unavailable_items_counter: Counter[str],
+        is_available: bool,
     ):
         counter_before = count_qty(items)
         counter_after = counter_before.copy()
@@ -72,7 +73,9 @@ class WaitingList(TypedDocument):
             if item_code in unavailable_items_counter:
                 counter_after[item_code] = unavailable_items_counter[item_code]
 
-        if counters_are_same(counter_before, counter_after):
+        if not is_available:
+            status = "Not Available"
+        elif counters_are_same(counter_before, counter_after):
             status = "Fully Available"
         elif any(counter_after.values()):
             status = "Partially Available"
@@ -88,20 +91,22 @@ class WaitingList(TypedDocument):
         grouped_items = group_by_attr(items, "parent")
         for order in self.sales_orders:
             cur_items = grouped_items[order.sales_order]
-            current_options: dict[str, tuple[dict[str, int], str]] = {}
+            current_options: defaultdict[
+                str, list[tuple[dict[str, int], str]]
+            ] = defaultdict(list)
 
             for option in delivery_services.delivery_options:
-                if not option.is_available:
-                    continue
-
                 counter = self._get_unavailable_items_counter(
                     cur_items,
                     option.unavailable_items,
                     delivery_services.cannot_add,
                 )
-                status = self._get_status_for_order(cur_items, counter)
-                current_options[option.type] = dict(counter), status
-
+                status = self._get_status_for_order(
+                    items=cur_items,
+                    unavailable_items_counter=counter,
+                    is_available=option.is_available,
+                )
+                current_options[option.type].append((dict(counter), status))
             if order.current_options:
                 order.last_options = copy(order.current_options)
             order.current_options = json.dumps(current_options)

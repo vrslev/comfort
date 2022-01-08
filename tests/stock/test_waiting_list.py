@@ -68,18 +68,20 @@ def test_get_unavailable_items_counter(waiting_list: WaitingList):
 
 
 @pytest.mark.parametrize(
-    ("items_counter", "unavailable_items_counter", "exp_status"),
+    ("items_counter", "unavailable_items_counter", "is_available", "exp_status"),
     (
-        ({"50366596": 1}, {"50366596": 0}, "Not Available"),
-        ({"50366596": 1, "50366595": 1}, {"50366596": 0}, "Partially Available"),
-        ({"50366596": 1, "50366595": 1}, {}, "Fully Available"),
-        ({"50366596": 1, "50366595": 1}, {"50366596": 1}, "Fully Available"),
+        ({"50366596": 1}, {"50366596": 0}, True, "Not Available"),
+        ({"50366596": 1}, {}, False, "Not Available"),
+        ({"50366596": 1, "50366595": 1}, {"50366596": 0}, True, "Partially Available"),
+        ({"50366596": 1, "50366595": 1}, {}, True, "Fully Available"),
+        ({"50366596": 1, "50366595": 1}, {"50366596": 1}, True, "Fully Available"),
     ),
 )
 def test_get_status_for_order(
     waiting_list: WaitingList,
     items_counter: dict[str, int],
     unavailable_items_counter: dict[str, int],
+    is_available: bool,
     exp_status: str,
 ):
     items = [
@@ -88,8 +90,9 @@ def test_get_status_for_order(
     ]
     assert (
         waiting_list._get_status_for_order(
-            items,  # type: ignore
-            Counter(unavailable_items_counter),
+            items=items,  # type: ignore
+            unavailable_items_counter=Counter(unavailable_items_counter),
+            is_available=is_available,
         )
         == exp_status
     )
