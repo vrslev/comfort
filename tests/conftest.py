@@ -347,7 +347,7 @@ def sales_order(
 mock_delivery_services = GetDeliveryServicesResponse(
     delivery_options=[
         DeliveryService(
-            is_available=True,
+            is_available=False,
             date=date(2021, 8, 26),
             type="Доставка",
             price=3299,
@@ -376,12 +376,7 @@ mock_delivery_services = GetDeliveryServicesResponse(
             type="Пункт самовывоза",
             price=1998,
             service_provider="Деловые линии",
-            unavailable_items=[
-                UnavailableItem(item_code="50366596", available_qty=0),
-                UnavailableItem(item_code="40277973", available_qty=0),
-                UnavailableItem(item_code="10366598", available_qty=0),
-                UnavailableItem(item_code="29128569", available_qty=0),
-            ],
+            unavailable_items=[],
         ),
         DeliveryService(
             is_available=True,
@@ -389,12 +384,7 @@ mock_delivery_services = GetDeliveryServicesResponse(
             type="Магазин",
             price=999999,
             service_provider=None,
-            unavailable_items=[
-                UnavailableItem(item_code="50366596", available_qty=0),
-                UnavailableItem(item_code="40277973", available_qty=0),
-                UnavailableItem(item_code="10366598", available_qty=0),
-                UnavailableItem(item_code="29128569", available_qty=0),
-            ],
+            unavailable_items=[],
         ),
         DeliveryService(
             is_available=False,

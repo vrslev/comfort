@@ -7,13 +7,7 @@ import ikea_api
 import ikea_api.wrappers
 import sentry_sdk
 from ikea_api import format_item_code as format_item_code  # For jenv hook
-from ikea_api.exceptions import (
-    GraphQLError,
-    IKEAAPIError,
-    ItemFetchError,
-    NoDeliveryOptionsAvailableError,
-    OrderCaptureError,
-)
+from ikea_api.exceptions import GraphQLError, IKEAAPIError, ItemFetchError
 from ikea_api.wrappers import types
 
 import frappe
@@ -47,47 +41,13 @@ def get_delivery_services(items: dict[str, int]):
     if not zip_code:
         raise ValidationError(_("Enter Zip Code in Ikea Settings"))
 
-    try:
-        res = ikea_api.wrappers.get_delivery_services(
-            api, items=items, zip_code=zip_code
-        )
+    res = ikea_api.wrappers.get_delivery_services(api, items=items, zip_code=zip_code)
 
-    except NoDeliveryOptionsAvailableError:
+    if not res.delivery_options:
         frappe.msgprint(_("No available delivery options"), alert=True, indicator="red")
+        return
 
-    except OrderCaptureError as exc:
-        if (
-            isinstance(exc.response._json, dict)
-            and "message" in exc.response._json
-            and isinstance(exc.response._json["message"], str)
-            and (
-                "Error while connecting to" in exc.response._json["message"]
-                or "Cannot read property 'get' of undefined"
-                in exc.response._json["message"]
-            )
-        ):
-            return frappe.msgprint(
-                _("Internal IKEA error, try again"), alert=True, indicator="red"
-            )
-        raise
-
-    except IKEAAPIError as exc:
-        if exc.response.status_code == 502:
-            return frappe.msgprint(
-                _("Internal IKEA error, try again"), alert=True, indicator="red"
-            )
-        raise
-
-    else:
-        if not res.delivery_options or all(
-            not o.is_available and not o.unavailable_items for o in res.delivery_options
-        ):
-            frappe.msgprint(
-                _("No available delivery options"), alert=True, indicator="red"
-            )
-            return
-
-        return res
+    return res
 
 
 def add_items_to_cart(items: dict[str, int], authorize: bool):

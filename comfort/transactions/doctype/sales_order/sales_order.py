@@ -599,10 +599,11 @@ class SalesOrder(TypedDocument):
         delivery_services = get_delivery_services(qty_counter)
 
         if delivery_services is None:
-            return  # Caught NoDeliveryOptionsAvailableError
+            return
 
         if delivery_services.cannot_add:
             return delivery_services
+
         if any(o.unavailable_items for o in delivery_services.delivery_options):
             return delivery_services
 
