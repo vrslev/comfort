@@ -116,8 +116,8 @@ def test_get_delivery_services_all_delivery_options_unavailable(
     def new_mock_delivery_services(api: IKEA, items: Any, zip_code: Any):
         return SimpleNamespace(
             delivery_options=[
-                SimpleNamespace(is_available=False),
-                SimpleNamespace(is_available=False),
+                SimpleNamespace(is_available=False, unavailable_items=[]),
+                SimpleNamespace(is_available=False, unavailable_items=[]),
             ],
             cannot_add=[],
         )
@@ -137,8 +137,8 @@ def test_get_delivery_services_some_delivery_options_available(
 ):
     exp_res = SimpleNamespace(
         delivery_options=[
-            SimpleNamespace(is_available=False),
-            SimpleNamespace(is_available=True),
+            SimpleNamespace(is_available=False, unavailable_items=[]),
+            SimpleNamespace(is_available=True, unavailable_items=[]),
         ],
         cannot_add=[],
     )
