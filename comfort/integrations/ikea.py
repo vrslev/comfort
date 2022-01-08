@@ -80,7 +80,7 @@ def get_delivery_services(items: dict[str, int]):
 
     else:
         if not res.delivery_options or all(
-            not o.is_available for o in res.delivery_options
+            not o.is_available and not o.unavailable_items for o in res.delivery_options
         ):
             frappe.msgprint(
                 _("No available delivery options"), alert=True, indicator="red"
