@@ -1,3 +1,49 @@
+function set_multiple_indicators(doctype, field, get_colors) {
+  frappe.meta.docfield_map[doctype][field].formatter = function (
+    value,
+    df,
+    options,
+    doc
+  ) {
+    if (value) {
+      var label;
+      if (frappe.form.link_formatters[df.options]) {
+        label = frappe.form.link_formatters[df.options](value, doc);
+      } else {
+        label = value;
+      }
+
+      const escaped_name = encodeURIComponent(value);
+
+      let parts = [];
+      let colors = get_colors(doc || {});
+      console.log(colors);
+      for (let color of colors) {
+        parts.push(`<div class="indicator ${color}"></div>`);
+      }
+      parts.push(
+        `<a href="/app/${frappe.router.slug(
+          df.options
+        )}/${escaped_name}" data-doctype="${doctype}" data-name="${value}">${label}</a>`
+      );
+      return parts.join("");
+    } else {
+      return "";
+    }
+  };
+}
+
+function resolve_color_from_option(option) {
+  let status = option[1];
+  if (status == "Partially Available") {
+    return "orange";
+  } else if (status == "Not Available" || !status) {
+    return "red";
+  } else {
+    return "green";
+  }
+}
+
 frappe.ui.form.on("Waiting List", {
   setup(frm) {
     frm.fields_dict.sales_orders.grid.get_docfield(
@@ -17,19 +63,26 @@ frappe.ui.form.on("Waiting List", {
       };
     });
 
-    frm.set_indicator_formatter("sales_order", (doc) => {
-      if (!doc.current_options) return "red";
+    set_multiple_indicators(
+      "Waiting List Sales Order",
+      "sales_order",
+      (doc) => {
+        if (doc.current_options == "{}") return ["red"];
 
-      for (let option of Object.values(JSON.parse(doc.current_options))) {
-        let status = option[1];
-        if (status == "Partially Available") {
-          return "orange";
-        } else if (status == "Not Available" || !status) {
-          return "red";
+        // Schema of doc.current_options:
+        // {<option_type>: [<option>, <option>]}
+        let all_options = [];
+        for (let options of Object.values(JSON.parse(doc.current_options))) {
+          for (let option of options) {
+            all_options.push(option);
+          }
         }
+
+        return all_options.map((option) => {
+          return resolve_color_from_option(option);
+        });
       }
-      return "green";
-    });
+    );
   },
 
   refresh(frm) {
