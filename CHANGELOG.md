@@ -3,6 +3,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.37.1 (2022-01-08)
+### Fix
+* **Waiting List:** Show yellow indicator instead of orange ([`989668d`](https://github.com/vrslev/comfort/commit/989668d59881afba2b4fbe1c0bfe9e954e29dd81))
+
 ## v0.37.0 (2022-01-08)
 ### Feature
 * **Waiting List:** Show multiple availability indicators ([`153a583`](https://github.com/vrslev/comfort/commit/153a583f5ddada4a30994ceb8006d86d21b4f28b))
