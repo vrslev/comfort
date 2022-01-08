@@ -3,6 +3,11 @@
 
 <!--next-version-placeholder-->
 
+## v0.36.5 (2022-01-08)
+### Fix
+* **IKEA:** Fix multiple issues with Order Capture ([`d0949f1`](https://github.com/vrslev/comfort/commit/d0949f15c6b6dc22fdf9799079bb0b22c7e2777f))
+* **IKEA:** Bump ikea-api from 1.1.3 to 1.1.4 ([`5edfaf0`](https://github.com/vrslev/comfort/commit/5edfaf0bddf1747ed05798c44e602b44cb5ed44d))
+
 ## v0.36.4 (2022-01-08)
 ### Fix
 * **IKEA:** Show delivery options if any of options has unavailable items ([`881c911`](https://github.com/vrslev/comfort/commit/881c91141ef82a618d362b646a477e8124a40de3))
