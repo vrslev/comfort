@@ -36,7 +36,7 @@ function set_multiple_indicators(doctype, field, get_colors) {
 function resolve_color_from_option(option) {
   let status = option[1];
   if (status == "Partially Available") {
-    return "orange";
+    return "yellow";
   } else if (status == "Not Available" || !status) {
     return "red";
   } else {
