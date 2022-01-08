@@ -3,6 +3,13 @@
 
 <!--next-version-placeholder-->
 
+## v0.37.0 (2022-01-08)
+### Feature
+* **Waiting List:** Show multiple availability indicators ([`153a583`](https://github.com/vrslev/comfort/commit/153a583f5ddada4a30994ceb8006d86d21b4f28b))
+
+### Fix
+* **Waiting List:** Set status based on is_available attr, too ([`12b4f46`](https://github.com/vrslev/comfort/commit/12b4f4682a9650eda260d6bdffc6f79b948d0c96))
+
 ## v0.36.5 (2022-01-08)
 ### Fix
 * **IKEA:** Fix multiple issues with Order Capture ([`d0949f1`](https://github.com/vrslev/comfort/commit/d0949f15c6b6dc22fdf9799079bb0b22c7e2777f))
