@@ -3,6 +3,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.37.2 (2022-01-09)
+### Fix
+* **Stock Balance:** Filter missing issue in JS ([`c874b95`](https://github.com/vrslev/comfort/commit/c874b957451d9e2e444399d7d5bbb7a73cf59ac7))
+
 ## v0.37.1 (2022-01-08)
 ### Fix
 * **Waiting List:** Show yellow indicator instead of orange ([`989668d`](https://github.com/vrslev/comfort/commit/989668d59881afba2b4fbe1c0bfe9e954e29dd81))
