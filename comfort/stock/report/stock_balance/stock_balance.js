@@ -6,7 +6,6 @@ frappe.query_reports["Stock Balance"] = {
       fieldtype: "Select",
       options:
         "\nAvailable Purchased\nAvailable Actual\nReserved Purchased\nReserved Actual",
-      reqd: 1,
     },
   ],
   formatter(value, row, column, data, original_func) {

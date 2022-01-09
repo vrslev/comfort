@@ -8,7 +8,7 @@ from comfort.stock import StockTypes, get_stock_balance
 
 
 class StockBalanceFilters(TypedDict):
-    stock_type: StockTypes
+    stock_type: StockTypes | None
 
 
 columns = [
@@ -30,6 +30,8 @@ columns = [
 
 
 def get_data(filters: StockBalanceFilters):
+    if not "stock_type" in filters or not filters["stock_type"]:
+        return
     balance = get_stock_balance(filters["stock_type"])
     items_with_names = get_all(
         Item,
