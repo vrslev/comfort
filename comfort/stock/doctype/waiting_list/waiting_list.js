@@ -16,11 +16,11 @@ function set_multiple_indicators(doctype, field, get_colors) {
       const escaped_name = encodeURIComponent(value);
 
       let parts = [];
-      let colors = get_colors(doc || {});
-      console.log(colors);
-      for (let color of colors) {
+
+      for (let color of get_colors(doc || {})) {
         parts.push(`<div class="indicator ${color}"></div>`);
       }
+
       parts.push(
         `<a href="/app/${frappe.router.slug(
           df.options
@@ -67,6 +67,7 @@ frappe.ui.form.on("Waiting List", {
       "Waiting List Sales Order",
       "sales_order",
       (doc) => {
+        if (!doc.current_options) return [];
         if (doc.current_options == "{}") return ["red"];
 
         // Schema of doc.current_options:
