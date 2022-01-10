@@ -3,6 +3,13 @@
 
 <!--next-version-placeholder-->
 
+## v0.37.3 (2022-01-10)
+### Fix
+* **Waiting List:** Crash on new Sales Order ([`ca00f86`](https://github.com/vrslev/comfort/commit/ca00f86b7b23e522f0e09d4b2a3683cfee5f4332))
+
+### Build
+* **deps:** Bump ikea-api from 1.1.3 to 1.1.4 in /browser_ext ([#129](https://github.com/vrslev/comfort/issues/129)) ([`0f46a39`](https://github.com/vrslev/comfort/commit/0f46a39e009a14254bd0e02ef9fd144a515afa20))
+
 ## v0.37.2 (2022-01-09)
 ### Fix
 * **Stock Balance:** Filter missing issue in JS ([`c874b95`](https://github.com/vrslev/comfort/commit/c874b957451d9e2e444399d7d5bbb7a73cf59ac7))
