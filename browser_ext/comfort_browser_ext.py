@@ -90,7 +90,7 @@ def _unshorten_item_urls(soup: BeautifulSoup):
 def _get_item_codes(html: str):
     soup = BeautifulSoup(unescape(unescape(html)), "html.parser")
     text = _unshorten_item_urls(soup).get_text()
-    return ikea_api.parse_item_codes(text)
+    return ikea_api.parse_item_codes(text, unshorten_ingka_pagelinks=True)
 
 
 class FrappeException(Exception):
