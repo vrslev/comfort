@@ -259,12 +259,12 @@ delivery_and_and_installation_test_data = (
         {"delivery_type": "To Apartment", "installation": False},
     ),
     (
-        [{"type": "Delivery to Entrance", "rate": 100}],
+        [{"type": "Delivery to Entrance", "rate": 150}],
         {"delivery_type": "To Entrance", "installation": False},
     ),
     (
         [
-            {"type": "Delivery to Entrance", "rate": 100},
+            {"type": "Delivery to Entrance", "rate": 150},
             {"type": "Installation", "rate": 500},
         ],
         {"delivery_type": "To Entrance", "installation": True},

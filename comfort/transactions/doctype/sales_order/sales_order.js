@@ -753,7 +753,7 @@ frappe.ui.form.on("Sales Order Service", {
   type(frm, cdt, cdn) {
     let default_rates = {
       "Delivery to Apartment": 400,
-      "Delivery to Entrance": 100,
+      "Delivery to Entrance": 150,
       Installation: 0,
     };
     let doc = frappe.get_doc(cdt, cdn);

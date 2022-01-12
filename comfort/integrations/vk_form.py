@@ -88,7 +88,7 @@ class Answers(BaseModel):
 
 def _get_delivery_service(raw_delivery_type: str):
     if "подъезд" in raw_delivery_type:
-        return {"type": "Delivery to Entrance", "rate": 100}
+        return {"type": "Delivery to Entrance", "rate": 150}
     elif "квартир" in raw_delivery_type:
         return {"type": "Delivery to Apartment", "rate": 400}
 

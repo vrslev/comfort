@@ -86,7 +86,7 @@ def test_create_vk_group_dialog_url():
     ("raw_delivery_type", "exp_result"),
     (
         ("Самовывоз (бесплатно)", None),
-        ("До подъезда (100 ₽)", {"type": "Delivery to Entrance", "rate": 100}),
+        ("До подъезда (от 150 ₽)", {"type": "Delivery to Entrance", "rate": 150}),
         ("До квартиры (от 400 ₽)", {"type": "Delivery to Apartment", "rate": 400}),
     ),
 )
@@ -137,11 +137,11 @@ def test_vk_form_create_sales_order_with_services(
     patch_fetch_items(monkeypatch)
 
     _create_sales_order(
-        customer.name, item_no_children.item_code, "До подъезда (100 ₽)"
+        customer.name, item_no_children.item_code, "До подъезда (от 150 ₽)"
     )
     doc = get_doc(SalesOrder, f"SO-{datetime.now().year}-0001")
     assert doc.services[0].type == "Delivery to Entrance"
-    assert doc.services[0].rate == 100
+    assert doc.services[0].rate == 150
 
 
 def test_vk_form_create_sales_order_no_services(
