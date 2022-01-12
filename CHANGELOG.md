@@ -3,6 +3,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.37.4 (2022-01-12)
+### Fix
+* Change rate of Delivery to Entrance ([`dbd603f`](https://github.com/vrslev/comfort/commit/dbd603f38e76fa769dfbfb660fa2f36c0563f64f))
+
 ## v0.37.3 (2022-01-10)
 ### Fix
 * **Waiting List:** Crash on new Sales Order ([`ca00f86`](https://github.com/vrslev/comfort/commit/ca00f86b7b23e522f0e09d4b2a3683cfee5f4332))
