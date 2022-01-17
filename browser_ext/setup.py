@@ -18,7 +18,7 @@ setup(
         "dev": [
             "pytest==6.2.5",
             "pytest-cov==3.0.0",
-            "pytest-randomly==3.10.3",
+            "pytest-randomly==3.11.0",
             "responses==0.17.0",
         ]
     },
