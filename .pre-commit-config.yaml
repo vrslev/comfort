@@ -25,12 +25,12 @@ repos:
       - id: isort
 
   - repo: https://github.com/pre-commit/mirrors-eslint
-    rev: v8.6.0
+    rev: v8.7.0
     hooks:
       - id: eslint
         args: [--fix]
         additional_dependencies:
-          - eslint@8.6.0
+          - eslint@8.7.0
           - eslint-plugin-prettier
 
   - repo: https://github.com/pre-commit/mirrors-prettier
