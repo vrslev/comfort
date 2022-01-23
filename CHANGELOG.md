@@ -3,6 +3,25 @@
 
 <!--next-version-placeholder-->
 
+## v0.37.5 (2022-01-23)
+### Fix
+* Bump frappe from 13.18.0 to 13.19.0 ([`e21ddf8`](https://github.com/vrslev/comfort/commit/e21ddf884c81a8ffdfdebb805199432a2bf9cb19))
+* Bump ikea-api from 1.1.4 to 1.1.5 ([`7682644`](https://github.com/vrslev/comfort/commit/768264460192a09c8516c01d5c3853c385f231c2))
+* Change rate of Delivery to Entrance in pickup order message ([`5023475`](https://github.com/vrslev/comfort/commit/50234753f9fdffc60749276fb875c04c430f6881))
+
+### Build
+* **deps-dev:** Bump pytest-randomly from 3.10.3 to 3.11.0 ([#134](https://github.com/vrslev/comfort/issues/134)) ([`3a11f94`](https://github.com/vrslev/comfort/commit/3a11f948f0524264a127a988d615b0ffff389909))
+* **deps-dev:** Bump responses from 0.16.0 to 0.17.0 ([#131](https://github.com/vrslev/comfort/issues/131)) ([`7a64c5d`](https://github.com/vrslev/comfort/commit/7a64c5d126664f023b5db783eff8c87134f7afd7))
+* **deps:** Bump sentry-sdk from 1.5.1 to 1.5.2 ([#133](https://github.com/vrslev/comfort/issues/133)) ([`a3c8112`](https://github.com/vrslev/comfort/commit/a3c811280532fb64ec230c3a4f711ea855eb1c0f))
+* **deps-dev:** Bump pytest-randomly in /browser_ext ([#137](https://github.com/vrslev/comfort/issues/137)) ([`5ec47bb`](https://github.com/vrslev/comfort/commit/5ec47bb013740bfdf52bf0b46558217c2a8d2211))
+* **deps:** Bump sentry-sdk from 1.5.1 to 1.5.2 in /browser_ext ([#136](https://github.com/vrslev/comfort/issues/136)) ([`9833044`](https://github.com/vrslev/comfort/commit/9833044ef38745a0c4804394e5ff85ef71c232c5))
+* **deps-dev:** Bump responses from 0.16.0 to 0.17.0 in /browser_ext ([#138](https://github.com/vrslev/comfort/issues/138)) ([`2d9b550`](https://github.com/vrslev/comfort/commit/2d9b550078532e7203822001a0d77cd96a492e17))
+* **deps:** Bump uvicorn[standard] from 0.16.0 to 0.17.0 ([#132](https://github.com/vrslev/comfort/issues/132)) ([`6255788`](https://github.com/vrslev/comfort/commit/62557889fadfd399f113dcb88772b1d2603de9d9))
+* **deps-dev:** Bump eslint from 8.6.0 to 8.7.0 ([#135](https://github.com/vrslev/comfort/issues/135)) ([`fda282b`](https://github.com/vrslev/comfort/commit/fda282b676d20b9f0ccc1b00f9bc6258d1397aa1))
+
+### Chore
+* **deps:** Update pre-commit hooks ([#130](https://github.com/vrslev/comfort/issues/130)) ([`86cbb88`](https://github.com/vrslev/comfort/commit/86cbb889ae492d870351e332b0d014f35020f456))
+
 ## v0.37.4 (2022-01-12)
 ### Fix
 * Change rate of Delivery to Entrance ([`dbd603f`](https://github.com/vrslev/comfort/commit/dbd603f38e76fa769dfbfb660fa2f36c0563f64f))
