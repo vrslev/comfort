@@ -106,7 +106,7 @@ def test_purchase_return_get_all_items(purchase_return: PurchaseReturn, item: It
 
 def test_allocate_items(purchase_return: PurchaseReturn):
     exp_counters: dict[str | None, Counter[str]] = {
-        None: Counter({"10366598": 1, "40366634": 1}),
+        None: Counter({"10366598": 2, "40366634": 1}),
         purchase_return._voucher.sales_orders[0].sales_order_name: Counter(
             {"10366598": 1}
         ),
@@ -116,10 +116,9 @@ def test_allocate_items(purchase_return: PurchaseReturn):
     grouped_items = group_by_attr(all_items)
     order_names_with_items = purchase_return._allocate_items().items()
     for order_name, cur_items in order_names_with_items:
-        assert (
-            count_qty(SimpleNamespace(**i) for i in cur_items)
-            == exp_counters[order_name]
-        )
+        cur_counter = count_qty(SimpleNamespace(**i) for i in cur_items)
+        assert cur_counter == exp_counters[order_name]
+
         for item in cur_items:
             grouped_item = grouped_items[item["item_code"]][0]
             assert item["item_name"] == grouped_item.item_name
