@@ -79,6 +79,7 @@ class SalesOrder(TypedDocument):
     doctype: Literal["Sales Order"]
 
     customer: str
+    # TODO: List is mutating thing. It is unsafe to set all of this in class definition.
     items: list[SalesOrderItem] = []
     services: list[SalesOrderService] = []
     commission: int
