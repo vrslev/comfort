@@ -3,6 +3,22 @@
 
 <!--next-version-placeholder-->
 
+## v0.37.6 (2022-01-25)
+### Fix
+* **Purchase Order:** Child item items to sell counting ([`ac2c5de`](https://github.com/vrslev/comfort/commit/ac2c5de1f0652d0ffded524f459231a718a954ce))
+
+### Build
+* **deps:** Bump sentry-sdk from 1.5.2 to 1.5.3 ([#139](https://github.com/vrslev/comfort/issues/139)) ([`2d64548`](https://github.com/vrslev/comfort/commit/2d64548a3d012084390a1f675ec1edc5857faace))
+* **deps:** Bump sentry-sdk from 1.5.2 to 1.5.3 in /browser_ext ([#141](https://github.com/vrslev/comfort/issues/141)) ([`77ad85f`](https://github.com/vrslev/comfort/commit/77ad85f5c601abb3aa55f84d34c7b4e55abdecdb))
+* **deps-dev:** Bump pre-commit from 2.16.0 to 2.17.0 ([#140](https://github.com/vrslev/comfort/issues/140)) ([`279a6a4`](https://github.com/vrslev/comfort/commit/279a6a44acb77146c0abb2700aec67d568be68bc))
+* **deps:** Bump ikea-api from 1.1.4 to 1.1.5 in /browser_ext ([#142](https://github.com/vrslev/comfort/issues/142)) ([`d577194`](https://github.com/vrslev/comfort/commit/d57719469e149493b298c447fb4f7d178b6d43a0))
+
+### Test
+* **Purchase Return:** Fix failing test ([`466b16b`](https://github.com/vrslev/comfort/commit/466b16b11b3c514f5bfa7f5986001a8eab6f2711))
+
+### Chore
+* Add todo ([`85a4d3d`](https://github.com/vrslev/comfort/commit/85a4d3d9d7ee016996045837a7116d136d28b43c))
+
 ## v0.37.5 (2022-01-23)
 ### Fix
 * Bump frappe from 13.18.0 to 13.19.0 ([`e21ddf8`](https://github.com/vrslev/comfort/commit/e21ddf884c81a8ffdfdebb805199432a2bf9cb19))
