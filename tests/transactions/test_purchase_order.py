@@ -11,17 +11,21 @@ from ikea_api.wrappers.types import GetDeliveryServicesResponse
 
 import comfort.transactions.doctype.purchase_order.purchase_order
 import frappe
-from comfort import count_qty, get_all, get_doc, get_value, group_by_attr, new_doc
-from comfort.entities.doctype.child_item.child_item import ChildItem
+from comfort import (
+    count_qty,
+    counters_are_same,
+    get_all,
+    get_doc,
+    get_value,
+    group_by_attr,
+    new_doc,
+)
 from comfort.entities.doctype.item.item import Item
 from comfort.integrations.ikea import FetchItemsResult, PurchaseInfoDict
 from comfort.transactions import AnyChildItem
 from comfort.transactions.doctype.purchase_order.purchase_order import (
     PurchaseOrder,
     calculate_total_weight_and_total_weight,
-)
-from comfort.transactions.doctype.purchase_order_item_to_sell.purchase_order_item_to_sell import (
-    PurchaseOrderItemToSell,
 )
 from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
 from comfort.transactions.doctype.sales_order_child_item.sales_order_child_item import (
@@ -288,21 +292,39 @@ def test_get_items_to_sell_no_split_combinations(purchase_order: PurchaseOrder):
     assert items == purchase_order.items_to_sell
 
 
-def test_get_items_to_sell_split_combinations(purchase_order: PurchaseOrder):
+def test_get_items_to_sell_split_combinations(
+    purchase_order: PurchaseOrder, item: Item
+):
+    item_without_children = item.child_items[0]
+    purchase_order.append(
+        "items_to_sell",
+        {
+            "item_code": item_without_children.item_code,
+            "qty": 5,
+        },
+    )
+
     items = purchase_order.get_items_to_sell(split_combinations=True)
 
-    child_items = get_all(
-        ChildItem,
-        fields=("parent", "item_code", "qty"),
-        filters={"parent": ("in", (i.item_code for i in purchase_order.items_to_sell))},
-    )
-    parents = (child.parent for child in child_items)
-    items_to_sell = [
-        i for i in purchase_order.items_to_sell.copy() if i.item_code not in parents
-    ]
-    exp_list: list[PurchaseOrderItemToSell | ChildItem] = list(items_to_sell)
-    exp_list += child_items
-    assert items == exp_list
+    exp_counter = count_qty(item.child_items)
+    for key in exp_counter:
+        exp_counter[key] = exp_counter[key] * 2
+    exp_counter[item_without_children.item_code] += 5
+
+    assert counters_are_same(count_qty(items), exp_counter)
+    # child_items = get_all(
+    #     ChildItem,
+    #     fields=("parent", "item_code", "qty"),
+    #     filters={"parent": ("in", (i.item_code for i in purchase_order.items_to_sell))},
+    # )
+    # count_qty(item.child_items)
+    # parents = (child.parent for child in child_items)
+    # items_to_sell = [
+    #     i for i in purchase_order.items_to_sell.copy() if i.item_code not in parents
+    # ]
+    # exp_list: list[PurchaseOrderItemToSell | ChildItem] = list(items_to_sell)
+    # exp_list += child_items
+    # assert items == exp_list
 
 
 def test_get_items_in_sales_orders_with_empty_sales_orders(

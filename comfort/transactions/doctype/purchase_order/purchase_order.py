@@ -245,6 +245,7 @@ class PurchaseOrder(TypedDocument):
         res: list[PurchaseOrderItemToSell | ChildItem] = []
         if not self.items_to_sell:
             return res
+
         if not split_combinations:
             res += self.items_to_sell
             return res
@@ -254,10 +255,17 @@ class PurchaseOrder(TypedDocument):
             fields=("parent", "item_code", "qty"),
             filters={"parent": ("in", (i.item_code for i in self.items_to_sell))},
         )
-        parents = [child.parent for child in child_items]
-        items_to_sell = [
-            item for item in self.items_to_sell if item.item_code not in parents
-        ]
+
+        # If item to sell has child items, they are accounted wrong.
+        # now: {'39331867': 4} => {'30469171': 1, '10406797': 1}
+        # should be: {'39331867': 4} => {'30469171': 4, '10406797': 4}
+        parent_counter = count_qty(self.items_to_sell)
+        for child in child_items:
+            child.qty = child.qty * parent_counter[child.parent]
+
+        parents = {child.parent for child in child_items}
+        items_to_sell = (i for i in self.items_to_sell if i.item_code not in parents)
+
         res += items_to_sell
         res += child_items
         return res
