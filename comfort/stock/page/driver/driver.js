@@ -69,11 +69,6 @@ class DriverPage {
         </h4>
         <div style="margin-block-end: 0.5rem">
           ${this.generate_button(__("Call"), `tel:${stop.phone}`, "phone")}
-          ${this.generate_button(
-            __("Open in Yandex.Maps"),
-            stop.route_url,
-            "car"
-          )}
           ${this.generate_open_in_vk_button(stop)}
         </div>
       </div>`
@@ -93,7 +88,7 @@ class DriverPage {
           fieldname: "address",
           fieldtype: "Data",
           read_only: 1,
-          default: stop.address,
+          options: "URL",
         },
         {
           fieldname: "delivery_type",
@@ -151,6 +146,13 @@ class DriverPage {
 
     // Clear spaces where field labels should be
     $(".clearfix").remove();
+
+    // Set URL in address field
+    let address_url_el = field_group.wrapper
+      .find('[data-fieldname="address"]')
+      .find("a");
+    address_url_el.attr("href", stop.route_url);
+    address_url_el.text(stop.address);
 
     // Fix '^' appearance on section break
     field_group.fields_dict.section_break.collapse();
