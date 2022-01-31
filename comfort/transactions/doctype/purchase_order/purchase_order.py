@@ -392,7 +392,7 @@ class PurchaseOrder(TypedDocument):
             all_items += doc.get_items_with_splitted_combinations()
         items_to_sell = self.get_items_to_sell(split_combinations=True)
         for item in items_to_sell:
-            item.parent = self.name  # type: ignore
+            item.parent = self.name
         all_items += items_to_sell
 
         counter = count_qty(

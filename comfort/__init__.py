@@ -107,7 +107,7 @@ class TypedDocument(Document):
     def save(  # type: ignore
         self, ignore_permissions: bool | None = None, ignore_version: bool | None = None
     ):
-        super().save(  # type: ignore
+        super().save(
             ignore_permissions=ignore_permissions, ignore_version=ignore_version
         )
 

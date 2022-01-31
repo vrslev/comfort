@@ -26,56 +26,8 @@ reportImportCycles = false
 reportUninitializedInstanceVariable = "warning"
 reportCallInDefaultInitializer = "warning"
 reportImplicitStringConcatenation = "warning"
+reportUnnecessaryTypeIgnoreComment = "warning"
 
-# strictListInference
-# strictDictionaryInference
-# strictSetInference
-# strictParameterNoneValue
-# reportPropertyTypeMismatch
-# reportFunctionMemberAccess
-# reportMissingImports
-# reportMissingModuleSource
-# reportImportCycles
-# reportUnusedImport
-# reportUnusedClass
-# reportUnusedFunction
-# reportUnusedVariable
-# reportDuplicateImport
-# reportGeneralTypeIssues
-# reportWildcardImportFromLibrary
-# reportOptionalSubscript
-# reportOptionalMemberAccess
-# reportOptionalCall
-# reportOptionalIterable
-# reportOptionalContextManager
-# reportOptionalOperand
-# reportOverlappingOverload
-# reportTypedDictNotRequiredAccess
-# reportUntypedFunctionDecorator
-# reportUntypedClassDecorator
-# reportUntypedBaseClass
-# reportUntypedNamedTuple
-# reportConstantRedefinition
-# reportIncompatibleMethodOverride
-# reportIncompatibleVariableOverride
-# reportInvalidStringEscapeSequence
-# reportUnknownParameterType
-# reportUnknownArgumentType
-# reportUnknownLambdaType
-# reportUnknownVariableType
-# reportMissingTypeArgument
-# reportInvalidTypeVarUse
-# reportUnnecessaryIsInstance
-# reportUnnecessaryCast
-# reportUnnecessaryComparison
-# reportAssertAlwaysTrue
-# reportSelfClsParameterName
-# reportUndefinedVariable
-# reportUnboundVariable
-# reportInvalidStubStatement
-# reportIncompleteStub
-# reportUnsupportedDunderAll
-# reportUnusedCoroutine
 
 [tool.semantic_release]
 branch = "main"

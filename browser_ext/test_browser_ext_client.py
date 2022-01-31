@@ -252,7 +252,7 @@ def test_update_token(
     monkeypatch.setattr(comfort_browser_ext, "get_config", mock_get_config)
     exp_token = "mytoken"  # nosec
 
-    def mock_post(self: FrappeApi, **data: Any) -> dict[Any, Any]:  # type: ignore
+    def mock_post(self: FrappeApi, **data: Any) -> dict[Any, Any]:
         assert data["cmd"] == "comfort.integrations.browser_ext.update_token"
         assert data["token"] == exp_token
         return {}

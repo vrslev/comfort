@@ -911,7 +911,7 @@ def test_get_services_for_check_availability_no_unavailble_items(
 
     items = count_qty(sales_order.get_items_with_splitted_combinations())
     assert sales_order._get_services_for_check_availability(items) is None
-    assert "All items available" in str(frappe.message_log)  # type: ignore
+    assert "All items available" in str(frappe.message_log)
 
 
 @pytest.mark.parametrize(
@@ -1132,7 +1132,7 @@ def test_sales_order_fetch_items_specs_passes(
     assert sales_order.as_dict() != doc_before.as_dict()
     if unsuccessful:
         assert f"Cannot fetch those items: {', '.join(unsuccessful)}" in str(
-            frappe.message_log  # type: ignore
+            frappe.message_log
         )
 
 

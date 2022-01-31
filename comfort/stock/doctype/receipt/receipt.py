@@ -81,7 +81,7 @@ class Receipt(TypedDocument):
                 raise ValidationError(_("Cannot calculate services amount for Receipt"))
 
         if inventory_amount:  # TODO: Test all this ifs
-            self._new_gl_entry("inventory", 0, inventory_amount)  # type: ignore
+            self._new_gl_entry("inventory", 0, inventory_amount)
         if sales_amount:
             self._new_gl_entry("sales", 0, sales_amount)
         if delivery_amount:

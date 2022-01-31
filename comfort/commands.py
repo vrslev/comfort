@@ -194,7 +194,7 @@ def _make_items():
         },
     ]
     for doc in items:
-        if not doc_exists(doc["doctype"], doc["item_code"]):  # type: ignore
+        if not doc_exists(doc["doctype"], doc["item_code"]):
             Item(doc).insert()
 
 

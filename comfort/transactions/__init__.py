@@ -100,7 +100,7 @@ class Return(TypedDocument):
                 "item_code": item_code,
                 "item_name": grouped_items[item_code][0].item_name,
                 "qty": qty,
-                "rate": grouped_items[item_code][0].rate,  # type: ignore
+                "rate": grouped_items[item_code][0].rate,
             }
             for item_code, qty in available_item_and_qty
         ]

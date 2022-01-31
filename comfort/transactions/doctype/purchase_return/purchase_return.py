@@ -58,7 +58,7 @@ class PurchaseReturn(Return):
 
     def _get_all_items(self):
         items: list[AnyChildItem] = []
-        items += self._voucher.get_items_to_sell(True)  # type: ignore
+        items += self._voucher.get_items_to_sell(True)
         # Using this way instead of _get_items_in_sales_orders(True)
         # to have `parent` and `doctype` fields in these items
         for sales_order in self._voucher.sales_orders:

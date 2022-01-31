@@ -50,8 +50,8 @@ _testdata = ("token", "expiration"), (
 def test_get_guest_api_update(
     ikea_settings: IkeaSettings, token: str | None, expiration: datetime | None
 ):
-    ikea_settings.guest_token = token  # type: ignore
-    ikea_settings.guest_token_expiration = expiration  # type: ignore
+    ikea_settings.guest_token = token
+    ikea_settings.guest_token_expiration = expiration
     ikea_settings.save()
     get_guest_api()
     ikea_settings.reload()

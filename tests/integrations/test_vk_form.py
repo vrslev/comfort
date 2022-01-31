@@ -234,7 +234,7 @@ def test_vk_form_main_success(monkeypatch: pytest.MonkeyPatch):
 
     monkeypatch.setattr(comfort.integrations.vk_form, "process_form", mock_process_form)
 
-    user_before = copy(frappe.session.user)  # type: ignore
+    user_before = copy(frappe.session.user)
     frappe.session.user = "Guest"
     frappe.form_dict = form_dict
     resp = main()
@@ -264,7 +264,7 @@ def test_vk_form_main_failure(monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setattr(comfort.integrations.vk_form, "process_form", mock_process_form)
     monkeypatch.setattr(sentry_sdk, "capture_exception", mock_capture_exception)
 
-    user_before = copy(frappe.session.user)  # type: ignore
+    user_before = copy(frappe.session.user)
     frappe.session.user = "Guest"
     resp = main()
     assert frappe.session.user == "Administrator"

@@ -81,7 +81,7 @@ def test_get_delivery_services_no_delivery_options(
     )
 
     assert get_delivery_services({"14251253": 1}) is None
-    assert "No available delivery options" in str(frappe.message_log)  # type: ignore
+    assert "No available delivery options" in str(frappe.message_log)
 
 
 @pytest.mark.usefixtures("ikea_settings")
@@ -106,7 +106,7 @@ def test_get_delivery_services_some_delivery_options_available(
     )
 
     assert get_delivery_services({"14251253": 1}) == exp_res
-    assert "No available delivery options" not in str(frappe.message_log)  # type: ignore
+    assert "No available delivery options" not in str(frappe.message_log)
 
 
 @pytest.mark.parametrize("authorize", (True, False))
@@ -549,5 +549,5 @@ def test_get_items_failure(monkeypatch: pytest.MonkeyPatch):
     import frappe
 
     assert f"Cannot fetch those items: {', '.join(mock_item_codes)}" in str(
-        frappe.message_log  # type: ignore
+        frappe.message_log
     )

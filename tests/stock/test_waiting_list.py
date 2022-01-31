@@ -22,7 +22,7 @@ from tests.conftest import mock_delivery_services
 @pytest.fixture
 def waiting_list(sales_order: SalesOrder):
     sales_order.insert()
-    new_sales_order = new_doc(SalesOrder)  # type: ignore
+    new_sales_order = new_doc(SalesOrder)
     new_sales_order.customer = sales_order.customer
     new_sales_order.append(
         "items", {"item_code": sales_order.items[0].item_code, "qty": 2}
@@ -110,7 +110,7 @@ def test_show_already_in_po_message_in_po(
     waiting_list._show_already_in_po_message()
     assert (
         f"Sales Orders already in Purchase Order: {waiting_list.sales_orders[1].sales_order}"
-        in str(frappe.message_log)  # type: ignore
+        in str(frappe.message_log)
     )
 
 

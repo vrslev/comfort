@@ -25,7 +25,7 @@ class Response(BaseModel):
 
 def get_message(text: str):
     if messages := frappe_get_messages("ru", page_length=1, search_text=text):
-        return Response(**messages[0])  # type: ignore
+        return Response(**messages[0])
 
 
 frappe.init("site", "../../sites")

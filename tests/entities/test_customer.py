@@ -145,7 +145,7 @@ def test_vk_group_token_in_settings_false():
     frappe.message_log = []
     res = Customer._vk_group_token_in_settings(object())  # type: ignore
     assert not res
-    assert "Enter VK App service token in Vk Api Settings" in str(frappe.message_log)  # type: ignore
+    assert "Enter VK App service token in Vk Api Settings" in str(frappe.message_log)
 
 
 @pytest.mark.parametrize(

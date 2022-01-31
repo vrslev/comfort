@@ -577,7 +577,7 @@ def test_purchase_order_fetch_items_specs(
         assert sales_order.as_dict() == sales_order_before.as_dict()
         assert new_sales_order.as_dict() == new_sales_order_before.as_dict()
 
-    assert "Information about items updated" in str(frappe.message_log)  # type: ignore
+    assert "Information about items updated" in str(frappe.message_log)
 
 
 def test_add_purchase_info_and_submit_info_loaded(purchase_order: PurchaseOrder):

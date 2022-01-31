@@ -22,14 +22,14 @@ def test_sentry_get_info(monkeypatch: pytest.MonkeyPatch):
 
 
 def test_get_user_email_no_session():
-    prev_session = copy(frappe.session)  # type: ignore
+    prev_session = copy(frappe.session)
     frappe.session = None
     assert _get_user_email() is None
     frappe.session = prev_session  # Cleanup for other tests
 
 
 def test_get_user_email_no_session_user():
-    prev_session = copy(frappe.session)  # type: ignore
+    prev_session = copy(frappe.session)
     frappe.session.user = None
     assert _get_user_email() is None
     frappe.session = prev_session
@@ -38,7 +38,7 @@ def test_get_user_email_no_session_user():
 def test_get_user_email_executed():
     user, exp_email = "Administrator", "test@email.com"
     frappe.db.set_value("User", user, "email", exp_email)
-    prev_session = copy(frappe.session)  # type: ignore
+    prev_session = copy(frappe.session)
     frappe.session = SimpleNamespace(user=user)
     assert _get_user_email() == exp_email
     frappe.session = prev_session
