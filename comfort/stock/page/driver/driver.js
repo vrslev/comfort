@@ -154,6 +154,9 @@ class DriverPage {
     address_url_el.attr("href", stop.route_url);
     address_url_el.text(stop.address);
 
+    // Reduce spacing between fields
+    $(".form-group").css("margin-bottom", "0");
+
     // Fix '^' appearance on section break
     field_group.fields_dict.section_break.collapse();
     field_group.fields_dict.section_break.collapse();
