@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-__version__ = "0.37.6"
+__version__ = "0.38.0"
 
 setup(
     name="comfort",

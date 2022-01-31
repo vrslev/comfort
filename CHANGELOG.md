@@ -3,6 +3,28 @@
 
 <!--next-version-placeholder-->
 
+## v0.38.0 (2022-01-31)
+### Feature
+* **Sales Order:** Allow to change item rate if order is from available stock ([`321ebf5`](https://github.com/vrslev/comfort/commit/321ebf57395b6d88f119250898653d0cca0b1768))
+
+### Fix
+* **Delivery Trip:** Reduce spacing between fields in Driver mode ([`7ea39f4`](https://github.com/vrslev/comfort/commit/7ea39f4971a7498580484740e819774acda13413))
+* **Delivery Trip:** Make address clickable, remove Open in Yandex.Maps button in Driver mode ([`c0310d8`](https://github.com/vrslev/comfort/commit/c0310d8fb62925bf7716f42b2ad5b4fdc8af651e))
+* **Delivery Trip:** Remove old driver mode ([`5b5e213`](https://github.com/vrslev/comfort/commit/5b5e213c583f32e741027842b5a0aed5826cded8))
+
+### Build
+* **deps:** Bump @sentry/tracing from 6.16.1 to 6.17.3 ([#149](https://github.com/vrslev/comfort/issues/149)) ([`bf680e6`](https://github.com/vrslev/comfort/commit/bf680e6954047216ee8aa81e6e237e7df8d50d78))
+* **deps:** Bump uvicorn[standard] from 0.17.0 to 0.17.1 ([#145](https://github.com/vrslev/comfort/issues/145)) ([`9365aaa`](https://github.com/vrslev/comfort/commit/9365aaac1bfc39bf8b87b9dda14e13466ff27a9f))
+* **deps-dev:** Bump eslint from 8.7.0 to 8.8.0 ([#150](https://github.com/vrslev/comfort/issues/150)) ([`d45e822`](https://github.com/vrslev/comfort/commit/d45e822a0df9877219cc2da6f459ca410a67ae25))
+* **deps:** Bump @sentry/browser from 6.16.1 to 6.17.3 ([#148](https://github.com/vrslev/comfort/issues/148)) ([`004b12b`](https://github.com/vrslev/comfort/commit/004b12bc862043e61443179fc7d71012f6f7ce09))
+* **deps-dev:** Bump black from 21.12b0 to 22.1.0 ([#146](https://github.com/vrslev/comfort/issues/146)) ([`f20953f`](https://github.com/vrslev/comfort/commit/f20953fdaf3f2d197e9c853f696e2908db317e4e))
+* **deps:** Bump peter-evans/create-pull-request from 3.12.0 to 3.12.1 ([#144](https://github.com/vrslev/comfort/issues/144)) ([`75f7268`](https://github.com/vrslev/comfort/commit/75f7268be076434ccb6ec644ab3ed3011a904270))
+* **deps:** Bump sentry-sdk from 1.5.3 to 1.5.4 ([#147](https://github.com/vrslev/comfort/issues/147)) ([`33d2b79`](https://github.com/vrslev/comfort/commit/33d2b793f8751ff2e4576452bbe4b9dbe2187976))
+* **deps:** Bump sentry-sdk from 1.5.3 to 1.5.4 in /browser_ext ([#151](https://github.com/vrslev/comfort/issues/151)) ([`94646d9`](https://github.com/vrslev/comfort/commit/94646d932f91ee25501386334b7d19df23117969))
+
+### Chore
+* **deps:** Update pre-commit hooks ([#143](https://github.com/vrslev/comfort/issues/143)) ([`68ce148`](https://github.com/vrslev/comfort/commit/68ce148da6c00632b07bfa8c72ad782c2358f3b2))
+
 ## v0.37.6 (2022-01-25)
 ### Fix
 * **Purchase Order:** Child item items to sell counting ([`ac2c5de`](https://github.com/vrslev/comfort/commit/ac2c5de1f0652d0ffded524f459231a718a954ce))
