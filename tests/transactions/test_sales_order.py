@@ -49,7 +49,9 @@ from frappe import ValidationError
 from tests.conftest import mock_delivery_services
 
 
-def test_update_items_from_db(sales_order: SalesOrder):
+def test_update_items_from_db_default(sales_order: SalesOrder):
+    sales_order.from_available_stock = None
+
     for i in sales_order.items:
         frappe.clear_document_cache("Item", i.item_code)
 
@@ -59,6 +61,23 @@ def test_update_items_from_db(sales_order: SalesOrder):
         doc = get_doc(Item, i.item_code)
         assert i.item_name == doc.item_name
         assert i.rate == doc.rate
+        assert i.weight == doc.weight
+
+
+@pytest.mark.parametrize("v", ("Available Purchased", "Available Actual"))
+def test_update_items_from_db_from_available_stock(sales_order: SalesOrder, v: Any):
+    sales_order.from_available_stock = v
+
+    for i in sales_order.items:
+        frappe.clear_document_cache("Item", i.item_code)
+        i.rate = 1000
+
+    sales_order.update_items_from_db()
+
+    for i in sales_order.items:
+        doc = get_doc(Item, i.item_code)
+        assert i.item_name == doc.item_name
+        assert i.rate == 1000
         assert i.weight == doc.weight
 
 

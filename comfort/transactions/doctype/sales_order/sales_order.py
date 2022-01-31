@@ -160,11 +160,13 @@ class SalesOrder(TypedDocument):
     ################
 
     def update_items_from_db(self):
-        """Load item properties from database and calculate Amount and Total Weight."""
+        """Load item properties from cache or database and calculate Amount and Total Weight."""
+
         for item in self.items:
             doc = get_cached_doc(Item, item.item_code)
             item.item_name = doc.item_name
-            item.rate = doc.rate
+            if not (self.from_available_stock and item.rate):
+                item.rate = doc.rate
             item.weight = doc.weight
 
             item.amount = item.rate * item.qty
