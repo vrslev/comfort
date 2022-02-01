@@ -3,6 +3,13 @@
 
 <!--next-version-placeholder-->
 
+## v0.38.1 (2022-02-01)
+### Fix
+* Large data exchanges ([`4a30b7b`](https://github.com/vrslev/comfort/commit/4a30b7b2b2441ab874e6d1fe136d45d8adf6ab13))
+
+### Chore
+* Enable `reportUnnecessaryTypeIgnoreComment` ([`3780bae`](https://github.com/vrslev/comfort/commit/3780bae799ce1cc96cb8b3e39bd7e020309fbaa0))
+
 ## v0.38.0 (2022-01-31)
 ### Feature
 * **Sales Order:** Allow to change item rate if order is from available stock ([`321ebf5`](https://github.com/vrslev/comfort/commit/321ebf57395b6d88f119250898653d0cca0b1768))
