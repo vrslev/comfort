@@ -3,6 +3,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.38.2 (2022-02-01)
+### Fix
+* Fix comment position in docker entrypoint ([`a2d257b`](https://github.com/vrslev/comfort/commit/a2d257b3c56c00f2d99ac891fe468f788944f362))
+
 ## v0.38.1 (2022-02-01)
 ### Fix
 * Large data exchanges ([`4a30b7b`](https://github.com/vrslev/comfort/commit/4a30b7b2b2441ab874e6d1fe136d45d8adf6ab13))
