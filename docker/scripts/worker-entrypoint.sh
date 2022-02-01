@@ -96,10 +96,10 @@ start)
 
   cd /home/frappe/frappe-bench/sites
   # shellcheck disable=SC2086
+  # TODO: Switch to UvicornWorker when https://github.com/encode/uvicorn/issues/344 will resolve
   /home/frappe/frappe-bench/env/bin/gunicorn ${LOAD_CONFIG_FILE} -b 0.0.0.0:${FRAPPE_PORT} \
     --worker-tmp-dir /dev/shm \
     --workers 4 \
-    # TODO: Switch to UvicornWorker when https://github.com/encode/uvicorn/issues/344 will resolve
     --worker-class=uvicorn.workers.UvicornH11Worker \
     --log-file=- \
     -t 120 comfort.app:app --preload
