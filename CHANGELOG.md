@@ -3,6 +3,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.38.3 (2022-02-02)
+### Fix
+* Bump ikea-api from 1.1.5 to 1.1.6 ([`e98f915`](https://github.com/vrslev/comfort/commit/e98f9158c92239cc8aff5973d90c5566405f9815))
+
 ## v0.38.2 (2022-02-01)
 ### Fix
 * Fix comment position in docker entrypoint ([`a2d257b`](https://github.com/vrslev/comfort/commit/a2d257b3c56c00f2d99ac891fe468f788944f362))
