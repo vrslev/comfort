@@ -21,6 +21,7 @@ setup(
     extras_require={
         "dev": [
             "black==22.1.0",
+            "click==7.1.2",  # Black depends on Click 8. It will be here until Frappe supports Click 8.
             "pre_commit==2.17.0",
             "pytest==6.2.5",
             "pytest-cov==3.0.0",
