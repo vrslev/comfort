@@ -3,6 +3,13 @@
 
 <!--next-version-placeholder-->
 
+## v0.38.4 (2022-02-04)
+### Fix
+* Bump ikea-api to 1.1.7 ([#153](https://github.com/vrslev/comfort/issues/153)) ([`d71d35f`](https://github.com/vrslev/comfort/commit/d71d35fc0bb9a5c6a3be6a14d29fafa8b6ee9855))
+
+### Ci
+* Fix redis server in CI ([#152](https://github.com/vrslev/comfort/issues/152)) ([`5a3dfd5`](https://github.com/vrslev/comfort/commit/5a3dfd591959e54a05901a08347f493fa4d4e80f))
+
 ## v0.38.3 (2022-02-02)
 ### Fix
 * Bump ikea-api from 1.1.5 to 1.1.6 ([`e98f915`](https://github.com/vrslev/comfort/commit/e98f9158c92239cc8aff5973d90c5566405f9815))
