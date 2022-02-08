@@ -3,6 +3,19 @@
 
 <!--next-version-placeholder-->
 
+## v0.38.5 (2022-02-08)
+### Fix
+* Bump ikea-api from 1.1.7 to 1.1.8 ([`7ed9c89`](https://github.com/vrslev/comfort/commit/7ed9c8995c9927c2312f8621e01f7d8250e49bc0))
+
+### Build
+* **deps-dev:** Bump responses from 0.17.0 to 0.18.0 ([#154](https://github.com/vrslev/comfort/issues/154)) ([`6114219`](https://github.com/vrslev/comfort/commit/61142198a10bbb01898c5fd196390dd40b49b297))
+* **deps-dev:** Bump pytest from 6.2.5 to 7.0.0 ([#157](https://github.com/vrslev/comfort/issues/157)) ([`fbc4f94`](https://github.com/vrslev/comfort/commit/fbc4f94d0c4888322d0d1bf2b88a240b1f1a7d83))
+* **deps:** Bump @sentry/browser from 6.17.3 to 6.17.4 ([#159](https://github.com/vrslev/comfort/issues/159)) ([`65d1325`](https://github.com/vrslev/comfort/commit/65d13258be6d073a893f4a2a52b47b75c430c409))
+* **deps-dev:** Bump responses from 0.17.0 to 0.18.0 in /browser_ext ([#160](https://github.com/vrslev/comfort/issues/160)) ([`5c4727c`](https://github.com/vrslev/comfort/commit/5c4727cb001a8d2f777e5e7b8d04363aff9539bd))
+* **deps:** Bump uvicorn[standard] from 0.17.1 to 0.17.4 ([#155](https://github.com/vrslev/comfort/issues/155)) ([`a69ffe4`](https://github.com/vrslev/comfort/commit/a69ffe4457945ea98663d70396ddffcddec460e6))
+* **deps:** Bump @sentry/tracing from 6.17.3 to 6.17.4 ([#158](https://github.com/vrslev/comfort/issues/158)) ([`7db2aea`](https://github.com/vrslev/comfort/commit/7db2aea76af379445fcf5812b81aabf2502d612a))
+* **deps-dev:** Bump pytest from 6.2.5 to 7.0.0 in /browser_ext ([#161](https://github.com/vrslev/comfort/issues/161)) ([`d2ec21f`](https://github.com/vrslev/comfort/commit/d2ec21f7296890b1d35f8e3ead14d89b2eb1a653))
+
 ## v0.38.4 (2022-02-04)
 ### Fix
 * Bump ikea-api to 1.1.7 ([#153](https://github.com/vrslev/comfort/issues/153)) ([`d71d35f`](https://github.com/vrslev/comfort/commit/d71d35fc0bb9a5c6a3be6a14d29fafa8b6ee9855))
