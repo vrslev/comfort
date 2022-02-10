@@ -1,3 +1,19 @@
+import frappe
+
+
+def patch_get_file_json():  # TODO: Remove this after https://github.com/frappe/frappe/pull/15933 is merged
+    orig_func = frappe.get_file_json  # type: ignore
+
+    def func(name: str):
+        if name == "common_site_config.json":
+            return orig_func(f"../../sites/{name}")
+        return orig_func(name)
+
+    frappe.get_file_json = func
+
+
+patch_get_file_json()
+
 import os
 import os.path
 from typing import Any
@@ -5,7 +21,6 @@ from typing import Any
 from uvicorn.middleware.wsgi import WSGIMiddleware
 from werkzeug.middleware.shared_data import SharedDataMiddleware
 
-import frappe
 import frappe.app
 from frappe.utils.bench_helper import get_sites
 
