@@ -93,7 +93,7 @@ jobs:
           env/bin/pip install -U -e apps/comfort[dev] &
 
           wait
-
+      - uses: mxschmitt/action-tmate@v3
       - name: Run tests
         run: |
           cd ~/frappe-bench
