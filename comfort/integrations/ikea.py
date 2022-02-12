@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import date
-from typing import TypedDict
+from typing import TypedDict, cast
 
 import ikea_api
 import ikea_api.wrappers
@@ -9,6 +9,7 @@ import sentry_sdk
 from ikea_api import format_item_code as format_item_code  # For jenv hook
 from ikea_api.exceptions import GraphQLError, IKEAAPIError, ItemFetchError
 from ikea_api.wrappers import types
+from ikea_api.wrappers._parsers.item_iows import get_url as get_short_url
 
 import frappe
 from comfort import (
@@ -127,11 +128,20 @@ def _make_items_from_child_items_if_not_exist(parsed_item: types.ParsedItem):
             doc.insert()
 
 
+def _shorten_item_url_if_required(item: types.ParsedItem):
+    if len(item.url) < 140:
+        return item.url
+
+    return cast(
+        str, get_short_url(item_code=item.item_code, is_combination=item.is_combination)
+    )
+
+
 def _create_item(parsed_item: types.ParsedItem):
     if doc_exists("Item", parsed_item.item_code):
         doc = get_doc(Item, parsed_item.item_code)
         doc.item_name = parsed_item.name
-        doc.url = parsed_item.url
+        doc.url = _shorten_item_url_if_required(parsed_item)
         doc.rate = parsed_item.price
         doc.weight = parsed_item.weight
         doc.image = parsed_item.image_url
@@ -160,7 +170,7 @@ def _create_item(parsed_item: types.ParsedItem):
         doc = new_doc(Item)
         doc.item_code = parsed_item.item_code
         doc.item_name = parsed_item.name
-        doc.url = parsed_item.url
+        doc.url = _shorten_item_url_if_required(parsed_item)
         doc.rate = parsed_item.price
         doc.weight = parsed_item.weight
         doc.image = parsed_item.image_url
