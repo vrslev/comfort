@@ -3,6 +3,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.38.7 (2022-02-12)
+### Fix
+* Shorten item url if length >140 ([`d2127ea`](https://github.com/vrslev/comfort/commit/d2127eafc29d272b04266803e4773e6766e7c296))
+
 ## v0.38.6 (2022-02-10)
 ### Fix
 * Patch frappe.get_file_json() so containers work ([#163](https://github.com/vrslev/comfort/issues/163)) ([`afa6477`](https://github.com/vrslev/comfort/commit/afa6477ff99fff1c2366ea0ea12af0495529eed5))
