@@ -147,3 +147,7 @@ class Receipt(TypedDocument):
             doc = get_doc(PurchaseOrder, self.voucher_no)
             doc.status = "To Receive"
             doc.save_without_validating()
+
+
+def on_doctype_update():
+    frappe.db.add_index("Receipt", ["voucher_type", "voucher_no"])

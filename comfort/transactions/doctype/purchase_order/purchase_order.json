@@ -70,8 +70,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Order Confirmation No",
-   "no_copy": 1,
-   "search_index": 1
+   "no_copy": 1
   },
   {
    "fieldname": "amended_from",
@@ -220,7 +219,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2021-10-29 12:53:07.715109",
+ "modified": "2022-02-17 17:41:46.089844",
  "modified_by": "Administrator",
  "module": "Transactions",
  "name": "Purchase Order",

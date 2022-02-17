@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Literal
 
+import frappe
 from comfort import TypedDocument
 from comfort.stock import StockTypes
 
@@ -19,3 +20,7 @@ class StockEntry(TypedDocument):
     ]
     voucher_no: str
     items: list[StockEntryItem]
+
+
+def on_doctype_update():
+    frappe.db.add_index("Stock Entry", ["voucher_type", "voucher_no"])

@@ -28,8 +28,7 @@
    "fieldtype": "Dynamic Link",
    "in_list_view": 1,
    "label": "Voucher No",
-   "options": "voucher_type",
-   "search_index": 1
+   "options": "voucher_type"
   },
   {
    "fieldname": "stock_type",
@@ -37,7 +36,8 @@
    "in_list_view": 1,
    "label": "Stock Type",
    "options": "\nReserved Actual\nAvailable Actual\nReserved Purchased\nAvailable Purchased",
-   "reqd": 1
+   "reqd": 1,
+   "search_index": 1
   },
   {
    "fieldname": "items",
