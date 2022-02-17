@@ -3,6 +3,25 @@
 
 <!--next-version-placeholder-->
 
+## v0.39.0 (2022-02-17)
+### Feature
+* Update indexes ([`070d1f8`](https://github.com/vrslev/comfort/commit/070d1f8ec4c351f28ff24ecc962959814ab3c9ec))
+
+### Fix
+* Refactor `get_all` usage ([`079e507`](https://github.com/vrslev/comfort/commit/079e5078e50731bd5b9c18869b07c44ac3fa70b2))
+
+### Build
+* **deps:** Bump @sentry/browser from 6.17.4 to 6.17.7 ([#169](https://github.com/vrslev/comfort/issues/169)) ([`1db5ad7`](https://github.com/vrslev/comfort/commit/1db5ad7431e66f6f80513ec4be9da421d223c0ec))
+* **deps:** Bump @sentry/tracing from 6.17.4 to 6.17.7 ([#171](https://github.com/vrslev/comfort/issues/171)) ([`6d88e24`](https://github.com/vrslev/comfort/commit/6d88e240f7a16d6a496f4638188a348035dc616a))
+* **deps-dev:** Bump eslint from 8.8.0 to 8.9.0 ([#170](https://github.com/vrslev/comfort/issues/170)) ([`7063d4c`](https://github.com/vrslev/comfort/commit/7063d4c9bc287fb229c150097371009b3e2e6016))
+* **deps:** Bump sentry-sdk from 1.5.4 to 1.5.5 ([#167](https://github.com/vrslev/comfort/issues/167)) ([`6d8697b`](https://github.com/vrslev/comfort/commit/6d8697b19a7778cd1ec330a893238bd9fe996d87))
+* **deps-dev:** Bump pytest from 7.0.0 to 7.0.1 ([#168](https://github.com/vrslev/comfort/issues/168)) ([`0df2196`](https://github.com/vrslev/comfort/commit/0df2196f6980145e10c010af5aaf4a34b13eb180))
+* **deps:** Bump sentry-sdk from 1.5.4 to 1.5.5 in /browser_ext ([#166](https://github.com/vrslev/comfort/issues/166)) ([`efb746c`](https://github.com/vrslev/comfort/commit/efb746c8710ab73eefd8d6d6d73edcde803effe5))
+* **deps-dev:** Bump pytest from 7.0.0 to 7.0.1 in /browser_ext ([#165](https://github.com/vrslev/comfort/issues/165)) ([`77c741b`](https://github.com/vrslev/comfort/commit/77c741b0cb17f73ff49c0abcba2365922cfa7473))
+
+### Chore
+* **deps:** Update pre-commit hooks ([#164](https://github.com/vrslev/comfort/issues/164)) ([`869c337`](https://github.com/vrslev/comfort/commit/869c337ee28be664d7223391f4d986de89b6cca4))
+
 ## v0.38.7 (2022-02-12)
 ### Fix
 * Shorten item url if length >140 ([`d2127ea`](https://github.com/vrslev/comfort/commit/d2127eafc29d272b04266803e4773e6766e7c296))
