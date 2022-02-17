@@ -25,7 +25,7 @@ def get_accounts_from_schema():
 @pytest.mark.usefixtures("accounts")
 def test_create_accounts_from_schema():
     accounts_from_schema = get_accounts_from_schema()
-    accounts: list[Account] = get_all(Account, ("name", "parent_account"))
+    accounts: list[Account] = get_all(Account, field=("name", "parent_account"))
     created_accounts: list[dict[str, str | None]] = [
         dict(a) for a in accounts  # type: ignore
     ]

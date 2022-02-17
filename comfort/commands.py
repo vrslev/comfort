@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import csv
 import os
-from typing import Any, Generator
+from typing import Any
 
 import click
 import sentry_sdk
@@ -33,11 +33,9 @@ def connect(context: Any):
 
 
 def _cleanup():
-    modules: Generator[Any, None, None] = (
-        m.name for m in get_all(ModuleDef, filters={"app_name": app_name})
-    )
+    modules = get_all(ModuleDef, pluck="name", filter={"app_name": app_name})
     doctypes = get_all(
-        DocType, fields=("name", "issingle"), filters={"module": ("in", modules)}
+        DocType, field=("name", "issingle"), filter={"module": ("in", modules)}
     )
     for doctype in doctypes:
         if doctype.issingle:  # type: ignore

@@ -48,8 +48,8 @@ class ItemMethods:
 
         items = get_all(
             Item,
-            fields=("item_code", "weight"),
-            filters={"item_code": ("in", (d.item_code for d in self.child_items))},
+            field=("item_code", "weight"),
+            filter={"item_code": ("in", (d.item_code for d in self.child_items))},
         )
         weight_map: Counter[str] = count_qty(items, "item_code", "weight")
         self.weight = 0
@@ -57,7 +57,9 @@ class ItemMethods:
             self.weight += weight_map[d.item_code] * d.qty
 
     def calculate_weight_in_parent_docs(self):
-        parent_items = get_all(ChildItem, "parent", {"item_code": self.item_code})
+        parent_items = get_all(
+            ChildItem, field="parent", filter={"item_code": self.item_code}
+        )
         parent_item_names = list({d.parent for d in parent_items})
         for d in parent_item_names:
             if doc_exists("Item", d):

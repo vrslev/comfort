@@ -11,8 +11,8 @@ from comfort.finance.doctype.gl_entry.gl_entry import GLEntry
 def test_get_children_root():
     assert get_children("Account") == get_all(
         Account,
-        fields=("name as value", "is_group as expandable", "parent_account"),
-        filters={"parent_account": ""},
+        field=("name as value", "is_group as expandable", "parent_account"),
+        filter={"parent_account": ""},
         order_by="name",
     )
 
@@ -26,8 +26,8 @@ def test_get_children_not_root_all_entries_present():
 
     assert res == get_all(
         Account,
-        fields=("name as value", "is_group as expandable", "parent_account"),
-        filters={"parent_account": "Income"},
+        field=("name as value", "is_group as expandable", "parent_account"),
+        filter={"parent_account": "Income"},
         order_by="name",
     )
 

@@ -223,11 +223,11 @@ class PurchaseOrder(TypedDocument):
         self.total_margin = (
             get_all(
                 SalesOrder,
-                filters={
+                filter={
                     "name": ("in", (o.sales_order_name for o in self.sales_orders)),
                     "docstatus": ("!=", 2),
                 },
-                fields="SUM(margin) as margin",
+                field="SUM(margin) as margin",
             )[0].margin
             or 0
         )
@@ -252,8 +252,8 @@ class PurchaseOrder(TypedDocument):
 
         child_items = get_all(
             ChildItem,
-            fields=("parent", "item_code", "qty"),
-            filters={"parent": ("in", (i.item_code for i in self.items_to_sell))},
+            field=("parent", "item_code", "qty"),
+            filter={"parent": ("in", (i.item_code for i in self.items_to_sell))},
         )
 
         # If item to sell has child items, they are accounted wrong.
@@ -278,15 +278,15 @@ class PurchaseOrder(TypedDocument):
         sales_order_names = [o.sales_order_name for o in self.sales_orders]
         so_items = get_all(
             SalesOrderItem,
-            fields=("item_code", "qty"),
-            filters={"parent": ("in", sales_order_names), "docstatus": ("!=", 2)},
+            field=("item_code", "qty"),
+            filter={"parent": ("in", sales_order_names), "docstatus": ("!=", 2)},
         )
 
         if split_combinations:
             child_items = get_all(
                 SalesOrderChildItem,
-                fields=("parent_item_code", "item_code", "qty"),
-                filters={"parent": ("in", sales_order_names), "docstatus": ("!=", 2)},
+                field=("parent_item_code", "item_code", "qty"),
+                filter={"parent": ("in", sales_order_names), "docstatus": ("!=", 2)},
             )
             items += child_items
 

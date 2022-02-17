@@ -83,8 +83,8 @@ def test_compensation_before_submit(
     }
     for entry in get_all(
         GLEntry,
-        filters={"voucher_type": doc.doctype, "voucher_no": doc.name},
-        fields=("account", "debit", "credit"),
+        filter={"voucher_type": doc.doctype, "voucher_no": doc.name},
+        field=("account", "debit", "credit"),
     ):
         assert entry.account in exp_accounts_to_amounts.keys()
         assert (entry.debit, entry.credit) == exp_accounts_to_amounts[entry.account]

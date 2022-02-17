@@ -98,8 +98,8 @@ def test_cancel_stock_entries_for(receipt_sales: Receipt):
 
     entries = get_all(
         StockEntry,
-        "docstatus",
-        filters={
+        field="docstatus",
+        filter={
             "voucher_type": receipt_sales.doctype,
             "voucher_no": receipt_sales.name,
         },

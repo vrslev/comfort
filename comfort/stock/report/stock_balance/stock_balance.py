@@ -35,8 +35,8 @@ def get_data(filters: StockBalanceFilters):
     balance = get_stock_balance(filters["stock_type"])
     items_with_names = get_all(
         Item,
-        fields=("item_code", "item_name"),
-        filters={"item_code": ("in", balance.keys())},
+        field=("item_code", "item_name"),
+        filter={"item_code": ("in", balance.keys())},
     )
     names_map = group_by_attr(items_with_names)
     return [

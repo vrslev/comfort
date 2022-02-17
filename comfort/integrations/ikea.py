@@ -201,12 +201,12 @@ def _get_items_to_fetch(item_codes: str | list[str], force_update: bool):
     if force_update:
         return parsed_item_codes
     else:
-        exist: list[str] = [
-            item.item_code
-            for item in get_all(
-                Item, "item_code", {"item_code": ("in", parsed_item_codes)}
-            )
-        ]
+        exist: list[str] = get_all(
+            Item,
+            pluck="item_code",
+            field="item_code",
+            filter={"item_code": ("in", parsed_item_codes)},
+        )
         return [item_code for item_code in parsed_item_codes if item_code not in exist]
 
 
@@ -282,6 +282,6 @@ def get_items(item_codes: str):  # pragma: no cover
         )
     return get_all(
         Item,
-        fields=("item_code", "item_name", "rate", "weight"),
-        filters={"item_code": ("in", response["successful"])},
+        field=("item_code", "item_name", "rate", "weight"),
+        filter={"item_code": ("in", response["successful"])},
     )

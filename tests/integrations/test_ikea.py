@@ -287,7 +287,7 @@ def test_get_purchase_info_raises(
 
 def test_make_item_category_not_exists(parsed_item: ParsedItem):
     _make_item_category(parsed_item.category_name, parsed_item.category_url)
-    categories = get_all(ItemCategory, ("category_name", "url"))
+    categories = get_all(ItemCategory, field=("category_name", "url"))
     assert categories[0].category_name == parsed_item.category_name
     assert categories[0].url == parsed_item.category_url
 
@@ -297,23 +297,23 @@ def test_make_item_category_exists(parsed_item: ParsedItem):
     _make_item_category(
         parsed_item.category_name, "https://www.ikea.com/ru/ru/cat/-43638"
     )
-    categories = get_all(ItemCategory, "url")
+    categories = get_all(ItemCategory, field="url")
     assert categories[0].url == parsed_item.category_url
 
 
 def test_make_item_category_no_name(parsed_item: ParsedItem):
     _make_item_category(None, parsed_item.category_url)
-    categories = get_all(ItemCategory, "url")
+    categories = get_all(ItemCategory, field="url")
     assert len(categories) == 0
 
 
 def test_make_items_from_child_items_if_not_exist(parsed_item: ParsedItem):
     _make_items_from_child_items_if_not_exist(parsed_item)
-    items_in_db = {item.item_code for item in get_all(Item, "item_code")}
+    items_in_db = {item.item_code for item in get_all(Item, field="item_code")}
     assert len({i.item_code for i in parsed_item.child_items} ^ items_in_db) == 0
 
     _make_items_from_child_items_if_not_exist(parsed_item)  # test if not exists block
-    items_in_db = {item.item_code for item in get_all(Item, "item_code")}
+    items_in_db = {item.item_code for item in get_all(Item, field="item_code")}
     assert len({i.item_code for i in parsed_item.child_items} ^ items_in_db) == 0
 
 

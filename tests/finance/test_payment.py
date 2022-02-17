@@ -56,8 +56,8 @@ def test_resolve_cash_or_bank(
 def get_gl_entries(doc: Payment | SalesOrder):
     return get_all(
         GLEntry,
-        fields=("account", "debit", "credit"),
-        filters={"voucher_type": doc.doctype, "voucher_no": doc.name},
+        field=("account", "debit", "credit"),
+        filter={"voucher_type": doc.doctype, "voucher_no": doc.name},
     )
 
 

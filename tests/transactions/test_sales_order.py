@@ -491,8 +491,8 @@ def test_make_stock_entries_for_from_available_stock_available_purchased(
     sales_order._make_stock_entries_for_from_available_stock()
 
     exp_counter = count_qty(sales_order.get_items_with_splitted_combinations())
-    for e in get_all(StockEntry):
-        entry = get_doc(StockEntry, e.name)
+    for name in get_all(StockEntry, pluck="name"):
+        entry = get_doc(StockEntry, name)
         assert entry.stock_type in ("Available Purchased", "Reserved Purchased")
         if entry.stock_type == "Available Purchased":
             for item in entry.items:
@@ -511,8 +511,8 @@ def test_make_stock_entries_for_from_available_stock_available_actual(
     sales_order._make_stock_entries_for_from_available_stock()
 
     exp_counter = count_qty(sales_order.get_items_with_splitted_combinations())
-    for e in get_all(StockEntry):
-        entry = get_doc(StockEntry, e.name)
+    for name in get_all(StockEntry, pluck="name"):
+        entry = get_doc(StockEntry, name)
         assert entry.stock_type in ("Available Actual", "Reserved Actual")
         if entry.stock_type == "Available Actual":
             for item in entry.items:
@@ -705,8 +705,11 @@ def test_sales_order_on_cancel(sales_order: SalesOrder):
     for doctype in (Payment, Receipt):
         docs = get_all(
             doctype,
-            {"voucher_type": sales_order.doctype, "voucher_no": sales_order.name},
-            "docstatus",
+            field="docstatus",
+            filter={
+                "voucher_type": sales_order.doctype,
+                "voucher_no": sales_order.name,
+            },
         )
         assert all(doc.docstatus == 2 for doc in docs)
 
@@ -725,7 +728,7 @@ def test_add_payment_passes(sales_order: SalesOrder):
     sales_order.add_payment(100, True)
     payments = get_all(
         Payment,
-        {"voucher_type": sales_order.doctype, "voucher_no": sales_order.name},
+        filter={"voucher_type": sales_order.doctype, "voucher_no": sales_order.name},
     )
     assert len(payments) == 1
 
@@ -751,7 +754,7 @@ def test_add_receipt_passes(sales_order: SalesOrder):
     sales_order.add_receipt()
     receipts = get_all(
         Receipt,
-        {"voucher_type": sales_order.doctype, "voucher_no": sales_order.name},
+        filter={"voucher_type": sales_order.doctype, "voucher_no": sales_order.name},
     )
     assert len(receipts) == 1
     assert sales_order.delivery_status == "Delivered"
@@ -769,8 +772,8 @@ def test_split_combinations(sales_order: SalesOrder, save: bool):
 
     child_items = get_all(
         ChildItem,
-        fields=("item_code", "qty"),
-        filters={"parent": splitted_combination.item_code},
+        field=("item_code", "qty"),
+        filter={"parent": splitted_combination.item_code},
     )
     exp_item_codes_to_qty = count_qty(child_items)
     for i in exp_item_codes_to_qty:

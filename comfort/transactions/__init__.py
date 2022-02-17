@@ -75,8 +75,8 @@ class Return(TypedDocument):
 
         items_with_missing_fields = get_all(
             Item,
-            fields=("item_code", "item_name", "rate"),
-            filters={
+            field=("item_code", "item_name", "rate"),
+            filter={
                 "item_code": ("in", (i.item_code for i in items if not i.get("rate")))
             },
         )

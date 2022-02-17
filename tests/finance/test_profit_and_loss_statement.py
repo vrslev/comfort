@@ -21,7 +21,7 @@ from tests.finance.test_general_ledger import insert_gl_entries_with_wrong_condi
 
 @pytest.mark.usefixtures("accounts")
 def test_get_parent_children_accounts_map():
-    accounts = get_all(Account, ("name", "parent_account"))
+    accounts = get_all(Account, field=("name", "parent_account"))
     to_remove: list[Account] = []
     for account in accounts:
         if account.parent_account is None and account.name not in (

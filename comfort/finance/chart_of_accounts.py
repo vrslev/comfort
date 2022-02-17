@@ -64,6 +64,6 @@ def _set_default_accounts():
 
 
 def initialize_accounts():
-    if not get_all(Account, limit_page_length=1):
+    if not get_all(Account, limit=1):
         _create_accounts_from_schema()
     _set_default_accounts()

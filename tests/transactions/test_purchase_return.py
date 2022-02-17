@@ -133,7 +133,7 @@ def test_make_sales_returns_creation(
     sales_order.reload()
     orders_to_items = purchase_return._allocate_items()
     purchase_return._make_sales_returns(orders_to_items)
-    sales_returns = get_all(SalesReturn, fields=("name", "sales_order"))
+    sales_returns = get_all(SalesReturn, field=("name", "sales_order"))
     grouped_sales_returns = group_by_attr(sales_returns, attr="sales_order")
 
     assert (
@@ -322,8 +322,8 @@ def test_purchase_return_make_gl_entries_create(
 
     entries = get_all(
         GLEntry,
-        fields=("account", "debit", "credit"),
-        filters={
+        field=("account", "debit", "credit"),
+        filter={
             "voucher_type": purchase_return.doctype,
             "voucher_no": purchase_return.name,
         },
@@ -430,5 +430,5 @@ def test_purchase_return_on_cancel_linked_docs_cancelled(
     purchase_return.on_cancel()
 
     for doctype in (SalesReturn, GLEntry, StockEntry):
-        docs = get_all(doctype, "docstatus")
+        docs = get_all(doctype, field="docstatus")
         assert all(doc.docstatus == 2 for doc in docs)

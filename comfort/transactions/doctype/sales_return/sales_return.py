@@ -134,8 +134,8 @@ class SalesReturn(Return):
     ):
         items_with_weight = get_all(
             Item,
-            fields=("item_code", "weight"),
-            filters={"item_code": ("in", (i.item_code for i in items if not i.weight))},
+            field=("item_code", "weight"),
+            filter={"item_code": ("in", (i.item_code for i in items if not i.weight))},
         )
         grouped_items = group_by_attr(items_with_weight)
         for item in items:

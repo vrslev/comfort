@@ -9,8 +9,8 @@ from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
 def _get_purchased_sales_orders_amount() -> int:
     sales_orders = get_all(
         SalesOrder,
-        fields="(items_cost - paid_amount) as diff",
-        filters={
+        field="(items_cost - paid_amount) as diff",
+        filter={
             "payment_status": ("in", ("Unpaid", "Partially Paid", "Overpaid")),
             "delivery_status": ("in", ("Purchased", "To Deliver")),
         },
@@ -21,8 +21,8 @@ def _get_purchased_sales_orders_amount() -> int:
 def _get_not_purchased_sales_orders_amount():
     sales_orders = get_all(
         SalesOrder,
-        fields="SUM(paid_amount) as paid_amount",
-        filters={
+        field="SUM(paid_amount) as paid_amount",
+        filter={
             "payment_status": ("in", ("Partially Paid", "Paid", "Overpaid")),
             "delivery_status": (
                 "in",
@@ -45,8 +45,8 @@ def _get_items_to_sell_amount():
 
     items_with_rates = get_all(
         Item,
-        fields=("item_code", "rate"),
-        filters={"item_code": ("in", counter.keys())},
+        field=("item_code", "rate"),
+        filter={"item_code": ("in", counter.keys())},
     )
     grouped_items = group_by_attr(items_with_rates)
 

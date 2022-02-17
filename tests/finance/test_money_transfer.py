@@ -33,8 +33,8 @@ def test_money_transfer_before_submit(money_transfer: MoneyTransfer):
     money_transfer.before_submit()
     gl_entries = get_all(
         GLEntry,
-        fields=("account", "debit", "credit"),
-        filters={
+        field=("account", "debit", "credit"),
+        filter={
             "voucher_type": money_transfer.doctype,
             "voucher_no": money_transfer.name,
         },

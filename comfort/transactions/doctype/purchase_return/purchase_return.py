@@ -136,8 +136,8 @@ class PurchaseReturn(Return):
 
         items_with_missing_fields = get_all(
             Item,
-            fields=("item_code", "item_name", "rate", "weight"),
-            filters={"item_code": ("in", (i.item_code for i in items if include(i)))},
+            field=("item_code", "item_name", "rate", "weight"),
+            filter={"item_code": ("in", (i.item_code for i in items if include(i)))},
         )
         grouped_items = group_by_attr(items_with_missing_fields)
         for item in items:
@@ -219,7 +219,7 @@ class PurchaseReturn(Return):
                 )
             )
 
-        sales_returns = get_all(SalesReturn, {"from_purchase_return": self.name})
+        sales_returns = get_all(SalesReturn, filter={"from_purchase_return": self.name})
         for return_ in sales_returns:
             doc = get_doc(SalesReturn, return_.name)
             doc.flags.from_purchase_return = True

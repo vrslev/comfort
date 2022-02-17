@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 from collections import Counter, defaultdict
-from typing import Any, Iterable, TypeVar
+from typing import Any, Iterable, TypeVar, cast, overload
 
 import frappe
 import frappe.auth
@@ -145,8 +145,65 @@ def get_doc(cls: type[_T_doc], *args: Any, **kwargs: Any) -> _T_doc:
     return frappe.get_doc(doctype, *args, **kwargs)  # type: ignore
 
 
-def get_all(cls: type[_T_doc], *args: Any, **kwargs: Any) -> list[_T_doc]:
-    return frappe.get_all(_resolve_doctype_from_class(cls), *args, **kwargs)  # type: ignore
+@overload
+def get_all(
+    cls: type[_T_doc],
+    *,
+    pluck: None,
+    field: str | tuple[str, ...] | None = None,
+    filter: dict[str, Any] | tuple[tuple[Any, ...], ...] | None = None,
+    limit: int | None = None,
+    order_by: str | None = None,
+) -> list[_T_doc]:
+    ...
+
+
+@overload
+def get_all(
+    cls: type[_T_doc],
+    *,
+    pluck: None = None,
+    field: str | tuple[str, ...] | None = None,
+    filter: dict[str, Any] | tuple[tuple[Any, ...], ...] | None = None,
+    limit: int | None = None,
+    order_by: str | None = None,
+) -> list[_T_doc]:
+    ...
+
+
+@overload
+def get_all(
+    cls: type[_T_doc],
+    *,
+    pluck: str,
+    field: str | tuple[str, ...] | None = None,
+    filter: dict[str, Any] | tuple[tuple[Any, ...], ...] | None = None,
+    limit: int | None = None,
+    order_by: str | None = None,
+) -> list[Any]:
+    ...
+
+
+def get_all(
+    cls: type[_T_doc],
+    *,
+    pluck: str | None = None,
+    field: str | tuple[str, ...] | None = None,
+    filter: dict[str, Any] | tuple[tuple[Any, ...], ...] | None = None,
+    limit: int | None = None,
+    order_by: str | None = None,
+) -> list[_T_doc]:
+    return cast(
+        list[_T_doc],
+        frappe.get_all(
+            _resolve_doctype_from_class(cls),
+            fields=field,
+            filters=filter,
+            pluck=pluck,
+            limit_page_length=limit,
+            order_by=order_by,
+        ),
+    )
 
 
 def get_value(

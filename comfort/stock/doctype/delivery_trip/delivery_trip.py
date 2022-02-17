@@ -48,8 +48,8 @@ class DeliveryTrip(TypedDocument):
     def _validate_delivery_statuses_in_orders(self):
         orders = get_all(
             SalesOrder,
-            fields=("name", "delivery_status"),
-            filters={"name": ("in", (s.sales_order for s in self.stops))},
+            field=("name", "delivery_status"),
+            filter={"name": ("in", (s.sales_order for s in self.stops))},
         )
         for order in orders:
             if order.delivery_status == "To Deliver":
@@ -65,8 +65,8 @@ class DeliveryTrip(TypedDocument):
         grouped_orders_with_customer = group_by_attr(
             data=get_all(
                 SalesOrder,
-                fields=("name", "customer", "pending_amount"),
-                filters={"name": ("in", order_names)},
+                field=("name", "customer", "pending_amount"),
+                filter={"name": ("in", order_names)},
             ),
             attr="name",
         )
@@ -80,16 +80,16 @@ class DeliveryTrip(TypedDocument):
         grouped_services = group_by_attr(
             data=get_all(
                 SalesOrderService,
-                fields=("parent", "type"),
-                filters={"parent": ("in", order_names)},
+                field=("parent", "type"),
+                filter={"parent": ("in", order_names)},
             ),
             attr="parent",
         )
         grouped_customers = group_by_attr(
             data=get_all(
                 Customer,
-                fields=("name", "address", "city", "phone"),
-                filters={"name": ("in", (s.customer for s in self.stops))},
+                field=("name", "address", "city", "phone"),
+                filter={"name": ("in", (s.customer for s in self.stops))},
             ),
             attr="name",
         )
@@ -110,8 +110,8 @@ class DeliveryTrip(TypedDocument):
     def _get_weight(self):
         v: list[Any] = get_all(
             SalesOrder,
-            fields="SUM(total_weight) as weight",
-            filters={"name": ("in", (s.sales_order for s in self.stops))},
+            field="SUM(total_weight) as weight",
+            filter={"name": ("in", (s.sales_order for s in self.stops))},
         )
         self.weight = v[0].weight
 
@@ -168,19 +168,16 @@ class DeliveryTrip(TypedDocument):
         return context
 
     def _add_receipts_to_sales_orders(self):
-        orders_have_receipt: list[str] = [
-            r.voucher_no
-            for r in get_all(
-                Receipt,
-                fields="voucher_no",
-                filters={
-                    "voucher_type": "Sales Order",
-                    "voucher_no": ("in", (s.sales_order for s in self.stops)),
-                    "docstatus": 1,
-                },
-            )
-        ]
-
+        orders_have_receipt: list[str] = get_all(
+            Receipt,
+            pluck="voucher_no",
+            field="voucher_no",
+            filter={
+                "voucher_type": "Sales Order",
+                "voucher_no": ("in", (s.sales_order for s in self.stops)),
+                "docstatus": 1,
+            },
+        )
         for stop in self.stops:
             if stop.sales_order not in orders_have_receipt:
                 doc = get_doc(SalesOrder, stop.sales_order)
@@ -234,6 +231,6 @@ def _get_delivery_and_installation_from_services(services: list[SalesOrderServic
 @frappe.whitelist()
 def get_delivery_and_installation_for_order(sales_order_name: str):
     services = get_all(
-        SalesOrderService, fields="type", filters={"parent": sales_order_name}
+        SalesOrderService, field="type", filter={"parent": sales_order_name}
     )
     return _get_delivery_and_installation_from_services(services)

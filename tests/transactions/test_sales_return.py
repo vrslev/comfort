@@ -272,8 +272,8 @@ def test_sales_return_make_delivery_gl_entries_create(sales_return: SalesReturn)
     amount = prev_items_cost - new_items_cost
     entries = get_all(
         GLEntry,
-        fields=("account", "debit", "credit"),
-        filters={
+        field=("account", "debit", "credit"),
+        filter={
             "voucher_type": sales_return.doctype,
             "voucher_no": sales_return.name,
         },
@@ -315,16 +315,15 @@ def test_sales_return_make_stock_entries_create(
     sales_return.db_insert()
     sales_return._make_stock_entries()
 
-    entry_names = [
-        e.name
-        for e in get_all(
-            StockEntry,
-            {
-                "voucher_type": sales_return.doctype,
-                "voucher_no": sales_return.name,
-            },
-        )
-    ]
+    entry_names = get_all(
+        StockEntry,
+        pluck="name",
+        filter={
+            "voucher_type": sales_return.doctype,
+            "voucher_no": sales_return.name,
+        },
+    )
+
     assert len(entry_names) == 2
     return_counter = count_qty(sales_return.items)
     entry_with_first_type, entry_with_second_type = False, False
@@ -369,8 +368,8 @@ def test_sales_return_make_payment_gl_entries_create(
     sales_return._make_payment_gl_entries()
     entries = get_all(
         GLEntry,
-        fields=("account", "debit", "credit"),
-        filters={"voucher_type": sales_return.doctype, "voucher_no": sales_return.name},
+        field=("account", "debit", "credit"),
+        filter={"voucher_type": sales_return.doctype, "voucher_no": sales_return.name},
     )
     cash_account = get_account("cash")
     bank_account = get_account("bank")
@@ -462,5 +461,5 @@ def test_sales_return_on_cancel_linked_docs_cancelled(sales_return: SalesReturn)
 
     sales_return.on_cancel()
     for doctype in (GLEntry, StockEntry):
-        docs = get_all(doctype, "docstatus")
+        docs = get_all(doctype, field="docstatus")
         assert all(doc.docstatus == 2 for doc in docs)

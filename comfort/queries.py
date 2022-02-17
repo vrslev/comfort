@@ -138,14 +138,15 @@ def purchase_order_sales_order_query(
     page_len: str,
     filters: dict[str, Any],
 ):
-    ignore_orders: list[str] | str = [
-        s.sales_order_name
-        for s in get_all(
+    ignore_orders: list[str] | str = (
+        get_all(
             PurchaseOrderSalesOrder,
-            "sales_order_name",
-            {"parent": ("!=", filters["docname"]), "docstatus": ("!=", 2)},
+            pluck="sales_order_name",
+            field="sales_order_name",
+            filter={"parent": ("!=", filters["docname"]), "docstatus": ("!=", 2)},
         )
-    ] + filters["not in"]
+        + filters["not in"]
+    )
 
     ignore_orders_cond = ""
     if len(ignore_orders) > 0:
@@ -199,8 +200,8 @@ def sales_order_item_query(
     elif from_available_stock == "Available Purchased":
         items_to_sell = get_all(
             PurchaseOrderItemToSell,
-            fields="item_code",
-            filters={"parent": ("in", from_purchase_order)},
+            field="item_code",
+            filter={"parent": ("in", from_purchase_order)},
         )
         acceptable_item_codes = (d.item_code for d in items_to_sell)
 

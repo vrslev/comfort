@@ -74,7 +74,7 @@ class _GLEntryForReport(GLEntry):
 def get_data(filters: dict[str, str]) -> list[_GLEntryForReport]:
     return get_all(  # type: ignore
         GLEntry,
-        fields=(
+        field=(
             "name as gl_entry",
             "creation as date",
             "account",
@@ -84,7 +84,7 @@ def get_data(filters: dict[str, str]) -> list[_GLEntryForReport]:
             "credit",
             "(debit - credit) as balance",
         ),
-        filters=(
+        filter=(
             ("docstatus", "!=", 2),
             ("creation", "between", (filters["from_date"], filters["to_date"])),
         ),

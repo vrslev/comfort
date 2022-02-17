@@ -25,7 +25,7 @@ columns = [
 
 
 def _get_parent_children_accounts_map() -> dict[str | None, list[AccountWithTotal]]:
-    accounts: list[AccountWithTotal] = get_all(Account, ("name", "parent_account"))  # type: ignore
+    accounts: list[AccountWithTotal] = get_all(Account, field=("name", "parent_account"))  # type: ignore
     acceptable_parents = ("Income", "Expense")
     to_remove: list[AccountWithTotal] = []
     for account in accounts:

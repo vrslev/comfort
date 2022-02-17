@@ -50,7 +50,7 @@ def cancel_gl_entries_for(
 ):
     for entry in get_all(
         GLEntry,
-        {"voucher_type": doctype, "voucher_no": name, "docstatus": ("!=", 2)},
+        filter={"voucher_type": doctype, "voucher_no": name, "docstatus": ("!=", 2)},
     ):
         get_doc(GLEntry, entry.name).cancel()
 

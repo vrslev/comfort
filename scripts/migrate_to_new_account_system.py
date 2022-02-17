@@ -61,7 +61,7 @@ def set_prepaid_sales_default_account():
 
 def sales_return():
     for entry in get_all(
-        GLEntry, filters={"voucher_type": "Sales Return", "account": "Sales"}
+        GLEntry, filter={"voucher_type": "Sales Return", "account": "Sales"}
     ):
         doc = get_doc(GLEntry, entry.name)
         doc.account = "Prepaid Sales"
@@ -69,10 +69,10 @@ def sales_return():
 
 
 def payment_sales():
-    payments = get_all(Payment, filters={"voucher_type": "Sales Order", "docstatus": 1})
+    payments = get_all(Payment, filter={"voucher_type": "Sales Order", "docstatus": 1})
     for payment in payments:
         entries = get_all(
-            GLEntry, filters={"voucher_type": "Payment", "voucher_no": payment.name}
+            GLEntry, filter={"voucher_type": "Payment", "voucher_no": payment.name}
         )
         for entry in entries:
             entry_doc = get_doc(GLEntry, entry.name)
@@ -85,10 +85,10 @@ def payment_sales():
 
 
 def receipt_sales():
-    receipts = get_all(Receipt, filters={"voucher_type": "Sales Order", "docstatus": 1})
+    receipts = get_all(Receipt, filter={"voucher_type": "Sales Order", "docstatus": 1})
     for receipt in receipts:
         entries = get_all(
-            GLEntry, filters={"voucher_type": "Receipt", "voucher_no": receipt.name}
+            GLEntry, filter={"voucher_type": "Receipt", "voucher_no": receipt.name}
         )
         for entry in entries:
             entry_doc = get_doc(GLEntry, entry.name)
@@ -107,8 +107,8 @@ def remove_costs_of_goods_sold():
 
 
 def check_if_statuses_changed():
-    for sales_order in get_all(SalesOrder, filters={"docstatus": 1}):
-        doc = get_doc(SalesOrder, sales_order.name)
+    for name in get_all(SalesOrder, pluck="name", filter={"docstatus": 1}):
+        doc = get_doc(SalesOrder, name)
         values_before = deepcopy(
             (
                 doc.paid_amount,

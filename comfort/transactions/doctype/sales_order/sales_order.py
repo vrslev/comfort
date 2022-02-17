@@ -146,7 +146,7 @@ class SalesOrder(TypedDocument):
         payload = {"voucher_type": self.doctype, "voucher_no": self.name}
 
         for doctype in Payment, Receipt:
-            for doc in get_all(doctype, filters=payload, fields=("name", "docstatus")):
+            for doc in get_all(doctype, filter=payload, field=("name", "docstatus")):
                 if doc.docstatus != 2:
                     get_doc(doctype, doc.name).cancel()
 
@@ -181,8 +181,8 @@ class SalesOrder(TypedDocument):
 
         child_items = get_all(
             ChildItem,
-            fields=("parent as parent_item_code", "item_code", "item_name", "qty"),
-            filters={"parent": ("in", (i.item_code for i in self.items))},
+            field=("parent as parent_item_code", "item_code", "item_name", "qty"),
+            filter={"parent": ("in", (i.item_code for i in self.items))},
         )
 
         item_codes_to_qty = count_qty(self.items)
@@ -373,19 +373,14 @@ class SalesOrder(TypedDocument):
         create_stock_entry(ref_doctype, ref_name, stock_types[1], items)  # type: ignore
 
     def _get_paid_amount(self):
-        payments = [
-            p.name
-            for p in get_all(
-                Payment, {"voucher_type": self.doctype, "voucher_no": self.name}
-            )
-        ]
-        returns: list[Any] = [
-            r.name
-            for r in frappe.get_all(  # type: ignore
-                "Sales Return", {"sales_order": self.name}
-            )
-        ]
-
+        payments = get_all(
+            Payment,
+            pluck="name",
+            filter={"voucher_type": self.doctype, "voucher_no": self.name},
+        )
+        returns: list[Any] = frappe.get_all(
+            "Sales Return", filters={"sales_order": self.name}, pluck="name"
+        )
         balances: list[tuple[int]] = frappe.get_all(
             "GL Entry",
             fields="SUM(debit - credit) as balance",
@@ -520,8 +515,8 @@ class SalesOrder(TypedDocument):
 
         child_items = get_all(
             ChildItem,
-            fields=("parent", "item_code", "qty"),
-            filters={"parent": ("in", parent_item_codes_to_qty.keys())},
+            field=("parent", "item_code", "qty"),
+            filter={"parent": ("in", parent_item_codes_to_qty.keys())},
         )
 
         for parent_item_code, items in group_by_attr(child_items, "parent").items():
@@ -739,11 +734,11 @@ def has_linked_delivery_trip(sales_order_name: str):
 
 
 @frappe.whitelist()
-def get_sales_orders_not_in_purchase_order():
+def get_sales_orders_not_in_purchase_order() -> list[str]:
     po_sales_orders = get_all(
         PurchaseOrderSalesOrder,
-        fields="sales_order_name",
-        filters={"docstatus": ("!=", 2)},
+        field="sales_order_name",
+        filter={"docstatus": ("!=", 2)},
     )
     filters = {
         "name": ("not in", (s.sales_order_name for s in po_sales_orders)),
@@ -751,7 +746,7 @@ def get_sales_orders_not_in_purchase_order():
         # Frappe makes Select fields with no value "" instead of None
         "from_available_stock": "",
     }
-    return [s.name for s in get_all(SalesOrder, filters=filters)]
+    return get_all(SalesOrder, pluck="name", filter=filters)
 
 
 @frappe.whitelist()
@@ -781,8 +776,8 @@ def purchase_order_filter_query(
 def get_sales_orders_in_purchase_order(purchase_order_name: str):
     po_sales_orders = get_all(
         PurchaseOrderSalesOrder,
-        fields="sales_order_name",
-        filters={"parent": ("in", purchase_order_name)},
+        field="sales_order_name",
+        filter={"parent": ("in", purchase_order_name)},
     )
     return [s.sales_order_name for s in po_sales_orders]
 
@@ -805,8 +800,8 @@ def validate_params_from_available_stock(
 
         items_to_sell = get_all(
             PurchaseOrderItemToSell,
-            fields="item_code",
-            filters={"parent": ("in", from_purchase_order)},
+            field="item_code",
+            filter={"parent": ("in", from_purchase_order)},
         )
         if not items_to_sell:
             raise ValidationError(_("Selected Purchase Order has no Items To Sell"))

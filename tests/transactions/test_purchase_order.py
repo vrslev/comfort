@@ -275,8 +275,8 @@ def test_calculate_total_margin_with_sales_order(purchase_order: PurchaseOrder):
         purchase_order.total_margin
         == get_all(
             SalesOrder,
-            filters={"name": purchase_order.sales_orders[0].sales_order_name},
-            fields="SUM(margin) as margin",
+            filter={"name": purchase_order.sales_orders[0].sales_order_name},
+            field="SUM(margin) as margin",
         )[0].margin
     )
 
@@ -354,8 +354,8 @@ def test_get_items_in_sales_orders_with_cancelled_items(
 def test_get_items_in_sales_orders_no_split_combinations(purchase_order: PurchaseOrder):
     exp_items = get_all(
         SalesOrderItem,
-        fields=("item_code", "qty"),
-        filters={
+        field=("item_code", "qty"),
+        filter={
             "parent": (
                 "in",
                 (o.sales_order_name for o in purchase_order.sales_orders),
@@ -370,13 +370,13 @@ def test_get_items_in_sales_orders_split_combinations(purchase_order: PurchaseOr
     sales_order_names = [o.sales_order_name for o in purchase_order.sales_orders]
     so_items = get_all(
         SalesOrderItem,
-        fields=("item_code", "qty"),
-        filters={"parent": ("in", sales_order_names)},
+        field=("item_code", "qty"),
+        filter={"parent": ("in", sales_order_names)},
     )
     child_items = get_all(
         SalesOrderChildItem,
-        fields=("parent_item_code", "item_code", "qty"),
-        filters={"parent": ("in", sales_order_names)},
+        field=("parent_item_code", "item_code", "qty"),
+        filter={"parent": ("in", sales_order_names)},
     )
     parents = [i.parent_item_code for i in child_items]
     exp_items: list[SalesOrderItem | SalesOrderChildItem] = list(child_items)

@@ -9,7 +9,7 @@ def test_checkout_before_submit(checkout: Checkout, purchase_order: PurchaseOrde
 
     entry_names = get_all(
         StockEntry,
-        filters={
+        filter={
             "voucher_type": purchase_order.doctype,
             "voucher_no": purchase_order.name,
         },

@@ -60,7 +60,7 @@ def cancel_stock_entries_for(
 
     entries = get_all(
         StockEntry,
-        {"voucher_type": doctype, "voucher_no": name, "docstatus": ("!=", 2)},
+        filter={"voucher_type": doctype, "voucher_no": name, "docstatus": ("!=", 2)},
     )
     for entry in entries:
         get_doc(StockEntry, entry.name).cancel()
@@ -69,17 +69,15 @@ def cancel_stock_entries_for(
 def get_stock_balance(stock_type: StockTypes) -> dict[str, int]:
     from comfort.stock.doctype.stock_entry.stock_entry import StockEntry
 
-    stock_entries = (
-        entry.name
-        for entry in get_all(
-            StockEntry, {"docstatus": ("!=", 2), "stock_type": stock_type}
-        )
+    stock_entries = get_all(
+        StockEntry,
+        pluck="name",
+        filter={"docstatus": ("!=", 2), "stock_type": stock_type},
     )
-
     items = get_all(
         StockEntryItem,
-        fields=("item_code", "qty"),
-        filters={"parent": ("in", stock_entries)},
+        field=("item_code", "qty"),
+        filter={"parent": ("in", stock_entries)},
     )
 
     res: dict[str, int] = {}

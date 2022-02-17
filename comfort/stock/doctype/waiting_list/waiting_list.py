@@ -124,10 +124,10 @@ class WaitingList(TypedDocument):
     def _show_already_in_po_message(self):
         sales_orders_in_purchase_order = get_all(
             PurchaseOrderSalesOrder,
-            filters={
+            filter={
                 "sales_order_name": ("in", (o.sales_order for o in self.sales_orders))
             },
-            fields=("sales_order_name"),
+            field=("sales_order_name"),
         )
         if sales_orders_in_purchase_order:
             names = [o.sales_order_name for o in sales_orders_in_purchase_order]

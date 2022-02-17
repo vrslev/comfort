@@ -101,8 +101,8 @@ def test_receipt_create_sales_gl_entries(
     ]
     entries = get_all(
         GLEntry,
-        fields=("account", "debit", "credit"),
-        filters={
+        field=("account", "debit", "credit"),
+        filter={
             "voucher_type": receipt_sales.doctype,
             "voucher_no": receipt_sales.name,
         },
@@ -157,8 +157,8 @@ def test_create_purchase_gl_entries(
 
     entries = get_all(
         GLEntry,
-        fields=("account", "debit", "credit"),
-        filters={
+        field=("account", "debit", "credit"),
+        filter={
             "voucher_type": receipt_purchase.doctype,
             "voucher_no": receipt_purchase.name,
         },
@@ -173,7 +173,10 @@ def test_create_purchase_stock_entries_for_sales_orders(receipt_purchase: Receip
 
     entries = get_all(
         StockEntry,
-        {"voucher_type": receipt_purchase.doctype, "voucher_no": receipt_purchase.name},
+        filter={
+            "voucher_type": receipt_purchase.doctype,
+            "voucher_no": receipt_purchase.name,
+        },
     )
     for entry in entries:
         entry = get_doc(StockEntry, entry.name)
@@ -212,7 +215,7 @@ def test_create_purchase_stock_entries_for_items_to_sell_executed(
 
     entries = get_all(
         StockEntry,
-        {
+        filter={
             "voucher_type": receipt_purchase.doctype,
             "voucher_no": receipt_purchase.name,
         },

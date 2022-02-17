@@ -122,7 +122,7 @@ def _update_customer_from_vk_user(customer: Customer, user: User):
 
 
 def update_all_customers_from_vk():
-    customers = get_all(Customer, fields=("name", "vk_id"))
+    customers = get_all(Customer, field=("name", "vk_id"))
     users = _get_vk_users_for_customers(customers)
     for customer_values in customers:
         if customer_values.vk_id not in users:

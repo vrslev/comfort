@@ -39,8 +39,8 @@ def test_create_gl_entry(payment_sales: Payment):
     create_gl_entry(payment_sales.doctype, payment_sales.name, account, debit, credit)
     entries = get_all(
         GLEntry,
-        fields=("docstatus", "account", "debit", "credit"),
-        filters={
+        field=("docstatus", "account", "debit", "credit"),
+        filter={
             "voucher_type": payment_sales.doctype,
             "voucher_no": payment_sales.name,
         },
@@ -80,8 +80,8 @@ def test_create_payment(sales_order: SalesOrder):
 
     payments = get_all(
         Payment,
-        fields=("amount", "paid_with_cash"),
-        filters={
+        field=("amount", "paid_with_cash"),
+        filter={
             "voucher_type": sales_order.doctype,
             "voucher_no": sales_order.name,
         },
