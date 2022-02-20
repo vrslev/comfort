@@ -31,7 +31,7 @@ from comfort.entities.doctype.child_item.child_item import ChildItem
 from comfort.entities.doctype.item.item import Item
 from comfort.finance import create_payment, get_account
 from comfort.finance.doctype.payment.payment import Payment
-from comfort.integrations.ikea import fetch_items, get_delivery_services
+from comfort.integrations._ikea import fetch_items, get_delivery_services
 from comfort.stock import create_receipt, create_stock_entry, get_stock_balance
 from comfort.stock.doctype.receipt.receipt import Receipt
 from comfort.transactions import delete_empty_items, merge_same_items

@@ -12,8 +12,8 @@ site_name = "Site Name"
 
 import frappe
 from comfort import new_doc
+from comfort.integrations._ikea import fetch_items
 from comfort.integrations.browser_ext import _create_customer
-from comfort.integrations.ikea import fetch_items
 from comfort.transactions.doctype.purchase_order.purchase_order import PurchaseOrder
 from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
 

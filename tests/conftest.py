@@ -20,8 +20,6 @@ from types import SimpleNamespace
 from typing import Any
 from unittest.mock import MagicMock
 
-import ikea_api._endpoints.auth
-import ikea_api.wrappers
 import pytest
 from ikea_api.wrappers.types import (
     ChildItem,
@@ -35,6 +33,7 @@ from ikea_api.wrappers.types import (
 from pymysql import OperationalError
 
 import comfort.entities.doctype.customer.customer
+import comfort.integrations.ikea
 from comfort import TypedDocument, doc_exists, get_doc
 from comfort.comfort_core.doctype.commission_settings.commission_settings import (
     CommissionSettings,
@@ -471,11 +470,11 @@ mock_purchase_info = PurchaseInfo(
 
 
 def patch_get_delivery_services(monkeypatch: pytest.MonkeyPatch):
-    def mock_get_delivery_services(api: Any, *, items: Any, zip_code: Any):
+    def mock_get_delivery_services(items: Any):
         return mock_delivery_services
 
     monkeypatch.setattr(
-        ikea_api.wrappers, "get_delivery_services", mock_get_delivery_services
+        comfort.integrations.ikea, "_get_delivery_services", mock_get_delivery_services
     )
 
 
@@ -541,7 +540,9 @@ mock_token = "some_mock_token"  # nosec
 
 @pytest.fixture
 def ikea_settings(monkeypatch: pytest.MonkeyPatch):
-    monkeypatch.setattr(ikea_api._endpoints.auth, "get_guest_token", lambda: mock_token)
+    monkeypatch.setattr(
+        comfort.integrations.ikea, "_get_guest_token", lambda: mock_token
+    )
     doc = get_doc(IkeaSettings)
     doc.authorized_token = mock_token
     doc.authorized_token_expiration = timegm(

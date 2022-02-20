@@ -2,9 +2,10 @@ from __future__ import annotations
 
 import re
 from typing import Any
+from unittest.mock import Mock
 
-from ikea_api._api import API
-
+# from ikea_api._api import API
+API = Mock()
 import frappe
 
 

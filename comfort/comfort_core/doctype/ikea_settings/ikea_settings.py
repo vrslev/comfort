@@ -1,15 +1,8 @@
 from __future__ import annotations
 
-from calendar import timegm
-from datetime import datetime, timezone
+from datetime import datetime
 
-import ikea_api._endpoints.auth
-from ikea_api import IKEA
-from jwt import PyJWT
-from jwt.exceptions import ExpiredSignatureError
-
-from comfort import TypedDocument, ValidationError, _, get_cached_doc
-from frappe.utils import add_to_date, get_datetime, now_datetime
+from comfort import TypedDocument
 
 
 class IkeaSettings(TypedDocument):
@@ -21,41 +14,3 @@ class IkeaSettings(TypedDocument):
 
     def on_change(self):
         self.clear_cache()
-
-
-def convert_to_datetime(datetime_str: datetime | str) -> datetime:
-    return get_datetime(datetime_str)  # type: ignore
-
-
-def get_guest_api():
-    doc = get_cached_doc(IkeaSettings)
-    if (
-        doc.guest_token is None
-        or doc.guest_token_expiration is None
-        or convert_to_datetime(doc.guest_token_expiration) <= now_datetime()
-    ):
-        doc.guest_token = ikea_api._endpoints.auth.get_guest_token()
-        doc.guest_token_expiration = add_to_date(None, days=30)
-        doc.save()
-
-    return IKEA(doc.guest_token)
-
-
-def _authorized_token_expired(exp: int):
-    now = timegm(datetime.now(tz=timezone.utc).utctimetuple())
-    try:
-        PyJWT()._validate_exp({"exp": exp}, now, 0)
-    except ExpiredSignatureError:
-        return True
-
-
-def get_authorized_api():
-    doc = get_cached_doc(IkeaSettings)
-    if (
-        doc.authorized_token is None
-        or doc.authorized_token_expiration is None
-        or _authorized_token_expired(doc.authorized_token_expiration)
-    ):
-        raise ValidationError(_("Update authorization info"))
-
-    return IKEA(doc.authorized_token)

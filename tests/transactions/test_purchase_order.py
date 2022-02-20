@@ -21,7 +21,7 @@ from comfort import (
     new_doc,
 )
 from comfort.entities.doctype.item.item import Item
-from comfort.integrations.ikea import FetchItemsResult, PurchaseInfoDict
+from comfort.integrations._ikea import FetchItemsResult, PurchaseInfoDict
 from comfort.transactions import AnyChildItem
 from comfort.transactions.doctype.purchase_order.purchase_order import (
     PurchaseOrder,
