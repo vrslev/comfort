@@ -50,8 +50,10 @@ jobs:
 
       - name: Install dependencies
         run: |
-          sudo apt-get install redis-server
-          pip install -U frappe-bench
+          sudo apt-get install redis-server &
+          pip install -U frappe-bench &
+
+          wait
 
       - name: Configure MariaDB
         run: |
@@ -90,7 +92,9 @@ jobs:
             --admin-password admin \
             --install-app comfort \
             --verbose
-
+      - name: Setup tmate session
+        if: always()
+        uses: mxschmitt/action-tmate@v3
       - name: Run tests
         run: |
           cd ~/frappe-bench
