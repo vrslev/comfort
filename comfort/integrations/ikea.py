@@ -45,6 +45,11 @@ __all__ = [
 
 
 @lru_cache
+def get_event_loop():
+    return asyncio.new_event_loop()
+
+
+@lru_cache
 def get_constants():
     return ikea_api.Constants(country="ru", language="ru")
 
@@ -119,7 +124,7 @@ def _get_delivery_services(items: dict[str, int]) -> types.GetDeliveryServicesRe
         items=items,
         zip_code=_get_zip_code(),
     )
-    return asyncio.run(coro)
+    return get_event_loop().run_until_complete(coro)
 
 
 def _validate_delivery_services_items(items: dict[str, int]):
@@ -301,7 +306,7 @@ def _create_item(parsed_item: types.ParsedItem):
 
 def _unshorten_urls_from_ingka_pagelinks(item_codes: str | list[str]) -> list[str]:
     coro = orig_unshorten_urls_from_ingka_pagelinks(str(item_codes))
-    return asyncio.run(coro)
+    return get_event_loop().run_until_complete(coro)
 
 
 def parse_item_codes(item_codes: str | list[str]) -> list[str]:
@@ -352,7 +357,7 @@ class FetchItemsResult(TypedDict):
 
 def _get_items(item_codes: list[str]) -> list[types.ParsedItem]:
     coro = ikea_api.get_items(constants=get_constants(), item_codes=item_codes)
-    return asyncio.run(coro)
+    return get_event_loop().run_until_complete(coro)
 
 
 def fetch_items(item_codes: str | list[str], force_update: bool):
