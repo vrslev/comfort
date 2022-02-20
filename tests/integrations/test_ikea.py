@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from calendar import timegm
 from copy import deepcopy
 from datetime import datetime, timedelta, timezone
