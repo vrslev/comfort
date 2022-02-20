@@ -21,7 +21,7 @@ from comfort import (
 )
 from comfort.entities.doctype.child_item.child_item import ChildItem
 from comfort.finance import create_payment
-from comfort.integrations._ikea import (
+from comfort.integrations.ikea import (
     PurchaseInfoDict,
     add_items_to_cart,
     fetch_items,

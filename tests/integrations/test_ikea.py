@@ -244,10 +244,6 @@ def test_get_purchase_info_ikeaapierror_504(monkeypatch: pytest.MonkeyPatch):
     exp_purchase_id = "111111110"
     count = 0
 
-    class MockGetPurchaseInfoResult:
-        def dict(self):
-            return "foo"
-
     def mock_get_purchase_info(purchase_id: str):
         assert purchase_id == exp_purchase_id
         nonlocal count
@@ -263,7 +259,7 @@ def test_get_purchase_info_ikeaapierror_504(monkeypatch: pytest.MonkeyPatch):
                 )
             )
         else:
-            return MockGetPurchaseInfoResult()
+            return "foo"
 
     monkeypatch.setattr(
         comfort.integrations.ikea, "_get_purchase_info", mock_get_purchase_info

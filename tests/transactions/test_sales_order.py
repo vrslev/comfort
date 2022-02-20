@@ -18,7 +18,7 @@ from comfort.entities.doctype.child_item.child_item import ChildItem
 from comfort.entities.doctype.item.item import Item
 from comfort.finance import create_payment
 from comfort.finance.doctype.payment.payment import Payment
-from comfort.integrations._ikea import FetchItemsResult
+from comfort.integrations.ikea import FetchItemsResult
 from comfort.stock.doctype.checkout.checkout import Checkout
 from comfort.stock.doctype.delivery_stop.delivery_stop import DeliveryStop
 from comfort.stock.doctype.receipt.receipt import Receipt

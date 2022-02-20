@@ -1,11 +1,12 @@
 import asyncio
 from calendar import timegm
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from functools import lru_cache
-from typing import TypedDict
+from typing import TypedDict, cast
 
 import ikea_api
 import sentry_sdk
+from ikea_api import format_item_code as format_item_code  # For jenv hook
 from ikea_api.utils import (
     unshorten_urls_from_ingka_pagelinks as orig_unshorten_urls_from_ingka_pagelinks,
 )
@@ -164,9 +165,21 @@ def get_purchase_history():
     return [p.dict() for p in _get_purchase_history()]
 
 
-def _get_purchase_info(purchase_id: str):
+class PurchaseInfoDict(TypedDict):
+    delivery_cost: float
+    total_cost: float
+    purchase_date: date | None
+    delivery_date: date | None
+
+
+def _get_purchase_info(purchase_id: str) -> PurchaseInfoDict:
     purchases = ikea_api.Purchases(constants=get_constants(), token=get_auth_token())
-    return ikea_api.get_purchase_info(purchases=purchases, order_number=purchase_id)
+    return cast(
+        PurchaseInfoDict,
+        ikea_api.get_purchase_info(
+            purchases=purchases, order_number=purchase_id
+        ).dict(),
+    )
 
 
 def _handle_purchase_info_error(exc: ikea_api.GraphQLError):
@@ -185,12 +198,13 @@ def _handle_purchase_info_error(exc: ikea_api.GraphQLError):
 def _retry_get_purchase_info(purchase_id: str):
     for _ in range(3):
         try:
-            return _get_purchase_info(purchase_id=purchase_id).dict()
+            return _get_purchase_info(purchase_id=purchase_id)
         except ikea_api.APIError as exc:
             if exc.response.status_code != 504:
                 raise
 
 
+@frappe.whitelist()
 def get_purchase_info(purchase_id: str):
     try:
         return _retry_get_purchase_info(purchase_id)
@@ -289,8 +303,13 @@ def _unshorten_urls_from_ingka_pagelinks(item_codes: str | list[str]) -> list[st
 
 
 def parse_item_codes(item_codes: str | list[str]) -> list[str]:
-    unshortened = _unshorten_urls_from_ingka_pagelinks(item_codes=item_codes)
-    return ikea_api.parse_item_codes(f"{item_codes} {unshortened}")
+    if isinstance(item_codes, str):
+        res = [item_codes]
+    else:
+        res = item_codes
+    unshortened = _unshorten_urls_from_ingka_pagelinks(res[0]) if res else []
+    res.extend(unshortened)
+    return ikea_api.parse_item_codes(res)
 
 
 def _get_items_to_fetch(item_codes: str | list[str], force_update: bool):

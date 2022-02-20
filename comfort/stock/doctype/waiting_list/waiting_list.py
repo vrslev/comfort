@@ -16,7 +16,7 @@ from comfort import (
     get_doc,
     group_by_attr,
 )
-from comfort.integrations._ikea import get_delivery_services
+from comfort.integrations.ikea import get_delivery_services
 from comfort.stock.doctype.waiting_list_sales_order.waiting_list_sales_order import (
     WaitingListSalesOrder,
 )
