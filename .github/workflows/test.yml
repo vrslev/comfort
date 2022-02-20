@@ -52,6 +52,7 @@ jobs:
         run: |
           sudo apt-get install redis-server &
           pip install -U frappe-bench &
+
           wait
 
       - name: Configure MariaDB
@@ -82,6 +83,7 @@ jobs:
         run: |
           cd ~/frappe-bench
           bench get-app $GITHUB_WORKSPACE --skip-assets
+          env/bin/pip install -U -e apps/comfort[dev]
           echo -ne "frappe\ncomfort" >sites/apps.txt
 
           bench new-site tests \
@@ -89,10 +91,7 @@ jobs:
             --no-mariadb-socket \
             --admin-password admin \
             --install-app comfort \
-            --verbose &
-          env/bin/pip install -U -e apps/comfort[dev] &
-
-          wait
+            --verbose
 
       - name: Run tests
         run: |

@@ -5,10 +5,10 @@ from copy import copy, deepcopy
 from datetime import datetime
 from typing import Any
 
-import ikea_api.wrappers
 import pytest
 from ikea_api.wrappers.types import GetDeliveryServicesResponse
 
+import comfort.integrations.ikea
 import comfort.transactions.doctype.purchase_order.purchase_order
 import frappe
 from comfort import (
@@ -413,11 +413,11 @@ def test_get_delivery_services_with_response(purchase_order: PurchaseOrder):
 def test_get_delivery_services_no_response(
     purchase_order: PurchaseOrder, monkeypatch: pytest.MonkeyPatch
 ):
-    def mock_get_delivery_services(api: Any, *, items: Any, zip_code: Any):
+    def mock_get_delivery_services(items: Any):
         return GetDeliveryServicesResponse(delivery_options=[], cannot_add=[])
 
     monkeypatch.setattr(
-        ikea_api.wrappers, "get_delivery_services", mock_get_delivery_services
+        comfort.integrations.ikea, "_get_delivery_services", mock_get_delivery_services
     )
 
     purchase_order.get_delivery_services()

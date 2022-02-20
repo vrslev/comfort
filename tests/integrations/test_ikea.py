@@ -1,25 +1,20 @@
 from __future__ import annotations
 
-import json
+from calendar import timegm
 from copy import deepcopy
+from datetime import datetime, timedelta, timezone
 from types import SimpleNamespace
 from typing import Any
 
-import ikea_api.wrappers
+import ikea_api
 import pytest
 import sentry_sdk
-from ikea_api import IKEA
-from ikea_api.exceptions import GraphQLError, IKEAAPIError
 from ikea_api.wrappers.types import GetDeliveryServicesResponse, ParsedItem
 
 import comfort.integrations.ikea
 import frappe
-from comfort import count_qty, counters_are_same, get_all, get_doc, get_value
-from comfort.comfort_core.doctype.ikea_settings.ikea_settings import (
-    IkeaSettings,
-    get_authorized_api,
-    get_guest_api,
-)
+from comfort import count_qty, counters_are_same, get_all, get_doc
+from comfort.comfort_core.doctype.ikea_settings.ikea_settings import IkeaSettings
 from comfort.entities.doctype.item.item import Item
 from comfort.entities.doctype.item_category.item_category import ItemCategory
 from comfort.integrations.ikea import (
@@ -32,17 +27,109 @@ from comfort.integrations.ikea import (
     _make_items_from_child_items_if_not_exist,
     add_items_to_cart,
     fetch_items,
+    get_auth_token,
     get_delivery_services,
+    get_guest_token,
     get_items,
     get_purchase_history,
     get_purchase_info,
 )
 from frappe.exceptions import ValidationError
+from frappe.utils import add_to_date, get_datetime
 from tests.conftest import (
     mock_delivery_services,
     mock_purchase_history,
+    mock_token,
     patch_get_delivery_services,
 )
+
+
+def is_same_date(first: Any, second: Any):
+    return first.replace(minute=0, second=0, microsecond=0) == second.replace(
+        minute=0, second=0, microsecond=0
+    )
+
+
+test_date = datetime(year=2021, month=10, day=13)
+
+
+_testdata = ("token", "expiration"), (
+    (None, None),
+    ("sometoken", None),
+    ("sometoken", datetime.now()),
+    (None, datetime.now()),
+)
+
+
+@pytest.mark.parametrize(*_testdata)
+def test_get_guest_token_update(
+    ikea_settings: IkeaSettings, token: str | None, expiration: datetime | None
+):
+    ikea_settings.guest_token = token
+    ikea_settings.guest_token_expiration = expiration
+    ikea_settings.save()
+    get_guest_token()
+    ikea_settings.reload()
+    assert ikea_settings.guest_token == mock_token
+    assert is_same_date(
+        get_datetime(ikea_settings.guest_token_expiration), add_to_date(None, days=30)
+    )
+
+
+def test_get_guest_token_no_update(ikea_settings: IkeaSettings):
+    new_token, new_expiration = "fff", add_to_date(None, days=25)
+    ikea_settings.guest_token = new_token
+    ikea_settings.guest_token_expiration = new_expiration
+    ikea_settings.save()
+    get_guest_token()
+    ikea_settings.reload()
+    assert ikea_settings.guest_token == new_token
+    assert is_same_date(
+        get_datetime(ikea_settings.guest_token_expiration), new_expiration
+    )
+
+
+@pytest.mark.usefixtures("ikea_settings")
+def test_get_guest_token_return():
+    assert get_guest_token() == mock_token
+
+
+@pytest.mark.parametrize(*_testdata)
+def test_get_authorized_api_update(
+    ikea_settings: IkeaSettings,
+    token: str | None,
+    expiration: datetime | None,
+):
+    ikea_settings.authorized_token = token
+    if expiration:
+        ikea_settings.authorized_token_expiration = timegm(
+            (expiration - timedelta(days=1)).astimezone(timezone.utc).utctimetuple()
+        )
+    else:
+        ikea_settings.authorized_token_expiration = None
+
+    ikea_settings.save()
+    with pytest.raises(ValidationError, match="Update authorization info"):
+        get_auth_token()
+
+
+def test_get_authorized_api_no_update(ikea_settings: IkeaSettings):
+    new_expiration = timegm(
+        (datetime.now(tz=timezone.utc) + timedelta(hours=1)).utctimetuple()
+    )
+    ikea_settings.authorized_token = mock_token
+    ikea_settings.authorized_token_expiration = new_expiration
+    ikea_settings.save()
+    frappe.clear_document_cache("Ikea Settings", "Ikea Settings")
+    get_auth_token()
+    ikea_settings.reload()
+    assert ikea_settings.authorized_token == mock_token
+    assert int(ikea_settings.authorized_token_expiration) == new_expiration
+
+
+@pytest.mark.usefixtures("ikea_settings")
+def test_get_authorized_api_return():
+    assert get_auth_token() == mock_token
 
 
 @pytest.mark.parametrize("v", ({}, {"11111111": 0, "22222222": 0}))
@@ -66,18 +153,15 @@ def test_get_delivery_services_ok(monkeypatch: pytest.MonkeyPatch):
     assert get_delivery_services({"14251253": 1}) == mock_delivery_services
 
 
-def test_get_delivery_services_no_delivery_options(
-    monkeypatch: pytest.MonkeyPatch, ikea_settings: IkeaSettings
-):
-    def new_mock_delivery_services(api: IKEA, *, items: Any, zip_code: Any):
-        assert api.token == get_guest_api().token
-        assert zip_code == ikea_settings.zip_code
+@pytest.mark.usefixtures("ikea_settings")
+def test_get_delivery_services_no_delivery_options(monkeypatch: pytest.MonkeyPatch):
+    def new_mock_delivery_services(items: Any):
         return GetDeliveryServicesResponse(delivery_options=[], cannot_add=[])
 
     frappe.message_log = []
 
     monkeypatch.setattr(
-        ikea_api.wrappers, "get_delivery_services", new_mock_delivery_services
+        comfort.integrations.ikea, "_get_delivery_services", new_mock_delivery_services
     )
 
     assert get_delivery_services({"14251253": 1}) is None
@@ -96,29 +180,31 @@ def test_get_delivery_services_some_delivery_options_available(
         cannot_add=[],
     )
 
-    def new_mock_delivery_services(api: IKEA, *, items: Any, zip_code: Any):
+    def new_mock_delivery_services(items: Any):
         return deepcopy(exp_res)
 
     frappe.message_log = []
 
     monkeypatch.setattr(
-        ikea_api.wrappers, "get_delivery_services", new_mock_delivery_services
+        comfort.integrations.ikea, "_get_delivery_services", new_mock_delivery_services
     )
 
     assert get_delivery_services({"14251253": 1}) == exp_res
     assert "No available delivery options" not in str(frappe.message_log)
 
 
-@pytest.mark.parametrize("authorize", (True, False))
+@pytest.mark.parametrize("authorize_", (True, False))
 @pytest.mark.usefixtures("ikea_settings")
-def test_add_items_to_cart_with_items(monkeypatch: pytest.MonkeyPatch, authorize: bool):
-    myapi = get_authorized_api() if authorize else get_guest_api()
+def test_add_items_to_cart_with_items(
+    monkeypatch: pytest.MonkeyPatch, authorize_: bool
+):
+    def mock_add_items_to_cart(items: Any, authorize: bool):
+        assert authorize == authorize_
 
-    def mock_add_items_to_cart(api: IKEA, *, items: Any):
-        assert api.token == myapi.token
-
-    monkeypatch.setattr(ikea_api.wrappers, "add_items_to_cart", mock_add_items_to_cart)
-    add_items_to_cart({"14251253": 1}, authorize)
+    monkeypatch.setattr(
+        comfort.integrations.ikea, "_add_items_to_cart", mock_add_items_to_cart
+    )
+    add_items_to_cart({"14251253": 1}, authorize_)
 
 
 @pytest.mark.usefixtures("ikea_settings")
@@ -129,57 +215,43 @@ def test_add_items_to_cart_no_items():
 
 @pytest.mark.usefixtures("ikea_settings")
 def test_get_purchase_history(monkeypatch: pytest.MonkeyPatch):
-    def mock_get_purchase_history(api: IKEA):
-        assert api.token == get_authorized_api().token
-        return mock_purchase_history
-
     monkeypatch.setattr(
-        ikea_api.wrappers, "get_purchase_history", mock_get_purchase_history
+        comfort.integrations.ikea,
+        "_get_purchase_history",
+        lambda: mock_purchase_history,
     )
     assert get_purchase_history() == mock_purchase_history
 
 
-@pytest.mark.parametrize("use_lite_id", (True, False))
 @pytest.mark.usefixtures("ikea_settings")
-def test_get_purchase_info_main(monkeypatch: pytest.MonkeyPatch, use_lite_id: bool):
-    exp_purchase_id = 111111110
+def test_get_purchase_info_main(monkeypatch: pytest.MonkeyPatch):
+    exp_purchase_id = "111111110"
 
     class MockGetPurchaseInfoResult:
         def dict(self):
             pass
 
-    def mock_get_purchase_info(api: IKEA, *, id: str, email: str):
-        assert api.token == get_authorized_api().token
-        assert id == str(exp_purchase_id)
-        if use_lite_id:
-            # TODO: Remove this block: IkeaSettings don't store username anymore
-            assert email == get_value("Ikea Settings", None, "username")
-        else:
-            assert email is None
+    def mock_get_purchase_info(purchase_id: str):
+        assert purchase_id == exp_purchase_id
         return MockGetPurchaseInfoResult()
 
-    monkeypatch.setattr(ikea_api.wrappers, "get_purchase_info", mock_get_purchase_info)
-    get_purchase_info(exp_purchase_id, use_lite_id)
+    monkeypatch.setattr(
+        comfort.integrations.ikea, "_get_purchase_info", mock_get_purchase_info
+    )
+    get_purchase_info(exp_purchase_id)
 
 
 @pytest.mark.usefixtures("ikea_settings")
 def test_get_purchase_info_ikeaapierror_504(monkeypatch: pytest.MonkeyPatch):
-    exp_purchase_id = 111111110
-
-    class MockGetPurchaseInfoResult:
-        def dict(self):
-            return "foo"
-
+    exp_purchase_id = "111111110"
     count = 0
 
-    def mock_get_purchase_info(api: IKEA, *, id: str, email: str):
-        assert api.token == get_authorized_api().token
-        assert id == str(exp_purchase_id)
-        assert email is None
+    def mock_get_purchase_info(purchase_id: str):
+        assert purchase_id == exp_purchase_id
         nonlocal count
         if count in (0, 1):
             count += 1
-            raise IKEAAPIError(
+            raise ikea_api.APIError(
                 SimpleNamespace(  # type: ignore
                     status_code=504,
                     text=(
@@ -189,39 +261,39 @@ def test_get_purchase_info_ikeaapierror_504(monkeypatch: pytest.MonkeyPatch):
                 )
             )
         else:
-            return MockGetPurchaseInfoResult()
+            return "foo"
 
-    monkeypatch.setattr(ikea_api.wrappers, "get_purchase_info", mock_get_purchase_info)
-    assert get_purchase_info(exp_purchase_id, False) == "foo"
+    monkeypatch.setattr(
+        comfort.integrations.ikea, "_get_purchase_info", mock_get_purchase_info
+    )
+    assert get_purchase_info(exp_purchase_id) == "foo"
 
 
 @pytest.mark.usefixtures("ikea_settings")
 def test_get_purchase_info_ikeaapierror_not_504(monkeypatch: pytest.MonkeyPatch):
-    exp_purchase_id = 111111110
+    exp_purchase_id = "111111110"
+    count = 0
 
     class MockGetPurchaseInfoResult:
         def dict(self):
             return "foo"
 
-    count = 0
-
-    def mock_get_purchase_info(api: IKEA, *, id: str, email: str):
-        assert api.token == get_authorized_api().token
-        assert id == str(exp_purchase_id)
-        assert email is None
+    def mock_get_purchase_info(purchase_id: str):
+        assert purchase_id == exp_purchase_id
         nonlocal count
         if count in (0, 1):
             count += 1
-            raise IKEAAPIError(SimpleNamespace(status_code=404, text=""))  # type: ignore
+            raise ikea_api.APIError(SimpleNamespace(status_code=404, text=""))  # type: ignore
         else:
             return MockGetPurchaseInfoResult()
 
-    monkeypatch.setattr(ikea_api.wrappers, "get_purchase_info", mock_get_purchase_info)
-    with pytest.raises(IKEAAPIError, match="404"):
-        get_purchase_info(exp_purchase_id, False)
+    monkeypatch.setattr(
+        comfort.integrations.ikea, "_get_purchase_info", mock_get_purchase_info
+    )
+    with pytest.raises(ikea_api.APIError, match="404"):
+        get_purchase_info(exp_purchase_id)
 
 
-@pytest.mark.parametrize("is_dict", (True, False))
 @pytest.mark.parametrize(
     ("err", "should_capture"),
     (
@@ -229,7 +301,7 @@ def test_get_purchase_info_ikeaapierror_not_504(monkeypatch: pytest.MonkeyPatch)
         ({"message": "Purchase not found"}, False),
         ({"message": "Order not found"}, False),
         ({"message": "Invalid order id"}, False),
-        ([{"message": "Purchase not found"}], False),
+        ({"message": "Purchase not found"}, False),
         (
             {
                 "message": "Exception while fetching data (/order/id) : null",
@@ -243,30 +315,28 @@ def test_get_purchase_info_ikeaapierror_not_504(monkeypatch: pytest.MonkeyPatch)
     ),
 )
 @pytest.mark.usefixtures("ikea_settings")
-def test_get_purchase_info_raises(
-    monkeypatch: pytest.MonkeyPatch,
-    is_dict: bool,
-    err: dict[str, str],
-    should_capture: bool,
+def test_get_purchase_info_raises_new(
+    monkeypatch: pytest.MonkeyPatch, err: dict[str, str], should_capture: bool
 ):
-    if is_dict:
-        msg = {"errors": [err]}
-    msg = {"errors": err}
+    msg = {"errors": [err]}
     resp = [msg, {}]
+    print(resp)
 
     class MockResponse:
         status_code = 200
-        _json = resp
-        text = json.dumps(resp)
 
-    exc = GraphQLError(MockResponse())  # type: ignore
+        def __init__(self) -> None:
+            self.json = resp
 
-    class MockPurchases:
-        def __init__(self, token: str):
-            pass
+    exc = ikea_api.GraphQLError(MockResponse())  # type: ignore
+    print(exc.errors)
 
-        def order_info(self, **kwargs: Any):
-            raise exc
+    def mock_get_purchase_info(purchase_id: str):
+        raise exc
+
+    monkeypatch.setattr(
+        comfort.integrations.ikea, "_get_purchase_info", mock_get_purchase_info
+    )
 
     called = False
 
@@ -275,10 +345,10 @@ def test_get_purchase_info_raises(
         nonlocal called
         called = True
 
-    monkeypatch.setattr(ikea_api, "Purchases", MockPurchases)
     monkeypatch.setattr(sentry_sdk, "capture_exception", mock_capture_exception)
 
-    get_purchase_info(1, False)
+    get_purchase_info("")
+
     if should_capture:
         assert called
     else:
@@ -492,7 +562,7 @@ def test_fetch_items_main(monkeypatch: pytest.MonkeyPatch, input_force_update: b
     monkeypatch.setattr(
         comfort.integrations.ikea, "_get_items_to_fetch", mock_get_items_to_fetch
     )
-    monkeypatch.setattr(ikea_api.wrappers, "get_items", mock_get_items)
+    monkeypatch.setattr(comfort.integrations.ikea, "_get_items", mock_get_items)
     monkeypatch.setattr(
         comfort.integrations.ikea,
         "_create_item_categories",
@@ -546,7 +616,6 @@ def test_get_items_failure(monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setattr(comfort.integrations.ikea, "fetch_items", mock_fetch_items)
 
     get_items(item_codes="81042840")
-    import frappe
 
     assert f"Cannot fetch those items: {', '.join(mock_item_codes)}" in str(
         frappe.message_log

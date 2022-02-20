@@ -13,10 +13,11 @@ setup(
     package_data={"": ["*.md", "*.json", "*.txt", "*.css", "*.csv", "*.html", "*.js"]},
     zip_safe=False,
     install_requires=[
-        "ikea-api==1.1.8",
+        "ikea-api[httpx]==2.0.3",
         "pydantic==1.9.0",
         "sentry-sdk==1.5.5",
         "uvicorn[standard]==0.17.4",
+        "markupsafe==2.0.1",  # Until https://github.com/frappe/frappe/pull/13344 is merged to upstream
     ],
     extras_require={
         "dev": [

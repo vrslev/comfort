@@ -1,65 +1,73 @@
 from __future__ import annotations
 
+import asyncio
 import re
-from typing import Any
+from typing import Any, Iterable
 
-from ikea_api._api import API
+import ikea_api
+from ikea_api.abc import Endpoint, SessionInfo, endpoint
+from ikea_api.base_ikea_api import BaseIkeaAPI
+from ikea_api.error_handlers import handle_json_decode_error
 
 import frappe
+from comfort.integrations.ikea import get_constants
 
 
-class Kvartiroteka(API):
-    _design_id: str
-    _rooms: list[dict[str, Any]]
-    _images: list[str] = []
+def parse_design_id_from_url(url: str) -> str:
+    matches = re.findall(r"#/[^/]+/[^/]+/([^/]+)", url)
+    if not matches:
+        raise RuntimeError(f"Invalid Kvartiroteka url: {url}")
+    return matches[0]
 
-    def __init__(self):
-        super().__init__("https://kvartiroteka.ikea.ru/data/_/items")
-        self._session.headers.update(
-            {
+
+def parse_images_from_blocks(blocks: dict[str, Any]) -> Iterable[str]:
+    for block in blocks["data"]:
+        for view in block["views"]:
+            if view and view.get("view_id"):
+                yield view["view_id"]["image"]["data"]["full_url"]
+
+
+class Kvartiroteka(BaseIkeaAPI):
+    def _get_session_info(self) -> SessionInfo:
+        return SessionInfo(
+            base_url="https://kvartiroteka.ikea.ru/data/_/items",
+            headers={
                 "Accept": "application/json, text/plain, */*",
                 "Content-Type": "application/json;charset=utf-8",
-            }
+            },
         )
 
-    def _parse_design_id(self, url: str):
-        matches = re.findall(r"#/[^/]+/[^/]+/([^/]+)", url)
-        if not matches:
-            raise RuntimeError(f"Invalid Kvartiroteka url: {url}")
-        self._design_id = matches[0]
-
-    def _get_rooms(self):
-        resp = self._get(
-            endpoint=f"{self.endpoint}/design_room",
-            params={"filter[design_id.url][eq]": self._design_id},
+    @endpoint(handlers=[handle_json_decode_error])
+    def get_rooms(self, design_id: str) -> Endpoint[list[dict[str, Any]]]:
+        response = yield self._RequestInfo(
+            "GET", "/design_room", params={"filter[design_id.url][eq]": design_id}
         )
-        self._rooms = resp["data"]
+        return response.json["data"]
 
-    def _get_images(self):
-        for room in self._rooms:
-            resp = self._get(
-                endpoint=f"{self.endpoint}/block",
-                params={
-                    "fields": "views.view_id.image.*",
-                    "limit": "-1",
-                    "filter[room_id][eq]": room["room_id"],
-                    "filter[design_id][eq]": room["design_id"],
-                },
-            )
-            for block in resp["data"]:
-                for view in block["views"]:
-                    if view and view.get("view_id"):
-                        self._images.append(
-                            view["view_id"]["image"]["data"]["full_url"]
-                        )
+    @endpoint(handlers=[handle_json_decode_error])
+    def get_images(self, room: dict[str, Any]) -> Endpoint[Iterable[str]]:
+        params = {
+            "fields": "views.view_id.image.*",
+            "limit": "-1",
+            "filter[room_id][eq]": room["room_id"],
+            "filter[design_id][eq]": room["design_id"],
+        }
+        response = yield self._RequestInfo("GET", "/block", params=params)
+        return parse_images_from_blocks(response.json)
 
-    def __call__(self, url: str):  # pragma: no cover
-        self._parse_design_id(url)
-        self._get_rooms()
-        self._get_images()
-        return self._images
+
+async def async_main(url: str):
+    design_id = parse_design_id_from_url(url)
+    api = Kvartiroteka(constants=get_constants())
+    rooms = await ikea_api.run_async(api.get_rooms(design_id))
+    tasks = [ikea_api.run_async(api.get_images(room)) for room in rooms]
+
+    images: list[str] = []
+    for room_images in await asyncio.gather(*tasks):
+        images += room_images
+    return images
 
 
 @frappe.whitelist(allow_guest=True)
 def main(url: str):  # pragma: no cover
-    return Kvartiroteka()(url)
+    return asyncio.run(async_main(url))

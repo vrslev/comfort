@@ -1,15 +1,21 @@
 from __future__ import annotations
 
-from datetime import date
+import asyncio
+from calendar import timegm
+from datetime import date, datetime, timezone
+from functools import lru_cache
 from typing import TypedDict, cast
 
 import ikea_api
-import ikea_api.wrappers
 import sentry_sdk
 from ikea_api import format_item_code as format_item_code  # For jenv hook
-from ikea_api.exceptions import GraphQLError, IKEAAPIError, ItemFetchError
+from ikea_api.utils import (
+    unshorten_urls_from_ingka_pagelinks as orig_unshorten_urls_from_ingka_pagelinks,
+)
 from ikea_api.wrappers import types
-from ikea_api.wrappers._parsers.item_iows import get_url as get_short_url
+from ikea_api.wrappers.parsers.iows_items import get_url as get_short_url
+from jwt import PyJWT
+from jwt.exceptions import ExpiredSignatureError
 
 import frappe
 from comfort import (
@@ -19,51 +25,151 @@ from comfort import (
     counters_are_same,
     doc_exists,
     get_all,
+    get_cached_doc,
     get_cached_value,
     get_doc,
     new_doc,
 )
-from comfort.comfort_core.doctype.ikea_settings.ikea_settings import (
-    get_authorized_api,
-    get_guest_api,
-)
+from comfort.comfort_core.doctype.ikea_settings.ikea_settings import IkeaSettings
 from comfort.entities.doctype.item.item import Item
 from comfort.entities.doctype.item_category.item_category import ItemCategory
+from frappe.utils import add_to_date, get_datetime, now_datetime
+
+__all__ = [
+    "get_constants",
+    "get_guest_token",
+    "get_auth_token",
+    "get_delivery_services",
+    "add_items_to_cart",
+]
 
 
-def get_delivery_services(items: dict[str, int]):
-    if sum(items.values()) == 0:
-        raise ValidationError(_("No items selected to check delivery services"))
+@lru_cache
+def get_event_loop():
+    return asyncio.new_event_loop()
 
-    api = get_guest_api()
+
+@lru_cache
+def get_constants():
+    return ikea_api.Constants(country="ru", language="ru")
+
+
+def _should_renew_guest_token(doc: IkeaSettings):
+    return any(
+        (
+            not doc.guest_token,
+            not doc.guest_token_expiration,
+            get_datetime(doc.guest_token_expiration) <= now_datetime(),  # type: ignore
+        )
+    )
+
+
+def _get_guest_token() -> str:
+    return ikea_api.run(ikea_api.Auth(get_constants()).get_guest_token())
+
+
+def _set_renew_guest_token(doc: IkeaSettings):
+    doc.guest_token = _get_guest_token()
+    doc.guest_token_expiration = add_to_date(None, days=30)
+    doc.save()
+
+
+def get_guest_token():
+    doc = get_cached_doc(IkeaSettings)
+    if _should_renew_guest_token(doc):
+        _set_renew_guest_token(doc)
+    assert doc.guest_token
+    return doc.guest_token
+
+
+def _auth_token_expired(exp: int):
+    now = timegm(datetime.now(tz=timezone.utc).utctimetuple())
+    try:
+        PyJWT()._validate_exp({"exp": exp}, now, 0)
+    except ExpiredSignatureError:
+        return True
+
+
+def _should_renew_auth_token(doc: IkeaSettings):
+    return any(
+        (
+            not doc.authorized_token,
+            not doc.authorized_token_expiration,
+            _auth_token_expired(doc.authorized_token_expiration),  # type: ignore
+        )
+    )
+
+
+def get_auth_token() -> str:
+    doc = get_cached_doc(IkeaSettings)
+    if _should_renew_auth_token(doc):
+        raise ValidationError(_("Update authorization info"))
+    assert doc.authorized_token
+    return doc.authorized_token
+
+
+def _get_zip_code():
     zip_code: str | None = get_cached_value(
         "Ikea Settings", "Ikea Settings", "zip_code"
     )
     if not zip_code:
         raise ValidationError(_("Enter Zip Code in Ikea Settings"))
-
-    res = ikea_api.wrappers.get_delivery_services(api, items=items, zip_code=zip_code)
-
-    if not res.delivery_options:
-        frappe.msgprint(_("No available delivery options"), alert=True, indicator="red")
-        return
-
-    return res
+    return zip_code
 
 
-def add_items_to_cart(items: dict[str, int], authorize: bool):
+def _get_delivery_services(items: dict[str, int]) -> types.GetDeliveryServicesResponse:
+    coro = ikea_api.get_delivery_services(
+        constants=get_constants(),
+        token=get_guest_token(),
+        items=items,
+        zip_code=_get_zip_code(),
+    )
+    return get_event_loop().run_until_complete(coro)
+
+
+def _validate_delivery_services_items(items: dict[str, int]):
+    if sum(items.values()) == 0:
+        raise ValidationError(_("No items selected to check delivery services"))
+
+
+def _check_delivery_services_response(response: types.GetDeliveryServicesResponse):
+    if response.delivery_options:
+        return True
+
+    frappe.msgprint(_("No available delivery options"), alert=True, indicator="red")
+
+
+def get_delivery_services(items: dict[str, int]):
+    _validate_delivery_services_items(items)
+    response = _get_delivery_services(items)
+    if _check_delivery_services_response(response):
+        return response
+
+
+def _validate_cart_items(items: dict[str, int]):
     if sum(items.values()) == 0:
         raise ValidationError(_("No items selected to add to cart"))
 
-    api = get_authorized_api() if authorize else get_guest_api()
-    ikea_api.wrappers.add_items_to_cart(api, items=items)
+
+def _add_items_to_cart(items: dict[str, int], authorize: bool):
+    token = get_auth_token() if authorize else get_guest_token()
+    cart = ikea_api.Cart(constants=get_constants(), token=token)
+    return ikea_api.add_items_to_cart(cart=cart, items=items)
+
+
+def add_items_to_cart(items: dict[str, int], authorize: bool):
+    _validate_cart_items(items)
+    return _add_items_to_cart(items, authorize)
+
+
+def _get_purchase_history():
+    purchases = ikea_api.Purchases(constants=get_constants(), token=get_auth_token())
+    return ikea_api.get_purchase_history(purchases=purchases)
 
 
 @frappe.whitelist()
 def get_purchase_history():
-    return [
-        p.dict() for p in ikea_api.wrappers.get_purchase_history(get_authorized_api())
-    ]
+    return [p.dict() for p in _get_purchase_history()]
 
 
 class PurchaseInfoDict(TypedDict):
@@ -73,41 +179,44 @@ class PurchaseInfoDict(TypedDict):
     delivery_date: date | None
 
 
-@frappe.whitelist()
-def get_purchase_info(purchase_id: int, use_lite_id: bool) -> PurchaseInfoDict | None:
-    api = get_authorized_api()
-    id = str(purchase_id)
-    email = (
-        get_cached_value("Ikea Settings", "Ikea Settings", "username")
-        if use_lite_id
-        else None
+def _get_purchase_info(purchase_id: str) -> PurchaseInfoDict:
+    purchases = ikea_api.Purchases(constants=get_constants(), token=get_auth_token())
+    return cast(
+        PurchaseInfoDict,
+        ikea_api.get_purchase_info(
+            purchases=purchases, order_number=purchase_id
+        ).dict(),
     )
 
+
+def _handle_purchase_info_error(exc: ikea_api.GraphQLError):
+    skip_messages = (
+        "Purchase not found",
+        "Order not found",
+        "Invalid order id",
+        "Exception while fetching data (/order/id) : null",
+    )
+    for error in exc.errors:
+        if error.get("message") in skip_messages:
+            return
+    sentry_sdk.capture_exception(exc)
+
+
+def _retry_get_purchase_info(purchase_id: str):
+    for _ in range(3):
+        try:
+            return _get_purchase_info(purchase_id=purchase_id)
+        except ikea_api.APIError as exc:
+            if exc.response.status_code != 504:
+                raise
+
+
+@frappe.whitelist()
+def get_purchase_info(purchase_id: str):
     try:
-        for _ in range(3):
-            try:
-                return ikea_api.wrappers.get_purchase_info(  # type: ignore
-                    api=api, id=id, email=email
-                ).dict()
-            except IKEAAPIError as exc:
-                if exc.response.status_code != 504:
-                    raise
-    except GraphQLError as exc:
-        if isinstance(exc.errors, list) and exc.errors:
-            exc.errors = exc.errors[0]
-        if isinstance(exc.errors, dict):
-            exc.errors = [exc.errors]
-        for error in exc.errors:
-            if "message" not in error:
-                continue
-            if error["message"] in (
-                "Purchase not found",
-                "Order not found",
-                "Invalid order id",
-                "Exception while fetching data (/order/id) : null",
-            ):
-                return
-        sentry_sdk.capture_exception(exc)
+        return _retry_get_purchase_info(purchase_id)
+    except ikea_api.GraphQLError as exc:
+        _handle_purchase_info_error(exc)
 
 
 def _make_item_category(name: str | None, url: str | None):
@@ -132,8 +241,10 @@ def _shorten_item_url_if_required(item: types.ParsedItem):
     if len(item.url) < 140:
         return item.url
 
-    return cast(
-        str, get_short_url(item_code=item.item_code, is_combination=item.is_combination)
+    return get_short_url(
+        constants=get_constants(),
+        item_code=item.item_code,
+        is_combination=item.is_combination,
     )
 
 
@@ -193,10 +304,23 @@ def _create_item(parsed_item: types.ParsedItem):
         doc.insert()
 
 
+def _unshorten_urls_from_ingka_pagelinks(item_codes: str | list[str]) -> list[str]:
+    coro = orig_unshorten_urls_from_ingka_pagelinks(str(item_codes))
+    return get_event_loop().run_until_complete(coro)
+
+
+def parse_item_codes(item_codes: str | list[str]) -> list[str]:
+    if isinstance(item_codes, str):
+        res = [item_codes]
+    else:
+        res = item_codes
+    unshortened = _unshorten_urls_from_ingka_pagelinks(res[0]) if res else []
+    res.extend(unshortened)
+    return ikea_api.parse_item_codes(res)
+
+
 def _get_items_to_fetch(item_codes: str | list[str], force_update: bool):
-    parsed_item_codes = ikea_api.parse_item_codes(
-        item_codes, unshorten_ingka_pagelinks=True
-    )
+    parsed_item_codes = parse_item_codes(item_codes)
 
     if force_update:
         return parsed_item_codes
@@ -207,7 +331,7 @@ def _get_items_to_fetch(item_codes: str | list[str], force_update: bool):
             field="item_code",
             filter={"item_code": ("in", parsed_item_codes)},
         )
-        return [item_code for item_code in parsed_item_codes if item_code not in exist]
+        return [i for i in parsed_item_codes if i not in exist]
 
 
 def _create_item_categories(items: list[types.ParsedItem]):
@@ -231,12 +355,17 @@ class FetchItemsResult(TypedDict):
     successful: list[str]
 
 
+def _get_items(item_codes: list[str]) -> list[types.ParsedItem]:
+    coro = ikea_api.get_items(constants=get_constants(), item_codes=item_codes)
+    return get_event_loop().run_until_complete(coro)
+
+
 def fetch_items(item_codes: str | list[str], force_update: bool):
     items_to_fetch = _get_items_to_fetch(item_codes, force_update)
     if not items_to_fetch:
         return FetchItemsResult(unsuccessful=[], successful=[])
 
-    parsed_items = ikea_api.wrappers.get_items(items_to_fetch)
+    parsed_items = _get_items(items_to_fetch)
 
     _create_item_categories(parsed_items)
     _fetch_child_items(parsed_items, force_update)
@@ -258,7 +387,7 @@ def get_items(item_codes: str):  # pragma: no cover
     """Fetch items, show message about unsuccessful ones and retrieve basic information about fetched items."""
     try:
         response = fetch_items(item_codes, force_update=True)
-    except ItemFetchError as e:
+    except ikea_api.ItemFetchError as e:
         if not (
             e.args
             and e.args[0]

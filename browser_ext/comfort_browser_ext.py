@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import json
 import os.path
 import re
@@ -18,6 +19,9 @@ import requests
 import sentry_sdk
 import sentry_sdk.utils
 from bs4 import BeautifulSoup
+from ikea_api.utils import (
+    unshorten_urls_from_ingka_pagelinks as orig_unshorten_urls_from_ingka_pagelinks,
+)
 
 PACKAGE_NAME = "comfort_browser_ext"
 
@@ -87,10 +91,25 @@ def _unshorten_item_urls(soup: BeautifulSoup):
     return soup
 
 
+def _unshorten_urls_from_ingka_pagelinks(item_codes: str | list[str]) -> list[str]:
+    coro = orig_unshorten_urls_from_ingka_pagelinks(str(item_codes))
+    return asyncio.run(coro)
+
+
+def parse_item_codes(item_codes: str | list[str]) -> list[str]:
+    if isinstance(item_codes, str):
+        res = [item_codes]
+    else:
+        res = item_codes
+    unshortened = _unshorten_urls_from_ingka_pagelinks(res[0]) if res else []
+    res.extend(unshortened)
+    return ikea_api.parse_item_codes(res)
+
+
 def _get_item_codes(html: str):
     soup = BeautifulSoup(unescape(unescape(html)), "html.parser")
     text = _unshorten_item_urls(soup).get_text()
-    return ikea_api.parse_item_codes(text, unshorten_ingka_pagelinks=True)
+    return parse_item_codes(text)
 
 
 class FrappeException(Exception):
