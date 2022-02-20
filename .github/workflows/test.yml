@@ -92,9 +92,7 @@ jobs:
             --admin-password admin \
             --install-app comfort \
             --verbose
-      - name: Setup tmate session
-        if: always()
-        uses: mxschmitt/action-tmate@v3
+
       - name: Run tests
         run: |
           cd ~/frappe-bench
