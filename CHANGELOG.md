@@ -3,6 +3,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.40.0 (2022-02-20)
+### Feature
+* Upgrade ikea-api to version 2 ([#172](https://github.com/vrslev/comfort/issues/172)) ([`82e21fb`](https://github.com/vrslev/comfort/commit/82e21fb923245a313923bd5f19b45588e7bfb3e5))
+
 ## v0.39.0 (2022-02-17)
 ### Feature
 * Update indexes ([`070d1f8`](https://github.com/vrslev/comfort/commit/070d1f8ec4c351f28ff24ecc962959814ab3c9ec))
