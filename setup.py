@@ -17,7 +17,7 @@ setup(
         "pydantic==1.9.0",
         "sentry-sdk==1.5.5",
         "uvicorn[standard]==0.17.4",
-        "markupsafe==2.0.1",  # Until https://github.com/frappe/frappe/pull/13344 is merged to upstream
+        "markupsafe==2.1.0",  # Until https://github.com/frappe/frappe/pull/13344 is merged to upstream
     ],
     extras_require={
         "dev": [
