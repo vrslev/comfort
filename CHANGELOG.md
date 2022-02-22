@@ -3,6 +3,18 @@
 
 <!--next-version-placeholder-->
 
+## v0.40.1 (2022-02-22)
+### Fix
+* Bump Frappe from 13.20.0 to 13.21.0 ([#180](https://github.com/vrslev/comfort/issues/180)) ([`674ef51`](https://github.com/vrslev/comfort/commit/674ef51dbf77e3c0fae89ad257fbb97ed28fe90e))
+
+### Build
+* **deps:** Bump @sentry/browser from 6.17.7 to 6.17.9 ([#179](https://github.com/vrslev/comfort/issues/179)) ([`fc0d337`](https://github.com/vrslev/comfort/commit/fc0d3373d574b20bd2824361dfefa1ad246980c3))
+* **deps-dev:** Bump eslint-config-prettier from 8.3.0 to 8.4.0 ([#178](https://github.com/vrslev/comfort/issues/178)) ([`4c36c02`](https://github.com/vrslev/comfort/commit/4c36c021d00fd1f80408653e76c3d008f7946eea))
+* **deps:** Bump @sentry/tracing from 6.17.7 to 6.17.9 ([#177](https://github.com/vrslev/comfort/issues/177)) ([`d158827`](https://github.com/vrslev/comfort/commit/d158827576e031e906a48607a7a9b3d101c08132))
+* **deps:** Bump uvicorn[standard] from 0.17.4 to 0.17.5 ([#176](https://github.com/vrslev/comfort/issues/176)) ([`a07298e`](https://github.com/vrslev/comfort/commit/a07298edf1a655470a12caf95a529375deda22c3))
+* **deps:** Bump docker/bake-action from 1.6.0 to 1.7.0 ([#174](https://github.com/vrslev/comfort/issues/174)) ([`b67ff63`](https://github.com/vrslev/comfort/commit/b67ff63d1e9f82e1faa3967bce43504a2d9d9eeb))
+* **deps:** Bump docker/login-action from 1.12.0 to 1.13.0 ([#173](https://github.com/vrslev/comfort/issues/173)) ([`39212e5`](https://github.com/vrslev/comfort/commit/39212e5042332f0c67f3784326bad59b031d7819))
+
 ## v0.40.0 (2022-02-20)
 ### Feature
 * Upgrade ikea-api to version 2 ([#172](https://github.com/vrslev/comfort/issues/172)) ([`82e21fb`](https://github.com/vrslev/comfort/commit/82e21fb923245a313923bd5f19b45588e7bfb3e5))
