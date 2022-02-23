@@ -2,6 +2,7 @@ ARG FRAPPE_VERSION
 FROM frappe/frappe-worker:${FRAPPE_VERSION}
 
 COPY --chown=frappe setup.py ../apps/comfort/
+# TODO: Mount cache
 RUN ../env/bin/pip install --no-cache-dir -e ../apps/comfort
 
 COPY --chown=frappe . ../apps/comfort

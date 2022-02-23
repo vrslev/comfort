@@ -128,9 +128,26 @@
    "link_type": "Report",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Finance",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Money Transfer",
+   "link_to": "Money Transfer",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
- "modified": "2021-11-03 14:29:12.612629",
+ "modified": "2022-02-23 10:56:52.312982",
  "modified_by": "Administrator",
  "module": "Comfort Core",
  "name": "Home",
