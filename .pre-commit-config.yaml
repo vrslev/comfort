@@ -25,7 +25,7 @@ repos:
       - id: isort
 
   - repo: https://github.com/pre-commit/mirrors-eslint
-    rev: v8.9.0
+    rev: v8.10.0
     hooks:
       - id: eslint
         args: [--fix]
@@ -45,7 +45,7 @@ repos:
         exclude: doctype/.*/.*\.json
 
   - repo: https://github.com/PyCQA/bandit
-    rev: 1.7.2
+    rev: 1.7.3
     hooks:
       - id: bandit
         args: [-c, .bandit.yaml]
