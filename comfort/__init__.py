@@ -56,7 +56,9 @@ class ValidationError(Exception):
     def __init__(
         self,
         msg: Any = "",
-        exc: type[Exception] = frappe.exceptions.ValidationError,
+        exc: type[
+            frappe.exceptions.ValidationError
+        ] = frappe.exceptions.ValidationError,
         title: str | None = None,
         is_minimizable: bool | None = None,
         wide: str | None = None,
@@ -117,6 +119,9 @@ class TypedDocument(Document):
         self.flags.ignore_links = True
         self.save()
 
+    def as_dict(self) -> Any:  # type: ignore
+        return super().as_dict()  # type: ignore
+
 
 _T_doc = TypeVar("_T_doc", bound=Document)
 
@@ -143,19 +148,6 @@ def get_doc(cls: type[_T_doc], *args: Any, **kwargs: Any) -> _T_doc:
     if not args and not kwargs:
         args = (doctype,)
     return frappe.get_doc(doctype, *args, **kwargs)  # type: ignore
-
-
-@overload
-def get_all(
-    cls: type[_T_doc],
-    *,
-    pluck: None,
-    field: str | tuple[str, ...] | None = None,
-    filter: dict[str, Any] | tuple[tuple[Any, ...], ...] | None = None,
-    limit: int | None = None,
-    order_by: str | None = None,
-) -> list[_T_doc]:
-    ...
 
 
 @overload
@@ -216,7 +208,7 @@ def get_value(
     return frappe.db.get_value(  # type: ignore
         doctype=doctype,
         filters=filters,
-        fieldname=fieldname,
+        fieldname=fieldname,  # type: ignore
         as_dict=as_dict,
         order_by=order_by,
     )
