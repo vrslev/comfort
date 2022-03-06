@@ -13,7 +13,7 @@ setup(
     package_data={"": ["*.md", "*.json", "*.txt", "*.css", "*.csv", "*.html", "*.js"]},
     zip_safe=False,
     install_requires=[
-        "ikea-api[httpx]==2.0.4",
+        "ikea-api[httpx]==2.0.5",
         "pydantic==1.9.0",
         "sentry-sdk==1.5.6",
         "uvicorn[standard]==0.17.5",
