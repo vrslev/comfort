@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Any, Literal
 
 from comfort import TypedDocument, ValidationError, _, get_value
 from comfort.finance import cancel_gl_entries_for, create_gl_entry, get_account
@@ -17,7 +17,8 @@ class Compensation(TypedDocument):
             raise ValidationError(_("Can only add compensation for submitted document"))
 
     def set_status(self):
-        self.status = {0: "Draft", 1: "Received", 2: "Cancelled"}[self.docstatus]  # type: ignore
+        d: dict[int, Any] = {0: "Draft", 1: "Received", 2: "Cancelled"}
+        self.status = d[self.docstatus]
 
     def validate(self):
         self.validate_docstatus()
