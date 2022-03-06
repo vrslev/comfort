@@ -49,6 +49,7 @@ def _init_sentry():  # pragma: no cover
             frappe.exceptions.ValidationError,
             # If somebody entered wrong credentials, it is not system error
             frappe.exceptions.AuthenticationError,
+            frappe.exceptions.CSRFTokenError,
             # When running in Redis Queue sometimes connection resets
             ConnectionResetError,
         ],
