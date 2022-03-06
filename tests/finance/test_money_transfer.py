@@ -31,7 +31,8 @@ def test_money_transfer_validate_passes(money_transfer: MoneyTransfer):
 def test_money_transfer_before_submit(money_transfer: MoneyTransfer):
     money_transfer.insert()
     money_transfer.before_submit()
-    gl_entries = get_all(
+
+    entries = get_all(
         GLEntry,
         field=("account", "debit", "credit"),
         filter={
@@ -40,7 +41,7 @@ def test_money_transfer_before_submit(money_transfer: MoneyTransfer):
         },
     )
 
-    assert {e.account: (e.debit, e.credit) for e in gl_entries} == {
+    assert {e.account: (e.debit, e.credit) for e in entries} == {
         money_transfer.from_account: (0, money_transfer.amount),
         money_transfer.to_account: (money_transfer.amount, 0),
     }
