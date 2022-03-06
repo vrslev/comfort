@@ -26,13 +26,15 @@ def get_children(doctype: str, parent: str = "", is_root: bool = False):
         order_by="name",
     )
     for account in accounts:
-        if not account.expandable:
-            v: list[Any] = get_all(
-                GLEntry,
-                field="SUM(debit) - SUM(credit) as balance",
-                filter={"account": account.value, "docstatus": ("!=", 2)},
-            )
-            account.balance = v[0].balance or 0
+        if account.expandable:
+            continue
+
+        v: list[Any] = get_all(
+            GLEntry,
+            field="SUM(debit) - SUM(credit) as balance",
+            filter={"account": account.value, "docstatus": ("!=", 2)},
+        )
+        account.balance = v[0].balance or 0
     return accounts
 
 
