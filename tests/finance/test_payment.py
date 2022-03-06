@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+from typing import Any
+
 import pytest
 
-from comfort import get_all, get_doc, get_value
-from comfort.finance import get_account
+from comfort import TypedDocument, get_all, get_doc, get_value
+from comfort.finance import cancel_gl_entries_for, get_account
 from comfort.finance.doctype.gl_entry.gl_entry import GLEntry
 from comfort.finance.doctype.payment.payment import Payment
 from comfort.transactions.doctype.purchase_order.purchase_order import PurchaseOrder
@@ -19,41 +21,18 @@ def test_payment_validate_raises(payment_sales: Payment, amount: int):
 
 
 @pytest.mark.parametrize("amount", (0.5, 1000))
-def test_payment_validate_not_raises(payment_sales: Payment, amount: float | int):
-    payment_sales.amount = amount  # type: ignore
+def test_payment_validate_passes(payment_sales: Payment, amount: Any):
+    payment_sales.amount = amount
     payment_sales.validate()
 
 
-def test_new_gl_entry(payment_sales: Payment):
-    account, debit, credit = "cash", 300, 0
-    payment_sales.db_insert()
-    payment_sales._new_gl_entry(account, debit, credit)
-
-    values: tuple[str, int, int] = get_value(
-        "GL Entry",
-        filters={
-            "voucher_type": payment_sales.doctype,
-            "voucher_no": payment_sales.name,
-        },
-        fieldname=("account", "debit", "credit"),
-    )
-
-    assert get_account(account) == values[0]
-    assert debit == values[1]
-    assert credit == values[2]
+@pytest.mark.parametrize(("v", "expected"), ((True, "cash"), (False, "bank")))
+def test_resolve_cash_or_bank(payment_sales: Payment, v: bool, expected: str):
+    payment_sales.paid_with_cash = v
+    assert payment_sales._resolve_cash_or_bank() == expected
 
 
-@pytest.mark.parametrize(
-    "paid_with_cash,expected_account", ((True, "cash"), (False, "bank"))
-)
-def test_resolve_cash_or_bank(
-    payment_sales: Payment, paid_with_cash: bool, expected_account: str
-):
-    payment_sales.paid_with_cash = paid_with_cash
-    assert payment_sales._resolve_cash_or_bank() == expected_account
-
-
-def get_gl_entries(doc: Payment | SalesOrder):
+def get_gl_entries(doc: TypedDocument):
     return get_all(
         GLEntry,
         field=("account", "debit", "credit"),
@@ -61,16 +40,17 @@ def get_gl_entries(doc: Payment | SalesOrder):
     )
 
 
-@pytest.mark.parametrize("cash", ("True", "False"))
+@pytest.mark.parametrize("cash", (True, False))
 def test_payment_create_sales_gl_entries(payment_sales: Payment, cash: bool):
     payment_sales.paid_with_cash = cash
     payment_sales.db_insert()
-
     payment_sales.create_sales_gl_entries()
+
     prepaid_sales = get_account("prepaid_sales")
     cash_or_bank = get_account(payment_sales._resolve_cash_or_bank())
     entries = get_gl_entries(payment_sales)
     assert len(entries) == 2
+
     for entry in entries:
         assert entry.account in (cash_or_bank, prepaid_sales)
         if entry.account == cash_or_bank:
@@ -89,10 +69,7 @@ def test_payment_create_sales_gl_entries(payment_sales: Payment, cash: bool):
         "exp_prepaid_inventory",
         "exp_purchase_delivery",
     ),
-    (
-        (10050, 3130, 5399, 13180, 5399),
-        (10050, 3130, 0, 13180, 0),
-    ),
+    ((10050, 3130, 5399, 13180, 5399), (10050, 3130, 0, 13180, 0)),
 )
 def test_create_purchase_gl_entries(
     payment_purchase: Payment,
@@ -142,7 +119,7 @@ def test_set_status_in_sales_order(sales_order: SalesOrder, docstatus: int):
         "Payment", {"voucher_type": sales_order.doctype, "voucher_no": sales_order.name}
     )
     payment = get_doc(Payment, payment_name)
-    payment.cancel_gl_entries()
+    cancel_gl_entries_for(payment.doctype, payment.name)
     payment.set_status_in_sales_order()
 
     sales_order.reload()
