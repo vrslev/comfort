@@ -7,16 +7,12 @@ from comfort.finance.doctype.gl_entry.gl_entry import GLEntry
 
 
 def get_account(field_name: str) -> str:
-    settings_docname = "Finance Settings"
-    actual_field_name = f"{field_name}_account"
-    account: str | None = get_cached_value(
-        settings_docname, settings_docname, actual_field_name
-    )
-    if account is None:
-        raise ValidationError(
-            _('Finance Settings has no field "{}"').format(actual_field_name)
-        )
-    return account
+    name = f"{field_name}_account"
+
+    if account := get_cached_value("Finance Settings", "Finance Settings", name):
+        return account
+
+    raise ValidationError(_('Finance Settings has no field "{}"').format(name))
 
 
 def create_gl_entry(
@@ -32,7 +28,7 @@ def create_gl_entry(
     account: str,
     debit: int,
     credit: int,
-):
+) -> None:
     doc = new_doc(GLEntry)
     doc.account = account
     doc.debit = debit
@@ -47,7 +43,7 @@ def cancel_gl_entries_for(
         "Payment", "Receipt", "Sales Return", "Purchase Return", "Compensation"
     ],
     name: str,
-):
+) -> None:
     for entry in get_all(
         GLEntry,
         filter={"voucher_type": doctype, "voucher_no": name, "docstatus": ("!=", 2)},
@@ -60,7 +56,7 @@ def create_payment(
     name: str,
     amount: int,
     paid_with_cash: bool,
-):
+) -> None:
     from comfort.finance.doctype.payment.payment import Payment
 
     doc = new_doc(Payment)
