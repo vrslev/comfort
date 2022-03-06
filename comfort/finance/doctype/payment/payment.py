@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Literal
 
 from comfort import TypedDocument, ValidationError, _, get_doc, get_value
-from comfort.finance import cancel_gl_entries_for, create_gl_entry, get_account
+from comfort.finance.utils import cancel_gl_entries_for, create_gl_entry, get_account
 
 
 class Payment(TypedDocument):
@@ -63,7 +63,7 @@ class Payment(TypedDocument):
         if self.voucher_type != "Sales Order":
             return
 
-        from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
+        from comfort.transactions import SalesOrder
 
         doc = get_doc(SalesOrder, self.voucher_no)
         if doc.docstatus != 2:

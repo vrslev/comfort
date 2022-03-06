@@ -20,20 +20,19 @@ from comfort import (
     group_by_attr,
     new_doc,
 )
-from comfort.entities.doctype.item.item import Item
+from comfort.entities import Item
 from comfort.integrations.ikea import FetchItemsResult, PurchaseInfoDict
-from comfort.transactions import AnyChildItem
+from comfort.transactions import (
+    PurchaseOrder,
+    SalesOrder,
+    SalesOrderChildItem,
+    SalesOrderItem,
+)
 from comfort.transactions.doctype.purchase_order.purchase_order import (
     PurchaseOrder,
     calculate_total_weight_and_total_weight,
 )
-from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
-from comfort.transactions.doctype.sales_order_child_item.sales_order_child_item import (
-    SalesOrderChildItem,
-)
-from comfort.transactions.doctype.sales_order_item.sales_order_item import (
-    SalesOrderItem,
-)
+from comfort.transactions.utils import AnyChildItem
 from frappe import ValidationError
 from frappe.utils.data import getdate, now_datetime, today
 from tests.conftest import mock_delivery_services, mock_purchase_info

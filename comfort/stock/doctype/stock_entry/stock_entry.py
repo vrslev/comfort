@@ -4,9 +4,8 @@ from typing import Literal
 
 import frappe
 from comfort import TypedDocument
-from comfort.stock import StockTypes
-
-from ..stock_entry_item.stock_entry_item import StockEntryItem
+from comfort.stock.doctype.stock_entry_item.stock_entry_item import StockEntryItem
+from comfort.stock.utils import StockTypes
 
 
 class StockEntry(TypedDocument):

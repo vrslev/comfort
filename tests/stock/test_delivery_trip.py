@@ -15,14 +15,13 @@ from comfort import (
 )
 from comfort.entities.doctype.customer.customer import Customer
 from comfort.entities.doctype.item.item import Item
+from comfort.stock import DeliveryTrip, Receipt
 from comfort.stock.doctype.delivery_trip.delivery_trip import (
-    DeliveryTrip,
     _get_delivery_and_installation_from_services,
     _make_route_url,
     get_delivery_and_installation_for_order,
 )
-from comfort.stock.doctype.receipt.receipt import Receipt
-from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
+from comfort.transactions import SalesOrder
 from frappe.utils import get_url_to_form
 
 

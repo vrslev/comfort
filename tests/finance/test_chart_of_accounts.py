@@ -5,8 +5,8 @@ from typing import Any
 import pytest
 
 from comfort import get_all
+from comfort.finance import Account
 from comfort.finance.chart_of_accounts import ACCOUNTS
-from comfort.finance.doctype.account.account import Account
 
 
 def get_accounts_from_schema():

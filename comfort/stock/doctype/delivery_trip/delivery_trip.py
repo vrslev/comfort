@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Literal, TypedDict
+from typing import TYPE_CHECKING, Any, Literal, TypedDict
 from urllib.parse import urlencode
 
 import frappe
@@ -13,15 +13,13 @@ from comfort import (
     get_value,
     group_by_attr,
 )
-from comfort.entities.doctype.customer.customer import Customer
+from comfort.entities import Customer
+from comfort.stock.doctype.delivery_stop.delivery_stop import DeliveryStop
 from comfort.stock.doctype.receipt.receipt import Receipt
-from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
-from comfort.transactions.doctype.sales_order_service.sales_order_service import (
-    SalesOrderService,
-)
 from frappe.utils import get_url_to_form
 
-from ..delivery_stop.delivery_stop import DeliveryStop
+if TYPE_CHECKING:
+    from comfort.transactions import SalesOrderService
 
 
 class DeliveryTrip(TypedDocument):
@@ -46,6 +44,8 @@ class DeliveryTrip(TypedDocument):
         self._get_weight()
 
     def _validate_delivery_statuses_in_orders(self):
+        from comfort.transactions import SalesOrder
+
         orders = get_all(
             SalesOrder,
             field=("name", "delivery_status"),
@@ -61,6 +61,8 @@ class DeliveryTrip(TypedDocument):
             )
 
     def update_sales_orders_from_db(self):
+        from comfort.transactions import SalesOrder, SalesOrderService
+
         order_names = [s.sales_order for s in self.stops]
         grouped_orders_with_customer = group_by_attr(
             data=get_all(
@@ -108,6 +110,8 @@ class DeliveryTrip(TypedDocument):
             stop.phone = customer.phone
 
     def _get_weight(self):
+        from comfort.transactions import SalesOrder
+
         v: list[Any] = get_all(
             SalesOrder,
             field="SUM(total_weight) as weight",
@@ -136,6 +140,8 @@ class DeliveryTrip(TypedDocument):
                 )
 
     def _get_template_context(self):
+        from comfort.transactions import SalesOrder
+
         context: dict[str, Any] = {
             "form_url": get_url_to_form("Delivery Trip", self.name),
             "doctype": _(self.doctype),
@@ -168,6 +174,8 @@ class DeliveryTrip(TypedDocument):
         return context
 
     def _add_receipts_to_sales_orders(self):
+        from comfort.transactions import SalesOrder
+
         orders_have_receipt: list[str] = get_all(
             Receipt,
             pluck="voucher_no",
@@ -230,6 +238,8 @@ def _get_delivery_and_installation_from_services(services: list[SalesOrderServic
 
 @frappe.whitelist()
 def get_delivery_and_installation_for_order(sales_order_name: str):
+    from comfort.transactions import SalesOrderService
+
     services = get_all(
         SalesOrderService, field="type", filter={"parent": sales_order_name}
     )

@@ -5,7 +5,7 @@ from typing import Any
 
 import frappe
 from comfort import _, get_all, group_by_attr
-from comfort.finance.doctype.account.account import Account
+from comfort.finance import Account
 
 columns = [
     {

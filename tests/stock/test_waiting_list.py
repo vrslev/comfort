@@ -7,13 +7,11 @@ import pytest
 
 import frappe
 from comfort import count_qty, counters_are_same, get_doc, new_doc
-from comfort.stock.doctype.waiting_list.waiting_list import WaitingList
-from comfort.transactions.doctype.purchase_order.purchase_order import PurchaseOrder
-from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
-from comfort.transactions.doctype.sales_order_child_item.sales_order_child_item import (
+from comfort.stock import WaitingList
+from comfort.transactions import (
+    PurchaseOrder,
+    SalesOrder,
     SalesOrderChildItem,
-)
-from comfort.transactions.doctype.sales_order_item.sales_order_item import (
     SalesOrderItem,
 )
 from tests.conftest import mock_delivery_services

@@ -30,9 +30,8 @@ from comfort import (
     new_doc,
     syncify,
 )
-from comfort.comfort_core.doctype.ikea_settings.ikea_settings import IkeaSettings
-from comfort.entities.doctype.item.item import Item
-from comfort.entities.doctype.item_category.item_category import ItemCategory
+from comfort.comfort_core import IkeaSettings
+from comfort.entities import Item, ItemCategory
 from frappe.utils import add_to_date, get_datetime, now_datetime
 
 __all__ = [

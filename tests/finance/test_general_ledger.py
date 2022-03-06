@@ -2,7 +2,7 @@ import pytest
 
 import frappe
 from comfort import copy_doc
-from comfort.finance.doctype.gl_entry.gl_entry import GLEntry
+from comfort.finance import GLEntry
 from comfort.finance.report.general_ledger.general_ledger import (
     get_data,
     validate_filters,

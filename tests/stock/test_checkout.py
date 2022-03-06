@@ -1,7 +1,6 @@
 from comfort import count_qty, get_all, get_doc
-from comfort.stock.doctype.checkout.checkout import Checkout
-from comfort.stock.doctype.stock_entry.stock_entry import StockEntry
-from comfort.transactions.doctype.purchase_order.purchase_order import PurchaseOrder
+from comfort.stock import Checkout, StockEntry
+from comfort.transactions import PurchaseOrder
 
 
 def test_checkout_before_submit(checkout: Checkout, purchase_order: PurchaseOrder):

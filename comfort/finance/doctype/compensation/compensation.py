@@ -1,7 +1,7 @@
 from typing import Any, Literal
 
 from comfort import TypedDocument, ValidationError, _, get_value
-from comfort.finance import cancel_gl_entries_for, create_gl_entry, get_account
+from comfort.finance.utils import cancel_gl_entries_for, create_gl_entry, get_account
 
 
 class Compensation(TypedDocument):

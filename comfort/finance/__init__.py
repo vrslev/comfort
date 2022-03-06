@@ -1,67 +1,12 @@
-from __future__ import annotations
-
-from typing import Literal
-
-from comfort import ValidationError, _, get_all, get_cached_value, get_doc, new_doc
-from comfort.finance.doctype.gl_entry.gl_entry import GLEntry
-
-
-def get_account(field_name: str) -> str:
-    name = f"{field_name}_account"
-
-    if account := get_cached_value("Finance Settings", "Finance Settings", name):
-        return account
-
-    raise ValidationError(_('Finance Settings has no field "{}"').format(name))
-
-
-def create_gl_entry(
-    doctype: Literal[
-        "Payment",
-        "Receipt",
-        "Sales Return",
-        "Purchase Return",
-        "Compensation",
-        "Money Transfer",
-    ],
-    name: str,
-    account: str,
-    debit: int,
-    credit: int,
-) -> None:
-    doc = new_doc(GLEntry)
-    doc.account = account
-    doc.debit = debit
-    doc.credit = credit
-    doc.voucher_type = doctype
-    doc.voucher_no = name
-    doc.insert().submit()
-
-
-def cancel_gl_entries_for(
-    doctype: Literal[
-        "Payment", "Receipt", "Sales Return", "Purchase Return", "Compensation"
-    ],
-    name: str,
-) -> None:
-    for entry in get_all(
-        GLEntry,
-        filter={"voucher_type": doctype, "voucher_no": name, "docstatus": ("!=", 2)},
-    ):
-        get_doc(GLEntry, entry.name).cancel()
-
-
-def create_payment(
-    doctype: Literal["Sales Order", "Purchase Order"],
-    name: str,
-    amount: int,
-    paid_with_cash: bool,
-) -> None:
-    from comfort.finance.doctype.payment.payment import Payment
-
-    doc = new_doc(Payment)
-    doc.amount = amount
-    doc.paid_with_cash = paid_with_cash
-    doc.voucher_type = doctype
-    doc.voucher_no = name
-    doc.insert().submit()
+from comfort.finance.doctype.account.account import Account as Account
+from comfort.finance.doctype.compensation.compensation import (
+    Compensation as Compensation,
+)
+from comfort.finance.doctype.finance_settings.finance_settings import (
+    FinanceSettings as FinanceSettings,
+)
+from comfort.finance.doctype.gl_entry.gl_entry import GLEntry as GLEntry
+from comfort.finance.doctype.money_transfer.money_transfer import (
+    MoneyTransfer as MoneyTransfer,
+)
+from comfort.finance.doctype.payment.payment import Payment as Payment

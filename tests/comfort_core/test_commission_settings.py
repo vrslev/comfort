@@ -1,9 +1,7 @@
 import pytest
 
 from comfort import get_doc
-from comfort.comfort_core.doctype.commission_settings.commission_settings import (
-    CommissionSettings,
-)
+from comfort.comfort_core import CommissionSettings
 from frappe import ValidationError
 
 

@@ -35,24 +35,12 @@ from pymysql import OperationalError
 import comfort.entities.doctype.customer.customer
 import comfort.integrations.ikea
 from comfort import TypedDocument, doc_exists, get_doc
-from comfort.comfort_core.doctype.commission_settings.commission_settings import (
-    CommissionSettings,
-)
-from comfort.comfort_core.doctype.ikea_settings.ikea_settings import IkeaSettings
-from comfort.comfort_core.doctype.vk_api_settings.vk_api_settings import VkApiSettings
-from comfort.entities.doctype.customer.customer import Customer
-from comfort.entities.doctype.item.item import Item
-from comfort.entities.doctype.item_category.item_category import ItemCategory
+from comfort.comfort_core import CommissionSettings, IkeaSettings, VkApiSettings
+from comfort.entities import Customer, Item, ItemCategory
+from comfort.finance import GLEntry, Payment
 from comfort.finance.chart_of_accounts import initialize_accounts
-from comfort.finance.doctype.gl_entry.gl_entry import GLEntry
-from comfort.finance.doctype.payment.payment import Payment
-from comfort.stock.doctype.checkout.checkout import Checkout
-from comfort.stock.doctype.delivery_trip.delivery_trip import DeliveryTrip
-from comfort.stock.doctype.receipt.receipt import Receipt
-from comfort.transactions.doctype.purchase_order.purchase_order import PurchaseOrder
-from comfort.transactions.doctype.purchase_return.purchase_return import PurchaseReturn
-from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
-from comfort.transactions.doctype.sales_return.sales_return import SalesReturn
+from comfort.stock import Checkout, DeliveryTrip, Receipt
+from comfort.transactions import PurchaseOrder, PurchaseReturn, SalesOrder, SalesReturn
 from frappe.database.mariadb.database import MariaDBDatabase
 
 TEST_SITE_NAME = "tests"
@@ -774,6 +762,6 @@ def purchase_return(purchase_order: PurchaseOrder, sales_order: SalesOrder):
 @pytest.fixture
 def vk_api_settings():
     doc = get_doc(VkApiSettings)
-    doc.group_token = "some_test_group_token_token"
+    doc.group_token = "some_test_group_token_token"  # nosec
     doc.save()
     return doc

@@ -11,24 +11,21 @@ from ikea_api.wrappers.types import DeliveryService, UnavailableItem
 import comfort.transactions.doctype.sales_order.sales_order
 import frappe
 from comfort import count_qty, counters_are_same, get_all, get_doc, get_value, new_doc
-from comfort.comfort_core.doctype.commission_settings.commission_settings import (
-    CommissionSettings,
-)
-from comfort.entities.doctype.child_item.child_item import ChildItem
-from comfort.entities.doctype.item.item import Item
-from comfort.finance import create_payment
-from comfort.finance.doctype.payment.payment import Payment
+from comfort.comfort_core import CommissionSettings
+from comfort.entities import ChildItem, Item
+from comfort.finance import Payment
+from comfort.finance.utils import create_payment
 from comfort.integrations.ikea import FetchItemsResult
-from comfort.stock.doctype.checkout.checkout import Checkout
-from comfort.stock.doctype.delivery_stop.delivery_stop import DeliveryStop
-from comfort.stock.doctype.receipt.receipt import Receipt
-from comfort.stock.doctype.stock_entry.stock_entry import StockEntry
-from comfort.transactions.doctype.purchase_order.purchase_order import PurchaseOrder
-from comfort.transactions.doctype.purchase_order_item_to_sell.purchase_order_item_to_sell import (
+from comfort.stock import Checkout, DeliveryStop, Receipt, StockEntry
+from comfort.transactions import (
+    PurchaseOrder,
     PurchaseOrderItemToSell,
+    SalesOrder,
+    SalesOrderChildItem,
+    SalesOrderItem,
+    SalesReturn,
 )
 from comfort.transactions.doctype.sales_order.sales_order import (
-    SalesOrder,
     _CheckAvailabilityCannotAddItem,
     _CheckAvailabilityDeliveryOptionItem,
     _SplitOrderItem,
@@ -38,13 +35,6 @@ from comfort.transactions.doctype.sales_order.sales_order import (
     has_linked_delivery_trip,
     validate_params_from_available_stock,
 )
-from comfort.transactions.doctype.sales_order_child_item.sales_order_child_item import (
-    SalesOrderChildItem,
-)
-from comfort.transactions.doctype.sales_order_item.sales_order_item import (
-    SalesOrderItem,
-)
-from comfort.transactions.doctype.sales_return.sales_return import SalesReturn
 from frappe import ValidationError
 from tests.conftest import mock_delivery_services
 

@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 from comfort import _, get_all, group_by_attr
-from comfort.entities.doctype.item.item import Item
-from comfort.stock import get_stock_balance
-from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
+from comfort.entities import Item
+from comfort.stock.utils import get_stock_balance
+from comfort.transactions import SalesOrder
 
 
 def _get_purchased_sales_orders_amount() -> int:

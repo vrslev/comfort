@@ -3,8 +3,7 @@ from typing import Any
 import pytest
 
 from comfort import get_all, group_by_attr
-from comfort.finance.doctype.account.account import Account
-from comfort.finance.doctype.gl_entry.gl_entry import GLEntry
+from comfort.finance import Account, GLEntry
 from comfort.finance.report.profit_and_loss_statement.profit_and_loss_statement import (
     _calculate_total_in_parent_accounts,
     _filter_accounts,

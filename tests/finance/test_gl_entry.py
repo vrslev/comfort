@@ -1,6 +1,6 @@
 import pytest
 
-from comfort.finance.doctype.gl_entry.gl_entry import GLEntry
+from comfort.finance import GLEntry
 from frappe import ValidationError
 
 

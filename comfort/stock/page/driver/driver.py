@@ -1,6 +1,6 @@
 import frappe
 from comfort import doc_exists, get_doc
-from comfort.stock.doctype.delivery_trip.delivery_trip import DeliveryTrip
+from comfort.stock import DeliveryTrip
 
 
 @frappe.whitelist()

@@ -14,14 +14,12 @@ from comfort import (
     get_doc,
     get_value,
 )
-from comfort.finance import create_payment, get_account
-from comfort.finance.doctype.gl_entry.gl_entry import GLEntry
-from comfort.stock.doctype.stock_entry.stock_entry import StockEntry
-from comfort.transactions import merge_same_items
-from comfort.transactions.doctype.purchase_order.purchase_order import PurchaseOrder
-from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
-from comfort.transactions.doctype.sales_return.sales_return import SalesReturn
-from tests.stock.test_init import reverse_qtys
+from comfort.finance import GLEntry
+from comfort.finance.utils import create_payment, get_account
+from comfort.stock import StockEntry
+from comfort.transactions import PurchaseOrder, SalesOrder, SalesReturn
+from comfort.transactions.utils import merge_same_items
+from tests.stock.test_utils import reverse_qtys
 
 
 def test_sales_return_voucher_property(sales_return: SalesReturn):

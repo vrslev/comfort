@@ -11,14 +11,8 @@ from werkzeug import Response
 import comfort.integrations.vk_form
 import frappe
 from comfort import count_qty, doc_exists, get_doc
-from comfort.comfort_core.doctype.commission_settings.commission_settings import (
-    CommissionSettings,
-)
-from comfort.comfort_core.doctype.vk_form_settings.vk_form_settings import (
-    VkFormSettings,
-)
-from comfort.entities.doctype.customer.customer import Customer
-from comfort.entities.doctype.item.item import Item
+from comfort.comfort_core import CommissionSettings, VkFormSettings
+from comfort.entities import Customer, Item
 from comfort.integrations.vk_form import (
     _create_sales_order,
     _create_vk_group_dialog_url,
@@ -28,7 +22,7 @@ from comfort.integrations.vk_form import (
     main,
     process_form,
 )
-from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
+from comfort.transactions import SalesOrder
 from tests.integrations.test_browser_ext_server import patch_fetch_items
 
 mock_api_secret = "E64XhVwb84nf@wPumC.JXFMo"  # nosec

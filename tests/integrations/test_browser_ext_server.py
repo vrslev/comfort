@@ -6,12 +6,8 @@ from jwt import PyJWT
 
 import comfort.integrations.browser_ext
 from comfort import count_qty, get_doc
-from comfort.comfort_core.doctype.commission_settings.commission_settings import (
-    CommissionSettings,
-)
-from comfort.comfort_core.doctype.ikea_settings.ikea_settings import IkeaSettings
-from comfort.entities.doctype.customer.customer import Customer
-from comfort.entities.doctype.item.item import Item
+from comfort.comfort_core import CommissionSettings, IkeaSettings
+from comfort.entities import Customer, Item
 from comfort.integrations.browser_ext import (
     _create_customer,
     _create_sales_order,

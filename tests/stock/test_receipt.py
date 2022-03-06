@@ -5,13 +5,11 @@ from types import SimpleNamespace
 import pytest
 
 from comfort import get_all, get_doc, get_value, new_doc
-from comfort.entities.doctype.item.item import Item
-from comfort.finance import get_account
-from comfort.finance.doctype.gl_entry.gl_entry import GLEntry
-from comfort.stock.doctype.receipt.receipt import Receipt
-from comfort.stock.doctype.stock_entry.stock_entry import StockEntry
-from comfort.transactions.doctype.purchase_order.purchase_order import PurchaseOrder
-from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
+from comfort.entities import Item
+from comfort.finance import GLEntry
+from comfort.finance.utils import get_account
+from comfort.stock import Receipt, StockEntry
+from comfort.transactions import PurchaseOrder, SalesOrder
 
 
 def test_voucher_property(receipt_sales: Receipt):

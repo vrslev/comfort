@@ -12,17 +12,18 @@ from comfort import (
     get_value,
     group_by_attr,
 )
-from comfort.entities.doctype.item.item import Item
-from comfort.finance import cancel_gl_entries_for, create_gl_entry, get_account
-from comfort.stock import cancel_stock_entries_for, create_stock_entry
-from comfort.transactions import Return, delete_empty_items, merge_same_items
-from comfort.transactions.doctype.purchase_order.purchase_order import PurchaseOrder
+from comfort.entities import Item
+from comfort.finance.utils import cancel_gl_entries_for, create_gl_entry, get_account
+from comfort.stock.utils import cancel_stock_entries_for, create_stock_entry
 from comfort.transactions.doctype.purchase_order_item_to_sell.purchase_order_item_to_sell import (
     PurchaseOrderItemToSell,
 )
-
-from ..sales_order.sales_order import SalesOrder
-from ..sales_return_item.sales_return_item import SalesReturnItem
+from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
+from comfort.transactions.doctype.sales_return_item.sales_return_item import (
+    SalesReturnItem,
+)
+from comfort.transactions.return_ import Return
+from comfort.transactions.utils import delete_empty_items, merge_same_items
 
 
 class SalesReturn(Return):
@@ -144,6 +145,8 @@ class SalesReturn(Return):
             item.amount = item.rate * item.qty
 
     def _add_items_to_sell_to_linked_purchase_order(self):
+        from comfort.transactions import PurchaseOrder
+
         purchase_order_name: str | None = get_value(
             "Purchase Order Sales Order",
             filters={"sales_order_name": self._voucher.name, "docstatus": ("!=", 2)},

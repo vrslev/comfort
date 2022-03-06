@@ -6,10 +6,11 @@ from jwt import PyJWT
 
 import frappe
 from comfort import get_doc, get_value, new_doc
-from comfort.comfort_core.doctype.ikea_settings.ikea_settings import IkeaSettings
-from comfort.entities.doctype.customer.customer import Customer, parse_vk_url
+from comfort.comfort_core import IkeaSettings
+from comfort.entities import Customer
+from comfort.entities.doctype.customer.customer import parse_vk_url
 from comfort.integrations.ikea import fetch_items
-from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
+from comfort.transactions import SalesOrder
 from frappe.model.rename_doc import rename_doc
 from frappe.utils import get_url_to_form
 

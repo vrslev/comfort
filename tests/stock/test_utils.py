@@ -6,17 +6,15 @@ from types import SimpleNamespace
 import pytest
 
 from comfort import count_qty, counters_are_same, get_all, get_doc, get_value
-from comfort.stock import (
+from comfort.stock import Receipt, StockEntry
+from comfort.stock.utils import (
     cancel_stock_entries_for,
     create_checkout,
     create_receipt,
     create_stock_entry,
     get_stock_balance,
 )
-from comfort.stock.doctype.receipt.receipt import Receipt
-from comfort.stock.doctype.stock_entry.stock_entry import StockEntry
-from comfort.transactions.doctype.purchase_order.purchase_order import PurchaseOrder
-from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
+from comfort.transactions import PurchaseOrder, SalesOrder
 
 
 def test_create_receipt(sales_order: SalesOrder):

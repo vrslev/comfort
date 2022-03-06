@@ -5,11 +5,9 @@ from typing import Any
 import pytest
 
 from comfort import TypedDocument, get_all, get_doc, get_value
-from comfort.finance import cancel_gl_entries_for, get_account
-from comfort.finance.doctype.gl_entry.gl_entry import GLEntry
-from comfort.finance.doctype.payment.payment import Payment
-from comfort.transactions.doctype.purchase_order.purchase_order import PurchaseOrder
-from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
+from comfort.finance import GLEntry, Payment
+from comfort.finance.utils import cancel_gl_entries_for, get_account
+from comfort.transactions import PurchaseOrder, SalesOrder
 from frappe import ValidationError
 
 

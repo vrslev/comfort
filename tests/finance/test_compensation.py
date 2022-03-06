@@ -4,11 +4,9 @@ import pytest
 
 import frappe
 from comfort import get_all, new_doc
-from comfort.finance import get_account
-from comfort.finance.doctype.compensation.compensation import Compensation
-from comfort.finance.doctype.gl_entry.gl_entry import GLEntry
-from comfort.transactions.doctype.purchase_order.purchase_order import PurchaseOrder
-from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
+from comfort.finance import Compensation, GLEntry
+from comfort.finance.utils import get_account
+from comfort.transactions import PurchaseOrder, SalesOrder
 
 
 @pytest.mark.parametrize("docstatus", (0, 2))

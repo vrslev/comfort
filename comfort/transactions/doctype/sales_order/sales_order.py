@@ -24,28 +24,30 @@ from comfort import (
     group_by_attr,
     new_doc,
 )
-from comfort.comfort_core.doctype.commission_settings.commission_settings import (
-    CommissionSettings,
-)
-from comfort.entities.doctype.child_item.child_item import ChildItem
-from comfort.entities.doctype.item.item import Item
-from comfort.finance import create_payment, get_account
-from comfort.finance.doctype.payment.payment import Payment
+from comfort.comfort_core import CommissionSettings
+from comfort.entities import ChildItem, Item
+from comfort.finance import Payment
+from comfort.finance.utils import create_payment, get_account
 from comfort.integrations.ikea import fetch_items, get_delivery_services
-from comfort.stock import create_receipt, create_stock_entry, get_stock_balance
-from comfort.stock.doctype.receipt.receipt import Receipt
-from comfort.transactions import delete_empty_items, merge_same_items
-from frappe.utils.print_format import get_pdf
-
-from ..purchase_order_item_to_sell.purchase_order_item_to_sell import (
+from comfort.stock import Receipt
+from comfort.stock.utils import create_receipt, create_stock_entry, get_stock_balance
+from comfort.transactions.doctype.purchase_order_item_to_sell.purchase_order_item_to_sell import (
     PurchaseOrderItemToSell,
 )
-from ..purchase_order_sales_order.purchase_order_sales_order import (
+from comfort.transactions.doctype.purchase_order_sales_order.purchase_order_sales_order import (
     PurchaseOrderSalesOrder,
 )
-from ..sales_order_child_item.sales_order_child_item import SalesOrderChildItem
-from ..sales_order_item.sales_order_item import SalesOrderItem
-from ..sales_order_service.sales_order_service import SalesOrderService
+from comfort.transactions.doctype.sales_order_child_item.sales_order_child_item import (
+    SalesOrderChildItem,
+)
+from comfort.transactions.doctype.sales_order_item.sales_order_item import (
+    SalesOrderItem,
+)
+from comfort.transactions.doctype.sales_order_service.sales_order_service import (
+    SalesOrderService,
+)
+from comfort.transactions.utils import delete_empty_items, merge_same_items
+from frappe.utils.print_format import get_pdf
 
 
 class _SplitOrderItem(TypedDict):
@@ -134,6 +136,7 @@ class SalesOrder(TypedDocument):
         self._create_cancel_sales_return()
 
     def on_cancel(self):
+
         self.ignore_linked_doctypes = [
             "Purchase Order",
             "Sales Return",
@@ -205,7 +208,7 @@ class SalesOrder(TypedDocument):
         if self.from_available_stock == "Available Actual":
             stock_counter = get_stock_balance(self.from_available_stock)
         else:
-            from ..purchase_order.purchase_order import PurchaseOrder
+            from comfort.transactions import PurchaseOrder
 
             doc = get_doc(PurchaseOrder, self.from_purchase_order)
             items_to_sell = doc.get_items_to_sell(split_combinations=True)
@@ -306,7 +309,7 @@ class SalesOrder(TypedDocument):
         if self.flags.on_cancel_from_sales_return:
             return
 
-        from ..sales_return.sales_return import SalesReturn
+        from comfort.transactions import SalesReturn
 
         sales_return = new_doc(SalesReturn)
         sales_return.sales_order = self.name
@@ -321,7 +324,7 @@ class SalesOrder(TypedDocument):
         if self.from_available_stock != "Available Purchased":
             return
 
-        from ..purchase_order.purchase_order import PurchaseOrder
+        from comfort.transactions import PurchaseOrder
 
         doc = get_doc(PurchaseOrder, self.from_purchase_order)
 

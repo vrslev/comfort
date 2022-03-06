@@ -5,13 +5,8 @@ from typing import Annotated, Any, Iterable, Literal
 
 import frappe
 from comfort import _, get_all
-from comfort.stock import get_stock_balance
-from comfort.transactions.doctype.purchase_order_item_to_sell.purchase_order_item_to_sell import (
-    PurchaseOrderItemToSell,
-)
-from comfort.transactions.doctype.purchase_order_sales_order.purchase_order_sales_order import (
-    PurchaseOrderSalesOrder,
-)
+from comfort.stock.utils import get_stock_balance
+from comfort.transactions import PurchaseOrderItemToSell, PurchaseOrderSalesOrder
 from comfort.transactions.doctype.sales_order.sales_order import (
     validate_params_from_available_stock,
 )

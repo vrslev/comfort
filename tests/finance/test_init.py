@@ -4,16 +4,15 @@ import pytest
 
 import frappe
 from comfort import get_all, get_value
-from comfort.finance import (
+from comfort.finance import GLEntry, Payment
+from comfort.finance.chart_of_accounts import DEFAULT_ACCOUNT_SETTINGS
+from comfort.finance.utils import (
     cancel_gl_entries_for,
     create_gl_entry,
     create_payment,
     get_account,
 )
-from comfort.finance.chart_of_accounts import DEFAULT_ACCOUNT_SETTINGS
-from comfort.finance.doctype.gl_entry.gl_entry import GLEntry
-from comfort.finance.doctype.payment.payment import Payment
-from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
+from comfort.transactions import SalesOrder
 
 
 @pytest.mark.usefixtures("accounts")

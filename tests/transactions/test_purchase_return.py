@@ -8,24 +8,20 @@ import pytest
 
 import frappe
 from comfort import count_qty, get_all, get_doc, get_value, group_by_attr, new_doc
-from comfort.entities.doctype.item.item import Item
-from comfort.finance import get_account
-from comfort.finance.doctype.gl_entry.gl_entry import GLEntry
-from comfort.stock.doctype.stock_entry.stock_entry import StockEntry
-from comfort.transactions import AnyChildItem, merge_same_items
-from comfort.transactions.doctype.purchase_order.purchase_order import PurchaseOrder
-from comfort.transactions.doctype.purchase_return.purchase_return import PurchaseReturn
-from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
-from comfort.transactions.doctype.sales_order_child_item.sales_order_child_item import (
+from comfort.entities import Item
+from comfort.finance import GLEntry
+from comfort.finance.utils import get_account
+from comfort.stock import StockEntry
+from comfort.transactions import (
+    PurchaseOrder,
+    PurchaseReturn,
+    SalesOrder,
     SalesOrderChildItem,
-)
-from comfort.transactions.doctype.sales_order_item.sales_order_item import (
     SalesOrderItem,
-)
-from comfort.transactions.doctype.sales_return.sales_return import SalesReturn
-from comfort.transactions.doctype.sales_return_item.sales_return_item import (
+    SalesReturn,
     SalesReturnItem,
 )
+from comfort.transactions.utils import AnyChildItem, merge_same_items
 
 
 def test_purchase_return_voucher_property(purchase_return: PurchaseReturn):

@@ -19,29 +19,36 @@ from comfort import (
     group_by_attr,
     maybe_json,
 )
-from comfort.entities.doctype.child_item.child_item import ChildItem
-from comfort.finance import create_payment
+from comfort.entities import ChildItem
+from comfort.finance.utils import create_payment
 from comfort.integrations.ikea import (
     PurchaseInfoDict,
     add_items_to_cart,
     fetch_items,
     get_delivery_services,
 )
-from comfort.stock import create_checkout, create_receipt
-from comfort.transactions import AnyChildItem, delete_empty_items, merge_same_items
-
-from ..purchase_order_delivery_option.purchase_order_delivery_option import (
+from comfort.stock.utils import create_checkout, create_receipt
+from comfort.transactions.doctype.purchase_order_delivery_option.purchase_order_delivery_option import (
     PurchaseOrderDeliveryOption,
 )
-from ..purchase_order_item_to_sell.purchase_order_item_to_sell import (
+from comfort.transactions.doctype.purchase_order_item_to_sell.purchase_order_item_to_sell import (
     PurchaseOrderItemToSell,
 )
-from ..purchase_order_sales_order.purchase_order_sales_order import (
+from comfort.transactions.doctype.purchase_order_sales_order.purchase_order_sales_order import (
     PurchaseOrderSalesOrder,
 )
-from ..sales_order.sales_order import SalesOrder
-from ..sales_order_child_item.sales_order_child_item import SalesOrderChildItem
-from ..sales_order_item.sales_order_item import SalesOrderItem
+from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
+from comfort.transactions.doctype.sales_order_child_item.sales_order_child_item import (
+    SalesOrderChildItem,
+)
+from comfort.transactions.doctype.sales_order_item.sales_order_item import (
+    SalesOrderItem,
+)
+from comfort.transactions.utils import (
+    AnyChildItem,
+    delete_empty_items,
+    merge_same_items,
+)
 
 
 class PurchaseOrder(TypedDocument):

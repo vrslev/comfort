@@ -1,8 +1,7 @@
 import pytest
 
 from comfort import get_doc, get_value
-from comfort.entities.doctype.child_item.child_item import ChildItem
-from comfort.entities.doctype.item.item import Item
+from comfort.entities import ChildItem, Item
 from frappe import ValidationError
 
 

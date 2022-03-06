@@ -12,23 +12,24 @@ from comfort import (
     group_by_attr,
     new_doc,
 )
-from comfort.entities.doctype.item.item import Item
-from comfort.finance import cancel_gl_entries_for, create_gl_entry, get_account
-from comfort.stock import cancel_stock_entries_for, create_stock_entry
-from comfort.transactions import (
+from comfort.entities import Item
+from comfort.finance.utils import cancel_gl_entries_for, create_gl_entry, get_account
+from comfort.stock.utils import cancel_stock_entries_for, create_stock_entry
+from comfort.transactions.doctype.purchase_order.purchase_order import PurchaseOrder
+from comfort.transactions.doctype.purchase_order_sales_order.purchase_order_sales_order import (
+    PurchaseOrderSalesOrder,
+)
+from comfort.transactions.doctype.purchase_return_item.purchase_return_item import (
+    PurchaseReturnItem,
+)
+from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
+from comfort.transactions.doctype.sales_return.sales_return import SalesReturn
+from comfort.transactions.return_ import Return
+from comfort.transactions.utils import (
     AnyChildItem,
-    Return,
     delete_empty_items,
     merge_same_items,
 )
-
-from ..purchase_order.purchase_order import PurchaseOrder
-from ..purchase_order_sales_order.purchase_order_sales_order import (
-    PurchaseOrderSalesOrder,
-)
-from ..purchase_return_item.purchase_return_item import PurchaseReturnItem
-from ..sales_order.sales_order import SalesOrder
-from ..sales_return.sales_return import SalesReturn
 
 
 class PurchaseReturn(Return):

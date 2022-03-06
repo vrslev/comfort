@@ -8,7 +8,7 @@ import requests
 import responses
 
 import comfort.integrations.vk_api
-from comfort.comfort_core.doctype.vk_api_settings.vk_api_settings import VkApiSettings
+from comfort.comfort_core import VkApiSettings
 from comfort.integrations.vk_api import User, VkApi, VkApiError
 from frappe.exceptions import ValidationError
 

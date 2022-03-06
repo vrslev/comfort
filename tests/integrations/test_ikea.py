@@ -14,9 +14,8 @@ from ikea_api.wrappers.types import GetDeliveryServicesResponse, ParsedItem
 import comfort.integrations.ikea
 import frappe
 from comfort import count_qty, counters_are_same, get_all, get_doc
-from comfort.comfort_core.doctype.ikea_settings.ikea_settings import IkeaSettings
-from comfort.entities.doctype.item.item import Item
-from comfort.entities.doctype.item_category.item_category import ItemCategory
+from comfort.comfort_core import IkeaSettings
+from comfort.entities import Item, ItemCategory
 from comfort.integrations.ikea import (
     FetchItemsResult,
     _create_item,

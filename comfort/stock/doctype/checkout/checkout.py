@@ -2,8 +2,7 @@ from typing import Literal
 
 import frappe
 from comfort import TypedDocument, get_doc
-from comfort.stock import cancel_stock_entries_for, create_stock_entry
-from comfort.transactions.doctype.purchase_order.purchase_order import PurchaseOrder
+from comfort.stock.utils import cancel_stock_entries_for, create_stock_entry
 
 
 class Checkout(TypedDocument):
@@ -11,6 +10,8 @@ class Checkout(TypedDocument):
     purchase_order: str
 
     def before_submit(self):
+        from comfort.transactions import PurchaseOrder
+
         doc = get_doc(PurchaseOrder, self.purchase_order)
         if doc.sales_orders:
             create_stock_entry(

@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 from collections import Counter, defaultdict
 from copy import copy
+from typing import TYPE_CHECKING
 
 from ikea_api.wrappers.types import GetDeliveryServicesResponse, UnavailableItem
 
@@ -20,22 +21,17 @@ from comfort.integrations.ikea import get_delivery_services
 from comfort.stock.doctype.waiting_list_sales_order.waiting_list_sales_order import (
     WaitingListSalesOrder,
 )
-from comfort.transactions.doctype.purchase_order_sales_order.purchase_order_sales_order import (
-    PurchaseOrderSalesOrder,
-)
-from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
-from comfort.transactions.doctype.sales_order_child_item.sales_order_child_item import (
-    SalesOrderChildItem,
-)
-from comfort.transactions.doctype.sales_order_item.sales_order_item import (
-    SalesOrderItem,
-)
+
+if TYPE_CHECKING:
+    from comfort.transactions import SalesOrderChildItem, SalesOrderItem
 
 
 class WaitingList(TypedDocument):
     sales_orders: list[WaitingListSalesOrder]
 
     def _get_items(self):
+        from comfort.transactions import SalesOrder
+
         items: list[SalesOrderChildItem | SalesOrderItem] = []
         for order in self.sales_orders:
             doc = get_doc(SalesOrder, order.sales_order)
@@ -122,6 +118,8 @@ class WaitingList(TypedDocument):
         self.save()
 
     def _show_already_in_po_message(self):
+        from comfort.transactions import PurchaseOrderSalesOrder
+
         sales_orders_in_purchase_order = get_all(
             PurchaseOrderSalesOrder,
             filter={

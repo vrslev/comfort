@@ -10,7 +10,7 @@ import frappe
 from comfort import get_value, new_doc
 from comfort.integrations.ikea import fetch_items
 from comfort.integrations.vk_api import VkApi
-from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
+from comfort.transactions import SalesOrder
 
 
 class VkFormAnswer(BaseModel):

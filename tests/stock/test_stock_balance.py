@@ -3,8 +3,8 @@ from typing import Any
 import pytest
 
 from comfort import get_doc
-from comfort.entities.doctype.item.item import Item
-from comfort.stock.doctype.stock_entry.stock_entry import StockEntry
+from comfort.entities import Item
+from comfort.stock import StockEntry
 from comfort.stock.report.stock_balance.stock_balance import get_data
 
 

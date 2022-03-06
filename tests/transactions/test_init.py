@@ -7,14 +7,9 @@ import pytest
 
 import frappe
 from comfort import count_qty, get_value, group_by_attr
-from comfort.transactions import (
-    _ReturnAddItemsPayloadItem,
-    delete_empty_items,
-    merge_same_items,
-)
-from comfort.transactions.doctype.purchase_return.purchase_return import PurchaseReturn
-from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
-from comfort.transactions.doctype.sales_return.sales_return import SalesReturn
+from comfort.transactions import PurchaseReturn, SalesOrder, SalesReturn
+from comfort.transactions.return_ import _ReturnAddItemsPayloadItem
+from comfort.transactions.utils import delete_empty_items, merge_same_items
 
 
 def test_return_delete_empty_items(sales_return: SalesReturn):

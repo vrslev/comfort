@@ -4,7 +4,7 @@ from typing import TypedDict
 
 from comfort import get_all, group_by_attr
 from comfort.entities.doctype.item.item import Item
-from comfort.stock import StockTypes, get_stock_balance
+from comfort.stock.utils import StockTypes, get_stock_balance
 
 
 class StockBalanceFilters(TypedDict):

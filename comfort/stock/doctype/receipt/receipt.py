@@ -4,27 +4,12 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import frappe
 from comfort import TypedDocument, ValidationError, _, get_doc, get_value
-from comfort.entities.doctype.child_item.child_item import ChildItem
-from comfort.finance import cancel_gl_entries_for, create_gl_entry, get_account
-from comfort.stock import cancel_stock_entries_for, create_stock_entry
-from comfort.transactions.doctype.purchase_order_item_to_sell.purchase_order_item_to_sell import (
-    PurchaseOrderItemToSell,
-)
-from comfort.transactions.doctype.sales_order_child_item.sales_order_child_item import (
-    SalesOrderChildItem,
-)
-from comfort.transactions.doctype.sales_order_item.sales_order_item import (
-    SalesOrderItem,
-)
-from comfort.transactions.doctype.sales_order_service.sales_order_service import (
-    SalesOrderService,
-)
-
-from ..stock_entry.stock_entry import StockTypes
+from comfort.finance.utils import cancel_gl_entries_for, create_gl_entry, get_account
+from comfort.stock.doctype.stock_entry.stock_entry import StockTypes
+from comfort.stock.utils import cancel_stock_entries_for, create_stock_entry
 
 if TYPE_CHECKING:
-    from comfort.transactions.doctype.purchase_order.purchase_order import PurchaseOrder
-    from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
+    from comfort.transactions import PurchaseOrder, SalesOrder
 
 
 class Receipt(TypedDocument):
@@ -67,6 +52,8 @@ class Receipt(TypedDocument):
         self.set_status_in_voucher()
 
     def create_sales_gl_entries(self):
+        from comfort.transactions import SalesOrderService
+
         inventory_amount: int = self._voucher.items_cost  # type: ignore
         sales_amount: int = self._voucher.margin - self._voucher.discount  # type: ignore
         delivery_amount, installation_amount = 0, 0
@@ -92,9 +79,7 @@ class Receipt(TypedDocument):
             self._new_gl_entry("prepaid_sales", prepaid_sales_amount, 0)
 
     def create_sales_stock_entries(self):
-        items: list[
-            SalesOrderItem | SalesOrderChildItem
-        ] = self._voucher.get_items_with_splitted_combinations()  # type: ignore
+        items: Any = self._voucher.get_items_with_splitted_combinations()  # type: ignore
         self._new_stock_entry("Reserved Actual", items, reverse_qty=True)
 
     def create_purchase_gl_entries(self):
@@ -107,9 +92,7 @@ class Receipt(TypedDocument):
         self._new_gl_entry("inventory", items_amount, 0)
 
     def _create_purchase_stock_entries_for_sales_orders(self):
-        items: list[
-            SalesOrderItem | SalesOrderChildItem
-        ] = self._voucher.get_items_in_sales_orders(  # type: ignore
+        items: Any = self._voucher.get_items_in_sales_orders(  # type: ignore
             split_combinations=True
         )
         if not items:
@@ -118,9 +101,7 @@ class Receipt(TypedDocument):
         self._new_stock_entry("Reserved Actual", items)
 
     def _create_purchase_stock_entries_for_items_to_sell(self):
-        items: list[
-            PurchaseOrderItemToSell | ChildItem
-        ] = self._voucher.get_items_to_sell(  # type: ignore
+        items: list[Any] = self._voucher.get_items_to_sell(  # type: ignore
             split_combinations=True
         )
         if not items:
@@ -133,17 +114,13 @@ class Receipt(TypedDocument):
         self._create_purchase_stock_entries_for_items_to_sell()
 
     def set_status_in_voucher(self):
-        if self.voucher_type == "Sales Order":
-            from comfort.transactions.doctype.sales_order.sales_order import SalesOrder
+        from comfort.transactions import PurchaseOrder, SalesOrder
 
+        if self.voucher_type == "Sales Order":
             doc = get_doc(SalesOrder, self.voucher_no)
             doc.set_statuses()
             doc.save_without_validating()
         else:
-            from comfort.transactions.doctype.purchase_order.purchase_order import (
-                PurchaseOrder,
-            )
-
             doc = get_doc(PurchaseOrder, self.voucher_no)
             doc.status = "To Receive"
             doc.save_without_validating()
