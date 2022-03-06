@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import asyncio
 from calendar import timegm
 from datetime import date, datetime, timezone
 from functools import lru_cache
@@ -29,6 +28,7 @@ from comfort import (
     get_cached_value,
     get_doc,
     new_doc,
+    syncify,
 )
 from comfort.comfort_core.doctype.ikea_settings.ikea_settings import IkeaSettings
 from comfort.entities.doctype.item.item import Item
@@ -42,11 +42,6 @@ __all__ = [
     "get_delivery_services",
     "add_items_to_cart",
 ]
-
-
-@lru_cache
-def get_event_loop():
-    return asyncio.new_event_loop()
 
 
 @lru_cache
@@ -124,7 +119,7 @@ def _get_delivery_services(items: dict[str, int]) -> types.GetDeliveryServicesRe
         items=items,
         zip_code=_get_zip_code(),
     )
-    return get_event_loop().run_until_complete(coro)
+    return syncify.run(coro)
 
 
 def _validate_delivery_services_items(items: dict[str, int]):
@@ -306,7 +301,7 @@ def _create_item(parsed_item: types.ParsedItem):
 
 def _unshorten_urls_from_ingka_pagelinks(item_codes: str | list[str]) -> list[str]:
     coro = orig_unshorten_urls_from_ingka_pagelinks(str(item_codes))
-    return get_event_loop().run_until_complete(coro)
+    return syncify.run(coro)
 
 
 def parse_item_codes(item_codes: str | list[str]) -> list[str]:
@@ -357,7 +352,7 @@ class FetchItemsResult(TypedDict):
 
 def _get_items(item_codes: list[str]) -> list[types.ParsedItem]:
     coro = ikea_api.get_items(constants=get_constants(), item_codes=item_codes)
-    return get_event_loop().run_until_complete(coro)
+    return syncify.run(coro)
 
 
 def fetch_items(item_codes: str | list[str], force_update: bool):
@@ -399,6 +394,7 @@ def get_items(item_codes: str):  # pragma: no cover
         # If error has this format: ItemFetchError(["item_code", ...])
         if unsuccessful := ikea_api.parse_item_codes(e.args[0]):  # type: ignore
             response = FetchItemsResult(unsuccessful=unsuccessful, successful=[])
+            sentry_sdk.capture_exception(e)
         else:
             raise
 
