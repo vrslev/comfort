@@ -37,21 +37,6 @@ def test_get_parent_children_accounts_map():
     )
 
 
-@pytest.mark.usefixtures("accounts")
-def test_filter_accounts():
-    assert _filter_accounts(_get_parent_children_accounts_map()) == [
-        {"name": "Income", "parent_account": None, "indent": 0},
-        {"name": "Service", "parent_account": "Income", "indent": 1},
-        {"name": "Installation", "parent_account": "Service", "indent": 2},
-        {"name": "Delivery", "parent_account": "Service", "indent": 2},
-        {"name": "Sales", "parent_account": "Income", "indent": 1},
-        {"name": "Purchase Compensations", "parent_account": "Income", "indent": 1},
-        {"name": "Expense", "parent_account": None, "indent": 0},
-        {"name": "Sales Compensations", "parent_account": "Expense", "indent": 1},
-        {"name": "Purchase Delivery", "parent_account": "Expense", "indent": 1},
-    ]
-
-
 def get_filters() -> dict[str, str]:
     return {
         "from_date": "2021-07-31",
