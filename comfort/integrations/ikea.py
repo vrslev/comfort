@@ -399,7 +399,6 @@ def get_items(item_codes: str):  # pragma: no cover
         # If error has this format: ItemFetchError(["item_code", ...])
         if unsuccessful := ikea_api.parse_item_codes(e.args[0]):  # type: ignore
             response = FetchItemsResult(unsuccessful=unsuccessful, successful=[])
-            sentry_sdk.capture_exception(e)
         else:
             raise
 
