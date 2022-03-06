@@ -3,6 +3,46 @@
 
 <!--next-version-placeholder-->
 
+## v0.40.2 (2022-03-06)
+### Fix
+* **browser ext:** Add requests ([`7ee35c9`](https://github.com/vrslev/comfort/commit/7ee35c9e2a2e068056114b943db1da2e8e2338fe))
+* **ikea:** Bump ikea-api from 2.0.4 to 2.0.5 ([`9c16b1e`](https://github.com/vrslev/comfort/commit/9c16b1e4168c4f6abbd828d110e84d9bffc84ccd))
+* **ikea:** RuntimeError "This event loop is already running" ([`705c26d`](https://github.com/vrslev/comfort/commit/705c26d88f063f36c110a6a13e1a1f6657e27db7))
+* As_dict() after fixing typing issues ([`51812b2`](https://github.com/vrslev/comfort/commit/51812b25278da3459d56dd5b4137a20818e8ba21))
+* **Sentry:** Don't capture ItemFetchError ([`c39e124`](https://github.com/vrslev/comfort/commit/c39e124d9114a9a35c9a2fcac9a2a21a387cf4ec))
+* **Sentry:** Stop catching CSRF error ([`2ed385f`](https://github.com/vrslev/comfort/commit/2ed385f0decf2354e41512e55327a618b8a0357e))
+* Typing issues ([`9d12a6a`](https://github.com/vrslev/comfort/commit/9d12a6a5ba74fd1f3a24eacb93fae78c6221d879))
+
+### Build
+* **deps:** Bump @sentry/tracing from 6.17.9 to 6.18.0 ([#187](https://github.com/vrslev/comfort/issues/187)) ([`2a06239`](https://github.com/vrslev/comfort/commit/2a062396f21d23d9a00b777907a9c6a40c37427a))
+* **deps:** Bump sentry-sdk from 1.5.5 to 1.5.6 ([#185](https://github.com/vrslev/comfort/issues/185)) ([`649d15b`](https://github.com/vrslev/comfort/commit/649d15bca78904f209d3c1895e022aa7df6f955f))
+* **deps:** Bump @sentry/browser from 6.17.9 to 6.18.0 ([#188](https://github.com/vrslev/comfort/issues/188)) ([`a4c7274`](https://github.com/vrslev/comfort/commit/a4c7274e144ffc16bb00993c5ac1b600feb5b036))
+* **deps:** Bump sentry-sdk from 1.5.5 to 1.5.6 in /browser_ext ([#189](https://github.com/vrslev/comfort/issues/189)) ([`4eb0da9`](https://github.com/vrslev/comfort/commit/4eb0da94395c89ab7c0747415f7914c8b9420311))
+* **deps:** Bump ikea-api[httpx] from 2.0.3 to 2.0.4 ([#184](https://github.com/vrslev/comfort/issues/184)) ([`5731eb2`](https://github.com/vrslev/comfort/commit/5731eb2175a2e345f251639c1f9e6c80a31ce749))
+* **deps:** Bump ikea-api[httpx] from 2.0.3 to 2.0.4 in /browser_ext ([#190](https://github.com/vrslev/comfort/issues/190)) ([`63476ef`](https://github.com/vrslev/comfort/commit/63476efe31df865e0052e0d064c1a67cab22d810))
+* **deps-dev:** Bump eslint from 8.9.0 to 8.10.0 ([#186](https://github.com/vrslev/comfort/issues/186)) ([`734bd6c`](https://github.com/vrslev/comfort/commit/734bd6cd649b362ae048968d56fc0c748889029b))
+* **deps:** Bump actions/setup-node from 2 to 3 ([#183](https://github.com/vrslev/comfort/issues/183)) ([`a9caffe`](https://github.com/vrslev/comfort/commit/a9caffe917a3da0c04ca4d75b6bba42ba45f6cf8))
+* **deps:** Bump peter-evans/create-pull-request from 3.12.1 to 3.13.0 ([#182](https://github.com/vrslev/comfort/issues/182)) ([`baaa19a`](https://github.com/vrslev/comfort/commit/baaa19ae0ac1e43952d651c0ad6db86fd49415ba))
+
+### Refactor
+* Shorten imports ([`a6611d7`](https://github.com/vrslev/comfort/commit/a6611d7f2291c347ed95f5e2b506da828d7a5480))
+* Finance utils ([`bab489d`](https://github.com/vrslev/comfort/commit/bab489d9c8d0bd6557e817d2e9725f530303bf22))
+* Account ([`b00e0d4`](https://github.com/vrslev/comfort/commit/b00e0d4de436f53a775910db70a11bb192cdf46e))
+* **Payment:** Refactor Payment ([`4f209de`](https://github.com/vrslev/comfort/commit/4f209ded112b2a7639902d8634367cf20da1e539))
+* Small fixes ([`57ba4fc`](https://github.com/vrslev/comfort/commit/57ba4fc75c7bcc31518df4e152570aae55b7d288))
+* Customer module ([`d25fdc8`](https://github.com/vrslev/comfort/commit/d25fdc88d4acc3006a96660ee4f449fafe6f8538))
+
+### Test
+* Remove useless test ([`aa1aa6a`](https://github.com/vrslev/comfort/commit/aa1aa6a5db815d39fe52721066409a4147f4346a))
+* Refactor Money Transfer tests ([`ab96f6b`](https://github.com/vrslev/comfort/commit/ab96f6b86c71a7fcd2c52f19bcaaa0fc813c7a59))
+* Refactor Compensation tests ([`badd602`](https://github.com/vrslev/comfort/commit/badd602744fd56ffd35989677c5e9e3fcee31960))
+* Refactor GL Entry test ([`ae70d41`](https://github.com/vrslev/comfort/commit/ae70d41aff302a39a61d087fcbd49b7dc2f8b7b1))
+
+### Chore
+* Remove transfer from ERPNext script ([`8c011e5`](https://github.com/vrslev/comfort/commit/8c011e550873fd0927bee3c53fa29da7ce1746e0))
+* Remove ERP migration script ([`75cdf32`](https://github.com/vrslev/comfort/commit/75cdf32723cefa36f3f357c2f35be939c64746c4))
+* **deps:** Update pre-commit hooks ([#181](https://github.com/vrslev/comfort/issues/181)) ([`5fc5652`](https://github.com/vrslev/comfort/commit/5fc5652130e004c0bbcc171a340981df862a67ec))
+
 ## v0.40.1 (2022-02-22)
 ### Fix
 * Bump Frappe from 13.20.0 to 13.21.0 ([#180](https://github.com/vrslev/comfort/issues/180)) ([`674ef51`](https://github.com/vrslev/comfort/commit/674ef51dbf77e3c0fae89ad257fbb97ed28fe90e))
