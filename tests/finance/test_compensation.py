@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Literal
-
 import pytest
 
 import frappe
@@ -23,10 +21,7 @@ def test_compensation_validate_docstatus_raises(docstatus: int):
     doc.voucher_type = ref_doc.doctype
     doc.voucher_no = ref_doc.name
 
-    with pytest.raises(
-        frappe.exceptions.ValidationError,
-        match="Can only add compensation for submitted document",
-    ):
+    with pytest.raises(frappe.exceptions.ValidationError, match="submitted document"):
         doc.validate()
 
 
@@ -42,19 +37,7 @@ def test_compensation_validate_docstatus_passes():
 
 
 @pytest.mark.parametrize(
-    ("docstatus", "exp_status"), ((0, "Draft"), (1, "Received"), (2, "Cancelled"))
-)
-def test_compensation_set_status(
-    docstatus: int, exp_status: Literal["Draft", "Received", "Cancelled"]
-):
-    doc = new_doc(Compensation)
-    doc.docstatus = docstatus
-    doc.set_status()
-    assert doc.status == exp_status
-
-
-@pytest.mark.parametrize(
-    ("cls_", "paid_with_cash", "exp_accounts_to_amounts"),
+    ("cls_", "cash", "accounts_to_amounts"),
     (
         (SalesOrder, True, {"cash": (0, 100), "sales_compensations": (100, 0)}),
         (SalesOrder, False, {"bank": (0, 100), "sales_compensations": (100, 0)}),
@@ -64,8 +47,8 @@ def test_compensation_set_status(
 )
 def test_compensation_before_submit(
     cls_: type[SalesOrder | PurchaseOrder],
-    paid_with_cash: bool,
-    exp_accounts_to_amounts: dict[str, tuple[int, int]],
+    cash: bool,
+    accounts_to_amounts: dict[str, tuple[int, int]],
 ):
     ref_doc = new_doc(cls_)
     ref_doc.db_insert()
@@ -74,17 +57,17 @@ def test_compensation_before_submit(
     doc.voucher_type = ref_doc.doctype
     doc.voucher_no = ref_doc.name
     doc.amount = 100
-    doc.paid_with_cash = paid_with_cash
+    doc.paid_with_cash = cash
     doc.before_submit()
 
-    exp_accounts_to_amounts = {
-        get_account(field): amounts
-        for field, amounts in exp_accounts_to_amounts.items()
+    accounts_to_amounts = {
+        get_account(field): amounts for field, amounts in accounts_to_amounts.items()
     }
+
     for entry in get_all(
         GLEntry,
         filter={"voucher_type": doc.doctype, "voucher_no": doc.name},
         field=("account", "debit", "credit"),
     ):
-        assert entry.account in exp_accounts_to_amounts.keys()
-        assert (entry.debit, entry.credit) == exp_accounts_to_amounts[entry.account]
+        assert entry.account in accounts_to_amounts.keys()
+        assert (entry.debit, entry.credit) == accounts_to_amounts[entry.account]
