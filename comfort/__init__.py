@@ -119,8 +119,17 @@ class TypedDocument(Document):
         self.flags.ignore_links = True
         self.save()
 
-    def as_dict(self) -> Any:  # type: ignore
-        return super().as_dict()  # type: ignore
+    def as_dict(
+        self,
+        no_nulls: bool = False,
+        no_default_fields: bool = False,
+        convert_dates_to_str: bool = False,
+    ) -> Any:
+        return super().as_dict(  # type: ignore
+            no_nulls=no_nulls,
+            no_default_fields=no_default_fields,
+            convert_dates_to_str=convert_dates_to_str,
+        )
 
 
 _T_doc = TypeVar("_T_doc", bound=Document)
