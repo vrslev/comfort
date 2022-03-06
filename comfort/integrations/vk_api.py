@@ -9,7 +9,7 @@ from pydantic import BaseModel, HttpUrl
 from comfort import ValidationError, _, get_value
 
 
-class VkApi:
+class VkApi:  # TODO: Use base_vk_api
     group_token: str
     api_version: str = "5.131"
     lang: str = "ru"

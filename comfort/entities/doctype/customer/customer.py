@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import re
-from typing import Iterable, Literal, NamedTuple, overload
+from typing import Any, Iterable, Literal, NamedTuple
 from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
 
 import frappe
@@ -17,41 +17,29 @@ from comfort import (
 from comfort.integrations.vk_api import User, VkApi
 
 
-class ParseVkUrlResponse(NamedTuple):
+class ParseVkUrlResult(NamedTuple):
     vk_id: str
     vk_url: str
 
 
-@overload
-def parse_vk_url(vk_url: str) -> ParseVkUrlResponse:
-    ...
+def parse_vk_url(vk_url: str) -> ParseVkUrlResult:
+    url = urlparse(vk_url)
+    query = parse_qs(url.query)
+
+    if not ("vk.com" in url.netloc and "im" in url.path and query.get("sel")):
+        raise ValidationError(_("Invalid VK URL"))
+
+    vk_id = query["sel"][0]
+    params = urlencode({"sel": vk_id}, doseq=True)
+    components = (url.scheme, url.netloc, url.path, "", params, "")
+    return ParseVkUrlResult(vk_id, urlunparse(components))
 
 
-@overload
-def parse_vk_url(vk_url: None) -> None:
-    ...
-
-
-def parse_vk_url(vk_url: str | None):
-    if not vk_url:
-        return
-
-    parsed_url = urlparse(vk_url)
-    query = parse_qs(parsed_url.query)
-    if "vk.com" in parsed_url.netloc and "im" in parsed_url.path and query.get("sel"):
-        vk_id = query["sel"][0]
-        components = (
-            parsed_url.scheme,
-            parsed_url.netloc,
-            parsed_url.path,
-            "",
-            urlencode({"sel": vk_id}, doseq=True),
-            "",
-        )
-        new_url = urlunparse(components)
-        return ParseVkUrlResponse(vk_id, new_url)
-
-    raise ValidationError(_("Invalid VK URL"))
+def _vk_token_in_settings():
+    there = bool(get_value("Vk Api Settings", fieldname="group_token"))
+    if not there:
+        frappe.msgprint(_("Enter VK App service token in Vk Api Settings"))
+    return there
 
 
 class Customer(TypedDocument):
@@ -81,52 +69,40 @@ class Customer(TypedDocument):
             self.vk_id, self.vk_url = parse_vk_url(self.vk_url)
         self.update_info_from_vk()
 
-    def _vk_group_token_in_settings(self):
-        token: str | None = get_value("Vk Api Settings", fieldname="group_token")
-        if token:
-            return True
-        else:
-            frappe.msgprint(_("Enter VK App service token in Vk Api Settings"))
-            return False
-
     def update_info_from_vk(self):
-        if self.vk_id is None:
-            return
-        if not self._vk_group_token_in_settings():
-            return
-
-        users = _get_vk_users_for_customers((self,))
-        _update_customer_from_vk_user(self, users[self.vk_id])
+        if self.vk_id and _vk_token_in_settings():
+            users = _get_vk_users_for_customers((self,))
+            _update_customer_from_vk_user(self, users[self.vk_id])
 
 
 def _get_vk_users_for_customers(customers: Iterable[Customer]) -> dict[str, User]:
-    vk_id_to_customer_name_map = {
-        c.name: c.vk_id for c in customers if c.vk_id is not None
-    }
-    user_ids = list(vk_id_to_customer_name_map.values())
-    if not user_ids:
+    if ids := [c.vk_id for c in customers if c.vk_id]:
+        users = VkApi().get_users(ids)
+        return {str(user.id): user for user in users if not user.deactivated}
+    else:
         return {}
-
-    users = VkApi().get_users(user_ids)
-    active_users = [u for u in users if not u.deactivated]
-    return {str(u.id): u for u in active_users}
 
 
 def _update_customer_from_vk_user(customer: Customer, user: User):
     if not customer.gender:
-        customer.gender = {None: None, 0: None, 1: "Female", 2: "Male"}[user.sex]  # type: ignore
+        val_to_str: dict[Any, Any] = {None: None, 0: None, 1: "Female", 2: "Male"}
+        customer.gender = val_to_str[user.sex]
+
     if user.photo_max_orig:
         customer.image = user.photo_max_orig
-    if not customer.city and user.city and user.city.title:
+
+    if not customer.city and user.city:
         customer.city = user.city.title
 
 
 def update_all_customers_from_vk():
     customers = get_all(Customer, field=("name", "vk_id"))
     users = _get_vk_users_for_customers(customers)
-    for customer_values in customers:
-        if customer_values.vk_id not in users:
+
+    for c in customers:
+        if not c.vk_id or c.vk_id not in users:
             continue
-        doc = get_doc(Customer, customer_values.name)
-        _update_customer_from_vk_user(doc, users[customer_values.vk_id])  # type: ignore
+
+        doc = get_doc(Customer, c.name)
+        _update_customer_from_vk_user(customer=doc, user=users[c.vk_id])
         doc.save()
