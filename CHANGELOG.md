@@ -3,6 +3,23 @@
 
 <!--next-version-placeholder-->
 
+## v0.40.3 (2022-03-08)
+### Fix
+* Bump Frappe from 13.21.0 to 13.22.0 ([#200](https://github.com/vrslev/comfort/issues/200)) ([`17c0b73`](https://github.com/vrslev/comfort/commit/17c0b73502d14591521dab24fa95860c8bcf6ebb))
+
+### Build
+* **deps:** Bump @sentry/tracing from 6.18.0 to 6.18.1 ([#198](https://github.com/vrslev/comfort/issues/198)) ([`0236891`](https://github.com/vrslev/comfort/commit/02368916660433caecc2bb6383a52c0ce01d488c))
+* **deps:** Bump docker/login-action from 1.13.0 to 1.14.1 ([#195](https://github.com/vrslev/comfort/issues/195)) ([`ad789b4`](https://github.com/vrslev/comfort/commit/ad789b49d84003ef6983f3634a1f67f4200ee38b))
+* **deps:** Bump actions/setup-python from 2 to 3 ([#194](https://github.com/vrslev/comfort/issues/194)) ([`e22bc5c`](https://github.com/vrslev/comfort/commit/e22bc5c00c53d49f8af3b06f79501b7553342f9e))
+* **deps-dev:** Bump responses from 0.18.0 to 0.19.0 in /browser_ext ([#199](https://github.com/vrslev/comfort/issues/199)) ([`dade410`](https://github.com/vrslev/comfort/commit/dade410461fc9d85a61d4382d2de68f9597cb4a2))
+* **deps:** Bump @sentry/browser from 6.18.0 to 6.18.1 ([#197](https://github.com/vrslev/comfort/issues/197)) ([`ee80ea5`](https://github.com/vrslev/comfort/commit/ee80ea51a8e6b24b15214e97af927c55bdd1d553))
+* **deps:** Bump peter-evans/create-pull-request from 3.13.0 to 3.14.0 ([#193](https://github.com/vrslev/comfort/issues/193)) ([`efe45de`](https://github.com/vrslev/comfort/commit/efe45de06006fd6af11b794bd3a25522c0cadc0c))
+* **deps-dev:** Bump eslint-config-prettier from 8.4.0 to 8.5.0 ([#196](https://github.com/vrslev/comfort/issues/196)) ([`48d603e`](https://github.com/vrslev/comfort/commit/48d603ec9f59b46b801c027d4d73f671238ea4b8))
+* **deps:** Bump actions/checkout from 2 to 3 ([#192](https://github.com/vrslev/comfort/issues/192)) ([`49f6182`](https://github.com/vrslev/comfort/commit/49f61822fcd4b238b1326a5db96f3ee1271b1210))
+
+### Chore
+* **deps:** Update pre-commit hooks ([#191](https://github.com/vrslev/comfort/issues/191)) ([`c4993d2`](https://github.com/vrslev/comfort/commit/c4993d235eda56db2950c01533ff5d07c3608e6a))
+
 ## v0.40.2 (2022-03-06)
 ### Fix
 * **browser ext:** Add requests ([`7ee35c9`](https://github.com/vrslev/comfort/commit/7ee35c9e2a2e068056114b943db1da2e8e2338fe))
