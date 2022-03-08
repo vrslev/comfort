@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from comfort import TypedDocument, ValidationError, _, get_cached_doc
+from comfort.utils import TypedDocument, ValidationError, _, get_cached_doc
 
 from ..commission_range.commission_range import CommissionRange
 

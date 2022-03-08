@@ -1,6 +1,6 @@
 import frappe
-from comfort import get_doc, get_value
 from comfort.comfort_core.hooks import _disable_signup, _set_currency, load_metadata
+from comfort.utils import get_doc, get_value
 from frappe.geo.doctype.currency.currency import Currency
 
 

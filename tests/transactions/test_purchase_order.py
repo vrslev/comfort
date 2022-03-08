@@ -11,15 +11,6 @@ from ikea_api.wrappers.types import GetDeliveryServicesResponse
 import comfort.integrations.ikea
 import comfort.transactions.doctype.purchase_order.purchase_order
 import frappe
-from comfort import (
-    count_qty,
-    counters_are_same,
-    get_all,
-    get_doc,
-    get_value,
-    group_by_attr,
-    new_doc,
-)
 from comfort.entities import Item
 from comfort.integrations.ikea import FetchItemsResult, PurchaseInfoDict
 from comfort.transactions import (
@@ -33,6 +24,15 @@ from comfort.transactions.doctype.purchase_order.purchase_order import (
     calculate_total_weight_and_total_weight,
 )
 from comfort.transactions.utils import AnyChildItem
+from comfort.utils import (
+    count_qty,
+    counters_are_same,
+    get_all,
+    get_doc,
+    get_value,
+    group_by_attr,
+    new_doc,
+)
 from frappe import ValidationError
 from frappe.utils.data import getdate, now_datetime, today
 from tests.conftest import mock_delivery_services, mock_purchase_info

@@ -13,7 +13,6 @@ from ikea_api.wrappers.types import GetDeliveryServicesResponse, ParsedItem
 
 import comfort.integrations.ikea
 import frappe
-from comfort import count_qty, counters_are_same, get_all, get_doc
 from comfort.comfort_core import IkeaSettings
 from comfort.entities import Item, ItemCategory
 from comfort.integrations.ikea import (
@@ -33,6 +32,7 @@ from comfort.integrations.ikea import (
     get_purchase_history,
     get_purchase_info,
 )
+from comfort.utils import count_qty, counters_are_same, get_all, get_doc
 from frappe.exceptions import ValidationError
 from frappe.utils import add_to_date, get_datetime
 from tests.conftest import (

@@ -5,14 +5,6 @@ from types import SimpleNamespace
 import pytest
 
 import frappe
-from comfort import (
-    count_qty,
-    counters_are_same,
-    doc_exists,
-    get_doc,
-    get_value,
-    new_doc,
-)
 from comfort.entities.doctype.customer.customer import Customer
 from comfort.entities.doctype.item.item import Item
 from comfort.stock import DeliveryTrip, Receipt
@@ -22,6 +14,14 @@ from comfort.stock.doctype.delivery_trip.delivery_trip import (
     get_delivery_and_installation_for_order,
 )
 from comfort.transactions import SalesOrder
+from comfort.utils import (
+    count_qty,
+    counters_are_same,
+    doc_exists,
+    get_doc,
+    get_value,
+    new_doc,
+)
 from frappe.utils import get_url_to_form
 
 

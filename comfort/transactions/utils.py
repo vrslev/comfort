@@ -1,6 +1,5 @@
 from typing import TypeVar, Union
 
-from comfort import count_qty, group_by_attr
 from comfort.entities.doctype.child_item.child_item import ChildItem
 from comfort.transactions.doctype.purchase_order_item_to_sell.purchase_order_item_to_sell import (
     PurchaseOrderItemToSell,
@@ -11,6 +10,7 @@ from comfort.transactions.doctype.sales_order_child_item.sales_order_child_item 
 from comfort.transactions.doctype.sales_order_item.sales_order_item import (
     SalesOrderItem,
 )
+from comfort.utils import count_qty, group_by_attr
 
 AnyChildItem = Union[
     SalesOrderItem, SalesOrderChildItem, ChildItem, PurchaseOrderItemToSell

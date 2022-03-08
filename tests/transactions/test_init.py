@@ -6,10 +6,10 @@ from types import SimpleNamespace
 import pytest
 
 import frappe
-from comfort import count_qty, get_value, group_by_attr
 from comfort.transactions import PurchaseReturn, SalesOrder, SalesReturn
 from comfort.transactions.return_ import _ReturnAddItemsPayloadItem
 from comfort.transactions.utils import delete_empty_items, merge_same_items
+from comfort.utils import count_qty, get_value, group_by_attr
 
 
 def test_return_delete_empty_items(sales_return: SalesReturn):

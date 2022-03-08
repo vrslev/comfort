@@ -1,7 +1,7 @@
 import pytest
 
-from comfort import get_all, new_doc
 from comfort.finance import GLEntry, MoneyTransfer
+from comfort.utils import get_all, new_doc
 from frappe import ValidationError
 
 

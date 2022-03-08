@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Literal
 
-from comfort import TypedDocument, ValidationError, _, get_value
+from comfort.utils import TypedDocument, ValidationError, _, get_value
 
 
 class GLEntry(TypedDocument):

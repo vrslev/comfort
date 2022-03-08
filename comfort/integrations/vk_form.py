@@ -7,10 +7,10 @@ from pydantic import BaseModel, Field, validator
 from werkzeug import Response
 
 import frappe
-from comfort import get_value, new_doc
 from comfort.integrations.ikea import fetch_items
 from comfort.integrations.vk_api import VkApi
 from comfort.transactions import SalesOrder
+from comfort.utils import get_value, new_doc
 
 
 class VkFormAnswer(BaseModel):

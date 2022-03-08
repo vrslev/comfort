@@ -5,12 +5,12 @@ from typing import Any, Mapping
 from jwt import PyJWT
 
 import frappe
-from comfort import get_doc, get_value, new_doc
 from comfort.comfort_core import IkeaSettings
 from comfort.entities import Customer
 from comfort.entities.doctype.customer.customer import parse_vk_url
 from comfort.integrations.ikea import fetch_items
 from comfort.transactions import SalesOrder
+from comfort.utils import get_doc, get_value, new_doc
 from frappe.model.rename_doc import rename_doc
 from frappe.utils import get_url_to_form
 

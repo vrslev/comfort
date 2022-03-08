@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 from collections import Counter
 
-from comfort import (
+from comfort.utils import (
     TypedDocument,
     ValidationError,
     _,

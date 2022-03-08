@@ -3,9 +3,9 @@ from __future__ import annotations
 from typing import Literal
 
 import frappe
-from comfort import TypedDocument
 from comfort.stock.doctype.stock_entry_item.stock_entry_item import StockEntryItem
 from comfort.stock.utils import StockTypes
+from comfort.utils import TypedDocument
 
 
 class StockEntry(TypedDocument):

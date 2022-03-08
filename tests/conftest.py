@@ -19,13 +19,13 @@ from pymysql import OperationalError
 import comfort.entities.doctype.customer.customer
 import comfort.integrations.ikea
 import frappe
-from comfort import TypedDocument, doc_exists, get_doc
 from comfort.comfort_core import CommissionSettings, IkeaSettings, VkApiSettings
 from comfort.entities import Customer, Item, ItemCategory
 from comfort.finance import GLEntry, Payment
 from comfort.finance.chart_of_accounts import initialize_accounts
 from comfort.stock import Checkout, DeliveryTrip, Receipt
 from comfort.transactions import PurchaseOrder, PurchaseReturn, SalesOrder, SalesReturn
+from comfort.utils import TypedDocument, doc_exists, get_doc
 from frappe.database.mariadb.database import MariaDBDatabase
 
 TEST_SITE_NAME = "tests"

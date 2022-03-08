@@ -1,10 +1,10 @@
 import pytest
 
 import frappe
-from comfort import doc_exists, get_doc, get_value
 from comfort.finance import GLEntry
 from comfort.finance.doctype.account.account import add_node, get_children
 from comfort.finance.utils import create_gl_entry
+from comfort.utils import doc_exists, get_doc, get_value
 
 
 @pytest.mark.usefixtures("accounts")

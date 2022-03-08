@@ -5,7 +5,6 @@ from types import SimpleNamespace
 from typing import Any, Callable, TypedDict
 
 import frappe
-from comfort import TypedDocument, ValidationError, _, count_qty, get_all, group_by_attr
 from comfort.entities import Item
 from comfort.transactions.doctype.purchase_return_item.purchase_return_item import (
     PurchaseReturnItem,
@@ -14,6 +13,14 @@ from comfort.transactions.doctype.sales_return_item.sales_return_item import (
     SalesReturnItem,
 )
 from comfort.transactions.utils import delete_empty_items, merge_same_items
+from comfort.utils import (
+    TypedDocument,
+    ValidationError,
+    _,
+    count_qty,
+    get_all,
+    group_by_attr,
+)
 
 
 class _ReturnAddItemsPayloadItem(TypedDict):

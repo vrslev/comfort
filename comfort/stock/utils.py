@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from typing import Any, Literal
 
-from comfort import count_qty, get_all, get_doc, new_doc
 from comfort.stock.doctype.stock_entry_item.stock_entry_item import StockEntryItem
+from comfort.utils import count_qty, get_all, get_doc, new_doc
 
 StockTypes = Literal[
     "Reserved Actual", "Available Actual", "Reserved Purchased", "Available Purchased"

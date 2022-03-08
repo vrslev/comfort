@@ -5,6 +5,7 @@ from typing import Any
 from uvicorn.middleware.wsgi import WSGIMiddleware
 from werkzeug.middleware.shared_data import SharedDataMiddleware
 
+import comfort.utils  # type: ignore # Initialise Sentry and patches
 import frappe
 import frappe.app
 from frappe.utils.bench_helper import get_sites

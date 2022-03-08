@@ -3,15 +3,6 @@ from __future__ import annotations
 from collections import defaultdict
 from typing import Literal
 
-from comfort import (
-    ValidationError,
-    _,
-    count_qty,
-    get_all,
-    get_doc,
-    group_by_attr,
-    new_doc,
-)
 from comfort.entities import Item
 from comfort.finance.utils import cancel_gl_entries_for, create_gl_entry, get_account
 from comfort.stock.utils import cancel_stock_entries_for, create_stock_entry
@@ -29,6 +20,15 @@ from comfort.transactions.utils import (
     AnyChildItem,
     delete_empty_items,
     merge_same_items,
+)
+from comfort.utils import (
+    ValidationError,
+    _,
+    count_qty,
+    get_all,
+    get_doc,
+    group_by_attr,
+    new_doc,
 )
 
 

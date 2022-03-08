@@ -2,10 +2,10 @@ from typing import Any
 
 import pytest
 
-from comfort import get_doc
 from comfort.entities import Item
 from comfort.stock import StockEntry
 from comfort.stock.report.stock_balance.stock_balance import get_data
+from comfort.utils import get_doc
 
 
 @pytest.mark.parametrize("v", ({}, {"stock_type": None}))

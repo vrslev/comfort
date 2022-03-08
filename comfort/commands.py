@@ -9,12 +9,12 @@ import sentry_sdk
 
 import frappe
 import frappe.utils.scheduler
-from comfort import doc_exists, get_all, get_doc, new_doc
 from comfort.comfort_core import CommissionSettings
 from comfort.comfort_core.hooks import after_install
 from comfort.entities import Customer, Item
 from comfort.hooks import app_name
 from comfort.transactions import PurchaseOrder, SalesOrder
+from comfort.utils import doc_exists, get_all, get_doc, new_doc
 from frappe.commands import get_site, pass_context
 from frappe.core.doctype.doctype.doctype import DocType
 from frappe.core.doctype.module_def.module_def import ModuleDef

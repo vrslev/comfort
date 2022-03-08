@@ -10,7 +10,6 @@ from werkzeug import Response
 
 import comfort.integrations.vk_form
 import frappe
-from comfort import count_qty, doc_exists, get_doc
 from comfort.comfort_core import CommissionSettings, VkFormSettings
 from comfort.entities import Customer, Item
 from comfort.integrations.vk_form import (
@@ -23,6 +22,7 @@ from comfort.integrations.vk_form import (
     process_form,
 )
 from comfort.transactions import SalesOrder
+from comfort.utils import count_qty, doc_exists, get_doc
 from tests.integrations.test_browser_ext_server import patch_fetch_items
 
 mock_api_secret = "E64XhVwb84nf@wPumC.JXFMo"  # nosec

@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from typing import Literal
 
-from comfort import TypedDocument, ValidationError, _, get_doc, get_value
 from comfort.finance.utils import cancel_gl_entries_for, create_gl_entry, get_account
+from comfort.utils import TypedDocument, ValidationError, _, get_doc, get_value
 
 
 class Payment(TypedDocument):

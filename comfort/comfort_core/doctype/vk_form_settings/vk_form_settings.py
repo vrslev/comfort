@@ -1,4 +1,4 @@
-from comfort import TypedDocument
+from comfort.utils import TypedDocument
 
 
 class VkFormSettings(TypedDocument):

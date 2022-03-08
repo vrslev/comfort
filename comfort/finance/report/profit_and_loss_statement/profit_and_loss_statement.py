@@ -4,8 +4,8 @@ from collections import defaultdict
 from typing import Any
 
 import frappe
-from comfort import _, get_all, group_by_attr
 from comfort.finance import Account
+from comfort.utils import _, get_all, group_by_attr
 
 columns = [
     {

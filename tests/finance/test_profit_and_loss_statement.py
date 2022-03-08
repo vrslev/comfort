@@ -2,7 +2,6 @@ from typing import Any
 
 import pytest
 
-from comfort import get_all, group_by_attr
 from comfort.finance import Account, GLEntry
 from comfort.finance.report.profit_and_loss_statement.profit_and_loss_statement import (
     _calculate_total_in_parent_accounts,
@@ -14,6 +13,7 @@ from comfort.finance.report.profit_and_loss_statement.profit_and_loss_statement 
     get_income_expense_profit_loss_totals,
     get_report_summary,
 )
+from comfort.utils import get_all, group_by_attr
 from frappe.utils import get_datetime_str, today
 from tests.finance.test_general_ledger import insert_gl_entries_with_wrong_conditions
 

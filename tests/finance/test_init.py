@@ -3,7 +3,6 @@ import re
 import pytest
 
 import frappe
-from comfort import get_all, get_value
 from comfort.finance import GLEntry, Payment
 from comfort.finance.chart_of_accounts import DEFAULT_ACCOUNT_SETTINGS
 from comfort.finance.utils import (
@@ -13,6 +12,7 @@ from comfort.finance.utils import (
     get_account,
 )
 from comfort.transactions import SalesOrder
+from comfort.utils import get_all, get_value
 
 
 @pytest.mark.usefixtures("accounts")

@@ -4,10 +4,10 @@ from typing import Any
 
 import pytest
 
-from comfort import TypedDocument, get_all, get_doc, get_value
 from comfort.finance import GLEntry, Payment
 from comfort.finance.utils import cancel_gl_entries_for, get_account
 from comfort.transactions import PurchaseOrder, SalesOrder
+from comfort.utils import TypedDocument, get_all, get_doc, get_value
 from frappe import ValidationError
 
 

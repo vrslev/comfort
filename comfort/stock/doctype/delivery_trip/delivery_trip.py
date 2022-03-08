@@ -4,7 +4,10 @@ from typing import TYPE_CHECKING, Any, Literal, TypedDict
 from urllib.parse import urlencode
 
 import frappe
-from comfort import (
+from comfort.entities import Customer
+from comfort.stock.doctype.delivery_stop.delivery_stop import DeliveryStop
+from comfort.stock.doctype.receipt.receipt import Receipt
+from comfort.utils import (
     TypedDocument,
     ValidationError,
     _,
@@ -13,9 +16,6 @@ from comfort import (
     get_value,
     group_by_attr,
 )
-from comfort.entities import Customer
-from comfort.stock.doctype.delivery_stop.delivery_stop import DeliveryStop
-from comfort.stock.doctype.receipt.receipt import Receipt
 from frappe.utils import get_url_to_form
 
 if TYPE_CHECKING:

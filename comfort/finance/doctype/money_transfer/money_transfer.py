@@ -1,7 +1,7 @@
 from typing import Literal
 
-from comfort import TypedDocument, ValidationError, _
 from comfort.finance.utils import create_gl_entry
+from comfort.utils import TypedDocument, ValidationError, _
 
 
 class MoneyTransfer(TypedDocument):

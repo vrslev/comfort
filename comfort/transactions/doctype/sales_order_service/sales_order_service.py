@@ -1,6 +1,6 @@
 from typing import Literal
 
-from comfort import TypedDocument
+from comfort.utils import TypedDocument
 
 
 class SalesOrderService(TypedDocument):

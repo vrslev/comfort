@@ -3,8 +3,8 @@ from __future__ import annotations
 from typing import Any
 
 import frappe
-from comfort import get_all, get_doc
 from comfort.finance.doctype.gl_entry.gl_entry import GLEntry
+from comfort.utils import get_all, get_doc
 from frappe.desk.treeview import make_tree_args
 from frappe.utils.nestedset import NestedSet
 

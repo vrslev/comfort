@@ -8,7 +8,6 @@ import pytest
 import responses
 
 import frappe
-from comfort import new_doc
 from comfort.entities.doctype.customer.customer import (
     Customer,
     _get_vk_users_for_customers,
@@ -18,6 +17,7 @@ from comfort.entities.doctype.customer.customer import (
     update_all_customers_from_vk,
 )
 from comfort.integrations.vk_api import User, VkApi
+from comfort.utils import new_doc
 from tests.integrations import test_vk_api
 
 acceptable_vk_urls = (

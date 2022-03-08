@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from comfort import TypedDocument
+from comfort.utils import TypedDocument
 
 
 class PurchaseOrderDeliveryOption(TypedDocument):

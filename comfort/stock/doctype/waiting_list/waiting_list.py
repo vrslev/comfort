@@ -8,7 +8,11 @@ from typing import TYPE_CHECKING
 from ikea_api.wrappers.types import GetDeliveryServicesResponse, UnavailableItem
 
 import frappe
-from comfort import (
+from comfort.integrations.ikea import get_delivery_services
+from comfort.stock.doctype.waiting_list_sales_order.waiting_list_sales_order import (
+    WaitingListSalesOrder,
+)
+from comfort.utils import (
     TypedDocument,
     _,
     count_qty,
@@ -16,10 +20,6 @@ from comfort import (
     get_all,
     get_doc,
     group_by_attr,
-)
-from comfort.integrations.ikea import get_delivery_services
-from comfort.stock.doctype.waiting_list_sales_order.waiting_list_sales_order import (
-    WaitingListSalesOrder,
 )
 
 if TYPE_CHECKING:

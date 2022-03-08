@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from comfort import ValidationError, _, get_all
 from comfort.finance import GLEntry
+from comfort.utils import ValidationError, _, get_all
 
 columns = [
     {

@@ -5,7 +5,8 @@ from typing import Any, Iterable, Literal, NamedTuple
 from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
 
 import frappe
-from comfort import (
+from comfort.integrations.vk_api import User, VkApi
+from comfort.utils import (
     TypedDocument,
     ValidationError,
     _,
@@ -14,7 +15,6 @@ from comfort import (
     get_doc,
     get_value,
 )
-from comfort.integrations.vk_api import User, VkApi
 
 
 class ParseVkUrlResult(NamedTuple):

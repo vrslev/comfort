@@ -10,20 +10,6 @@ from typing import Any, Literal, TypedDict
 from ikea_api.wrappers.types import DeliveryService
 
 import frappe
-from comfort import (
-    TypedDocument,
-    ValidationError,
-    _,
-    count_qty,
-    counters_are_same,
-    doc_exists,
-    get_all,
-    get_cached_doc,
-    get_doc,
-    get_value,
-    group_by_attr,
-    new_doc,
-)
 from comfort.comfort_core import CommissionSettings
 from comfort.entities import ChildItem, Item
 from comfort.finance import Payment
@@ -47,6 +33,20 @@ from comfort.transactions.doctype.sales_order_service.sales_order_service import
     SalesOrderService,
 )
 from comfort.transactions.utils import delete_empty_items, merge_same_items
+from comfort.utils import (
+    TypedDocument,
+    ValidationError,
+    _,
+    count_qty,
+    counters_are_same,
+    doc_exists,
+    get_all,
+    get_cached_doc,
+    get_doc,
+    get_value,
+    group_by_attr,
+    new_doc,
+)
 from frappe.utils.print_format import get_pdf
 
 

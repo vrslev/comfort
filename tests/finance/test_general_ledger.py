@@ -1,12 +1,12 @@
 import pytest
 
 import frappe
-from comfort import copy_doc
 from comfort.finance import GLEntry
 from comfort.finance.report.general_ledger.general_ledger import (
     get_data,
     validate_filters,
 )
+from comfort.utils import copy_doc
 from frappe.utils import add_to_date, get_date_str, today
 
 

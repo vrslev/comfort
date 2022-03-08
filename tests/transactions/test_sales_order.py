@@ -10,7 +10,6 @@ from ikea_api.wrappers.types import DeliveryService, UnavailableItem
 
 import comfort.transactions.doctype.sales_order.sales_order
 import frappe
-from comfort import count_qty, counters_are_same, get_all, get_doc, get_value, new_doc
 from comfort.comfort_core import CommissionSettings
 from comfort.entities import ChildItem, Item
 from comfort.finance import Payment
@@ -34,6 +33,14 @@ from comfort.transactions.doctype.sales_order.sales_order import (
     get_sales_orders_not_in_purchase_order,
     has_linked_delivery_trip,
     validate_params_from_available_stock,
+)
+from comfort.utils import (
+    count_qty,
+    counters_are_same,
+    get_all,
+    get_doc,
+    get_value,
+    new_doc,
 )
 from frappe import ValidationError
 from tests.conftest import mock_delivery_services

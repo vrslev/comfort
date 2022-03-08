@@ -3,10 +3,10 @@ from __future__ import annotations
 import pytest
 
 import frappe
-from comfort import get_all, new_doc
 from comfort.finance import Compensation, GLEntry
 from comfort.finance.utils import get_account
 from comfort.transactions import PurchaseOrder, SalesOrder
+from comfort.utils import get_all, new_doc
 
 
 @pytest.mark.parametrize("docstatus", (0, 2))

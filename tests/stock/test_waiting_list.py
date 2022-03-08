@@ -6,7 +6,6 @@ from types import SimpleNamespace
 import pytest
 
 import frappe
-from comfort import count_qty, counters_are_same, get_doc, new_doc
 from comfort.stock import WaitingList
 from comfort.transactions import (
     PurchaseOrder,
@@ -14,6 +13,7 @@ from comfort.transactions import (
     SalesOrderChildItem,
     SalesOrderItem,
 )
+from comfort.utils import count_qty, counters_are_same, get_doc, new_doc
 from tests.conftest import mock_delivery_services
 
 

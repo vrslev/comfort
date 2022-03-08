@@ -1,8 +1,8 @@
 from typing import Literal
 
 import frappe
-from comfort import TypedDocument, get_doc
 from comfort.stock.utils import cancel_stock_entries_for, create_stock_entry
+from comfort.utils import TypedDocument, get_doc
 
 
 class Checkout(TypedDocument):

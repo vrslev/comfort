@@ -1,7 +1,7 @@
 import pytest
 
-from comfort import get_doc, get_value
 from comfort.entities import ChildItem, Item
+from comfort.utils import get_doc, get_value
 from frappe import ValidationError
 
 

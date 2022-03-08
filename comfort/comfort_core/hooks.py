@@ -3,8 +3,8 @@ from typing import Any
 
 import frappe
 import frappe.defaults
-from comfort import get_doc
 from comfort.finance.chart_of_accounts import initialize_accounts
+from comfort.utils import get_doc
 from frappe.core.doctype.doctype.doctype import DocType
 from frappe.core.doctype.system_settings.system_settings import SystemSettings
 from frappe.geo.doctype.currency.currency import Currency

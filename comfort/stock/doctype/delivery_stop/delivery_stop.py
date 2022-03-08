@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Literal
 
-from comfort import TypedDocument
+from comfort.utils import TypedDocument
 
 
 class DeliveryStop(TypedDocument):

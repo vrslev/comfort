@@ -6,7 +6,7 @@ from typing import Any, Literal, Optional
 import requests
 from pydantic import BaseModel, HttpUrl
 
-from comfort import ValidationError, _, get_value
+from comfort.utils import ValidationError, _, get_value
 
 
 class VkApi:  # TODO: Use base_vk_api

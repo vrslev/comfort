@@ -5,7 +5,6 @@ import pytest
 from jwt import PyJWT
 
 import comfort.integrations.browser_ext
-from comfort import count_qty, get_doc
 from comfort.comfort_core import CommissionSettings, IkeaSettings
 from comfort.entities import Customer, Item
 from comfort.integrations.browser_ext import (
@@ -14,6 +13,7 @@ from comfort.integrations.browser_ext import (
     _get_url_to_reference_doc,
     update_token,
 )
+from comfort.utils import count_qty, get_doc
 
 
 def test_create_customer_exists_same_name(customer: Customer):

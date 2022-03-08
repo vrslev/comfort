@@ -6,7 +6,12 @@ from typing import Literal
 import pytest
 
 import frappe
-from comfort import (
+from comfort.finance import GLEntry
+from comfort.finance.utils import create_payment, get_account
+from comfort.stock import StockEntry
+from comfort.transactions import PurchaseOrder, SalesOrder, SalesReturn
+from comfort.transactions.utils import merge_same_items
+from comfort.utils import (
     count_qty,
     counters_are_same,
     doc_exists,
@@ -14,11 +19,6 @@ from comfort import (
     get_doc,
     get_value,
 )
-from comfort.finance import GLEntry
-from comfort.finance.utils import create_payment, get_account
-from comfort.stock import StockEntry
-from comfort.transactions import PurchaseOrder, SalesOrder, SalesReturn
-from comfort.transactions.utils import merge_same_items
 from tests.stock.test_utils import reverse_qtys
 
 

@@ -5,9 +5,9 @@ from typing import Any
 
 import pytest
 
-import comfort
+import comfort.utils as utils
 import frappe
-from comfort import count_qty, counters_are_same, group_by_attr, maybe_json
+from comfort.utils import count_qty, counters_are_same, group_by_attr, maybe_json
 
 
 @dataclass
@@ -68,4 +68,4 @@ def test_maybe_json():
 
 def test_validation_error():
     with pytest.raises(frappe.exceptions.ValidationError):
-        raise comfort.ValidationError
+        raise utils.ValidationError

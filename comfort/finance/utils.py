@@ -2,7 +2,14 @@ from __future__ import annotations
 
 from typing import Literal
 
-from comfort import ValidationError, _, get_all, get_cached_value, get_doc, new_doc
+from comfort.utils import (
+    ValidationError,
+    _,
+    get_all,
+    get_cached_value,
+    get_doc,
+    new_doc,
+)
 
 
 def get_account(field_name: str) -> str:

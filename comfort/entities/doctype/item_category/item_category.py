@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 
-from comfort import TypedDocument, ValidationError, _
+from comfort.utils import TypedDocument, ValidationError, _
 
 
 class ItemCategory(TypedDocument):

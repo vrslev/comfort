@@ -4,12 +4,12 @@ from types import SimpleNamespace
 
 import pytest
 
-from comfort import get_all, get_doc, get_value, new_doc
 from comfort.entities import Item
 from comfort.finance import GLEntry
 from comfort.finance.utils import get_account
 from comfort.stock import Receipt, StockEntry
 from comfort.transactions import PurchaseOrder, SalesOrder
+from comfort.utils import get_all, get_doc, get_value, new_doc
 
 
 def test_voucher_property(receipt_sales: Receipt):
