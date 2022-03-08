@@ -40,8 +40,8 @@ upload_to_pypi = false
 [tool.pytest.ini_options]
 addopts = []
 filterwarnings = [
-  "ignore:bleach-whitelist has been renamed bleach-allowlist",
-  "ignore:the imp module is deprecated in favour of importlib:DeprecationWarning"
+  "ignore:the imp module is deprecated in favour of importlib:DeprecationWarning",
+  "ignore:The distutils package is deprecated"
 ]
 cache_dir = "tests/.cache"
 testpaths = ["tests", "browser_ext"]
