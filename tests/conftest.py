@@ -1,19 +1,3 @@
-import frappe
-
-
-def patch_get_file_json():  # TODO: Remove this after https://github.com/frappe/frappe/pull/15933 is merged
-    orig_func = frappe.get_file_json  # type: ignore
-
-    def func(name: str):
-        if name == "common_site_config.json":
-            return orig_func(f"../../sites/{name}")
-        return orig_func(name)
-
-    frappe.get_file_json = func
-
-
-patch_get_file_json()
-
 from calendar import timegm
 from datetime import date, datetime, timedelta, timezone
 from types import SimpleNamespace
@@ -34,6 +18,7 @@ from pymysql import OperationalError
 
 import comfort.entities.doctype.customer.customer
 import comfort.integrations.ikea
+import frappe
 from comfort import TypedDocument, doc_exists, get_doc
 from comfort.comfort_core import CommissionSettings, IkeaSettings, VkApiSettings
 from comfort.entities import Customer, Item, ItemCategory
