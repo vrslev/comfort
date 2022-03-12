@@ -38,26 +38,26 @@ class Return(TypedDocument):
     def _voucher(self) -> Any:  # pragma: no cover
         pass
 
-    def _calculate_returned_paid_amount(self):  # pragma: no cover
+    def _calculate_returned_paid_amount(self) -> None:  # pragma: no cover
         pass
 
-    def _validate_voucher_statuses(self):  # pragma: no cover
+    def _validate_voucher_statuses(self) -> None:  # pragma: no cover
         pass
 
     def _get_all_items(self) -> Any:  # pragma: no cover
         pass
 
-    def delete_empty_items(self):
+    def delete_empty_items(self) -> None:
         if not hasattr(self, "items") or self.items is None:
             self.items = []
         delete_empty_items(self, "items")
 
-    def _calculate_item_values(self):
+    def _calculate_item_values(self) -> None:
         for item in self.items:
             item.amount = item.qty * item.rate
 
     @frappe.whitelist()
-    def calculate(self):
+    def calculate(self) -> None:
         self._calculate_item_values()
         self._calculate_returned_paid_amount()
 
@@ -68,7 +68,7 @@ class Return(TypedDocument):
             in_voucher[item] -= in_return.get(item, 0)
         return (item for item in in_voucher.items() if item[1] > 0)
 
-    def _add_missing_fields_to_items(self, items: list[Any]):
+    def _add_missing_fields_to_items(self, items: list[Any]) -> None:
         items_with_missing_fields = get_all(
             Item,
             field=("item_code", "item_name", "rate"),
@@ -119,7 +119,7 @@ class Return(TypedDocument):
             )
 
     @frappe.whitelist()
-    def add_items(self, items: list[_ReturnAddItemsPayloadItem]):
+    def add_items(self, items: list[_ReturnAddItemsPayloadItem]) -> None:
         all_items = self.get_items_available_to_add()
         counter = count_qty(SimpleNamespace(**item) for item in all_items)
 
@@ -140,7 +140,7 @@ class Return(TypedDocument):
         if len([i for i in self._get_remaining_qtys(self._get_all_items())]) == 0:
             raise ValidationError(_("Can't return all items"))
 
-    def validate(self):
+    def validate(self) -> None:
         self.delete_empty_items()
         self._validate_voucher_statuses()
         self._validate_not_all_items_returned()

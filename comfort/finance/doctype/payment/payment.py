@@ -18,7 +18,7 @@ class Payment(TypedDocument):
         if self.amount <= 0:
             raise ValidationError(_("Amount should be more that zero"))
 
-    def _new_gl_entry(self, account_field: str, debit: int, credit: int):
+    def _new_gl_entry(self, account_field: str, debit: int, credit: int) -> None:
         create_gl_entry(
             doctype=self.doctype,
             name=self.name,
@@ -30,7 +30,7 @@ class Payment(TypedDocument):
     def _resolve_cash_or_bank(self):
         return "cash" if self.paid_with_cash else "bank"
 
-    def create_sales_gl_entries(self):
+    def create_sales_gl_entries(self) -> None:
         cash_or_bank = self._resolve_cash_or_bank()
         self._new_gl_entry(cash_or_bank, self.amount, 0)
         self._new_gl_entry("prepaid_sales", 0, self.amount)
@@ -42,7 +42,7 @@ class Payment(TypedDocument):
         )
         return get_value(self.voucher_type, self.voucher_no, fieldname=fields)
 
-    def create_purchase_gl_entries(self):
+    def create_purchase_gl_entries(self) -> None:
         prepaid_inventory, purchase_delivery = self._get_purchase_values()
         cash_or_bank = self._resolve_cash_or_bank()
 
@@ -53,13 +53,13 @@ class Payment(TypedDocument):
             self._new_gl_entry(cash_or_bank, 0, purchase_delivery)
             self._new_gl_entry("purchase_delivery", purchase_delivery, 0)
 
-    def before_submit(self):
+    def before_submit(self) -> None:
         if self.voucher_type == "Sales Order":
             self.create_sales_gl_entries()
         elif self.voucher_type == "Purchase Order":
             self.create_purchase_gl_entries()
 
-    def set_status_in_sales_order(self):
+    def set_status_in_sales_order(self) -> None:
         if self.voucher_type != "Sales Order":
             return
 
@@ -70,6 +70,6 @@ class Payment(TypedDocument):
             doc.set_statuses()
             doc.save_without_validating()
 
-    def on_cancel(self):
+    def on_cancel(self) -> None:
         cancel_gl_entries_for(self.doctype, self.name)
         self.set_status_in_sales_order()

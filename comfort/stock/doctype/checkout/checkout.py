@@ -9,7 +9,7 @@ class Checkout(TypedDocument):
     doctype: Literal["Checkout"]
     purchase_order: str
 
-    def before_submit(self):
+    def before_submit(self) -> None:
         from comfort.transactions import PurchaseOrder
 
         doc = get_doc(PurchaseOrder, self.purchase_order)
@@ -29,9 +29,9 @@ class Checkout(TypedDocument):
                 doc.get_items_to_sell(True),
             )
 
-    def set_purchase_draft_status(self):
+    def set_purchase_draft_status(self) -> None:
         frappe.db.set_value("Purchase Order", self.purchase_order, "status", "Draft")
 
-    def before_cancel(self):  # pragma: no cover
+    def before_cancel(self) -> None:  # pragma: no cover
         cancel_stock_entries_for(self.doctype, self.name)
         self.set_purchase_draft_status()

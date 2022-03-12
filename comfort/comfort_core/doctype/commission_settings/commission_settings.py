@@ -24,13 +24,13 @@ class CommissionSettings(TypedDocument):
             if c.to_amount >= self.ranges[idx + 1].to_amount:
                 raise ValidationError(_("To Amounts should be in ascending order"))
 
-    def set_from_amounts(self):
+    def set_from_amounts(self) -> None:
         previous_to_amount = -1
         for range_ in self.ranges:
             range_.from_amount = previous_to_amount + 1
             previous_to_amount = range_.to_amount
 
-    def validate(self):
+    def validate(self) -> None:
         if not self.ranges:
             return
 
@@ -39,7 +39,7 @@ class CommissionSettings(TypedDocument):
         self.validate_to_amounts_order()
         self.set_from_amounts()
 
-    def on_change(self):
+    def on_change(self) -> None:
         self.clear_cache()
 
     @staticmethod

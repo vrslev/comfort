@@ -42,7 +42,7 @@ class SalesReturn(Return):
             self.__voucher = get_doc(SalesOrder, self.sales_order)
         return self.__voucher
 
-    def _calculate_returned_paid_amount(self):
+    def _calculate_returned_paid_amount(self) -> None:
         self._modify_voucher()
         self._voucher.set_paid_and_pending_per_amount()
         self.returned_paid_amount = (
@@ -67,13 +67,13 @@ class SalesReturn(Return):
                 _("Delivery Status should be Purchased, To Deliver, or Delivered")
             )
 
-    def _validate_not_all_items_returned(self):
+    def _validate_not_all_items_returned(self) -> None:
         pass
 
     def _get_all_items(self):
         return self._voucher.get_items_with_splitted_combinations()
 
-    def _split_combinations_in_voucher(self):
+    def _split_combinations_in_voucher(self) -> None:
         return_qty_counter = count_qty(self.items)
         items_no_children_qty_counter = count_qty(self._voucher.items)
         parent_item_codes_to_modify: list[str] = []
@@ -102,7 +102,7 @@ class SalesReturn(Return):
                 save=False,
             )
 
-    def _add_missing_info_to_items_in_voucher(self):
+    def _add_missing_info_to_items_in_voucher(self) -> None:
         for item in self._voucher.items:
             if not item.rate or not item.weight:
                 item_values: tuple[str, int, float] = get_value(
@@ -113,7 +113,7 @@ class SalesReturn(Return):
                 item.amount = item.qty * item.rate
                 item.total_weight = item.qty * item.weight
 
-    def _modify_voucher(self):
+    def _modify_voucher(self) -> None:
         self._split_combinations_in_voucher()
 
         qty_counter = count_qty(self.items)
@@ -132,7 +132,7 @@ class SalesReturn(Return):
 
     def _add_missing_info_to_items_in_items_to_sell(
         self, items: list[PurchaseOrderItemToSell]
-    ):
+    ) -> None:
         items_with_weight = get_all(
             Item,
             field=("item_code", "weight"),
@@ -144,7 +144,7 @@ class SalesReturn(Return):
                 item.weight = grouped_items[item.item_code][0].weight
             item.amount = item.rate * item.qty
 
-    def _add_items_to_sell_to_linked_purchase_order(self):
+    def _add_items_to_sell_to_linked_purchase_order(self) -> None:
         from comfort.transactions import PurchaseOrder
 
         purchase_order_name: str | None = get_value(
@@ -176,7 +176,7 @@ class SalesReturn(Return):
         doc.calculate()
         doc.save_without_validating()
 
-    def _make_delivery_gl_entries(self):
+    def _make_delivery_gl_entries(self) -> None:
         """Transfer cost of returned items from "Prepaid Sales" to "Inventory" account if Sales Order is delivered.
         Changes Sales Receipt behavior."""
         if not self._voucher.delivery_status == "Delivered":
@@ -191,7 +191,7 @@ class SalesReturn(Return):
         )
         create_gl_entry(self.doctype, self.name, get_account("inventory"), amount, 0)
 
-    def _make_stock_entries(self):
+    def _make_stock_entries(self) -> None:
         """Transfer returned items.
 
         Depends on `delivery_status`:
@@ -219,7 +219,7 @@ class SalesReturn(Return):
         )
         create_stock_entry(self.doctype, self.name, stock_types[1], self.items)
 
-    def _make_payment_gl_entries(self):
+    def _make_payment_gl_entries(self) -> None:
         """Return `returned_paid_amount` from "Cash" or "Bank" to "Prepaid Sales".
         Changes Payment behavior.
         """
@@ -235,7 +235,7 @@ class SalesReturn(Return):
         create_gl_entry(self.doctype, self.name, get_account(asset_account), 0, amt)
         create_gl_entry(self.doctype, self.name, get_account("prepaid_sales"), amt, 0)
 
-    def before_submit(self):
+    def before_submit(self) -> None:
         self._modify_voucher()
 
         return_all_items = len(self._voucher.items) == 0
@@ -253,13 +253,13 @@ class SalesReturn(Return):
             self._voucher.flags.on_cancel_from_sales_return = True
             self._voucher.cancel()
 
-    def on_submit(self):
+    def on_submit(self) -> None:
         self._add_items_to_sell_to_linked_purchase_order()
 
     def before_cancel(self):
         if not self.flags.from_purchase_return:
             raise ValidationError(_("Not allowed to cancel Sales Return"))
 
-    def on_cancel(self):
+    def on_cancel(self) -> None:
         cancel_gl_entries_for(self.doctype, self.name)
         cancel_stock_entries_for(self.doctype, self.name)

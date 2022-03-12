@@ -23,12 +23,12 @@ from frappe.utils.fixtures import sync_fixtures
 from frappe.utils.scheduler import enqueue_events, is_scheduler_inactive
 
 
-def connect(context: Any):
+def connect(context: Any) -> None:
     frappe.init(get_site(context))
     frappe.connect()
 
 
-def _cleanup():
+def _cleanup() -> None:
     modules = get_all(ModuleDef, pluck="name", filter={"app_name": app_name})
     doctypes = get_all(
         DocType, field=("name", "issingle"), filter={"module": ("in", modules)}
@@ -46,7 +46,7 @@ def _cleanup():
     frappe.db.commit()
 
 
-def _make_customer():
+def _make_customer() -> None:
     doc = {
         "name": "Pavel Durov",
         "gender": "Male",
@@ -60,7 +60,7 @@ def _make_customer():
         Customer(doc).db_insert()
 
 
-def _make_commission_settings():
+def _make_commission_settings() -> None:
     doc = new_doc(CommissionSettings)
     doc.extend(
         "ranges",
@@ -82,7 +82,7 @@ def _make_commission_settings():
     doc.insert()
 
 
-def _make_items():
+def _make_items() -> None:
     # Last item contains all previous items
     items: list[dict[str, Any]] = [
         {
@@ -219,11 +219,11 @@ def _make_sales_order():
     return doc.insert()
 
 
-def _add_payment(sales_order: SalesOrder):
+def _add_payment(sales_order: SalesOrder) -> None:
     sales_order.add_payment(500, cash=False)
 
 
-def _make_purchase_order(sales_order_name: str | None):
+def _make_purchase_order(sales_order_name: str | None) -> None:
     get_doc(
         PurchaseOrder,
         {
@@ -233,7 +233,7 @@ def _make_purchase_order(sales_order_name: str | None):
     ).insert()
 
 
-def _make_docs():
+def _make_docs() -> None:
     _make_customer()
     _make_items()
     _make_commission_settings()
@@ -246,7 +246,7 @@ def _make_docs():
 @click.command("demo")
 @click.option("--clean", is_flag=True)
 @pass_context
-def demo(context: Any, clean: bool):
+def demo(context: Any, clean: bool) -> None:
     connect(context)
     if clean:
         _cleanup()
@@ -255,7 +255,7 @@ def demo(context: Any, clean: bool):
 
 @click.command("reset")
 @pass_context
-def reset(context: Any):
+def reset(context: Any) -> None:
     connect(context)
     _cleanup()
 
@@ -264,7 +264,7 @@ def reset(context: Any):
 @click.argument("untranslated_file", type=str, required=False)
 @click.argument("lang", default="ru")
 @pass_context
-def write_translations(context: Any, untranslated_file: str | None, lang: str):
+def write_translations(context: Any, untranslated_file: str | None, lang: str) -> None:
     "Get untranslated strings for language"
     if untranslated_file is None:
         untranslated_file = frappe.get_app_path(app_name, "translations", "ru.csv")
@@ -284,11 +284,11 @@ def write_translations(context: Any, untranslated_file: str | None, lang: str):
         print("All translated!")
 
 
-def _patch_scheduler_enqueue_events_for_site():
+def _patch_scheduler_enqueue_events_for_site() -> None:
     if not os.getenv("SENTRY_DSN"):
         return
 
-    def patched_enqueue_events_for_site(site: str):
+    def patched_enqueue_events_for_site(site: str) -> None:
         try:
             frappe.connect(site=site)
             if is_scheduler_inactive():
@@ -313,7 +313,7 @@ def _patch_scheduler_enqueue_events_for_site():
 
 
 @click.command("schedule")
-def start_scheduler():
+def start_scheduler() -> None:
     print("custom scheduler started")
     from frappe.utils.scheduler import start_scheduler
 
@@ -324,7 +324,7 @@ def start_scheduler():
 @click.command("worker")
 @click.option("--queue", type=str)
 @click.option("--quiet", is_flag=True, default=False)
-def start_worker(queue: str, quiet: bool = False):
+def start_worker(queue: str, quiet: bool = False) -> None:
     from frappe.utils.background_jobs import start_worker
 
     start_worker(queue=queue, quiet=quiet)

@@ -74,7 +74,7 @@ class PurchaseOrder(TypedDocument):
     # Hooks #
     #########
 
-    def autoname(self):
+    def autoname(self) -> None:
         months_number_to_name = {
             1: "Январь",
             2: "Февраль",
@@ -109,7 +109,7 @@ class PurchaseOrder(TypedDocument):
 
         self.name = f"{this_month}-{new_cart_number}"
 
-    def validate(self):
+    def validate(self) -> None:
         self._validate_not_empty()
         self._delete_sales_order_duplicates()
         delete_empty_items(self, "items_to_sell")
@@ -118,28 +118,28 @@ class PurchaseOrder(TypedDocument):
         self.update_items_to_sell_from_db()
         self.calculate()
 
-    def before_insert(self):
+    def before_insert(self) -> None:
         self.status = "Draft"
         self._clear_no_copy_fields_for_amended()
 
-    def before_save(self):
+    def before_save(self) -> None:
         self.delivery_options = []
         self.cannot_add_items = None
 
-    def before_submit(self):
+    def before_submit(self) -> None:
         self.delivery_options = []
         self.cannot_add_items = None
         self.status = "To Receive"
 
-    def on_submit(self):
+    def on_submit(self) -> None:
         self._create_payment()
         self._create_checkout()
         self._submit_sales_orders_and_update_statuses()
 
-    def before_cancel(self):
+    def before_cancel(self) -> None:
         self.status = "Cancelled"
 
-    def on_cancel(self):  # pragma: no cover
+    def on_cancel(self) -> None:  # pragma: no cover
         self._submit_sales_orders_and_update_statuses()
 
     ################
@@ -150,13 +150,13 @@ class PurchaseOrder(TypedDocument):
         if not (self.sales_orders or self.items_to_sell):
             raise ValidationError(_("Add Sales Orders or Items to Sell"))
 
-    def _delete_sales_order_duplicates(self):
+    def _delete_sales_order_duplicates(self) -> None:
         sales_orders_grouped_by_name = group_by_attr(
             self.sales_orders, "sales_order_name"
         ).values()
         self.sales_orders = [orders[0] for orders in sales_orders_grouped_by_name]
 
-    def update_sales_orders_from_db(self):
+    def update_sales_orders_from_db(self) -> None:
         for order in self.sales_orders:
             order_values: tuple[str, int] | None = get_value(
                 "Sales Order", order.sales_order_name, ("customer", "total_amount")
@@ -164,7 +164,7 @@ class PurchaseOrder(TypedDocument):
             if order_values is not None:
                 order.customer, order.total_amount = order_values
 
-    def update_items_to_sell_from_db(self):
+    def update_items_to_sell_from_db(self) -> None:
         for item in self.items_to_sell:
             item_values: tuple[str, int, float] = get_value(
                 "Item", item.item_code, ("item_name", "rate", "weight")
@@ -172,7 +172,7 @@ class PurchaseOrder(TypedDocument):
             item.item_name, item.rate, item.weight = item_values
             item.amount = item.qty * item.rate
 
-    def _clear_no_copy_fields_for_amended(self):
+    def _clear_no_copy_fields_for_amended(self) -> None:
         if not self.amended_from:
             return
 
@@ -181,10 +181,10 @@ class PurchaseOrder(TypedDocument):
         self.schedule_date = None
         self.delivery_cost = 0
 
-    def _calculate_items_to_sell_cost(self):
+    def _calculate_items_to_sell_cost(self) -> None:
         self.items_to_sell_cost = sum(item.amount for item in self.items_to_sell)
 
-    def _calculate_sales_orders_cost(self):
+    def _calculate_sales_orders_cost(self) -> None:
         res: list[list[int]] = frappe.get_all(
             "Sales Order Item",
             fields="SUM(qty * rate) AS sales_orders_cost",
@@ -196,7 +196,7 @@ class PurchaseOrder(TypedDocument):
         )
         self.sales_orders_cost = res[0][0] or 0
 
-    def _calculate_total_weight(self):
+    def _calculate_total_weight(self) -> None:
         res: list[list[float]] = frappe.get_all(
             "Sales Order Item",
             fields="SUM(total_weight) AS total_weight",
@@ -214,7 +214,7 @@ class PurchaseOrder(TypedDocument):
         )
         self.total_weight = sales_orders_weight + items_to_sell_weight
 
-    def _calculate_total_amount(self):
+    def _calculate_total_amount(self) -> None:
         if not self.delivery_cost:
             self.delivery_cost = 0
         if not self.items_to_sell_cost:
@@ -226,7 +226,7 @@ class PurchaseOrder(TypedDocument):
             self.sales_orders_cost + self.items_to_sell_cost + self.delivery_cost
         )
 
-    def _calculate_total_margin(self):
+    def _calculate_total_margin(self) -> None:
         self.total_margin = (
             get_all(
                 SalesOrder,
@@ -239,7 +239,7 @@ class PurchaseOrder(TypedDocument):
             or 0
         )
 
-    def calculate(self):
+    def calculate(self) -> None:
         self._calculate_items_to_sell_cost()
         self._calculate_sales_orders_cost()
         self._calculate_total_weight()
@@ -309,7 +309,7 @@ class PurchaseOrder(TypedDocument):
         return count_qty(items)
 
     @frappe.whitelist()
-    def get_delivery_services(self):
+    def get_delivery_services(self) -> None:
         templated_items = self._get_templated_items_for_api(split_combinations=True)
         response = get_delivery_services(templated_items)
         if not response:
@@ -333,7 +333,7 @@ class PurchaseOrder(TypedDocument):
             )
         self.save_without_validating()
 
-    def _submit_sales_orders_and_update_statuses(self):
+    def _submit_sales_orders_and_update_statuses(self) -> None:
         for o in self.sales_orders:
             doc = get_doc(SalesOrder, o.sales_order_name)
             if doc.docstatus == 2:
@@ -342,14 +342,14 @@ class PurchaseOrder(TypedDocument):
             doc.flags.ignore_validate_update_after_submit = True
             doc.submit()
 
-    def _create_payment(self):
+    def _create_payment(self) -> None:
         create_payment(self.doctype, self.name, self.total_amount, paid_with_cash=False)
 
-    def _create_checkout(self):
+    def _create_checkout(self) -> None:
         create_checkout(self.name)
 
     @frappe.whitelist()
-    def fetch_items_specs(self):
+    def fetch_items_specs(self) -> None:
         items: list[AnyChildItem] = list(self.get_items_to_sell(False))
         items += self.get_items_in_sales_orders(False)
         item_codes = [i.item_code for i in items]
@@ -370,7 +370,7 @@ class PurchaseOrder(TypedDocument):
     @frappe.whitelist()
     def add_purchase_info_and_submit(
         self, purchase_id: str, purchase_info: PurchaseInfoDict
-    ):
+    ) -> None:
         # Schedule date and posting date could be not loaded
         self.schedule_date = purchase_info.get("delivery_date", datetime.now())  # type: ignore
         self.posting_date = purchase_info.get("purchase_date", datetime.now())  # type: ignore
@@ -379,11 +379,11 @@ class PurchaseOrder(TypedDocument):
         self.submit()
 
     @frappe.whitelist()
-    def checkout(self):
+    def checkout(self) -> None:
         add_items_to_cart(self._get_templated_items_for_api(False), authorize=True)
 
     @frappe.whitelist()
-    def add_receipt(self):
+    def add_receipt(self) -> None:
         create_receipt(self.doctype, self.name)
         self.status = "Completed"
         self.save_without_validating()

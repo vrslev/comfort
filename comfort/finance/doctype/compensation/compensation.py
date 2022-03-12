@@ -16,15 +16,15 @@ class Compensation(TypedDocument):
         if int(get_value(self.voucher_type, self.voucher_no, "docstatus")) != 1:
             raise ValidationError(_("Can only add compensation for submitted document"))
 
-    def set_status(self):
+    def set_status(self) -> None:
         d: dict[int, Any] = {0: "Draft", 1: "Received", 2: "Cancelled"}
         self.status = d[self.docstatus]
 
-    def validate(self):
+    def validate(self) -> None:
         self.validate_docstatus()
         self.set_status()
 
-    def before_submit(self):
+    def before_submit(self) -> None:
         bank_or_cash = get_account("cash" if self.paid_with_cash else "bank")
         accounts = {
             "Purchase Order": (get_account("purchase_compensations"), bank_or_cash),
@@ -34,5 +34,5 @@ class Compensation(TypedDocument):
         create_gl_entry(self.doctype, self.name, accounts[0], 0, self.amount)
         create_gl_entry(self.doctype, self.name, accounts[1], self.amount, 0)
 
-    def on_cancel(self):  # pragma: no cover
+    def on_cancel(self) -> None:  # pragma: no cover
         cancel_gl_entries_for(self.doctype, self.name)

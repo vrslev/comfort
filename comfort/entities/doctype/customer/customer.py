@@ -51,7 +51,7 @@ class Customer(TypedDocument):
     city: str | None
     address: str | None
 
-    def before_insert(self):
+    def before_insert(self) -> None:
         # Find and set unique name (with number suffix if needed)
         regex = re.compile(r" (\d+)$")
         while True:
@@ -64,12 +64,12 @@ class Customer(TypedDocument):
                 self.name = f"{self.name} 2"
         self.name = self.name.strip()
 
-    def validate(self):
+    def validate(self) -> None:
         if self.vk_url:
             self.vk_id, self.vk_url = parse_vk_url(self.vk_url)
         self.update_info_from_vk()
 
-    def update_info_from_vk(self):
+    def update_info_from_vk(self) -> None:
         if self.vk_id and _vk_token_in_settings():
             users = _get_vk_users_for_customers((self,))
             _update_customer_from_vk_user(self, users[self.vk_id])
@@ -83,7 +83,7 @@ def _get_vk_users_for_customers(customers: Iterable[Customer]) -> dict[str, User
         return {}
 
 
-def _update_customer_from_vk_user(customer: Customer, user: User):
+def _update_customer_from_vk_user(customer: Customer, user: User) -> None:
     if not customer.gender:
         val_to_str: dict[Any, Any] = {None: None, 0: None, 1: "Female", 2: "Male"}
         customer.gender = val_to_str[user.sex]
@@ -95,7 +95,7 @@ def _update_customer_from_vk_user(customer: Customer, user: User):
         customer.city = user.city.title
 
 
-def update_all_customers_from_vk():
+def update_all_customers_from_vk() -> None:
     customers = get_all(Customer, field=("name", "vk_id"))
     users = _get_vk_users_for_customers(customers)
 

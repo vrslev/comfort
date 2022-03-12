@@ -83,7 +83,7 @@ class WaitingList(TypedDocument):
         self,
         items: list[SalesOrderChildItem | SalesOrderItem],
         delivery_services: GetDeliveryServicesResponse,
-    ):
+    ) -> None:
         grouped_items = group_by_attr(items, "parent")
         for order in self.sales_orders:
             cur_items = grouped_items[order.sales_order]
@@ -109,7 +109,7 @@ class WaitingList(TypedDocument):
             order.options_changed = order.last_options != order.current_options
 
     @frappe.whitelist()
-    def get_delivery_services(self):
+    def get_delivery_services(self) -> None:
         items = self._get_items()
         resp = get_delivery_services(count_qty(items))
         if resp is None:
@@ -117,7 +117,7 @@ class WaitingList(TypedDocument):
         self._process_options(items, resp)
         self.save()
 
-    def _show_already_in_po_message(self):
+    def _show_already_in_po_message(self) -> None:
         from comfort.transactions import PurchaseOrderSalesOrder
 
         sales_orders_in_purchase_order = get_all(
@@ -133,5 +133,5 @@ class WaitingList(TypedDocument):
                 _("Sales Orders already in Purchase Order: {}").format(", ".join(names))
             )
 
-    def before_save(self):
+    def before_save(self) -> None:
         self._show_already_in_po_message()

@@ -47,7 +47,7 @@ class PurchaseReturn(Return):
             self.__voucher = get_doc(PurchaseOrder, self.purchase_order)
         return self.__voucher
 
-    def _calculate_returned_paid_amount(self):
+    def _calculate_returned_paid_amount(self) -> None:
         self.returned_paid_amount = sum(item.qty * item.rate for item in self.items)
 
     def _validate_voucher_statuses(self):
@@ -74,7 +74,7 @@ class PurchaseReturn(Return):
             str | None, list[dict[str, str | int | None]]
         ] = defaultdict(list)
 
-        def append_item(item: AnyChildItem):
+        def append_item(item: AnyChildItem) -> None:
             item_dict: dict[str, str | int | None] = {
                 "item_code": item.item_code,
                 "item_name": item.item_name,
@@ -104,7 +104,7 @@ class PurchaseReturn(Return):
     def _make_sales_returns(
         self,
         orders_to_items: defaultdict[str | None, list[dict[str, str | int | None]]],
-    ):
+    ) -> None:
         self._voucher.flags.ignore_links = True
         to_remove: list[PurchaseOrderSalesOrder] = []
         for order_name, items in orders_to_items.items():
@@ -125,8 +125,10 @@ class PurchaseReturn(Return):
         for order in to_remove:
             self._voucher.sales_orders.remove(order)
 
-    def _add_missing_field_to_voucher_items_to_sell(self, items: list[AnyChildItem]):
-        def include(item: AnyChildItem):
+    def _add_missing_field_to_voucher_items_to_sell(
+        self, items: list[AnyChildItem]
+    ) -> None:
+        def include(item: AnyChildItem) -> bool | None:
             if (
                 not item.get("rate")
                 or not item.get("weight")
@@ -149,7 +151,7 @@ class PurchaseReturn(Return):
                 item.weight = grouped_item.weight  # type: ignore
             item.amount = item.qty * item.rate  # type: ignore
 
-    def _split_combinations_in_voucher(self):
+    def _split_combinations_in_voucher(self) -> None:
         items: list[AnyChildItem] = list(  # type: ignore
             merge_same_items(self._voucher.get_items_to_sell(True))
         )
@@ -157,7 +159,7 @@ class PurchaseReturn(Return):
         self._voucher.items_to_sell = []
         self._voucher.extend("items_to_sell", items)
 
-    def _modify_voucher(self):
+    def _modify_voucher(self) -> None:
         self._voucher.reload()  # After Sales Returns
         self._split_combinations_in_voucher()
 
@@ -178,7 +180,7 @@ class PurchaseReturn(Return):
         self._voucher.calculate()
         self._voucher.save_without_validating()
 
-    def _make_gl_entries(self):
+    def _make_gl_entries(self) -> None:
         """Return `returned_paid_amount` to "Cash" or "Bank"."""
         inventory_account = {
             "To Receive": "prepaid_inventory",
@@ -189,7 +191,7 @@ class PurchaseReturn(Return):
         create_gl_entry(self.doctype, self.name, get_account(inventory_account), 0, amt)
         create_gl_entry(self.doctype, self.name, get_account("bank"), amt, 0)
 
-    def _make_stock_entries(self):
+    def _make_stock_entries(self) -> None:
         """Return items to supplier.
 
         Since Sales Returns make Stock Entries (Reserved -> Available), making only (Available -> None)
@@ -205,7 +207,7 @@ class PurchaseReturn(Return):
             self.doctype, self.name, stock_type, self.items, reverse_qty=True
         )
 
-    def before_submit(self):
+    def before_submit(self) -> None:
         orders_to_items = self._allocate_items()
         self._make_sales_returns(orders_to_items)
         self._modify_voucher()

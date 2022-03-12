@@ -38,11 +38,11 @@ class ItemMethods:
             if len(re.findall(r"ikea.com/ru/ru/p/[^/]+s?\d+", self.url)) == 0:
                 raise ValidationError(_("Invalid URL"))
 
-    def set_name(self):
+    def set_name(self) -> None:
         if not self.item_name:
             self.item_name = self.item_code
 
-    def calculate_weight(self):
+    def calculate_weight(self) -> None:
         if not self.child_items:
             return
 
@@ -56,7 +56,7 @@ class ItemMethods:
         for d in self.child_items:
             self.weight += weight_map[d.item_code] * d.qty
 
-    def calculate_weight_in_parent_docs(self):
+    def calculate_weight_in_parent_docs(self) -> None:
         parent_items = get_all(
             ChildItem, field="parent", filter={"item_code": self.item_code}
         )
@@ -69,14 +69,14 @@ class ItemMethods:
 
 
 class Item(TypedDocument, ItemMethods):
-    def validate(self):
+    def validate(self) -> None:
         self.validate_child_items()
         self.validate_url()
         self.set_name()
         self.calculate_weight()
 
-    def on_change(self):
+    def on_change(self) -> None:
         self.clear_cache()
 
-    def on_update(self):
+    def on_update(self) -> None:
         self.calculate_weight_in_parent_docs()

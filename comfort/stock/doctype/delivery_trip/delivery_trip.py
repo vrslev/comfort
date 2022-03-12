@@ -27,18 +27,18 @@ class DeliveryTrip(TypedDocument):
     weight: float
     status: Literal["Draft", "In Progress", "Completed", "Cancelled"]
 
-    def before_insert(self):  # pragma: no cover
+    def before_insert(self) -> None:  # pragma: no cover
         self.set_status()
 
-    def before_submit(self):  # pragma: no cover
+    def before_submit(self) -> None:  # pragma: no cover
         self.set_status()
         self._validate_stops_have_address_and_city()
         self._validate_orders_have_delivery_services()
 
-    def before_cancel(self):  # pragma: no cover
+    def before_cancel(self) -> None:  # pragma: no cover
         self.set_status()
 
-    def validate(self):  # pragma: no cover
+    def validate(self) -> None:  # pragma: no cover
         self._validate_delivery_statuses_in_orders()
         self.update_sales_orders_from_db()
         self._get_weight()
@@ -60,7 +60,7 @@ class DeliveryTrip(TypedDocument):
                 ).format(order.name)
             )
 
-    def update_sales_orders_from_db(self):
+    def update_sales_orders_from_db(self) -> None:
         from comfort.transactions import SalesOrder, SalesOrderService
 
         order_names = [s.sales_order for s in self.stops]
@@ -109,7 +109,7 @@ class DeliveryTrip(TypedDocument):
             stop.city = customer.city
             stop.phone = customer.phone
 
-    def _get_weight(self):
+    def _get_weight(self) -> None:
         from comfort.transactions import SalesOrder
 
         v: list[Any] = get_all(
@@ -119,7 +119,7 @@ class DeliveryTrip(TypedDocument):
         )
         self.weight = v[0].weight
 
-    def set_status(self):
+    def set_status(self) -> None:
         docstatus_to_status_map: dict[
             int, Literal["Draft", "In Progress", "Cancelled"]
         ] = {0: "Draft", 1: "In Progress", 2: "Cancelled"}
@@ -173,7 +173,7 @@ class DeliveryTrip(TypedDocument):
         context["stops"] = stops
         return context
 
-    def _add_receipts_to_sales_orders(self):
+    def _add_receipts_to_sales_orders(self) -> None:
         from comfort.transactions import SalesOrder
 
         orders_have_receipt: list[str] = get_all(
@@ -192,7 +192,7 @@ class DeliveryTrip(TypedDocument):
                 doc.add_receipt()
 
     @frappe.whitelist()
-    def set_completed_status(self):
+    def set_completed_status(self) -> None:
         self.status = "Completed"
         self.save_without_validating()
         self._add_receipts_to_sales_orders()

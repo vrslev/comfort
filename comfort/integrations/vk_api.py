@@ -14,7 +14,7 @@ class VkApi:  # TODO: Use base_vk_api
     api_version: str = "5.131"
     lang: str = "ru"
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._get_group_token_from_settings()
         self._session = requests.Session()
 
@@ -53,7 +53,7 @@ class VkApi:  # TODO: Use base_vk_api
         )
         return [User(**u) for u in response]
 
-    def send_message(self, user_id: int, message: str):
+    def send_message(self, user_id: int, message: str) -> None:
         random_id = randint(1, 10000)  # nosec
         self._call_api(
             "messages.send", user_id=user_id, message=message, random_id=random_id

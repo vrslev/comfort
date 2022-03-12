@@ -21,5 +21,5 @@ class StockEntry(TypedDocument):
     items: list[StockEntryItem]
 
 
-def on_doctype_update():
+def on_doctype_update() -> None:
     frappe.db.add_index("Stock Entry", ["voucher_type", "voucher_no"])

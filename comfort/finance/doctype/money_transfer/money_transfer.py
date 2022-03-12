@@ -17,6 +17,6 @@ class MoneyTransfer(TypedDocument):
                 _("From Account and To Account shouldn't be the same")
             )
 
-    def before_submit(self):
+    def before_submit(self) -> None:
         create_gl_entry(self.doctype, self.name, self.from_account, 0, self.amount)
         create_gl_entry(self.doctype, self.name, self.to_account, self.amount, 0)

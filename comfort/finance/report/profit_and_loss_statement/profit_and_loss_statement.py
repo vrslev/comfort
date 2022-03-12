@@ -39,7 +39,7 @@ def _get_parent_children_accounts_map() -> dict[str | None, list[AccountWithTota
 def _filter_accounts(parent_children_map: dict[str | None, list[AccountWithTotal]]):
     filtered_accounts: list[AccountWithTotal] = []
 
-    def add_to_list(parent: str | None, level: int):
+    def add_to_list(parent: str | None, level: int) -> None:
         for child in parent_children_map.get(parent, []):
             child.indent = level
             filtered_accounts.append(child)
@@ -73,7 +73,7 @@ def _calculate_total_in_parent_accounts(
     account_balance_map: defaultdict[str | None, int],
     parent_children_map: dict[str | None, list[AccountWithTotal]],
     accounts: list[AccountWithTotal],
-):
+) -> None:
     for account in reversed(accounts):
         account.total = account_balance_map[account.name]
         children: list[AccountWithTotal] | None = parent_children_map.get(account.name)

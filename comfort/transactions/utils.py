@@ -17,7 +17,7 @@ AnyChildItem = Union[
 ]
 
 
-def delete_empty_items(self: object, items_field: str):
+def delete_empty_items(self: object, items_field: str) -> None:
     """Delete items that have zero quantity."""
     items: list[AnyChildItem] = getattr(self, items_field)
     new_items: list[AnyChildItem] = []

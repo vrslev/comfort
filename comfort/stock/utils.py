@@ -10,7 +10,9 @@ StockTypes = Literal[
 ]
 
 
-def create_receipt(doctype: Literal["Sales Order", "Purchase Order"], name: str):
+def create_receipt(
+    doctype: Literal["Sales Order", "Purchase Order"], name: str
+) -> None:
     from comfort.stock import Receipt
 
     doc = new_doc(Receipt)
@@ -19,7 +21,7 @@ def create_receipt(doctype: Literal["Sales Order", "Purchase Order"], name: str)
     doc.insert().submit()
 
 
-def create_checkout(purchase_order: str):
+def create_checkout(purchase_order: str) -> None:
     from comfort.stock import Checkout
 
     doc = new_doc(Checkout)
@@ -33,7 +35,7 @@ def create_stock_entry(
     stock_type: StockTypes,
     items: list[Any],
     reverse_qty: bool = False,
-):
+) -> None:
     from comfort.stock import StockEntry
 
     doc = new_doc(StockEntry)
@@ -55,7 +57,7 @@ def cancel_stock_entries_for(
         "Receipt", "Checkout", "Sales Return", "Purchase Return", "Sales Order"
     ],
     name: str,
-):
+) -> None:
     from comfort.stock import StockEntry
 
     entries = get_all(

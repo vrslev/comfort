@@ -12,5 +12,5 @@ class IkeaSettings(TypedDocument):
     guest_token: str | None
     guest_token_expiration: datetime | str | None
 
-    def on_change(self):
+    def on_change(self) -> None:
         self.clear_cache()

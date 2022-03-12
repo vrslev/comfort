@@ -14,7 +14,7 @@ from frappe.model.meta import Meta
 from frappe.utils import fmt_money, unique
 
 
-def _format_weight(weight: int | float):
+def _format_weight(weight: int | float) -> str:
     return f"{float(weight)} кг"
 
 
@@ -39,26 +39,26 @@ def format_phone(phone: str):  # pragma: no cover
 
 def _format_item_query(  # pragma: no cover
     result: Annotated[list[Any], ["name", "item_name", "rate"]]
-):
+) -> None:
     result[2] = fmt_money(result[2])
 
 
 def _format_purchase_order_query(  # pragma: no cover
     result: Annotated[list[Any], ["name", "status", "total_amount", "total_weight"]]
-):
+) -> None:
     result[2] = fmt_money(result[2])
     result[3] = _format_weight(result[3])
 
 
 def _format_sales_order_query(  # pragma: no cover
     result: Annotated[list[Any], ["name", "status", "customer", "total_amount"]]
-):
+) -> None:
     result[3] = fmt_money(result[3])
 
 
 def _format_customer_query(  # pragma: no cover
     result: Annotated[list[Any], ["name", "phone"]]
-):
+) -> None:
     result[1] = format_phone(str(result[1]))
 
 

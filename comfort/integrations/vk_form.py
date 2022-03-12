@@ -66,7 +66,7 @@ def _get_customer_name(first_name: str, last_name: str):
     return first_name
 
 
-def _create_vk_group_dialog_url(group_id: int, user_id: int):
+def _create_vk_group_dialog_url(group_id: int, user_id: int) -> str:
     return f"https://vk.com/gim{group_id}?sel={user_id}"
 
 
@@ -93,7 +93,9 @@ def _get_delivery_service(raw_delivery_type: str):
         return {"type": "Delivery to Apartment", "rate": 400}
 
 
-def _create_sales_order(customer_name: str, raw_order: str, raw_delivery_type: str):
+def _create_sales_order(
+    customer_name: str, raw_order: str, raw_delivery_type: str
+) -> None:
     fetch_result = fetch_items(raw_order, force_update=True)
     if not fetch_result["successful"]:
         return
@@ -113,12 +115,12 @@ def _create_sales_order(customer_name: str, raw_order: str, raw_delivery_type: s
     doc.save()
 
 
-def _send_confirmation_message(user_id: int, first_name: str):
+def _send_confirmation_message(user_id: int, first_name: str) -> None:
     message = f"{first_name}, спасибо за ваш заказ! Когда обработаем его, напишем вам!"
     VkApi().send_message(user_id=user_id, message=message)
 
 
-def process_form(form: dict[Any, Any]):
+def process_form(form: dict[Any, Any]) -> None:
     response = VkForm(**form)
     answers = _get_mapped_answers(response.object.answers)
 

@@ -112,7 +112,7 @@ class SalesOrder(TypedDocument):
     # Hooks #
     #########
 
-    def validate(self):
+    def validate(self) -> None:
         self._validate_from_available_stock()
 
         delete_empty_items(self, "items")
@@ -123,7 +123,7 @@ class SalesOrder(TypedDocument):
         self.calculate()
         self.set_statuses()
 
-    def before_submit(self):  # pragma: no cover
+    def before_submit(self) -> None:  # pragma: no cover
         self.edit_commission = True
         if self.from_available_stock:
             self._modify_purchase_order_for_from_available_stock()
@@ -131,11 +131,11 @@ class SalesOrder(TypedDocument):
             self.set_statuses()
             self.from_purchase_order = None
 
-    def before_cancel(self):  # pragma: no cover
+    def before_cancel(self) -> None:  # pragma: no cover
         self.set_statuses()
         self._create_cancel_sales_return()
 
-    def on_cancel(self):
+    def on_cancel(self) -> None:
 
         self.ignore_linked_doctypes = [
             "Purchase Order",
@@ -153,7 +153,7 @@ class SalesOrder(TypedDocument):
                 if doc.docstatus != 2:
                     get_doc(doctype, doc.name).cancel()
 
-    def before_update_after_submit(self):  # pragma: no cover
+    def before_update_after_submit(self) -> None:  # pragma: no cover
         self._validate_services_not_changed()
         self.calculate()
         self.set_statuses()
@@ -162,7 +162,7 @@ class SalesOrder(TypedDocument):
     # End of hooks #
     ################
 
-    def update_items_from_db(self):
+    def update_items_from_db(self) -> None:
         """Load item properties from cache or database and calculate Amount and Total Weight."""
 
         for item in self.items:
@@ -175,7 +175,7 @@ class SalesOrder(TypedDocument):
             item.amount = item.rate * item.qty
             item.total_weight = item.weight * item.qty
 
-    def set_child_items(self):
+    def set_child_items(self) -> None:
         """Generate Child Items from combinations in Items."""
 
         self.child_items = []
@@ -222,7 +222,7 @@ class SalesOrder(TypedDocument):
                     ).format(item_code, qty, stock_counter[item_code])
                 )
 
-    def _calculate_item_totals(self):
+    def _calculate_item_totals(self) -> None:
         """Calculate global Total Quantity, Weight and Items Cost."""
         self.total_quantity, self.total_weight, self.items_cost = 0, 0.0, 0
         for item in self.items:
@@ -233,17 +233,17 @@ class SalesOrder(TypedDocument):
             self.total_weight += item.total_weight
             self.items_cost += item.amount
 
-    def _calculate_service_amount(self):
+    def _calculate_service_amount(self) -> None:
         self.service_amount = sum(s.rate for s in self.services)
 
-    def _calculate_commission(self):
+    def _calculate_commission(self) -> None:
         """Calculate commission based rules set in Commission Settings if `edit_commission` is False."""
         if self.items_cost and not self.edit_commission:
             self.commission = CommissionSettings.get_commission_percentage(
                 self.items_cost
             )
 
-    def _calculate_margin(self):
+    def _calculate_margin(self) -> None:
         """Calculate margin based on commission and rounding remainder of items_cost."""
         if self.items_cost <= 0:
             self.margin = 0
@@ -253,12 +253,12 @@ class SalesOrder(TypedDocument):
         rounded_margin = int(round(base_margin, -1) + items_cost_rounding_remainder)
         self.margin = rounded_margin
 
-    def _calculate_total_amount(self):
+    def _calculate_total_amount(self) -> None:
         self.total_amount = (
             self.items_cost + self.margin + self.service_amount - self.discount
         )
 
-    def calculate(self):
+    def calculate(self) -> None:
         """Calculate all things that are calculable."""
         self._calculate_item_totals()
         self._calculate_service_amount()
@@ -274,7 +274,7 @@ class SalesOrder(TypedDocument):
         ):
             return
 
-        def services_changed():
+        def services_changed() -> bool | None:
             self.load_doc_before_save()
 
             if len(self.services) != len(self._doc_before_save.services):
@@ -305,7 +305,7 @@ class SalesOrder(TypedDocument):
             item for item in self.items if item.item_code not in parents
         ]
 
-    def _create_cancel_sales_return(self):
+    def _create_cancel_sales_return(self) -> None:
         if self.flags.on_cancel_from_sales_return:
             return
 
@@ -320,7 +320,7 @@ class SalesOrder(TypedDocument):
         sales_return.save()
         sales_return.submit()
 
-    def _modify_purchase_order_for_from_available_stock(self):
+    def _modify_purchase_order_for_from_available_stock(self) -> None:
         if self.from_available_stock != "Available Purchased":
             return
 
@@ -350,7 +350,7 @@ class SalesOrder(TypedDocument):
         doc.calculate()
         doc.save_without_validating()
 
-    def _make_stock_entries_for_from_available_stock(self):
+    def _make_stock_entries_for_from_available_stock(self) -> None:
         if not self.from_available_stock:
             return
 
@@ -397,7 +397,7 @@ class SalesOrder(TypedDocument):
         )
         return sum(b[0] or 0 for b in balances)
 
-    def set_paid_and_pending_per_amount(self):
+    def set_paid_and_pending_per_amount(self) -> None:
         self.paid_amount = self._get_paid_amount()
 
         if self.total_amount == 0:
@@ -407,7 +407,7 @@ class SalesOrder(TypedDocument):
 
         self.pending_amount = self.total_amount - self.paid_amount
 
-    def _set_payment_status(self):
+    def _set_payment_status(self) -> None:
         if self.docstatus == 2:
             status = ""
         elif self.per_paid > 100:
@@ -421,7 +421,7 @@ class SalesOrder(TypedDocument):
 
         self.payment_status = status
 
-    def _set_delivery_status(self):
+    def _set_delivery_status(self) -> None:
         if self.docstatus == 2:
             status = ""
         elif doc_exists(
@@ -456,7 +456,7 @@ class SalesOrder(TypedDocument):
 
         self.delivery_status = status
 
-    def _set_document_status(self):
+    def _set_document_status(self) -> None:
         """Set Document Status. Depends on `docstatus`, `payment_status` and `delivery_status`."""
         if self.docstatus == 0:
             status = "Draft"
@@ -470,7 +470,7 @@ class SalesOrder(TypedDocument):
 
         self.status = status
 
-    def set_statuses(self):
+    def set_statuses(self) -> None:
         """Set statuses according to current Sales Order and linked Purchase Order states."""
         self.set_paid_and_pending_per_amount()
         self._set_payment_status()
@@ -499,7 +499,7 @@ class SalesOrder(TypedDocument):
         self.save_without_validating()
 
     @frappe.whitelist()
-    def split_combinations(self, combos_docnames: list[str], save: bool):
+    def split_combinations(self, combos_docnames: list[str], save: bool) -> None:
         combos_docnames = list(set(combos_docnames))
 
         items_to_remove: list[SalesOrderItem] = []
@@ -823,7 +823,7 @@ def calculate_commission_and_margin(doc: str):
 
 
 @frappe.whitelist()
-def get_contract_template():  # pragma: no cover
+def get_contract_template() -> None:  # pragma: no cover
     doc = new_doc(SalesOrder)
     doc.customer = "________________"
     doc.items = []

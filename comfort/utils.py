@@ -62,7 +62,7 @@ class ValidationError(Exception):
         is_minimizable: bool | None = None,
         wide: str | None = None,
         as_list: bool = False,
-    ):
+    ) -> None:
         frappe.throw(
             msg,
             exc=exc,
@@ -107,12 +107,12 @@ class TypedDocument(Document):
 
     def save(  # type: ignore
         self, ignore_permissions: bool | None = None, ignore_version: bool | None = None
-    ):
+    ) -> None:
         super().save(
             ignore_permissions=ignore_permissions, ignore_version=ignore_version
         )
 
-    def save_without_validating(self):
+    def save_without_validating(self) -> None:
         self.flags.ignore_validate = True
         self.flags.ignore_validate_update_after_submit = True
         self.flags.ignore_links = True
@@ -254,7 +254,7 @@ def copy_doc(doc: _T_doc, ignore_no_copy: bool = True) -> _T_doc:
     return frappe.copy_doc(doc, ignore_no_copy=ignore_no_copy)  # type: ignore
 
 
-def patch_fmt_money():  # pragma: no cover
+def patch_fmt_money() -> None:  # pragma: no cover
     old_func = frappe.utils.data.fmt_money  # type: ignore
 
     def fmt_money(
@@ -269,8 +269,8 @@ def patch_fmt_money():  # pragma: no cover
     frappe.utils.fmt_money = fmt_money
 
 
-def patch_validate_ip_address():
-    def mock_validate_ip_address(user: Any):
+def patch_validate_ip_address() -> None:
+    def mock_validate_ip_address(user: Any) -> None:
         return
 
     frappe.auth.validate_ip_address = mock_validate_ip_address

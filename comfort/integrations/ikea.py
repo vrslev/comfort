@@ -62,7 +62,7 @@ def _get_guest_token() -> str:
     return ikea_api.run(ikea_api.Auth(get_constants()).get_guest_token())
 
 
-def _set_renew_guest_token(doc: IkeaSettings):
+def _set_renew_guest_token(doc: IkeaSettings) -> None:
     doc.guest_token = _get_guest_token()
     doc.guest_token_expiration = add_to_date(None, days=30)
     doc.save()
@@ -76,7 +76,7 @@ def get_guest_token():
     return doc.guest_token
 
 
-def _auth_token_expired(exp: int):
+def _auth_token_expired(exp: int) -> bool | None:
     now = timegm(datetime.now(tz=timezone.utc).utctimetuple())
     try:
         PyJWT()._validate_exp({"exp": exp}, now, 0)
@@ -126,7 +126,9 @@ def _validate_delivery_services_items(items: dict[str, int]):
         raise ValidationError(_("No items selected to check delivery services"))
 
 
-def _check_delivery_services_response(response: types.GetDeliveryServicesResponse):
+def _check_delivery_services_response(
+    response: types.GetDeliveryServicesResponse,
+) -> bool | None:
     if response.delivery_options:
         return True
 
@@ -183,7 +185,7 @@ def _get_purchase_info(purchase_id: str) -> PurchaseInfoDict:
     )
 
 
-def _handle_purchase_info_error(exc: ikea_api.GraphQLError):
+def _handle_purchase_info_error(exc: ikea_api.GraphQLError) -> None:
     skip_messages = (
         "Purchase not found",
         "Order not found",
@@ -213,7 +215,7 @@ def get_purchase_info(purchase_id: str):
         _handle_purchase_info_error(exc)
 
 
-def _make_item_category(name: str | None, url: str | None):
+def _make_item_category(name: str | None, url: str | None) -> None:
     if name and not doc_exists("Item Category", name):
         doc = new_doc(ItemCategory)
         doc.category_name = name
@@ -221,7 +223,7 @@ def _make_item_category(name: str | None, url: str | None):
         doc.insert()
 
 
-def _make_items_from_child_items_if_not_exist(parsed_item: types.ParsedItem):
+def _make_items_from_child_items_if_not_exist(parsed_item: types.ParsedItem) -> None:
     for child_item in parsed_item.child_items:
         if not doc_exists("Item", child_item.item_code):
             doc = new_doc(Item)
@@ -242,7 +244,7 @@ def _shorten_item_url_if_required(item: types.ParsedItem):
     )
 
 
-def _create_item(parsed_item: types.ParsedItem):
+def _create_item(parsed_item: types.ParsedItem) -> None:
     if doc_exists("Item", parsed_item.item_code):
         doc = get_doc(Item, parsed_item.item_code)
         doc.item_name = parsed_item.name
@@ -328,7 +330,7 @@ def _get_items_to_fetch(item_codes: str | list[str], force_update: bool):
         return [i for i in parsed_item_codes if i not in exist]
 
 
-def _create_item_categories(items: list[types.ParsedItem]):
+def _create_item_categories(items: list[types.ParsedItem]) -> None:
     categories: set[tuple[str | None, str | None]] = set()
     for item in items:
         categories.add((item.category_name, item.category_url))

@@ -25,14 +25,14 @@ def load_metadata():
     return app_name, app_title, app_description, app_publisher, app_version
 
 
-def _set_currency():
+def _set_currency() -> None:
     doc = get_doc(Currency, "RUB")
     doc.update({"symbol": "₽", "enabled": True})
     doc.save()
     frappe.db.set_default("currency", "RUB")
 
 
-def _update_system_settings():  # pragma: no cover
+def _update_system_settings() -> None:  # pragma: no cover
     doc = get_doc(SystemSettings)
     doc.app_name = "Comfort"  # type: ignore
     doc.date_format = "dd.mm.yyyy"  # type: ignore  # Accepted Russian date format
@@ -45,25 +45,25 @@ def _update_system_settings():  # pragma: no cover
     doc.save()
 
 
-def _disable_signup():
+def _disable_signup() -> None:
     doc = get_doc(WebsiteSettings)
     doc.disable_signup = True  # type: ignore  # Don't want strangers
     doc.home_page = "login"
     doc.save()
 
 
-def after_install():  # pragma: no cover
+def after_install() -> None:  # pragma: no cover
     initialize_accounts()
     _set_currency()
     after_migrate()
 
 
-def after_migrate():  # pragma: no cover
+def after_migrate() -> None:  # pragma: no cover
     _update_system_settings()
     _disable_signup()
 
 
-def extend_boot_session(bootinfo: Any):  # pragma: no cover
+def extend_boot_session(bootinfo: Any) -> None:  # pragma: no cover
     currency_doc: dict[str, Any] = frappe.get_cached_value(  # type: ignore
         "Currency",
         bootinfo.sysdefaults.currency,
@@ -82,7 +82,7 @@ def extend_boot_session(bootinfo: Any):  # pragma: no cover
 
 
 class CustomDocType(DocType):  # pragma: no cover
-    def make_controller_template(self):
+    def make_controller_template(self) -> None:
         """Do not madly create dt.js, test_dt.py files"""
         make_boilerplate("controller._py", self)
 

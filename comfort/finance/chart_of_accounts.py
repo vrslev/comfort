@@ -42,8 +42,8 @@ DEFAULT_ACCOUNT_SETTINGS = {
 }
 
 
-def _create_accounts_from_schema():
-    def execute(parent: str | None, children: dict[str, Any]):
+def _create_accounts_from_schema() -> None:
+    def execute(parent: str | None, children: dict[str, Any]) -> None:
         for child, children_of_child in children.items():
             doc = new_doc(Account)
             doc.account_name = child
@@ -56,13 +56,13 @@ def _create_accounts_from_schema():
     rebuild_tree("Account", "parent_account")
 
 
-def _set_default_accounts():
+def _set_default_accounts() -> None:
     doc = get_doc(FinanceSettings)
     doc.update(DEFAULT_ACCOUNT_SETTINGS)
     doc.save()
 
 
-def initialize_accounts():
+def initialize_accounts() -> None:
     if not get_all(Account, limit=1):
         _create_accounts_from_schema()
     _set_default_accounts()
