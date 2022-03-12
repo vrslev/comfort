@@ -152,8 +152,8 @@ class PurchaseReturn(Return):
             item.amount = item.qty * item.rate  # type: ignore
 
     def _split_combinations_in_voucher(self) -> None:
-        items: list[AnyChildItem] = list(  # type: ignore
-            merge_same_items(self._voucher.get_items_to_sell(True))
+        items: list[AnyChildItem] = list(
+            merge_same_items(self._voucher.get_items_to_sell(True))  # type: ignore
         )
         self._add_missing_field_to_voucher_items_to_sell(items)
         self._voucher.items_to_sell = []
