@@ -67,7 +67,7 @@ jobs:
           load: true
 
       - name: Test
-        run: ./github/scripts/smoke-test.sh
+        run: ./.github/scripts/smoke-test.sh
 
       - name: Push images
         if: github.event_name != 'pull_request'
