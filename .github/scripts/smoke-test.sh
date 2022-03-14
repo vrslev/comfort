@@ -10,7 +10,7 @@ export DOMAIN=127.0.0.1
 ./.github/scripts/generate-env.sh
 
 docker-compose up -d
-docker-compose exec backend bench new-site $DOMAIN --install-app comfort --db-root-password $DB_PASSWORD --admin-password admin
+docker-compose exec -T backend bench new-site $DOMAIN --install-app comfort --db-root-password $DB_PASSWORD --admin-password admin
 
 echo Ping version
 ping_res=$(curl --insecure -sS "https://$DOMAIN/api/method/version")
