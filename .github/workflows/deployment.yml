@@ -27,7 +27,7 @@ jobs:
         run: |
           docker manifest inspect cr.yandex/crpdmuh1072ntg30t18g/comfort-nginx:$COMFORT_VERSION
           if [ $? -ne 0 ]; then echo "No image with tag $COMFORT_VERSION" && exit 1; fi
-          ./docker/scripts/generate-env.sh
+          ./.github/scripts/generate-env.sh
         env:
           COMFORT_VERSION: ${{ env.COMFORT_VERSION }}
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
@@ -56,7 +56,7 @@ jobs:
           username: ${{ secrets.SERVER_USERNAME }}
           port: ${{ secrets.SERVER_PORT }}
           key: ${{ secrets.SERVER_KEY }}
-          source: compose.yaml,.env,docker/scripts/deploy.sh
+          source: compose.yaml,.env,.github/scripts/deploy.sh
           target: comfort
           strip_components: 1
 

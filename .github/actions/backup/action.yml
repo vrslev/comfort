@@ -42,7 +42,7 @@ runs:
         username: ${{ inputs.username }}
         port: ${{ inputs.port }}
         key: ${{ inputs.key }}
-        source: docker/scripts/backup.sh
+        source: .github/scripts/backup.sh
         target: comfort
         strip_components: 1
 
