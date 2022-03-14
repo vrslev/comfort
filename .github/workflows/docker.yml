@@ -65,8 +65,13 @@ jobs:
             ./docker-bake.hcl
             ${{ steps.meta.outputs.bake-file }}
           load: true
+
+      - name: Install Docker Compose v2
+        uses: ndeloof/install-compose-action@4a33bc31f327b8231c4f343f6fba704fedc0fa23
+
       - name: Test
         run: ./.github/scripts/smoke-test.sh
+
       - name: Setup tmate session
         if: failure()
         uses: mxschmitt/action-tmate@v3
