@@ -9,7 +9,7 @@ group "default" {
 }
 
 target "frontend" {
-    dockerfile = "docker/frontend.Dockerfile"
+    dockerfile = "Dockerfile.frontend"
     tags = ["cr.yandex/crpdmuh1072ntg30t18g/comfort-nginx:${TAG}"]
     args = {
       FRAPPE_VERSION = FRAPPE_VERSION
@@ -17,7 +17,7 @@ target "frontend" {
 }
 
 target "backend" {
-    dockerfile = "docker/backend.Dockerfile"
+    dockerfile = "Dockerfile.backend"
     tags = ["cr.yandex/crpdmuh1072ntg30t18g/comfort-worker:${TAG}"]
     args = {
       FRAPPE_VERSION = FRAPPE_VERSION
