@@ -65,10 +65,11 @@ jobs:
             ./docker-bake.hcl
             ${{ steps.meta.outputs.bake-file }}
           load: true
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
       - name: Test
         run: ./.github/scripts/smoke-test.sh
+      - name: Setup tmate session
+        if: failure()
+        uses: mxschmitt/action-tmate@v3
 
       - name: Push images
         if: github.event_name != 'pull_request'

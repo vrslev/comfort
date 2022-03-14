@@ -14,7 +14,7 @@ x-backend-defaults: &backend_defaults
 services:
   configurator:
     <<: *backend_defaults
-    command: configure.py
+    command: /usr/local/bin/configure.py
     environment:
       DB_HOST: db
       DB_PORT: 3306
