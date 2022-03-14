@@ -29,14 +29,14 @@ jobs:
         uses: docker/metadata-action@v3.6.2
         with:
           images: cr.yandex/crpdmuh1072ntg30t18g/comfort-nginx
-          bake-target: nginx
+          bake-target: frontend
 
       - name: Worker meta
         id: worker-meta
         uses: docker/metadata-action@v3.6.2
         with:
           images: cr.yandex/crpdmuh1072ntg30t18g/comfort-worker
-          bake-target: worker
+          bake-target: backend
 
       - name: Merge metas
         id: meta
