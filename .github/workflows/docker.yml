@@ -65,7 +65,8 @@ jobs:
             ./docker-bake.hcl
             ${{ steps.meta.outputs.bake-file }}
           load: true
-
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
       - name: Test
         run: ./.github/scripts/smoke-test.sh
 
