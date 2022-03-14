@@ -4,7 +4,7 @@
     "@sentry/tracing": "6.18.2"
   },
   "devDependencies": {
-    "eslint": "8.10.0",
+    "eslint": "8.11.0",
     "eslint-config-prettier": "8.5.0",
     "prettier": "2.5.1"
   },
