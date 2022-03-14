@@ -3,6 +3,7 @@ FROM frappe/frappe-worker:${FRAPPE_VERSION}
 
 COPY --chown=frappe . ../apps/comfort
 
+# TODO: Cache doesn't work
 RUN --mount=type=cache,target=/home/frappe/.cache/pip echo "frappe\ncomfort" >/home/frappe/frappe-bench/sites/apps.txt \
   && ../env/bin/pip install -e ../apps/comfort
 

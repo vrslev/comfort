@@ -27,11 +27,9 @@ jobs:
         run: |
           docker manifest inspect cr.yandex/crpdmuh1072ntg30t18g/comfort-nginx:$COMFORT_VERSION
           if [ $? -ne 0 ]; then echo "No image with tag $COMFORT_VERSION" && exit 1; fi
-          cd docker
-          bash scripts/generate-env.sh
+          ./docker/scripts/generate-env.sh
         env:
           COMFORT_VERSION: ${{ env.COMFORT_VERSION }}
-          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           DOMAIN: ${{ secrets.DOMAIN }}
           LETSENCRYPT_EMAIL: ${{ secrets.LETSENCRYPT_EMAIL }}
@@ -44,6 +42,7 @@ jobs:
           username: ${{ secrets.SERVER_USERNAME }}
           port: ${{ secrets.SERVER_PORT }}
           key: ${{ secrets.SERVER_KEY }}
+          domain: ${{ secrets.DOMAIN }}
           bucket_name: ${{ secrets.S3_BACKUP_BUCKET_NAME }}
           region: ${{ secrets.S3_BACKUP_REGION }}
           access_key_id: ${{ secrets.S3_BACKUP_ACCESS_KEY_ID }}
@@ -57,7 +56,7 @@ jobs:
           username: ${{ secrets.SERVER_USERNAME }}
           port: ${{ secrets.SERVER_PORT }}
           key: ${{ secrets.SERVER_KEY }}
-          source: docker/docker-compose.yml,docker/.env,docker/scripts/deploy.sh,docker/scripts/check-health.sh
+          source: compose.yaml,.env,docker/scripts/deploy.sh
           target: comfort
           strip_components: 1
 
