@@ -1,32 +1,35 @@
-name: "Backup"
-description: "Backup Frappe sites and push to S3 storate"
+name: Backup
+description: Backup Frappe sites and push to S3 storate
 inputs:
   host:
-    description: "Server host"
+    description: Server host
     required: true
   username:
-    description: "Server username"
+    description: Server username
     required: true
   port:
-    description: "Server port"
+    description: Server port
     required: true
   key:
-    description: "Server ssh key"
+    description: Server ssh key
+    required: true
+  domain:
+    description: Frappe site name
     required: true
   bucket_name:
-    description: "Server ssh key"
+    description: S3 bucket name
     required: true
   region:
-    description: "S3 region"
+    description: S3 region
     required: true
   access_key_id:
-    description: "S3 access key id"
+    description: S3 access key id
     required: true
   secret_access_key:
-    description: "S3 secret access key"
+    description: S3 secret access key
     required: true
   endpoint_url:
-    description: "S3 endpoint url"
+    description: S3 endpoint url
     required: true
 
 runs:
@@ -39,7 +42,7 @@ runs:
         username: ${{ inputs.username }}
         port: ${{ inputs.port }}
         key: ${{ inputs.key }}
-        source: docker/scripts/backup.sh
+        source: .github/scripts/backup.sh
         target: comfort
         strip_components: 1
 
@@ -50,18 +53,14 @@ runs:
         username: ${{ inputs.username }}
         port: ${{ inputs.port }}
         key: ${{ inputs.key }}
-        envs: BUCKET_NAME,REGION,ACCESS_KEY_ID,SECRET_ACCESS_KEY,ENDPOINT_URL
+        envs: DOMAIN,BUCKET_NAME,REGION,ACCESS_KEY_ID,SECRET_ACCESS_KEY,ENDPOINT_URL
         script_stop: true
         script: |
           cd comfort
-          BUCKET_NAME=$BUCKET_NAME \
-            REGION=$REGION \
-            ACCESS_KEY_ID=$ACCESS_KEY_ID \
-            SECRET_ACCESS_KEY=$SECRET_ACCESS_KEY \
-            ENDPOINT_URL=$ENDPOINT_URL \
-            bash scripts/backup.sh
+          ./scripts/backup.sh
           rm -rf scripts
       env:
+        DOMAIN: ${{ inputs.domain }}
         BUCKET_NAME: ${{ inputs.bucket_name }}
         REGION: ${{ inputs.region }}
         ACCESS_KEY_ID: ${{ inputs.access_key_id }}

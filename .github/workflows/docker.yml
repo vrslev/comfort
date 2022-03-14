@@ -29,14 +29,14 @@ jobs:
         uses: docker/metadata-action@v3.6.2
         with:
           images: cr.yandex/crpdmuh1072ntg30t18g/comfort-nginx
-          bake-target: nginx
+          bake-target: frontend
 
       - name: Worker meta
         id: worker-meta
         uses: docker/metadata-action@v3.6.2
         with:
           images: cr.yandex/crpdmuh1072ntg30t18g/comfort-worker
-          bake-target: worker
+          bake-target: backend
 
       - name: Merge metas
         id: meta
@@ -66,9 +66,15 @@ jobs:
             ${{ steps.meta.outputs.bake-file }}
           load: true
 
-      - name: Smoke Test
-        working-directory: docker
-        run: bash scripts/smoke-test.sh
+      - name: Install Docker Compose v2
+        uses: ndeloof/install-compose-action@4a33bc31f327b8231c4f343f6fba704fedc0fa23
+
+      - name: Test
+        run: ./.github/scripts/smoke-test.sh
+
+      # - name: Setup tmate session
+      #   if: failure()
+      #   uses: mxschmitt/action-tmate@v3
 
       - name: Push images
         if: github.event_name != 'pull_request'

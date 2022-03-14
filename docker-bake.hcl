@@ -4,24 +4,22 @@ variable "FRAPPE_VERSION" {}
 # In GitHub Actions using https://github.com/docker/metadata-action.
 variable "TAG" {}
 
-target "frappe-version" {
-  args = {
-    FRAPPE_VERSION = FRAPPE_VERSION
-  }
-}
-
 group "default" {
-    targets = ["nginx", "worker"]
+    targets = ["frontend", "backend"]
 }
 
-target "nginx" {
-    inherits = ["frappe-version"]
-    dockerfile = "docker/nginx.Dockerfile"
+target "frontend" {
+    dockerfile = "Dockerfile.frontend"
     tags = ["cr.yandex/crpdmuh1072ntg30t18g/comfort-nginx:${TAG}"]
+    args = {
+      FRAPPE_VERSION = FRAPPE_VERSION
+    }
 }
 
-target "worker" {
-    inherits = ["frappe-version"]
-    dockerfile = "docker/worker.Dockerfile"
+target "backend" {
+    dockerfile = "Dockerfile.backend"
     tags = ["cr.yandex/crpdmuh1072ntg30t18g/comfort-worker:${TAG}"]
+    args = {
+      FRAPPE_VERSION = FRAPPE_VERSION
+    }
 }

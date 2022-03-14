@@ -1,0 +1,134 @@
+x-depends-on-configurator: &depends_on_configurator
+  depends_on:
+    configurator:
+      condition: service_completed_successfully
+
+x-backend-defaults: &backend_defaults
+  <<: *depends_on_configurator
+  image: cr.yandex/crpdmuh1072ntg30t18g/comfort-worker:${COMFORT_VERSION}
+  environment:
+    SENTRY_DSN: ${SENTRY_DSN}
+  volumes:
+    - sites:/home/frappe/frappe-bench/sites
+
+services:
+  configurator:
+    <<: *backend_defaults
+    command: /usr/local/bin/configure.py
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      REDIS_CACHE: redis:6379/0
+      REDIS_QUEUE: redis:6379/1
+      REDIS_SOCKETIO: redis:6379/2
+      SOCKETIO_PORT: 9000
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  backend:
+    <<: *backend_defaults
+    # TODO: Number of workers
+    entrypoint: /home/frappe/frappe-bench/env/bin/gunicorn -b 0.0.0.0:8000 --worker-class=uvicorn.workers.UvicornH11Worker --preload comfort.app:app
+    volumes:
+      - sites:/home/frappe/frappe-bench/sites
+      - assets:/home/frappe/frappe-bench/sites/assets:ro
+
+  frontend:
+    image: cr.yandex/crpdmuh1072ntg30t18g/comfort-nginx:${COMFORT_VERSION}
+    environment:
+      BACKEND: backend:8000
+      SOCKETIO: websocket:9000
+      # FRAPPE_SITE_NAME_HEADER: $$host
+      # UPSTREAM_REAL_IP_ADDRESS: 127.0.0.1
+      # UPSTREAM_REAL_IP_HEADER: X-Forwarded-For
+      # UPSTREAM_REAL_IP_RECURSIVE: "off"
+      FRAPPE_SITE_NAME_HEADER: ${FRAPPE_SITE_NAME_HEADER:-$$host}
+      UPSTREAM_REAL_IP_ADDRESS: ${UPSTREAM_REAL_IP_ADDRESS:-127.0.0.1}
+      UPSTREAM_REAL_IP_HEADER: ${UPSTREAM_REAL_IP_HEADER:-X-Forwarded-For}
+      UPSTREAM_REAL_IP_RECURSIVE: ${UPSTREAM_REAL_IP_RECURSIVE:-off}
+    volumes:
+      - sites:/usr/share/nginx/html/sites
+      - assets:/usr/share/nginx/html/assets
+    depends_on:
+      - backend
+      - websocket
+    labels:
+      - traefik.enable=true
+      - traefik.http.services.frontend.loadbalancer.server.port=8080
+      - traefik.http.routers.frontend-http.rule=Host(`${DOMAIN}`)
+      - traefik.http.routers.frontend-http.entrypoints=websecure
+      - traefik.http.routers.frontend-http.tls.certresolver=main-resolver
+
+  websocket:
+    <<: *depends_on_configurator
+    image: frappe/frappe-socketio:${FRAPPE_VERSION}
+    volumes:
+      - sites:/home/frappe/frappe-bench/sites
+
+  queue-short:
+    <<: *backend_defaults
+    command: bench worker --queue short
+
+  queue-default:
+    <<: *backend_defaults
+    command: bench worker --queue default
+
+  queue-long:
+    <<: *backend_defaults
+    command: bench worker --queue long
+
+  scheduler:
+    <<: *backend_defaults
+    command: bench schedule
+
+  proxy:
+    image: traefik:2.5
+    command:
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --entrypoints.web.address=:80
+      - --entrypoints.web.http.redirections.entrypoint.to=websecure
+      - --entrypoints.web.http.redirections.entrypoint.scheme=https
+      - --entrypoints.websecure.address=:443
+      - --certificatesResolvers.main-resolver.acme.httpChallenge=true
+      - --certificatesResolvers.main-resolver.acme.httpChallenge.entrypoint=web
+      - --certificatesResolvers.main-resolver.acme.email=${LETSENCRYPT_EMAIL:?No Let's Encrypt email set}
+      - --certificatesResolvers.main-resolver.acme.storage=/letsencrypt/acme.json
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - cert-data:/letsencrypt
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+  db:
+    image: mariadb:10.6
+    healthcheck:
+      test: mysqladmin ping -h localhost --password=${DB_PASSWORD}
+      interval: 1s
+      retries: 15
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --skip-character-set-client-handshake
+      - --skip-innodb-read-only-compressed # Temporary fix for MariaDB 10.6
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:?No db password set}
+    volumes:
+      - db-data:/var/lib/mysql
+
+  redis:
+    image: redis:6.2-alpine
+    volumes:
+      - redis-data:/data
+
+# ERPNext requires local assets access (Frappe does not)
+volumes:
+  sites:
+  assets:
+  cert-data:
+  db-data:
+  redis-data:

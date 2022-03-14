@@ -21,6 +21,7 @@ jobs:
           username: ${{ secrets.SERVER_USERNAME }}
           port: ${{ secrets.SERVER_PORT }}
           key: ${{ secrets.SERVER_KEY }}
+          domain: ${{ secrets.DOMAIN }}
           bucket_name: ${{ secrets.S3_BACKUP_BUCKET_NAME }}
           region: ${{ secrets.S3_BACKUP_REGION }}
           access_key_id: ${{ secrets.S3_BACKUP_ACCESS_KEY_ID }}
