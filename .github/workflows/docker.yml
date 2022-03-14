@@ -66,6 +66,9 @@ jobs:
             ${{ steps.meta.outputs.bake-file }}
           load: true
 
+      - name: Test
+        run: ./github/scripts/smoke-test.sh
+
       - name: Push images
         if: github.event_name != 'pull_request'
         uses: docker/bake-action@v1.7.0
