@@ -12,4 +12,4 @@ fi
 
 docker-compose pull
 docker-compose up -d --force-recreate --no-build --remove-orphans
-docker-compose exec backend migrate
+docker-compose exec backend bench migrate
