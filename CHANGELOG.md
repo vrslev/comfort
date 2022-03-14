@@ -3,6 +3,26 @@
 
 <!--next-version-placeholder-->
 
+## v0.41.0 (2022-03-14)
+### Feature
+* Refactor Docker ([#213](https://github.com/vrslev/comfort/issues/213)) ([`1f08713`](https://github.com/vrslev/comfort/commit/1f087136ba02e75b651b0e65dd8f157c6763db9c))
+
+### Build
+* **deps-dev:** Bump responses from 0.18.0 to 0.19.0 ([#206](https://github.com/vrslev/comfort/issues/206)) ([`a8d8a5e`](https://github.com/vrslev/comfort/commit/a8d8a5e7568dcd095b3bfebe813e98a535514e8a))
+* **deps:** Bump ikea-api[httpx] from 2.0.5 to 2.0.6 ([#204](https://github.com/vrslev/comfort/issues/204)) ([`2a857fe`](https://github.com/vrslev/comfort/commit/2a857feea9d68111af5892c8ba478f8341238573))
+* **deps:** Bump uvicorn[standard] from 0.17.5 to 0.17.6 ([#202](https://github.com/vrslev/comfort/issues/202)) ([`27c3ac0`](https://github.com/vrslev/comfort/commit/27c3ac06b75a73f1f9d1b18144cab19aca4070e1))
+* **deps:** Bump sentry-sdk from 1.5.6 to 1.5.7 ([#203](https://github.com/vrslev/comfort/issues/203)) ([`e4d0b3f`](https://github.com/vrslev/comfort/commit/e4d0b3fcad10eef1322dc2215dcabc20ca4123ff))
+* **deps-dev:** Bump eslint from 8.10.0 to 8.11.0 ([#209](https://github.com/vrslev/comfort/issues/209)) ([`36815ac`](https://github.com/vrslev/comfort/commit/36815ac46d696920787d4eed45b371e25e0eb88c))
+* **deps:** Bump sentry-sdk from 1.5.6 to 1.5.7 in /browser_ext ([#210](https://github.com/vrslev/comfort/issues/210)) ([`19b9a45`](https://github.com/vrslev/comfort/commit/19b9a45418cba14cb6cb5e421e4900ae39121409))
+* **deps-dev:** Bump pytest from 7.0.1 to 7.1.0 in /browser_ext ([#211](https://github.com/vrslev/comfort/issues/211)) ([`844a165`](https://github.com/vrslev/comfort/commit/844a1658d4ff7852340d5eef5213f6223a5e7fc2))
+* **deps-dev:** Bump pytest from 7.0.1 to 7.1.0 ([#205](https://github.com/vrslev/comfort/issues/205)) ([`8d85b20`](https://github.com/vrslev/comfort/commit/8d85b205269e9b2457612a347e2d762db7d4d641))
+* **deps:** Bump @sentry/browser from 6.18.1 to 6.18.2 ([#208](https://github.com/vrslev/comfort/issues/208)) ([`8a4bac9`](https://github.com/vrslev/comfort/commit/8a4bac96a3b8e725563929d8ade4ce7c8f13f281))
+* **deps:** Bump @sentry/tracing from 6.18.1 to 6.18.2 ([#207](https://github.com/vrslev/comfort/issues/207)) ([`99cdc6b`](https://github.com/vrslev/comfort/commit/99cdc6b1164ac6931b969071a9c92c5f912733ae))
+* **deps:** Bump ikea-api[httpx,requests] in /browser_ext ([#212](https://github.com/vrslev/comfort/issues/212)) ([`3b9acff`](https://github.com/vrslev/comfort/commit/3b9acffb8b193597baff6eb4f44fe8980616a97c))
+
+### Chore
+* **deps:** Update pre-commit hooks ([#201](https://github.com/vrslev/comfort/issues/201)) ([`534224e`](https://github.com/vrslev/comfort/commit/534224e0f5d597cf7dbefd87c5220a3cb6946d95))
+
 ## v0.40.3 (2022-03-08)
 ### Fix
 * Bump Frappe from 13.21.0 to 13.22.0 ([#200](https://github.com/vrslev/comfort/issues/200)) ([`17c0b73`](https://github.com/vrslev/comfort/commit/17c0b73502d14591521dab24fa95860c8bcf6ebb))
