@@ -71,7 +71,7 @@ jobs:
           script_stop: true
           script: |
             cd comfort
-            COMFORT_VERSION=$COMFORT_VERSION bash scripts/deploy.sh
+            ./scripts/deploy.sh
             rm -rf scripts
         env:
           COMFORT_VERSION: ${{ env.COMFORT_VERSION }}

@@ -1,5 +1,4 @@
 #!/bin/bash
-
 set -e
 
 export DB_PASSWORD=123
