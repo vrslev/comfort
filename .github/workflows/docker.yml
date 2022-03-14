@@ -72,9 +72,9 @@ jobs:
       - name: Test
         run: ./.github/scripts/smoke-test.sh
 
-      - name: Setup tmate session
-        if: failure()
-        uses: mxschmitt/action-tmate@v3
+      # - name: Setup tmate session
+      #   if: failure()
+      #   uses: mxschmitt/action-tmate@v3
 
       - name: Push images
         if: github.event_name != 'pull_request'
