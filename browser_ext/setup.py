@@ -19,7 +19,7 @@ setup(
             "pytest==7.1.0",
             "pytest-cov==3.0.0",
             "pytest-randomly==3.11.0",
-            "responses==0.19.0",
+            "responses==0.20.0",
         ]
     },
 )
