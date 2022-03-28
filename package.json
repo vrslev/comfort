@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "@sentry/browser": "6.18.2",
+    "@sentry/browser": "6.19.2",
     "@sentry/tracing": "6.19.2"
   },
   "devDependencies": {
