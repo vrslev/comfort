@@ -1,7 +1,7 @@
 {
   "dependencies": {
     "@sentry/browser": "6.19.3",
-    "@sentry/tracing": "6.19.2"
+    "@sentry/tracing": "6.19.3"
   },
   "devDependencies": {
     "eslint": "8.12.0",
