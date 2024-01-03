@@ -59,7 +59,7 @@ jobs:
           echo COMFORT_VERSION=${{ fromJSON(steps.nginx-meta.outputs.json).labels['org.opencontainers.image.version'] }} >>$GITHUB_ENV
 
       - name: Build images
-        uses: docker/bake-action@v1.7.0
+        uses: docker/bake-action@v4.1.0
         with:
           files: |
             ./docker-bake.hcl
@@ -78,7 +78,7 @@ jobs:
 
       - name: Push images
         if: github.event_name != 'pull_request'
-        uses: docker/bake-action@v1.7.0
+        uses: docker/bake-action@v4.1.0
         with:
           files: |
             ./docker-bake.hcl
