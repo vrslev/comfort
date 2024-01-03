@@ -11,7 +11,7 @@ setup(
     py_modules=["comfort_browser_ext"],
     install_requires=[
         "ikea-api[httpx,requests]==2.0.6",
-        "beautifulsoup4==4.10.0",
+        "beautifulsoup4==4.12.2",
         "sentry-sdk==1.5.8",
     ],
     extras_require={
