@@ -24,7 +24,7 @@ setup(
             "pre_commit==2.18.1",
             "pytest==7.1.1",
             "pytest-cov==3.0.0",
-            "pytest-randomly==3.11.0",
+            "pytest-randomly==3.15.0",
             "responses==0.20.0",
         ]
     },
